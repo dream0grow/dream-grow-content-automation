@@ -1,0 +1,29 @@
+# 민감 정보
+.env
+token.pickle
+credentials.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 출력
+output/
+
+# 개인 데이터
+*.csv
+.ai_drafts/
+
+# 콘텐츠 데이터 (옵시디언이 원본)
+SNS-시스템/
+artifacts/
+
+# 로그
+scheduled/logs/
