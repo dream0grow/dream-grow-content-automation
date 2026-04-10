@@ -12,17 +12,21 @@ mkdir -p "$LAUNCH_DIR"
 # 기존 작업 언로드 (에러 무시)
 launchctl unload "$LAUNCH_DIR/com.dreamgrow.diff-learn.plist" 2>/dev/null
 launchctl unload "$LAUNCH_DIR/com.dreamgrow.weekly-review.plist" 2>/dev/null
+launchctl unload "$LAUNCH_DIR/com.dreamgrow.daily-publish.plist" 2>/dev/null
 
 # plist 복사
 cp "$SCHED_DIR/daily-diff-learn.plist" "$LAUNCH_DIR/com.dreamgrow.diff-learn.plist"
 cp "$SCHED_DIR/weekly-review-report.plist" "$LAUNCH_DIR/com.dreamgrow.weekly-review.plist"
+cp "$SCHED_DIR/daily-publish.plist" "$LAUNCH_DIR/com.dreamgrow.daily-publish.plist"
 
 # 실행 권한
 chmod +x "$SCHED_DIR/weekly-review-report.sh"
+chmod +x "$SCHED_DIR/daily-publish.sh"
 
 # 등록
 launchctl load "$LAUNCH_DIR/com.dreamgrow.diff-learn.plist"
 launchctl load "$LAUNCH_DIR/com.dreamgrow.weekly-review.plist"
+launchctl load "$LAUNCH_DIR/com.dreamgrow.daily-publish.plist"
 
 # 타임스탬프 초기화
 touch "$LOG_DIR/.last-weekly"
@@ -37,6 +41,11 @@ echo ""
 echo "2. weekly-review (매주 일요일 20:00)"
 echo "   - 리뷰 대기 파일 수, 이번 주 스레드/원고 수 집계"
 echo "   - 보고서: $LOG_DIR/weekly-report-YYYY-MM-DD.md"
+echo ""
+echo "3. daily-publish (매일 08:00)"
+echo "   - 발행대기 콘텐츠 스캔 (dry-run)"
+echo "   - 주간 캘린더 자동 갱신"
+echo "   - 로그: $LOG_DIR/publish.log"
 echo ""
 echo "확인: launchctl list | grep dreamgrow"
 echo "해제: launchctl unload ~/Library/LaunchAgents/com.dreamgrow.*.plist"
