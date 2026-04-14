@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+import claude_client; claude_client.patch_anthropic()
 import anthropic
 
 load_dotenv()

@@ -7,7 +7,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/weekly-review-report.sh</string>
+        <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/weekly-review-report.sh</string>
     </array>
     <key>StartCalendarInterval</key>
     <dict>
@@ -19,8 +19,8 @@
         <integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/logs/weekly-review.log</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/logs/weekly-review.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/logs/weekly-review-error.log</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/logs/weekly-review-error.log</string>
 </dict>
 </plist>

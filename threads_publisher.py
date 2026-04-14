@@ -28,8 +28,8 @@ load_dotenv()
 
 # 경로 설정
 SNS_SYSTEM = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템"
-THREAD_DIR = os.path.join(SNS_SYSTEM, "07 스레드")
-PUBLISH_LOG = os.path.join(SNS_SYSTEM, "06 운영/61 성과 기록")
+LIBRARY_DIR = os.path.join(SNS_SYSTEM, "03 라이브러리", "38 주제별 콘텐츠")
+PUBLISH_LOG = os.path.join(SNS_SYSTEM, "07 운영", "61 성과 기록")
 
 THREADS_ACCESS_TOKEN = os.getenv("THREADS_ACCESS_TOKEN")
 THREADS_USER_ID = os.getenv("THREADS_USER_ID")
@@ -197,10 +197,12 @@ def save_publish_log(filename: str, posts_count: int, thread_ids: list):
 
 
 def find_publishable_files() -> list:
-    """07 스레드/에서 '발행대기' 상태 파일을 찾습니다."""
+    """03 라이브러리/38 주제별 콘텐츠/에서 '발행대기' 상태 파일을 찾습니다."""
     files = []
-    for category in os.listdir(THREAD_DIR):
-        cat_dir = os.path.join(THREAD_DIR, category)
+    if not os.path.isdir(LIBRARY_DIR):
+        return files
+    for category in os.listdir(LIBRARY_DIR):
+        cat_dir = os.path.join(LIBRARY_DIR, category)
         if not os.path.isdir(cat_dir) or category.startswith('.'):
             continue
         for fname in os.listdir(cat_dir):
@@ -229,13 +231,13 @@ def main():
     print()
 
     if specific_file:
-        # 특정 파일 찾기
         found = None
-        for cat in os.listdir(THREAD_DIR):
-            candidate = os.path.join(THREAD_DIR, cat, specific_file)
-            if os.path.exists(candidate):
-                found = candidate
-                break
+        if os.path.isdir(LIBRARY_DIR):
+            for cat in os.listdir(LIBRARY_DIR):
+                candidate = os.path.join(LIBRARY_DIR, cat, specific_file)
+                if os.path.exists(candidate):
+                    found = candidate
+                    break
         if not found:
             print(f"파일을 찾을 수 없습니다: {specific_file}")
             return

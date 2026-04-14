@@ -2,7 +2,7 @@
 # Dream_Grow 정기 작업 + 팀 에이전트 설치 스크립트
 # launchd에 plist 등록
 
-SCHED_DIR="/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled"
+SCHED_DIR="/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled"
 LAUNCH_DIR="$HOME/Library/LaunchAgents"
 LOG_DIR="$SCHED_DIR/logs"
 
@@ -15,6 +15,7 @@ launchctl unload "$LAUNCH_DIR/com.dreamgrow.weekly-review.plist" 2>/dev/null
 launchctl unload "$LAUNCH_DIR/com.dreamgrow.team-content.plist" 2>/dev/null
 launchctl unload "$LAUNCH_DIR/com.dreamgrow.team-knowledge.plist" 2>/dev/null
 launchctl unload "$LAUNCH_DIR/com.dreamgrow.team-book.plist" 2>/dev/null
+launchctl unload "$LAUNCH_DIR/com.dreamgrow.scheduled-publish.plist" 2>/dev/null
 
 # plist 복사
 cp "$SCHED_DIR/daily-diff-learn.plist" "$LAUNCH_DIR/com.dreamgrow.diff-learn.plist"
@@ -22,6 +23,7 @@ cp "$SCHED_DIR/weekly-review-report.plist" "$LAUNCH_DIR/com.dreamgrow.weekly-rev
 cp "$SCHED_DIR/team-content.plist" "$LAUNCH_DIR/com.dreamgrow.team-content.plist"
 cp "$SCHED_DIR/team-knowledge.plist" "$LAUNCH_DIR/com.dreamgrow.team-knowledge.plist"
 cp "$SCHED_DIR/team-book.plist" "$LAUNCH_DIR/com.dreamgrow.team-book.plist"
+cp "$SCHED_DIR/scheduled-publish.plist" "$LAUNCH_DIR/com.dreamgrow.scheduled-publish.plist"
 
 # 실행 권한
 chmod +x "$SCHED_DIR/weekly-review-report.sh"
@@ -32,6 +34,7 @@ launchctl load "$LAUNCH_DIR/com.dreamgrow.weekly-review.plist"
 launchctl load "$LAUNCH_DIR/com.dreamgrow.team-content.plist"
 launchctl load "$LAUNCH_DIR/com.dreamgrow.team-knowledge.plist"
 launchctl load "$LAUNCH_DIR/com.dreamgrow.team-book.plist"
+launchctl load "$LAUNCH_DIR/com.dreamgrow.scheduled-publish.plist"
 
 # 타임스탬프 초기화
 touch "$LOG_DIR/.last-weekly"
@@ -57,6 +60,10 @@ echo ""
 echo "5. team-book (매주 토 05:00)"
 echo "   - 콘텐츠 → 책 챕터 초안"
 echo "   - 리뷰: 주말"
+echo ""
+echo "6. scheduled-publish (매시 정각)"
+echo "   - 발행시간 도달한 리뷰완료 파일 → Threads API 발행"
+echo "   - 05 리뷰/완료/ → 64 발행완료/ 이동"
 echo ""
 echo "--- skill-updater ---"
 echo "각 팀 실행 후 자동으로 diff학습 + Honcho 업데이트 + 캘린더 갱신"

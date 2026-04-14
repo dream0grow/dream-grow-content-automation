@@ -6,11 +6,11 @@
     <string>com.dreamgrow.diff-learn</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/bin/python3</string>
-        <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/diff_learner.py</string>
+        <string>/Library/Frameworks/Python.framework/Versions/3.13/bin/python3</string>
+        <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/diff_learner.py</string>
     </array>
     <key>WorkingDirectory</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation</string>
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>
@@ -19,13 +19,13 @@
         <integer>0</integer>
     </dict>
     <key>StandardOutPath</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/logs/diff-learn.log</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/logs/diff-learn.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/logs/diff-learn-error.log</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/logs/diff-learn-error.log</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
-        <string>/usr/local/bin:/usr/bin:/bin</string>
+        <string>/Library/Frameworks/Python.framework/Versions/3.13/bin:/usr/local/bin:/usr/bin:/bin</string>
     </dict>
 </dict>
 </plist>

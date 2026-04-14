@@ -29,6 +29,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env")
 
+import claude_client; claude_client.patch_anthropic()
 import anthropic
 from memory_manager import (
     get_honcho_client, get_full_context, get_style_context,
@@ -63,15 +64,20 @@ def log(msg: str, team: str = ""):
         f.write(line + "\n")
 
 
-def call_claude(system: str, user_msg: str, max_tokens: int = 4000) -> str:
-    """Claude API 호출 (Sonnet)."""
+def call_claude(system: str, user_msg: str, max_tokens: int = 4000, model: str = "claude-sonnet-4-6") -> str:
+    """Claude API 호출. 글쓰기는 opus, 유틸리티는 sonnet."""
     message = claude.messages.create(
-        model="claude-sonnet-4-20250514",
+        model=model,
         max_tokens=max_tokens,
         system=system,
         messages=[{"role": "user", "content": user_msg}],
     )
     return message.content[0].text
+
+
+def call_claude_opus(system: str, user_msg: str, max_tokens: int = 4000) -> str:
+    """Opus 4.6으로 글쓰기 품질 최대화. 스레드/릴스/뉴스레터/제텔카스텐/책 원고용."""
+    return call_claude(system, user_msg, max_tokens, model="claude-opus-4-6")
 
 
 def read_file(path: str) -> str:
@@ -246,7 +252,7 @@ def run_content_team():
 {check_result}
 
 수정된 스레드 전체를 출력해주세요. 이모지 금지."""
-            thread_content = call_claude(
+            thread_content = call_claude_opus(
                 "스레드 수정 전문가. 문체 유지 필수. 이모지 금지.",
                 fix_prompt, max_tokens=2500
             )
@@ -275,7 +281,7 @@ def run_content_team():
 3. 리드마그넷 제안 (이름, 유형, 내용 3줄)
 4. B-roll 장면 목록"""
 
-        reels_content = call_claude(reels_system, reels_prompt, max_tokens=1500)
+        reels_content = call_claude_opus(reels_system, reels_prompt, max_tokens=1500)
 
         reels_filename = f"원고_릴스_{category}_{safe_topic}.md"
         reels_fm = {
@@ -301,6 +307,16 @@ def run_content_team():
         if honcho:
             save_team_learning(honcho, "thread", "pattern",
                                f"주제 '{topic}' ({category}) 생성 완료. 팩트체크: {check_result[:100]}")
+
+    # 5. 자동 검수 (content-review)
+    log("  Step 4: content-review 자동 검수", team)
+    try:
+        from content_reviewer import review_all
+        results = review_all(auto_fix=True)
+        passed = sum(1 for r in results if r.passed)
+        log(f"  검수 완료: {passed}/{len(results)} 통과", team)
+    except Exception as e:
+        log(f"  검수 실패: {e}", team)
 
     log(f"=== Team 콘텐츠-생산 완료: {len(topics)}개 세트 ===", team)
     return len(topics)
@@ -359,7 +375,7 @@ def run_knowledge_team():
 K=사실/인용, O=나의 해석, P=실천 원칙
 이모지 금지. JSON만 출력."""
 
-    zettel_result = call_claude(
+    zettel_result = call_claude_opus(
         "제텔카스텐 전문가. 교육학/심리학 지식 구조화.",
         zettel_prompt, max_tokens=3000
     )
@@ -418,7 +434,7 @@ type: {note_type}
 
 최대 3개. 이모지 금지. JSON만."""
 
-    wiki_result = call_claude(
+    wiki_result = call_claude_opus(
         "교육학 wiki 전문가. 정확한 사실만 기록.",
         wiki_prompt, max_tokens=2000
     )
@@ -529,7 +545,7 @@ def run_book_team():
 
 이모지 금지."""
 
-    structure_result = call_claude(
+    structure_result = call_claude_opus(
         "교육서 기획 전문가. 이한결(Dream_Grow) 스타일. 이모지 금지.",
         structure_prompt, max_tokens=3000
     )
@@ -585,7 +601,7 @@ def run_book_team():
 
 챕터 제목부터 시작해주세요."""
 
-    chapter_content = call_claude(
+    chapter_content = call_claude_opus(
         "교육서 작가. 현직 초등교사 관점. 이모지 금지.",
         chapter_prompt, max_tokens=4000
     )

@@ -14,6 +14,7 @@ import re
 import sys
 from datetime import datetime
 from dotenv import load_dotenv
+import claude_client; claude_client.patch_anthropic()
 import anthropic
 from memory_manager import get_honcho_client, get_style_context
 
@@ -128,7 +129,7 @@ def generate_reels_from_thread(thread_content: str, category: str) -> str:
 """
 
     message = claude.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-opus-4-6",
         max_tokens=1500,
         system=system,
         messages=[{"role": "user", "content": prompt}],

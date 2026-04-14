@@ -17,7 +17,7 @@ import sys
 from datetime import datetime
 
 # 경로 설정
-CONTENT_AUTO = "/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/SNS-시스템"
+CONTENT_AUTO = "/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/SNS-시스템"
 OBSIDIAN_SNS = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템"
 OBSIDIAN_WIKI = "/Users/lhg/Documents/obsidian/초생산/wiki"
 OBSIDIAN_THREAD = os.path.join(OBSIDIAN_SNS, "07 스레드")

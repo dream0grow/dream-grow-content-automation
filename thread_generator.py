@@ -7,6 +7,7 @@ import os
 import sys
 from datetime import datetime
 from dotenv import load_dotenv
+import claude_client; claude_client.patch_anthropic()
 import anthropic
 from memory_manager import get_honcho_client, get_style_context, get_brand_context, save_content_feedback
 
@@ -89,7 +90,7 @@ def generate_thread(topic: str, tone: str = "전문적이면서 친근한", cate
     user_msg += "\n\n위 주제로 스레드를 작성해주세요."
 
     message = claude.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-opus-4-6",
         max_tokens=2000,
         system=system,
         messages=[{"role": "user", "content": user_msg}],

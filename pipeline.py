@@ -2,15 +2,15 @@
 
 전체 자동화 흐름:
 
-  [1] AI 초안 생성 → 08 리뷰/에 저장 + .ai_drafts/에 원본 백업
+  [1] AI 초안 생성 → 05 리뷰/대기/에 저장 + .ai_drafts/에 원본 백업
       $ python3 pipeline.py generate --topic "주제" --channel thread
 
-  [2] 사용자가 Obsidian에서 수정 후 frontmatter 상태를 '리뷰완료'로 변경
+  [2] 사용자가 Obsidian에서 수정 후 05 리뷰/완료/로 이동, 상태를 '리뷰완료'로 변경
 
   [3] Diff 학습 + 이동
       $ python3 pipeline.py learn
       → AI원본 vs 수정본 비교 → 패턴을 Honcho에 저장
-      → 07 스레드/[카테고리]/로 이동
+      → 03 라이브러리/38 주제별 콘텐츠/[카테고리]/로 이동
 
   [4] Threads 발행
       $ python3 pipeline.py publish [--dry-run]
@@ -37,7 +37,7 @@ from datetime import datetime
 
 
 def cmd_generate():
-    """AI 초안을 생성하여 08 리뷰/에 저장합니다."""
+    """AI 초안을 생성하여 05 리뷰/대기/에 저장합니다."""
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--topic', required=True, help='콘텐츠 주제')
@@ -54,8 +54,7 @@ def cmd_generate():
         print(f"스레드 생성 중: {args.topic}")
         content = generate_thread(args.topic, category=args.category)
 
-        # 08 리뷰/에 저장
-        review_dir = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템/08 리뷰"
+        review_dir = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템/05 리뷰/대기"
         os.makedirs(review_dir, exist_ok=True)
 
         safe_topic = args.topic.replace(' ', '_')[:30]
@@ -177,34 +176,28 @@ def cmd_status():
 
     base = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템"
 
-    # 08 리뷰 현황
-    review_dir = os.path.join(base, "08 리뷰")
-    review_files = [f for f in os.listdir(review_dir)
-                    if f.endswith('.md') and f != 'README.md'] if os.path.exists(review_dir) else []
-
-    waiting = 0
-    completed = 0
-    for f in review_files:
-        with open(os.path.join(review_dir, f), 'r') as fh:
-            content = fh.read()
-        if '상태: 리뷰대기' in content:
-            waiting += 1
-        elif '상태: 리뷰완료' in content:
-            completed += 1
+    # 05 리뷰 현황
+    review_wait = os.path.join(base, "05 리뷰", "대기")
+    review_done = os.path.join(base, "05 리뷰", "완료")
+    wait_files = [f for f in os.listdir(review_wait)
+                  if f.endswith('.md') and f != 'README.md'] if os.path.exists(review_wait) else []
+    done_files = [f for f in os.listdir(review_done)
+                  if f.endswith('.md') and f != 'README.md'] if os.path.exists(review_done) else []
 
     print(f"\n--- 파이프라인 현황 ---")
-    print(f"08 리뷰/  리뷰대기: {waiting}개  리뷰완료: {completed}개")
+    print(f"05 리뷰/  대기: {len(wait_files)}개  완료: {len(done_files)}개")
 
-    # 07 스레드 카테고리별 현황
-    thread_dir = os.path.join(base, "07 스레드")
-    print(f"\n07 스레드/ 카테고리별:")
+    # 03 라이브러리/38 주제별 콘텐츠 카테고리별 현황
+    library_dir = os.path.join(base, "03 라이브러리", "38 주제별 콘텐츠")
+    print(f"\n03 라이브러리/38 주제별 콘텐츠/ 카테고리별:")
     total = 0
-    for cat in sorted(os.listdir(thread_dir)):
-        cat_dir = os.path.join(thread_dir, cat)
-        if os.path.isdir(cat_dir) and not cat.startswith('.'):
-            count = len([f for f in os.listdir(cat_dir) if f.endswith('.md')])
-            total += count
-            print(f"  {cat}: {count}개")
+    if os.path.isdir(library_dir):
+        for cat in sorted(os.listdir(library_dir)):
+            cat_dir = os.path.join(library_dir, cat)
+            if os.path.isdir(cat_dir) and not cat.startswith('.'):
+                count = len([f for f in os.listdir(cat_dir) if f.endswith('.md')])
+                total += count
+                print(f"  {cat}: {count}개")
     print(f"  합계: {total}개")
 
     # 09 리드마그넷 현황
@@ -229,6 +222,88 @@ def cmd_status():
             print(f"\nHoncho 수정 학습: 없음 (아직 학습 데이터 없음)")
 
 
+def cmd_youtube():
+    """Science Channel 자동 파이프라인: 리서치 → 제텔카스텐 → 원고.
+
+    $ python3 pipeline.py youtube --topic "도파민과 학습 동기"
+    $ python3 pipeline.py youtube --topic "..." --title "..." --hook "..."
+    """
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--topic', required=True, help='영상 주제')
+    parser.add_argument('--title', default=None, help='사용자 지정 제목 (선택)')
+    parser.add_argument('--hook', default=None, help='사용자 지정 도입부 훅 (선택)')
+    parser.add_argument('--channel', default='science_channel',
+                        choices=['science_channel', 'dream_grow', 'story_maker'])
+    args, _ = parser.parse_known_args(sys.argv[2:])
+
+    from youtube.script_generator import full_research_and_script
+    result = full_research_and_script(
+        args.topic,
+        channel_brand=args.channel,
+        user_title=args.title,
+        user_hook=args.hook,
+    )
+    print("\n완료:")
+    for k, v in result.items():
+        print(f"  {k}: {v}")
+
+
+def cmd_youtube_scan():
+    """Google Sheets 트리거 탭 스캔 → 대기 행에 대해 파이프라인 실행.
+
+    $ python3 pipeline.py youtube-scan
+    """
+    from youtube import sheets_manager
+    from youtube.script_generator import full_research_and_script
+
+    pending = sheets_manager.scan_trigger()
+    if not pending:
+        print("대기 중인 트리거 없음")
+        return
+
+    print(f"{len(pending)}개 대기 건 처리 시작")
+    for row in pending:
+        row_idx = row['row_index']
+        topic = row.get('핵심키워드', '').strip()
+        if not topic:
+            continue
+        brand = (row.get('채널브랜드') or 'SC').strip()
+        brand_key = {'SC': 'science_channel', 'DG': 'dream_grow', 'SM': 'story_maker'}.get(brand, 'science_channel')
+
+        print(f"\n[row {row_idx}] {topic}")
+        sheets_manager.update_trigger_row(row_idx, {"상태": "리서치중"})
+
+        try:
+            result = full_research_and_script(
+                topic,
+                channel_brand=brand_key,
+                user_title=row.get('제목_수동') or None,
+                user_hook=row.get('도입부_수동') or None,
+            )
+            sheets_manager.update_trigger_row(row_idx, {
+                "상태": "원고완료",
+                "생성일": __import__('datetime').date.today().isoformat(),
+                "원고경로": result['script_path'],
+                "논문소스": result.get('research_path', ''),
+                "제텔카스텐메모": ", ".join(result.get('memo_paths') or []),
+            })
+            print(f"  → 원고완료")
+        except Exception as e:
+            sheets_manager.update_trigger_row(row_idx, {
+                "상태": "실패",
+                "에러로그": str(e)[:500],
+            })
+            print(f"  → 실패: {e}")
+
+
+def cmd_youtube_bootstrap():
+    """Google Sheets에 SC_트리거/SC_성과/SC_인사이트 탭 자동 생성."""
+    from youtube import sheets_manager
+    sheets_manager.bootstrap()
+    print("부트스트랩 완료")
+
+
 def main():
     commands = {
         'generate': cmd_generate,
@@ -238,26 +313,27 @@ def main():
         'leadmagnet': cmd_leadmagnet,
         'auto': cmd_auto,
         'status': cmd_status,
+        'youtube': cmd_youtube,
+        'youtube-scan': cmd_youtube_scan,
+        'youtube-bootstrap': cmd_youtube_bootstrap,
     }
 
     if len(sys.argv) < 2 or sys.argv[1] not in commands:
         print("Dream_Grow 콘텐츠 파이프라인")
         print()
-        print("사용법:")
+        print("[Dream_Grow 기존 워크플로우]")
         print("  python3 pipeline.py generate --topic '주제' --channel thread  # AI 초안 생성")
         print("  python3 pipeline.py learn                                     # Diff 학습")
         print("  python3 pipeline.py publish [--dry-run]                       # Threads 발행")
         print("  python3 pipeline.py reels [--batch]                           # 릴스 변환")
         print("  python3 pipeline.py leadmagnet --topic '주제' --category 수학  # 리드마그넷 생성")
-        print("  python3 pipeline.py leadmagnet --from-reels '릴스파일.md'      # 릴스 연동 생성")
-        print("  python3 pipeline.py leadmagnet --batch                        # 일괄 생성")
-        print("  python3 pipeline.py leadmagnet --status                       # 현황 확인")
         print("  python3 pipeline.py auto                                      # 전체 자동 실행")
         print("  python3 pipeline.py status                                    # 현황 확인")
         print()
-        print("워크플로우:")
-        print("  generate → (Obsidian에서 수정) → learn → publish → reels → leadmagnet")
-        print("  리드마그넷은 09 리드마그넷/에서 확인 후 '확정'으로 변경")
+        print("[Science Channel 자동 유튜브]")
+        print("  python3 pipeline.py youtube-bootstrap                         # Sheets 탭 자동 생성")
+        print("  python3 pipeline.py youtube --topic '주제'                     # 리서치+원고 직접 실행")
+        print("  python3 pipeline.py youtube-scan                              # Sheets 트리거 스캔")
         return
 
     commands[sys.argv[1]]()

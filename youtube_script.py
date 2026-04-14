@@ -3,6 +3,7 @@ import os
 import sys
 from datetime import datetime
 from dotenv import load_dotenv
+import claude_client; claude_client.patch_anthropic()
 import anthropic
 
 load_dotenv()
@@ -62,7 +63,7 @@ YOUTUBE_SYSTEM_PROMPT = """당신은 유튜브 영상 전문 스크립트 작가
 def generate_youtube_script(topic: str, target_audience: str = "20~40대 일반") -> str:
     """주제와 타겟 오디언스를 받아 유튜브 스크립트를 생성합니다."""
     message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+        model="claude-opus-4-6",
         max_tokens=4000,
         system=YOUTUBE_SYSTEM_PROMPT,
         messages=[

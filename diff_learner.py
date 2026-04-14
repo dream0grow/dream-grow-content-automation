@@ -3,21 +3,22 @@
 지원 채널: thread, reels, youtube, blog, newsletter
 
 워크플로우:
-  1. AI가 08 리뷰/에 초안 생성 (frontmatter: 상태: 리뷰대기, AI원본 사본 저장)
-  2. 사용자가 Obsidian에서 수정
+  1. AI가 05 리뷰/대기/에 초안 생성 (frontmatter: 상태: 리뷰대기, AI원본 사본 저장)
+  2. 사용자가 Obsidian에서 수정 후 05 리뷰/완료/로 이동
   3. 사용자가 frontmatter 상태를 '리뷰완료'로 변경
   4. 이 스크립트가 감지하여:
      a. .ai_drafts/에 저장된 원본과 현재 파일의 diff 추출
      b. 변경 패턴을 분석하여 Honcho에 저장
      c. 채널별 대상 폴더로 이동:
-        - thread → 07 스레드/[카테고리]/
-        - reels/youtube/blog/newsletter → 05 제작/52 원고/ (그대로 유지)
+        - thread → 03 라이브러리/38 주제별 콘텐츠/[카테고리]/
+        - reels/youtube/blog/newsletter → 06 제작/52 원고/
 """
 import os
 import re
 import difflib
 from datetime import datetime
 from dotenv import load_dotenv
+import claude_client; claude_client.patch_anthropic()
 import anthropic
 from memory_manager import get_honcho_client
 
@@ -25,9 +26,9 @@ load_dotenv()
 
 # 경로 설정
 SNS_SYSTEM = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템"
-REVIEW_DIR = os.path.join(SNS_SYSTEM, "08 리뷰")
-THREAD_DIR = os.path.join(SNS_SYSTEM, "07 스레드")
-SCRIPT_DIR = os.path.join(SNS_SYSTEM, "05 제작", "52 원고")
+REVIEW_DIR = os.path.join(SNS_SYSTEM, "05 리뷰", "완료")
+LIBRARY_DIR = os.path.join(SNS_SYSTEM, "03 라이브러리", "38 주제별 콘텐츠")
+SCRIPT_DIR = os.path.join(SNS_SYSTEM, "06 제작", "52 원고")
 AI_DRAFTS_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), ".ai_drafts"
 )
@@ -202,7 +203,7 @@ def detect_category(content: str, filename: str) -> str:
 def process_reviewed_files():
     """08 리뷰/ 에서 '리뷰완료' 상태의 파일을 처리합니다."""
     if not os.path.exists(REVIEW_DIR):
-        print("08 리뷰/ 폴더가 없습니다.")
+        print("05 리뷰/완료/ 폴더가 없습니다.")
         return []
 
     processed = []
@@ -259,22 +260,19 @@ def process_reviewed_files():
 
         # 채널별 이동 대상 결정
         if channel == 'thread':
-            # 스레드 → 07 스레드/[카테고리]/
             category = fm.get('카테고리', detect_category(edited_content, fname))
-            dest_dir = os.path.join(THREAD_DIR, category)
+            dest_dir = os.path.join(LIBRARY_DIR, category)
             os.makedirs(dest_dir, exist_ok=True)
             dest_path = os.path.join(dest_dir, fname)
             os.rename(filepath, dest_path)
-            print(f"  이동: 08 리뷰/ → 07 스레드/{category}/")
+            print(f"  이동: 05 리뷰/완료/ → 03 라이브러리/38 주제별/{category}/")
         else:
-            # 릴스/유튜브/블로그/뉴스레터 → 05 제작/52 원고/
             os.makedirs(SCRIPT_DIR, exist_ok=True)
             dest_path = os.path.join(SCRIPT_DIR, fname)
             if os.path.exists(dest_path):
-                # 이미 존재하면 덮어쓰기 (수정본이 최신)
                 os.remove(dest_path)
             os.rename(filepath, dest_path)
-            print(f"  이동: 08 리뷰/ → 05 제작/52 원고/ ({channel})")
+            print(f"  이동: 05 리뷰/완료/ → 06 제작/52 원고/ ({channel})")
 
         # AI 원본 정리
         if os.path.exists(draft_path):

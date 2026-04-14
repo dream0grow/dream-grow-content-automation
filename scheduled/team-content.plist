@@ -7,7 +7,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/Library/Frameworks/Python.framework/Versions/3.13/bin/python3</string>
-        <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/agents/team_runner.py</string>
+        <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/agents/team_runner.py</string>
         <string>content</string>
     </array>
     <key>StartCalendarInterval</key>
@@ -18,11 +18,11 @@
         <integer>0</integer>
     </dict>
     <key>WorkingDirectory</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation</string>
     <key>StandardOutPath</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/logs/team-content-stdout.log</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/logs/team-content-stdout.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.AI/content-automation/scheduled/logs/team-content-stderr.log</string>
+    <string>/Users/lhg/Library/CloudStorage/Dropbox/1.한결/나/ㄱ.클로드코드_드림그로우/content-automation/scheduled/logs/team-content-stderr.log</string>
     <key>EnvironmentVariables</key>
     <dict>
         <key>PATH</key>
