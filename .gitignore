@@ -27,3 +27,5 @@ artifacts/
 
 # 로그
 scheduled/logs/
+*_tmp.txt
+honcho_reels_ctx_tmp.txt
