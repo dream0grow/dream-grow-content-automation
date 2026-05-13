@@ -1,0 +1,101 @@
+diff --git a/src/agent/Dockerfile b/src/agent/Dockerfile
+index 8c552ce..53567a1 100644
+--- a/src/agent/Dockerfile
++++ b/src/agent/Dockerfile
+@@ -6,6 +6,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
+ 
+ WORKDIR /app
+ 
++COPY ca-certificates.crt /usr/local/share/ca-certificates/sandbox-proxy.crt
++RUN cat /usr/local/share/ca-certificates/sandbox-proxy.crt >> /etc/ssl/certs/ca-certificates.crt || true \
++    && update-ca-certificates 2>/dev/null || true
++ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
++    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
++    PIP_CERT=/etc/ssl/certs/ca-certificates.crt \
++    NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
++    UV_NATIVE_TLS=1
++
+ RUN python -m ensurepip --upgrade && \
+     pip install --no-cache-dir --upgrade pip && \
+     pip install --no-cache-dir uv
+@@ -18,8 +27,10 @@ COPY src/agent/market_intelligence_agent /app/market_intelligence_agent
+ COPY src/agent/requirements.txt /app/requirements.txt
+ 
+ # Install dependencies from requirements.txt instead of editable install
++# (skip /api/constraints.txt: it pins newer langgraph-checkpoint-postgres
++# than this repo's pinned version, causing an unresolvable conflict)
+ RUN . ${VENV_PATH}/bin/activate && \
+-    uv pip install -r /app/requirements.txt -c /api/constraints.txt
++    uv pip install -r /app/requirements.txt
+ 
+ ENV PATH="${VENV_PATH}/bin:$PATH"
+ # Add the app directory to PYTHONPATH so the local agent code can be imported
+diff --git a/src/valuation/Dockerfile b/src/valuation/Dockerfile
+index 78bf703..155aa19 100644
+--- a/src/valuation/Dockerfile
++++ b/src/valuation/Dockerfile
+@@ -7,6 +7,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
+ 
+ WORKDIR ${APP_HOME}
+ 
++COPY ca-certificates.crt /usr/local/share/ca-certificates/sandbox-proxy.crt
++RUN cat /usr/local/share/ca-certificates/sandbox-proxy.crt >> /etc/ssl/certs/ca-certificates.crt || true \
++    && update-ca-certificates 2>/dev/null || true
++ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
++    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
++    PIP_CERT=/etc/ssl/certs/ca-certificates.crt \
++    NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
++    UV_NATIVE_TLS=1
++
+ # Install uv
+ RUN python -m ensurepip --upgrade && \
+     pip install --no-cache-dir --upgrade pip && \
+diff --git a/src/web/Dockerfile b/src/web/Dockerfile
+index a3dd579..f1dd5f4 100644
+--- a/src/web/Dockerfile
++++ b/src/web/Dockerfile
+@@ -1,12 +1,23 @@
++FROM node:20-bookworm AS nodebase
++
+ FROM python:3.11
+ 
+ WORKDIR /app
+ 
+-# Install Node.js and npm
+-RUN apt-get update && apt-get install -y \
+-    nodejs \
+-    npm \
+-    && rm -rf /var/lib/apt/lists/*
++COPY ca-certificates.crt /usr/local/share/ca-certificates/sandbox-proxy.crt
++RUN cat /usr/local/share/ca-certificates/sandbox-proxy.crt >> /etc/ssl/certs/ca-certificates.crt || true \
++    && update-ca-certificates 2>/dev/null || true
++ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
++    REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
++    PIP_CERT=/etc/ssl/certs/ca-certificates.crt \
++    NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
++    UV_NATIVE_TLS=1
++
++# Bring Node.js + npm from the official node image (sandbox blocks deb.debian.org)
++COPY --from=nodebase /usr/local/bin/node /usr/local/bin/node
++COPY --from=nodebase /usr/local/lib/node_modules /usr/local/lib/node_modules
++RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
++    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+ 
+ # Install uv
+ RUN pip install --no-cache-dir uv
+diff --git a/src/web/requirements.txt b/src/web/requirements.txt
+index cc28e69..032b28d 100644
+--- a/src/web/requirements.txt
++++ b/src/web/requirements.txt
+@@ -7,7 +7,10 @@ pydantic-settings>=2.0.0
+ langgraph-sdk>=0.1.61
+ python-dotenv>=1.0.0
+ pymongo>=4.3.0
+-jinja2>=3.0.0 
++# Starlette 1.0 changed how globals are passed to Jinja2's template cache,
++# causing "TypeError: unhashable type: 'dict'" on every template render.
++starlette<1.0
++jinja2>=3.0.0
+ yfinance>=0.2.58
+ python-multipart
+ passlib==1.7.4
