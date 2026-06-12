@@ -1,0 +1,113 @@
+"""Manus API 연동 - 외부 리서치 전담 (설계 결정 #3)
+
+Manus는 리서치 stage에서만 호출한다. 키워드/브리프/초안/검수는 모두 Claude.
+MANUS_API_KEY가 없으면 Claude 리서치로 자동 폴백하므로 시스템은 항상 동작한다.
+"""
+import json
+
+import requests
+
+from orchestrator import llm, prompts
+from orchestrator.config import MANUS_API_BASE, MANUS_API_KEY
+
+RESEARCH_SCHEMA = {
+    "type": "object",
+    "additionalProperties": False,
+    "required": [
+        "research_focus", "key_findings", "source_links", "parent_language",
+        "content_opportunities", "risk_notes", "confidence",
+    ],
+    "properties": {
+        "research_focus": {"type": "string"},
+        "key_findings": {"type": "array", "items": {"type": "string"}},
+        "source_links": {"type": "array", "items": {"type": "string"}},
+        "parent_language": {"type": "array", "items": {"type": "string"}},
+        "content_opportunities": {"type": "array", "items": {"type": "string"}},
+        "risk_notes": {"type": "array", "items": {"type": "string"}},
+        "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+    },
+}
+
+
+def available() -> bool:
+    return bool(MANUS_API_KEY)
+
+
+def _headers() -> dict:
+    return {"x-manus-api-key": MANUS_API_KEY, "Content-Type": "application/json"}
+
+
+def create_research_tasks(content_id: str, topic: str, audience: str) -> list[str]:
+    """관점이 다른 리서치 task 3개를 병렬 생성하고 task_id 목록을 반환한다."""
+    task_ids = []
+    for focus in prompts.RESEARCH_FOCUSES:
+        body = {
+            "title": f"DG Research - {content_id} - {focus[:20]}",
+            "locale": "ko",
+            "ask_followup": False,
+            "is_hidden": True,
+            "share_visibility": "private",
+            "message": {
+                "content": prompts.RESEARCH.format(
+                    topic=topic, audience=audience or "초등 학부모", focus=focus,
+                )
+            },
+            "structured_output_schema": RESEARCH_SCHEMA,
+        }
+        resp = requests.post(
+            f"{MANUS_API_BASE}/v2/task.create",
+            headers=_headers(), json=body, timeout=60,
+        )
+        resp.raise_for_status()
+        task_ids.append(resp.json()["task_id"])
+    return task_ids
+
+
+def poll_results(task_ids: list[str]) -> tuple[bool, list[dict]]:
+    """task들의 완료 여부와 structured output을 확인한다.
+
+    Returns: (모두 완료 여부, 완료된 결과 목록)
+    """
+    results = []
+    all_done = True
+    for task_id in task_ids:
+        resp = requests.get(
+            f"{MANUS_API_BASE}/v2/task.listMessages",
+            headers=_headers(), params={"task_id": task_id}, timeout=60,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        output = _extract_structured_output(data)
+        if output:
+            results.append(output)
+        else:
+            all_done = False
+    return all_done, results
+
+
+def _extract_structured_output(data: dict) -> dict | None:
+    """listMessages 응답에서 structured output을 찾는다."""
+    detail = data.get("task_detail") or {}
+    so = detail.get("structured_output") or data.get("structured_output") or {}
+    if so.get("success") and so.get("value"):
+        return so["value"]
+    # 메시지 목록 기반 응답 형식 폴백
+    for msg in reversed(data.get("messages", [])):
+        msg_so = (msg.get("structured_output") or {})
+        if msg_so.get("success") and msg_so.get("value"):
+            return msg_so["value"]
+    return None
+
+
+def claude_research_fallback(topic: str, audience: str) -> list[dict]:
+    """Manus 키가 없을 때 Claude가 관점 3개 리서치를 수행한다 (웹 접근 없이 지식 기반)."""
+    results = []
+    for focus in prompts.RESEARCH_FOCUSES:
+        prompt = prompts.RESEARCH.format(
+            topic=topic, audience=audience or "초등 학부모", focus=focus,
+        ) + "\n\n주의: 웹 검색 없이 작성하므로 확신할 수 없는 출처는 적지 말고, confidence를 보수적으로 매기세요."
+        try:
+            results.append(llm.call_json(prompt, system=prompts.get_system()))
+        except (ValueError, json.JSONDecodeError):
+            continue
+    return results
