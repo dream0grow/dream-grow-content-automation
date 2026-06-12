@@ -30,11 +30,17 @@ jobs:
       - name: Install deps
         run: pip install requests python-dotenv honcho-ai
 
+      # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ secrets.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
       - name: Run orchestrator
         env:
           NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
           NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
           HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
         run: |

@@ -110,7 +110,8 @@
 |---|---|---|
 | `NOTION_API_KEY` | ✅ | 노션 내부 integration 토큰 |
 | `NOTION_PIPELINE_DB_ID` | ✅ | 콘텐츠 파이프라인 DB id |
-| `ANTHROPIC_API_KEY` | cloud ✅ | 미설정 시 Claude Code CLI(Max 구독)로 폴백 |
+| `ANTHROPIC_API_KEY` | 둘 중 하나 | API 종량제 키. 없으면 아래 토큰으로 폴백 |
+| `CLAUDE_CODE_OAUTH_TOKEN` | 둘 중 하나 | Claude Max 구독 토큰. Mac에서 `claude setup-token`으로 발급 (1년 유효) |
 | `MANUS_API_KEY` | 선택 | 미설정 시 리서치도 Claude가 수행 |
 | `HONCHO_API_KEY` | 선택 | 문체/학습 메모리 |
 | `DG_MODEL_UTILITY` | 선택 | 기본 claude-sonnet-4-6 |
