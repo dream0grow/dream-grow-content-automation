@@ -1,5 +1,6 @@
-# 민감 정보
+# Secrets
 .env
+.env.local
 token.pickle
 credentials.json
 
@@ -9,23 +10,30 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
-# OS
+# Node / Next.js
+node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/.turbo/
+
+# Build / runtime data
+output/
+data/
+artifacts/
+.ai_drafts/
+*.csv
+
+# OS / editor
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
 
-# 출력
-output/
-
-# 개인 데이터
-*.csv
-.ai_drafts/
-
-# 콘텐츠 데이터 (옵시디언이 원본)
-SNS-시스템/
-artifacts/
-
-# 로그
+# Logs
+*.log
 scheduled/logs/
 *_tmp.txt
-honcho_reels_ctx_tmp.txt
