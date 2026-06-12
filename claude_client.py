@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 CLAUDE_BIN = os.getenv("CLAUDE_BIN", "claude")
 
 MODEL_MAP = {
+    "claude-opus-4-8": "opus",
     "claude-opus-4-6": "opus",
     "claude-sonnet-4-20250514": "sonnet",
     "claude-sonnet-4-6": "sonnet",

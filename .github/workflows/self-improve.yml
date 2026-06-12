@@ -1,0 +1,57 @@
+# 자가 학습 루프 (설계 결정 #6, 헤르메스 스타일)
+# 매주 월요일 09:00 KST(00:00 UTC) 회고 → 프롬프트 개선 큐시트 제출.
+# 매일 한 번 승인된 큐시트를 Honcho 오버레이로 반영.
+name: self-improve
+
+on:
+  schedule:
+    - cron: "0 0 * * 1"   # 주간 회고 (월 09:00 KST)
+    - cron: "0 21 * * *"  # 승인분 반영 (매일 06:00 KST)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "retrospect 또는 apply"
+        required: false
+        default: "retrospect"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai
+
+      # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ secrets.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run self-improve
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+        run: |
+          MODE="${{ github.event.inputs.mode }}"
+          # 스케줄 실행이면 cron에 따라 모드 결정 (21시 UTC = apply)
+          if [ -z "$MODE" ]; then
+            if [ "${{ github.event.schedule }}" = "0 21 * * *" ]; then
+              MODE="apply"
+            else
+              MODE="retrospect"
+            fi
+          fi
+          if [ "$MODE" = "apply" ]; then
+            python3 -m orchestrator.self_improve --apply
+          else
+            python3 -m orchestrator.self_improve
+          fi
