@@ -29,3 +29,10 @@ artifacts/
 scheduled/logs/
 *_tmp.txt
 honcho_reels_ctx_tmp.txt
+
+# 웹 앱 (backend/frontend)
+data/
+backend/data/
+node_modules/
+frontend/dist/
+.pytest_cache/

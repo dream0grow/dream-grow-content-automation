@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - TZ=Asia/Seoul
+      - DATABASE_URL=sqlite:////app/data/dreamgrow.db
+      # Postgres 사용 시 (profile: postgres):
+      # - DATABASE_URL=postgresql+psycopg://dreamgrow:dreamgrow@postgres:5432/dreamgrow
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["postgres"]
+    environment:
+      - POSTGRES_USER=dreamgrow
+      - POSTGRES_PASSWORD=dreamgrow
+      - POSTGRES_DB=dreamgrow
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
