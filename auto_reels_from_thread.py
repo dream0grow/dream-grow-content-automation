@@ -1,13 +1,16 @@
-"""스레드 → 릴스 스크립트 + B-roll 자동 변환기
+"""릴스 스크립트 자동 생성기 (스레드 변환 + 주제 직접 입력)
 
 검토완료된 스레드를 기반으로:
 1. 45초 릴스 스크립트 자동 생성
 2. B-roll 장면 목록 생성 (Pexels/Pixabay 검색 키워드 포함)
 3. 05 제작/52 원고/에 저장
 
+주제만으로 새 릴스 스크립트 생성도 가능 (구 reels_script.py 통합).
+
 사용법:
   python3 auto_reels_from_thread.py "스레드파일경로.md"
-  python3 auto_reels_from_thread.py --batch  # 최근 발행된 스레드 전체 변환
+  python3 auto_reels_from_thread.py --batch          # 최근 발행된 스레드 전체 변환
+  python3 auto_reels_from_thread.py --topic "주제"   # 주제만으로 새 릴스 생성
 """
 import os
 import re
@@ -85,32 +88,9 @@ def read_thread_file(filepath: str) -> dict:
     return {'frontmatter': fm, 'body': body, 'filepath': filepath}
 
 
-def detect_category(content: str, filename: str) -> str:
-    """파일에서 카테고리를 추출합니다."""
-    # 경로에서 카테고리 추출 시도
-    path_parts = filename.replace('\\', '/').split('/')
-    for part in path_parts:
-        if part in ('훈육', '수학', '독서', '미디어', '놀이', '감정', '학습', '학교', '크리에이터'):
-            return part
-    return '학습'
+KNOWN_CATEGORIES = ('훈육', '수학', '독서', '미디어', '놀이', '감정', '학습', '학교', '크리에이터')
 
-
-def generate_reels_from_thread(thread_content: str, category: str) -> str:
-    """스레드 내용을 기반으로 릴스 스크립트 + B-roll을 생성합니다."""
-    honcho = get_honcho_client()
-    reels_style = get_style_context(honcho, "reels")
-
-    system = REELS_SYSTEM_PROMPT
-    if reels_style:
-        system += f"\n\n## Honcho 릴스 스타일 가이드\n{reels_style}\n"
-
-    prompt = f"""아래 스레드 글을 45초 릴스 스크립트로 변환해주세요.
-카테고리: {category}
-
-## 원본 스레드
-{thread_content[:3000]}
-
-## 출력 형식
+OUTPUT_FORMAT = """## 출력 형식
 
 ### 릴스 스크립트
 (타임코드 + 대사 + 화면 지시)
@@ -128,10 +108,60 @@ def generate_reels_from_thread(thread_content: str, category: str) -> str:
 | 0~3초 | ... | ... | ... |
 """
 
+
+def detect_category(content: str, filename: str) -> str:
+    """파일에서 카테고리를 추출합니다."""
+    # 경로에서 카테고리 추출 시도
+    path_parts = filename.replace('\\', '/').split('/')
+    for part in path_parts:
+        if part in KNOWN_CATEGORIES:
+            return part
+    return '학습'
+
+
+def build_system_prompt() -> str:
+    """기본 프롬프트 + Honcho 릴스 스타일 가이드."""
+    honcho = get_honcho_client()
+    reels_style = get_style_context(honcho, "reels")
+
+    system = REELS_SYSTEM_PROMPT
+    if reels_style:
+        system += f"\n\n## Honcho 릴스 스타일 가이드\n{reels_style}\n"
+    return system
+
+
+def generate_reels_from_thread(thread_content: str, category: str) -> str:
+    """스레드 내용을 기반으로 릴스 스크립트 + B-roll을 생성합니다."""
+    prompt = f"""아래 스레드 글을 45초 릴스 스크립트로 변환해주세요.
+카테고리: {category}
+
+## 원본 스레드
+{thread_content[:3000]}
+
+{OUTPUT_FORMAT}"""
+
     message = claude.messages.create(
         model="claude-opus-4-6",
         max_tokens=1500,
-        system=system,
+        system=build_system_prompt(),
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return message.content[0].text
+
+
+def generate_reels_from_topic(topic: str, category: str, style: str = "정보 전달형") -> str:
+    """주제만으로 릴스 스크립트 + B-roll을 생성합니다 (구 reels_script.py)."""
+    prompt = f"""아래 주제로 45초 릴스 스크립트를 새로 작성해주세요.
+주제: {topic}
+카테고리: {category}
+스타일: {style}
+
+{OUTPUT_FORMAT}"""
+
+    message = claude.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=2000,
+        system=build_system_prompt(),
         messages=[{"role": "user", "content": prompt}],
     )
     return message.content[0].text
@@ -146,8 +176,8 @@ def make_reels_filename(thread_filename: str, category: str) -> str:
     return f"원고_릴스_{category}_{keywords}.md"
 
 
-def save_reels_script(content: str, filename: str, source_thread: str) -> str:
-    """릴스 스크립트를 저장합니다."""
+def save_reels_script(content: str, filename: str, source: str) -> str:
+    """릴스 스크립트를 저장합니다. source는 frontmatter 원본 필드에 그대로 기록."""
     now = datetime.now().strftime('%Y-%m-%d')
     filepath = os.path.join(REELS_DIR, filename)
 
@@ -155,7 +185,7 @@ def save_reels_script(content: str, filename: str, source_thread: str) -> str:
 type: 릴스스크립트
 상태: 초안
 생성일: {now}
-원본: "[[{os.path.splitext(os.path.basename(source_thread))[0]}]]"
+원본: {source}
 채널: Instagram Reels
 길이: 45초
 ---
@@ -181,8 +211,43 @@ def process_single_thread(filepath: str):
     reels_content = generate_reels_from_thread(thread['body'], category)
     reels_filename = make_reels_filename(os.path.basename(filepath), category)
 
-    saved = save_reels_script(reels_content, reels_filename, filepath)
+    source = f'"[[{os.path.splitext(os.path.basename(filepath))[0]}]]"'
+    saved = save_reels_script(reels_content, reels_filename, source)
     return saved
+
+
+def process_topic(topic: str, category: str = "", style: str = "정보 전달형"):
+    """주제만으로 릴스 스크립트를 생성합니다."""
+    category = category or next((c for c in KNOWN_CATEGORIES if c in topic), '학습')
+
+    print(f"\n--- 릴스 생성 (주제 직접 입력): {topic} ---")
+    print(f"  카테고리: {category} / 스타일: {style}")
+    print("  릴스 스크립트 생성 중...")
+
+    reels_content = generate_reels_from_topic(topic, category, style)
+    reels_filename = make_reels_filename(topic, category)
+
+    saved = save_reels_script(reels_content, reels_filename, f"주제 직접 입력 - {topic}")
+    return saved
+
+
+def topic_main():
+    """대화형 주제 입력 모드 (main.py 메뉴에서 호출)."""
+    topic = input("릴스 주제를 입력하세요: ").strip()
+    if not topic:
+        print("주제가 입력되지 않았습니다.")
+        return
+
+    print("스타일 선택:")
+    print("  1. 정보 전달형 (기본)")
+    print("  2. 스토리텔링형")
+    print("  3. Before/After형")
+    print("  4. 리스트형 (Top 3, 5가지 등)")
+    style_map = {"1": "정보 전달형", "2": "스토리텔링형", "3": "Before/After형", "4": "리스트형"}
+    choice = input("번호 선택 (기본: 1): ").strip()
+    style = style_map.get(choice, "정보 전달형")
+
+    process_topic(topic, style=style)
 
 
 def batch_process():
@@ -218,6 +283,12 @@ def batch_process():
 def main():
     if '--batch' in sys.argv:
         batch_process()
+    elif '--topic' in sys.argv:
+        idx = sys.argv.index('--topic')
+        if idx + 1 >= len(sys.argv):
+            print('사용법: python3 auto_reels_from_thread.py --topic "주제"')
+            return
+        process_topic(sys.argv[idx + 1])
     elif len(sys.argv) > 1:
         filepath = sys.argv[1]
         if not os.path.exists(filepath):
@@ -235,6 +306,7 @@ def main():
         print("사용법:")
         print('  python3 auto_reels_from_thread.py "스레드파일.md"')
         print("  python3 auto_reels_from_thread.py --batch")
+        print('  python3 auto_reels_from_thread.py --topic "주제"')
 
 
 if __name__ == "__main__":

@@ -687,8 +687,8 @@ def run_skill_updater():
     # 4. 주간 캘린더 갱신
     log("Step 4: 주간 캘린더 갱신", team)
     try:
-        from publish_calendar import scan_pipeline, scan_video_tracking
-        from publish_calendar import generate_weekly_calendar, get_week_dates, CALENDAR_DIR
+        from calendar_scheduler import scan_pipeline, scan_video_tracking
+        from calendar_scheduler import generate_weekly_calendar, get_week_dates, CALENDAR_DIR
         pipeline = scan_pipeline()
         videos = scan_video_tracking()
         content = generate_weekly_calendar(pipeline, videos)

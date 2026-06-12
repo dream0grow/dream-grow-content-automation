@@ -26,7 +26,7 @@ def main():
             from thread_generator import main as thread_main
             thread_main()
         elif choice == "2":
-            from reels_script import main as reels_main
+            from auto_reels_from_thread import topic_main as reels_main
             reels_main()
         elif choice == "3":
             from youtube_script import main as youtube_main
