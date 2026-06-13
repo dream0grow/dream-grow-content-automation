@@ -46,6 +46,8 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
     brief_summary = f"{brief.get('core_message', '')} / CTA: {brief.get('cta', '')}"
     style_block = f"[채널 스타일 가이드]\n{style_context}" if style_context else ""
     hook_block = f"[후킹 예시 - 첫 글 작성 시 참고]\n{hook_examples}" if hook_examples else ""
+    # 뉴스레터는 3,000~6,000자 심화 콘텐츠라 토큰 예산을 크게 잡는다
+    write_tokens = 16000 if fmt == "newsletter" else 8000
 
     draft = llm.call_writing(
         prompts.WRITER.format(
@@ -53,6 +55,7 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
             hook_examples=hook_block, feedback_block="",
         ),
         system=prompts.get_system(),
+        max_tokens=write_tokens,
     )
     transcript.append(f"[작가 v1]\n{draft}")
 
@@ -81,6 +84,7 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
                 ),
             ),
             system=prompts.get_system(),
+            max_tokens=write_tokens,
         )
         transcript.append(f"[작가 v{rounds + 1}]\n{draft}")
 
