@@ -116,6 +116,9 @@
 | `HONCHO_API_KEY` | 선택 | 문체/학습 메모리 |
 | `THREADS_ACCESS_TOKEN` | 선택 | Threads 자동 발행용. 미설정 시 수동 발행 안내로 폴백 |
 | `THREADS_USER_ID` | 선택 | Threads 사용자 ID |
+| `NAVER_AD_API_KEY` | 선택 | 네이버 검색광고 API (키워드 실측 검색량/경쟁도). searchad.naver.com → 도구 → API 사용 관리 |
+| `NAVER_AD_SECRET` | 선택 | 〃 비밀키 |
+| `NAVER_AD_CUSTOMER_ID` | 선택 | 〃 고객 ID (숫자) |
 | `DG_MODEL_UTILITY` | 선택 | 기본 claude-sonnet-4-6 |
 | `DG_MODEL_WRITING` | 선택 | 기본 claude-opus-4-8 |
 

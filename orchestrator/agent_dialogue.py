@@ -77,10 +77,22 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "") -> dict:
 
 
 def get_style_context(channel: str) -> str:
-    """기존 Honcho 메모리에서 채널 스타일을 가져온다 (기존 시스템 통합, 결정 #2)."""
+    """Honcho에서 채널 스타일 + 누적 수정 패턴을 가져온다 (기존 시스템 통합, 결정 #2)."""
+    parts = []
     try:
         from memory_manager import get_honcho_client, get_style_context as honcho_style
         client = get_honcho_client()
-        return honcho_style(client, channel) if client else ""
+        if client:
+            style = honcho_style(client, channel)
+            if style:
+                parts.append(style)
     except Exception:
-        return ""
+        pass
+    try:
+        from orchestrator.style_learn import get_corrections_context
+        corrections = get_corrections_context(channel)
+        if corrections:
+            parts.append(f"[사람 수정에서 학습된 패턴 - 반드시 반영]\n{corrections}")
+    except Exception:
+        pass
+    return "\n\n".join(parts)
