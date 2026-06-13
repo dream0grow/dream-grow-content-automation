@@ -29,6 +29,7 @@ jobs:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
       HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+      DG_AUTO_APPROVE_KEYWORD: ${{ secrets.DG_AUTO_APPROVE_KEYWORD }}
       THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
       THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
       NAVER_AD_API_KEY: ${{ secrets.NAVER_AD_API_KEY }}

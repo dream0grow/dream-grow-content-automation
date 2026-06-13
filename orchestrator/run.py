@@ -22,7 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from orchestrator import (
     agent_dialogue, llm, manus_research, naver_keywords, notion_state, prompts,
 )
-from orchestrator.config import MAX_CARDS_PER_RUN, require_notion
+from orchestrator.config import AUTO_APPROVE_KEYWORD, MAX_CARDS_PER_RUN, require_notion
 
 
 def log(msg: str):
@@ -217,6 +217,15 @@ def handle_keyword(card: dict):
         f"> 승인 방법: 위 키워드 중 하나를 골라 approved_keyword 속성에 입력하고 "
         f"approval_status를 approved로 바꾸세요.",
     )
+    # 자동 승인 모드: 최고점 키워드를 사람 승인 없이 채택 → 바로 브리프/초안으로 진행
+    if AUTO_APPROVE_KEYWORD and keywords:
+        top_kw = keywords[0].get("keyword", "")
+        notion_state.update_card(
+            card["page_id"], approved_keyword=top_kw,
+            stage="keyword_approval", status="running", approval_status="approved",
+        )
+        log(f"{card['content_id']} 키워드 자동 승인: {top_kw}")
+        return
     notion_state.update_card(
         card["page_id"], stage="keyword_approval", status="needs_human",
         approval_status="requested",

@@ -28,6 +28,10 @@ DIALOGUE_MAX_ROUNDS = int(os.getenv("DG_DIALOGUE_MAX_ROUNDS", "2"))
 # 한 번의 cron 실행에서 처리할 최대 카드 수 (rate limit 보호)
 MAX_CARDS_PER_RUN = int(os.getenv("DG_MAX_CARDS_PER_RUN", "5"))
 
+# 키워드 자동 승인: true면 최고점 키워드를 사람 승인 없이 자동 채택 (대량 검토용 초안 생성).
+# 발행 승인 게이트는 그대로 사람이 통과시킨다.
+AUTO_APPROVE_KEYWORD = os.getenv("DG_AUTO_APPROVE_KEYWORD", "").lower() in ("1", "true", "yes", "on")
+
 
 def require_notion():
     """노션 설정이 없으면 명확한 에러로 중단한다."""
