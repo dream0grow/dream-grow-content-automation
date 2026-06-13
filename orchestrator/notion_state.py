@@ -6,7 +6,7 @@
 """
 import re
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 
@@ -15,6 +15,7 @@ from orchestrator.config import (
 )
 
 BASE = "https://api.notion.com/v1"
+KST = timezone(timedelta(hours=9))  # 노션 토글 타임스탬프를 한국시간으로 표시
 
 
 def _headers() -> dict:
@@ -177,7 +178,7 @@ def append_section(page_id: str, heading: str, body: str) -> None:
 
     예: append_section(pid, "🔍 리서치 요약", summary_text)
     """
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    timestamp = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
     children = [
         {
             "object": "block",
@@ -242,7 +243,7 @@ def _md_to_blocks(md: str) -> list[dict]:
 
 def append_formatted_section(page_id: str, heading: str, markdown: str) -> None:
     """마크다운을 읽기 좋은 노션 블록(헤딩/불릿)으로 변환해 토글 섹션으로 추가한다."""
-    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    timestamp = datetime.now(KST).strftime("%Y-%m-%d %H:%M KST")
     children = _md_to_blocks(markdown) or [{
         "object": "block", "type": "paragraph",
         "paragraph": {"rich_text": [{"text": {"content": "(내용 없음)"}}]},

@@ -13,20 +13,23 @@ from orchestrator import llm, prompts
 from orchestrator.config import DIALOGUE_MAX_ROUNDS
 
 
-def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "") -> dict:
+def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
+                       hook_examples: str = "") -> dict:
     """브리프 → 토론을 거친 초안을 생성한다.
 
+    hook_examples: 후킹 DB에서 가져온 후킹 패턴/예시 (없으면 일반 지침만 적용)
     Returns: {"draft": str, "review": dict, "transcript": str, "rounds": int}
     """
     transcript: list[str] = []
     brief_text = json.dumps(brief, ensure_ascii=False, indent=2)
     brief_summary = f"{brief.get('core_message', '')} / CTA: {brief.get('cta', '')}"
     style_block = f"[채널 스타일 가이드]\n{style_context}" if style_context else ""
+    hook_block = f"[후킹 예시 - 첫 글 작성 시 참고]\n{hook_examples}" if hook_examples else ""
 
     draft = llm.call_writing(
         prompts.WRITER.format(
-            format=fmt, brief=brief_text,
-            style_context=style_block, feedback_block="",
+            format=fmt, brief=brief_text, style_context=style_block,
+            hook_examples=hook_block, feedback_block="",
         ),
         system=prompts.get_system(),
     )
@@ -50,6 +53,7 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "") -> dict:
         draft = llm.call_writing(
             prompts.WRITER.format(
                 format=fmt, brief=brief_text, style_context=style_block,
+                hook_examples=hook_block,
                 feedback_block=(
                     "[비평가 피드백 - 반드시 반영하되 브리프의 핵심 메시지는 유지]\n"
                     f"{feedback}\n\n[직전 초안]\n{draft}"
