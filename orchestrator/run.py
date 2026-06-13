@@ -142,6 +142,12 @@ def handle_keyword_approved(card: dict):
 
     review = result["review"]
     notion_state.append_section(page_id, "✅ 교육윤리 검수", _fmt_json(review))
+    notion_state.append_section(
+        page_id, "⏸️ 발행 승인 요청",
+        "검수 결과와 '✍️ 초안'을 확인한 뒤 approval_status를 approved로 바꾸면 "
+        "Threads에 자동 발행됩니다 (THREADS Secret 설정 시). "
+        "수정이 필요하면 approval_status를 revision_requested로 바꾸고 코멘트를 남겨주세요.",
+    )
     notion_state.update_card(
         page_id, stage="approval", status="needs_human",
         review_status=review.get("review_status", "revise"),
@@ -151,12 +157,19 @@ def handle_keyword_approved(card: dict):
 
 
 def handle_final_approved(card: dict):
-    """approval + approved + 검수 통과 → publish_ready."""
+    """approval + approved + 검수 통과 → publish_ready (같은 실행에서 발행까지 이어짐)."""
     if card["review_status"] != "approved":
         log(f"{card['content_id']} review_status={card['review_status']} → 게이트 차단")
         return
-    notion_state.update_card(card["page_id"], stage="publish_ready", status="done")
-    log(f"{card['content_id']} publish_ready (발행은 기존 파이프라인 담당)")
+    notion_state.update_card(card["page_id"], stage="publish_ready", status="queued")
+    log(f"{card['content_id']} publish_ready → 발행 대기열")
+
+
+def handle_publish(card: dict):
+    """publish_ready/queued → Threads 자동 발행 (로드맵 2단계)."""
+    from orchestrator import publish
+    publish.handle_publish(card)
+    log(f"{card['content_id']} 발행 처리 완료")
 
 
 # ---------- 디스패처 ----------
@@ -168,6 +181,7 @@ DISPATCH = [
     ("keyword", "queued", None, handle_keyword),
     ("keyword_approval", None, "approved", handle_keyword_approved),
     ("approval", None, "approved", handle_final_approved),
+    ("publish_ready", "queued", None, handle_publish),
 ]
 
 

@@ -114,6 +114,8 @@
 | `CLAUDE_CODE_OAUTH_TOKEN` | 둘 중 하나 | Claude Max 구독 토큰. Mac에서 `claude setup-token`으로 발급 (1년 유효) |
 | `MANUS_API_KEY` | 선택 | 미설정 시 리서치도 Claude가 수행 |
 | `HONCHO_API_KEY` | 선택 | 문체/학습 메모리 |
+| `THREADS_ACCESS_TOKEN` | 선택 | Threads 자동 발행용. 미설정 시 수동 발행 안내로 폴백 |
+| `THREADS_USER_ID` | 선택 | Threads 사용자 ID |
 | `DG_MODEL_UTILITY` | 선택 | 기본 claude-sonnet-4-6 |
 | `DG_MODEL_WRITING` | 선택 | 기본 claude-opus-4-8 |
 
@@ -124,6 +126,6 @@ GitHub Actions에서는 위 키들을 repo Secrets로 등록한다.
 | 단계 | 내용 | 상태 |
 |---|---|---|
 | 1 | 노션 DB 생성 + orchestrator 모듈 + Actions cron | 본 브랜치에서 구현 |
-| 2 | 노션 승인 → 기존 로컬 파이프라인(발행) 연결: publish_ready 카드를 pipeline.py가 읽어 발행 | 다음 |
+| 2 | 발행 자동화: publish_ready 카드를 orchestrator/publish.py가 Threads API로 직접 발행 (클라우드, Mac 불필요) | 구현됨 |
 | 3 | 성과 자동 수집 (Threads insights → 노션 metrics) | 다음 |
 | 4 | 자가 학습 큐시트 승인 → 프롬프트 파일 자동 갱신 PR | 다음 |
