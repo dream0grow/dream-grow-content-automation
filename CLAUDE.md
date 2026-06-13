@@ -65,10 +65,16 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 
 - 시스템 완성: 리서치~키워드~브리프~토론초안~검수~발행(Threads/스티비) 전부 작동. **스티비 실제 발송 성공 확인**.
 - 핸드오프 시스템 가동: CLAUDE.md + `/dreamgrow-resume` 스킬 (PR #18 머지됨).
-- **노션 카드 현황**:
-  - DG-2026-0001 (스마트폰 규칙): approval 단계, review_status=approved → 발행 승인만 하면 됨
-  - DG-2026-0002 (친구 문제): 키워드 승인 단계, approved_keyword에 부모 고민 문장 입력됨 → approval_status=approved만 하면 진행
-  - 검토용 thread 카드 12개 (intake 대기): 받아쓰기/구구단/자존감/화내고후회/심심해/책읽기/우는아이/1학년학교/수학포기/형제비교/칭찬함정/거짓말/발표목소리
+- **Manus 429 백오프 추가 (2026-06-13)**: 카드 대량 처리 시 `task.create` 버스트가 Manus 레이트리밋(429)에 걸려
+  research 단계에서 8개가 일괄 실패했었음. `manus_research.py`에 `_request_with_retry`(429/5xx 지수 백오프 2→4→8→16초,
+  Retry-After 존중) + task.create 사이 1초 간격을 추가해 완화. 환경변수 `DG_MANUS_MAX_RETRIES`(기본 4)로 조절.
+- **노션 카드 현황** (2026-06-13 갱신):
+  - DG-2026-0001 (스마트폰 규칙): publish_ready, review·approval 모두 approved → 다음 orchestrator 실행 시 Threads 자동 발행
+  - DG-2026-0002 (친구 문제): 키워드 승인 완료(approval_status=approved 처리함) → 다음 실행에 브리프→초안 진행
+  - 받아쓰기/형제비교/칭찬함정: research running (Manus task 진행 중)
+  - 발표목소리/거짓말: intake 대기
+  - 429로 실패했던 8개(수학포기/자존감/책읽기/구구단/우는아이/1학년학교/화내고후회/심심해): stage=intake, status=queued로
+    리셋 완료 (idempotency_key·last_error 비움) → 다음 실행에 재시도. content_id는 유지됨.
     (8번 1학년학교·10번 형제비교는 유지하기로 함 — 삭제 안 함)
 - **다음 자동 진행 대기**: `DG_AUTO_APPROVE_KEYWORD=true` Secret이 켜져 있으면, orchestrator를 2~3회 실행 시
   검토용 카드들이 키워드 자동 채택 → 브리프 → 초안 → 검수까지 진행되어 "발행 승인 대기"로 모인다.
