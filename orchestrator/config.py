@@ -11,6 +11,8 @@ load_dotenv(PROJECT_ROOT / ".env")
 NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
 NOTION_PIPELINE_DB_ID = os.getenv("NOTION_PIPELINE_DB_ID", "")
 NOTION_VERSION = "2022-06-28"
+# 승인 대기 시 멘션할 노션 사용자 ID (비우면 멘션 없이 댓글만). 노션 알림 발송용.
+NOTION_MENTION_USER_ID = os.getenv("NOTION_MENTION_USER_ID", "")
 
 # Manus (선택 - 외부 리서치 전담, 없으면 Claude 리서치로 폴백)
 MANUS_API_KEY = os.getenv("MANUS_API_KEY", "")

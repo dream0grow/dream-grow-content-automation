@@ -221,6 +221,12 @@ def handle_keyword(card: dict):
         card["page_id"], stage="keyword_approval", status="needs_human",
         approval_status="requested",
     )
+    notion_state.notify(
+        card["page_id"],
+        f"🏷️ [{card['content_id']}] 키워드 승인이 필요합니다. "
+        f"'{card['topic']}' — 키워드 표를 확인하고 approved_keyword 입력 후 "
+        "approval_status를 approved로 바꿔주세요.",
+    )
     log(f"{card['content_id']} 키워드 {len(keywords)}개 → 승인 대기 ⏸️")
 
 
@@ -299,6 +305,12 @@ def handle_keyword_approved(card: dict):
         page_id, stage="approval", status="needs_human",
         review_status=worst_review,
         approval_status="requested",
+    )
+    notion_state.notify(
+        page_id,
+        f"✍️ [{card['content_id']}] 초안 완성, 발행 승인이 필요합니다. "
+        f"'{card['topic']}' — 글 평가/검수와 초안을 확인하고 approval_status를 "
+        "approved로 바꾸면 자동 발행됩니다.",
     )
     log(f"{card['content_id']} 초안 {len(supported)}종 + 검수/평가 완료 → 발행 승인 대기 ⏸️")
 

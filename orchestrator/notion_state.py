@@ -11,7 +11,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 
 from orchestrator.config import (
-    NOTION_API_KEY, NOTION_PIPELINE_DB_ID, NOTION_VERSION,
+    NOTION_API_KEY, NOTION_MENTION_USER_ID, NOTION_PIPELINE_DB_ID, NOTION_VERSION,
 )
 
 BASE = "https://api.notion.com/v1"
@@ -257,6 +257,26 @@ def append_formatted_section(page_id: str, heading: str, markdown: str) -> None:
         },
     }
     _request("PATCH", f"/blocks/{page_id}/children", {"children": [block]})
+
+
+def notify(page_id: str, message: str) -> None:
+    """카드에 사용자를 멘션하는 댓글을 달아 노션 알림을 보낸다.
+
+    멘션 대상은 NOTION_MENTION_USER_ID. 댓글 권한/설정이 없으면 조용히 건너뛴다
+    (파이프라인을 멈추지 않기 위함).
+    """
+    rich: list[dict] = []
+    if NOTION_MENTION_USER_ID:
+        rich.append({"type": "mention",
+                     "mention": {"type": "user", "user": {"id": NOTION_MENTION_USER_ID}}})
+        rich.append({"type": "text", "text": {"content": " "}})
+    rich.append({"type": "text", "text": {"content": message[:1900]}})
+    try:
+        _request("POST", "/comments", {
+            "parent": {"page_id": page_id}, "rich_text": rich,
+        })
+    except Exception as e:
+        print(f"노션 알림 댓글 실패 (계속 진행): {e}")
 
 
 def read_sections(page_id: str) -> str:
