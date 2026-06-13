@@ -22,6 +22,9 @@ import requests
 BASE_URL = "https://api.stibee.com/v2"
 API_KEY = os.getenv("STIBEE_API_KEY", "")
 LIST_ID = os.getenv("STIBEE_LIST_ID", "")
+# 발신자: 스티비에 사전 인증된 발신 이메일이어야 한다 (워크스페이스 설정 → 발신자 정보)
+SENDER_EMAIL = os.getenv("STIBEE_SENDER_EMAIL", "")
+SENDER_NAME = os.getenv("STIBEE_SENDER_NAME", "드림그로우")
 # 안전장치: 기본은 스티비에 '초안만 생성'하고 발송은 사람이 확인 후. true일 때만 자동 발송.
 AUTO_SEND = os.getenv("STIBEE_AUTO_SEND", "").lower() in ("1", "true", "yes", "on")
 
@@ -74,16 +77,20 @@ def create_and_send(draft: str, subject: str = "") -> dict:
     """
     subject = subject or extract_subject(draft)
     content_html = markdown_to_html(draft)
+    list_value = int(LIST_ID) if LIST_ID.isdigit() else LIST_ID
 
+    body = {
+        "subject": subject,
+        "title": subject,
+        "senderName": SENDER_NAME,
+        "senderEmail": SENDER_EMAIL,
+        "replyTo": SENDER_EMAIL,
+        "listIds": [list_value],
+        "content": content_html,
+        "contentHtml": content_html,
+    }
     create_resp = requests.post(
-        f"{BASE_URL}/emails",
-        headers=_headers(),
-        json={
-            "subject": subject,
-            "listIds": [int(LIST_ID)] if LIST_ID.isdigit() else [LIST_ID],
-            "contentHtml": content_html,
-        },
-        timeout=60,
+        f"{BASE_URL}/emails", headers=_headers(), json=body, timeout=60,
     )
     if create_resp.status_code >= 400:
         raise RuntimeError(

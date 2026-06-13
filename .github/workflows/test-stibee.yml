@@ -13,6 +13,8 @@ jobs:
     env:
       STIBEE_API_KEY: ${{ secrets.STIBEE_API_KEY }}
       STIBEE_LIST_ID: ${{ secrets.STIBEE_LIST_ID }}
+      STIBEE_SENDER_EMAIL: ${{ secrets.STIBEE_SENDER_EMAIL }}
+      STIBEE_SENDER_NAME: ${{ secrets.STIBEE_SENDER_NAME }}
       STIBEE_AUTO_SEND: "true"
     steps:
       - uses: actions/checkout@v4

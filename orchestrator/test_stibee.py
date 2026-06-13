@@ -37,9 +37,12 @@ SAMPLE = """# 우리 집 스마트폰, 싸우지 않고 시작하는 법
 
 def main():
     print(f"스티비 설정됨: {stibee.available()}  /  자동발송(AUTO_SEND): {stibee.AUTO_SEND}")
+    print(f"발신자: {stibee.SENDER_NAME} <{stibee.SENDER_EMAIL or '(미설정)'}>")
     if not stibee.available():
         print("[중단] STIBEE_API_KEY 또는 STIBEE_LIST_ID Secret이 없습니다.")
         sys.exit(1)
+    if not stibee.SENDER_EMAIL:
+        print("[경고] STIBEE_SENDER_EMAIL이 비어 있습니다. 스티비에 인증된 발신 이메일을 Secret으로 넣으세요.")
     try:
         result = stibee.create_and_send(
             SAMPLE, subject="[테스트] 드림그로우 뉴스레터 발송 점검",
