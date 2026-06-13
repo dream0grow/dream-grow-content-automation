@@ -253,6 +253,7 @@ def handle_keyword_approved(card: dict):
     for fmt in supported:
         result = agent_dialogue.run_draft_dialogue(
             brief, fmt, style_context=agent_dialogue.get_style_context(fmt),
+            hook_examples=agent_dialogue.load_hooks(),
         )
         notion_state.append_section(
             page_id, f"💬 에이전트 토론 ({fmt}, {result['rounds']}라운드)",

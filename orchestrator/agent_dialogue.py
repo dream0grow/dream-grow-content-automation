@@ -8,9 +8,30 @@
 - 모든 발언은 transcript로 반환되어 노션 카드 본문에 기록된다
 """
 import json
+from pathlib import Path
 
 from orchestrator import llm, prompts
 from orchestrator.config import DIALOGUE_MAX_ROUNDS
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+
+def load_benchmark(channel: str, limit: int = 6000) -> str:
+    """채널별 고성과 과거 글(벤치마킹용)을 읽는다. thread만 해당."""
+    if channel != "thread":
+        return ""
+    path = DATA_DIR / "benchmark_posts.md"
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8")[:limit]
+
+
+def load_hooks(limit: int = 4000) -> str:
+    """후킹 패턴 파일을 읽는다 (작가 hook_examples 주입용)."""
+    path = DATA_DIR / "hook_patterns.md"
+    if not path.exists():
+        return ""
+    return path.read_text(encoding="utf-8")[:limit]
 
 
 def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
@@ -99,4 +120,7 @@ def get_style_context(channel: str) -> str:
             parts.append(f"[사람 수정에서 학습된 패턴 - 반드시 반영]\n{corrections}")
     except Exception:
         pass
+    bench = load_benchmark(channel)
+    if bench:
+        parts.append(bench)
     return "\n\n".join(parts)
