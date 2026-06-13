@@ -16,7 +16,7 @@ from orchestrator.config import DIALOGUE_MAX_ROUNDS
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
 
-def load_benchmark(channel: str, limit: int = 6000) -> str:
+def load_benchmark(channel: str, limit: int = 9000) -> str:
     """채널별 고성과 과거 글(벤치마킹용)을 읽는다. thread만 해당."""
     if channel != "thread":
         return ""
