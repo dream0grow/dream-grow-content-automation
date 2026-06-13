@@ -1,0 +1,25 @@
+# 스티비 발송 단독 테스트 (수동 실행 전용)
+# test 구독자만 든 주소록(STIBEE_LIST_ID)에 샘플 뉴스레터를 실제 발송한다.
+# STIBEE_AUTO_SEND를 여기서 강제 주입하므로 평소 파이프라인 설정과 무관하게 발송된다.
+name: test-stibee
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      STIBEE_API_KEY: ${{ secrets.STIBEE_API_KEY }}
+      STIBEE_LIST_ID: ${{ secrets.STIBEE_LIST_ID }}
+      STIBEE_AUTO_SEND: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install requests python-dotenv
+      - name: Send test newsletter via Stibee
+        run: python3 -m orchestrator.test_stibee
