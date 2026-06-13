@@ -80,13 +80,12 @@ def create_and_send(draft: str, subject: str = "") -> dict:
     content_html = markdown_to_html(draft)
     list_value = int(LIST_ID) if LIST_ID.isdigit() else LIST_ID
 
-    # 스티비 공식 예시 기준: listId(단수), senderEmail, senderName. content는 본문용 추가 시도.
+    # 1단계: 이메일 생성 (메타데이터만, HTML 필드 없음 - 공식 스펙 기준)
     body = {
         "subject": subject,
         "senderEmail": SENDER_EMAIL,
         "senderName": SENDER_NAME,
         "listId": list_value,
-        "content": content_html,
     }
     create_resp = requests.post(
         f"{BASE_URL}/emails", headers=_headers(), json=body, timeout=60,
@@ -104,18 +103,33 @@ def create_and_send(draft: str, subject: str = "") -> dict:
     if not email_id:
         raise RuntimeError(f"스티비 응답에서 email id를 찾지 못함: {create_resp.text[:500]}")
 
-    # 안전 모드: 자동 발송이 꺼져 있으면 초안만 생성하고 멈춘다
+    # 2단계: 본문 HTML 주입 (POST /emails/{id}/content, Content-Type: text/html, body=raw HTML)
+    full_html = f"<html><head></head><body>{content_html}</body></html>"
+    content_resp = requests.post(
+        f"{BASE_URL}/emails/{email_id}/content",
+        headers={"AccessToken": API_KEY, "Content-Type": "text/html"},
+        data=full_html.encode("utf-8"),
+        timeout=60,
+    )
+    if content_resp.status_code >= 400:
+        raise RuntimeError(
+            f"스티비 본문(HTML) 주입 실패 {content_resp.status_code}: "
+            f"{content_resp.text[:300]} (email_id={email_id})"
+        )
+
+    # 안전 모드: 자동 발송이 꺼져 있으면 본문까지 채운 초안만 두고 멈춘다
     if not AUTO_SEND:
         return {
             "email_id": email_id,
             "sent": False,
             "detail": (
-                f"스티비에 초안 생성 완료 (id={email_id}). 자동 발송은 꺼져 있습니다.\n"
+                f"스티비에 초안 생성 + 본문 입력 완료 (id={email_id}). 자동 발송은 꺼져 있습니다.\n"
                 "스티비 대시보드에서 내용을 확인하고 직접 발송하세요. "
                 "검증이 끝나 자동 발송을 켜려면 Secrets에 STIBEE_AUTO_SEND=true를 추가하세요."
             ),
         }
 
+    # 3단계: 발송
     send_resp = requests.post(
         f"{BASE_URL}/emails/{email_id}/send",
         headers=_headers(),
@@ -127,9 +141,10 @@ def create_and_send(draft: str, subject: str = "") -> dict:
             "email_id": email_id,
             "sent": False,
             "detail": (
-                f"이메일 생성은 성공(id={email_id}), 발송 호출 실패 "
+                f"이메일 생성+본문은 성공(id={email_id}), 발송 호출 실패 "
                 f"{send_resp.status_code}: {send_resp.text[:300]} "
                 "- 스티비 대시보드에서 해당 이메일을 열어 수동 발송하세요."
             ),
         }
     return {"email_id": email_id, "sent": True, "detail": f"발송 완료 (id={email_id})"}
+
