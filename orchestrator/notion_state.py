@@ -205,6 +205,34 @@ def read_sections(page_id: str) -> str:
     return "\n".join(lines)
 
 
+def read_latest_section(page_id: str, heading_prefix: str) -> str:
+    """카드 본문에서 heading_prefix로 시작하는 가장 최근 토글의 내용을 읽는다.
+
+    예: read_latest_section(pid, "✍️ 초안") → 발행할 초안 텍스트
+    """
+    matches: list[str] = []
+    cursor = None
+    while True:
+        path = f"/blocks/{page_id}/children?page_size=100"
+        if cursor:
+            path += f"&start_cursor={cursor}"
+        data = _request("GET", path)
+        for block in data.get("results", []):
+            if block["type"] != "toggle":
+                continue
+            heading = "".join(
+                x["plain_text"] for x in block["toggle"].get("rich_text", [])
+            )
+            if heading.startswith(heading_prefix):
+                matches.append(block["id"])
+        if not data.get("has_more"):
+            break
+        cursor = data.get("next_cursor")
+    if not matches:
+        return ""
+    return read_sections(matches[-1])
+
+
 def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
                 audience: str = "", body: str = "") -> str:
     """새 콘텐츠 카드(또는 큐시트)를 생성하고 page_id를 반환한다."""
