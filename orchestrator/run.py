@@ -12,6 +12,7 @@ stage별 핸들러를 호출하고, 산출물을 카드 본문에 기록한 뒤 
   python3 -m orchestrator.run --stage intake  # 특정 stage만
 """
 import json
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -61,18 +62,51 @@ def handle_intake(card: dict):
         log(f"{content_id} Claude 폴백 리서치 {len(results)}건 완료 → keyword")
 
 
+# research가 이 분(minute)을 넘겨도 안 끝나면 Manus가 막힌 것으로 보고 Claude로 우회
+RESEARCH_STALL_MINUTES = int(os.getenv("DG_RESEARCH_STALL_MINUTES", "25"))
+
+
 def handle_research(card: dict):
-    """research/running → Manus 완료 폴링 → 키워드 단계로."""
+    """research/running → Manus 완료 폴링 → 키워드 단계로.
+
+    Manus가 RESEARCH_STALL_MINUTES를 넘겨도 결과를 안 주면(느림/응답형식 불일치)
+    Claude 폴백 리서치로 우회해 카드가 영구히 막히지 않게 한다.
+    """
+    page_id = card["page_id"]
     task_ids = [t for t in card["manus_task_ids"].split(",") if t.strip()]
-    if not task_ids:
+
+    results, debug = [], ""
+    if task_ids:
+        try:
+            all_done, results, debug = manus_research.poll_results(task_ids)
+        except Exception as e:
+            all_done, debug = False, f"poll 예외: {type(e).__name__}: {e}"
+            log(f"{card['content_id']} Manus 폴링 실패: {e}")
+        if all_done and results:
+            _save_research(page_id, results)
+            notion_state.update_card(page_id, stage="keyword", status="queued")
+            log(f"{card['content_id']} 리서치 완료 → keyword")
+            return
+
+    age_min = notion_state.age_minutes(card)
+    if age_min < RESEARCH_STALL_MINUTES:
+        log(f"{card['content_id']} 리서치 진행 중 "
+            f"({len(results)}/{len(task_ids)}, {age_min:.0f}분 경과)")
         return
-    all_done, results = manus_research.poll_results(task_ids)
-    if not all_done:
-        log(f"{card['content_id']} 리서치 진행 중 ({len(results)}/{len(task_ids)})")
-        return
-    _save_research(card["page_id"], results)
-    notion_state.update_card(card["page_id"], stage="keyword", status="queued")
-    log(f"{card['content_id']} 리서치 완료 → keyword")
+
+    # 임계 시간 초과 → Claude 폴백 리서치로 우회 (Manus 부분 결과가 있으면 함께 저장)
+    log(f"{card['content_id']} Manus {RESEARCH_STALL_MINUTES}분 초과 → Claude 폴백 우회")
+    notion_state.append_section(
+        page_id, "⚠️ Manus 리서치 우회",
+        f"Manus 결과를 {RESEARCH_STALL_MINUTES}분 내에 받지 못해 Claude 리서치로 대체합니다.\n"
+        f"마지막 폴링 디버그: {debug[:500]}",
+    )
+    if results:
+        _save_research(page_id, results)
+    fallback = manus_research.claude_research_fallback(card["topic"], card["audience"])
+    _save_research(page_id, fallback)
+    notion_state.update_card(page_id, stage="keyword", status="queued")
+    log(f"{card['content_id']} Claude 폴백 리서치 {len(fallback)}건 → keyword")
 
 
 def _save_research(page_id: str, results: list[dict]):

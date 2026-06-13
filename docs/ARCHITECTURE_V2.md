@@ -119,6 +119,8 @@
 | `NAVER_AD_API_KEY` | 선택 | 네이버 검색광고 API (키워드 실측 검색량/경쟁도). searchad.naver.com → 도구 → API 사용 관리 |
 | `NAVER_AD_SECRET` | 선택 | 〃 비밀키 |
 | `NAVER_AD_CUSTOMER_ID` | 선택 | 〃 고객 ID (숫자) |
+| `STIBEE_API_KEY` | 선택 | 스티비 뉴스레터 자동 발행. 워크스페이스 설정 → API 키 (2025-01-21 이후 발급 키만 유효) |
+| `STIBEE_LIST_ID` | 선택 | 스티비 주소록 ID (주소록 페이지 URL의 숫자) |
 | `DG_MODEL_UTILITY` | 선택 | 기본 claude-sonnet-4-6 |
 | `DG_MODEL_WRITING` | 선택 | 기본 claude-opus-4-8 |
 
