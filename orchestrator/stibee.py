@@ -22,6 +22,8 @@ import requests
 BASE_URL = "https://api.stibee.com/v2"
 API_KEY = os.getenv("STIBEE_API_KEY", "")
 LIST_ID = os.getenv("STIBEE_LIST_ID", "")
+# 안전장치: 기본은 스티비에 '초안만 생성'하고 발송은 사람이 확인 후. true일 때만 자동 발송.
+AUTO_SEND = os.getenv("STIBEE_AUTO_SEND", "").lower() in ("1", "true", "yes", "on")
 
 
 def available() -> bool:
@@ -95,6 +97,18 @@ def create_and_send(draft: str, subject: str = "") -> dict:
     )
     if not email_id:
         raise RuntimeError(f"스티비 응답에서 email id를 찾지 못함: {create_resp.text[:500]}")
+
+    # 안전 모드: 자동 발송이 꺼져 있으면 초안만 생성하고 멈춘다
+    if not AUTO_SEND:
+        return {
+            "email_id": email_id,
+            "sent": False,
+            "detail": (
+                f"스티비에 초안 생성 완료 (id={email_id}). 자동 발송은 꺼져 있습니다.\n"
+                "스티비 대시보드에서 내용을 확인하고 직접 발송하세요. "
+                "검증이 끝나 자동 발송을 켜려면 Secrets에 STIBEE_AUTO_SEND=true를 추가하세요."
+            ),
+        }
 
     send_resp = requests.post(
         f"{BASE_URL}/emails/{email_id}/send",

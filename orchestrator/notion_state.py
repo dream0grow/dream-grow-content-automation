@@ -4,6 +4,7 @@
 속성(stage/status 등)은 자동화 라우팅에 쓰고,
 산출물(리서치/키워드/브리프/초안/대화록)은 페이지 본문에 토글 블록으로 누적한다.
 """
+import re
 import time
 from datetime import datetime, timezone
 
@@ -185,6 +186,67 @@ def append_section(page_id: str, heading: str, body: str) -> None:
         }
         for chunk in _chunks(body)[:90]  # 블록 100개 제한 보호
     ]
+    block = {
+        "object": "block",
+        "type": "toggle",
+        "toggle": {
+            "rich_text": [{"text": {"content": f"{heading} ({timestamp})"}}],
+            "children": children,
+        },
+    }
+    _request("PATCH", f"/blocks/{page_id}/children", {"children": [block]})
+
+
+def _rich(text: str) -> list[dict]:
+    """**굵게** 인라인 마크업을 노션 rich_text 배열로 변환한다."""
+    parts = []
+    for i, seg in enumerate(re.split(r"\*\*(.+?)\*\*", text)):
+        if seg == "":
+            continue
+        parts.append({
+            "text": {"content": seg[:1900]},
+            "annotations": {"bold": i % 2 == 1},
+        })
+    return parts or [{"text": {"content": ""}}]
+
+
+def _md_to_blocks(md: str) -> list[dict]:
+    """간단 마크다운을 노션 블록으로 변환한다.
+
+    지원: '## '/'### ' 헤딩, '- '/'• ' 불릿, '> ' 인용, 그 외 문단.
+    """
+    blocks: list[dict] = []
+    for raw in md.split("\n"):
+        line = raw.rstrip()
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(("### ", "## ")):
+            text = stripped.split(" ", 1)[1]
+            blocks.append({"object": "block", "type": "heading_3",
+                           "heading_3": {"rich_text": _rich(text)}})
+        elif re.match(r"^[-•*]\s+", stripped):
+            text = re.sub(r"^[-•*]\s+", "", stripped)
+            blocks.append({"object": "block", "type": "bulleted_list_item",
+                           "bulleted_list_item": {"rich_text": _rich(text)}})
+        elif stripped.startswith("> "):
+            blocks.append({"object": "block", "type": "quote",
+                           "quote": {"rich_text": _rich(stripped[2:])}})
+        else:
+            blocks.append({"object": "block", "type": "paragraph",
+                           "paragraph": {"rich_text": _rich(stripped)}})
+        if len(blocks) >= 95:  # 블록 100개 제한 보호
+            break
+    return blocks
+
+
+def append_formatted_section(page_id: str, heading: str, markdown: str) -> None:
+    """마크다운을 읽기 좋은 노션 블록(헤딩/불릿)으로 변환해 토글 섹션으로 추가한다."""
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    children = _md_to_blocks(markdown) or [{
+        "object": "block", "type": "paragraph",
+        "paragraph": {"rich_text": [{"text": {"content": "(내용 없음)"}}]},
+    }]
     block = {
         "object": "block",
         "type": "toggle",

@@ -108,6 +108,26 @@ def _extract_structured_output(data: dict) -> dict | None:
         msg_so = (msg.get("structured_output") or {})
         if msg_so.get("success") and msg_so.get("value"):
             return msg_so["value"]
+    # listMessages가 구조화 출력을 직접 안 주는 경우: 마지막 메시지 텍스트에서 JSON 파싱
+    import json as _json
+    import re as _re
+    for msg in reversed(data.get("messages", [])):
+        content = msg.get("content")
+        text = content if isinstance(content, str) else ""
+        if isinstance(content, list):
+            text = " ".join(
+                b.get("text", "") if isinstance(b, dict) else str(b) for b in content
+            )
+        if not text:
+            continue
+        match = _re.search(r"\{.*\}", text, _re.DOTALL)
+        if match:
+            try:
+                obj = _json.loads(match.group(0))
+                if isinstance(obj, dict) and obj.get("key_findings"):
+                    return obj
+            except ValueError:
+                continue
     return None
 
 

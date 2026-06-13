@@ -33,6 +33,69 @@ def _fmt_json(data) -> str:
     return json.dumps(data, ensure_ascii=False, indent=2)
 
 
+def _bullets(items) -> str:
+    return "\n".join(f"- {x}" for x in (items or []) if str(x).strip())
+
+
+def _fmt_research(r: dict) -> str:
+    """리서치 결과 dict를 읽기 좋은 마크다운으로."""
+    conf = {"low": "낮음", "medium": "보통", "high": "높음"}.get(r.get("confidence", ""), r.get("confidence", ""))
+    return (
+        f"## 핵심 발견\n{_bullets(r.get('key_findings'))}\n\n"
+        f"## 부모의 실제 언어\n{_bullets(r.get('parent_language'))}\n\n"
+        f"## 콘텐츠 기회\n{_bullets(r.get('content_opportunities'))}\n\n"
+        f"## 주의할 표현\n{_bullets(r.get('risk_notes'))}\n\n"
+        f"## 근거 출처\n{_bullets(r.get('source_links'))}\n\n"
+        f"> 신뢰도: {conf}"
+    )
+
+
+def _fmt_brief(b: dict) -> str:
+    """브리프 dict를 읽기 좋은 마크다운으로."""
+    parts = [
+        f"## {b.get('brief_title', '브리프')}",
+        f"**대상 독자**: {b.get('target_reader', '')}",
+        f"**부모의 고민**: {b.get('pain_sentence', '')}",
+        f"**핵심 메시지**: {b.get('core_message', '')}",
+        f"**반전 관점**: {b.get('contrarian_angle', '')}",
+    ]
+    if b.get("reaction_type"):
+        parts.append(f"**부모 반응 유형**: {b.get('reaction_type')}")
+    if b.get("parent_reactions"):
+        parts.append(f"## 부모 반응(원문 느낌)\n{_bullets(b.get('parent_reactions'))}")
+    parts.append(f"## 콘텐츠 구조\n{_bullets(b.get('outline'))}")
+    parts.append(f"## 근거 앵커\n{_bullets(b.get('evidence_anchors'))}")
+    parts.append(f"**CTA**: {b.get('cta', '')}")
+    parts.append(f"## 금지 표현\n{_bullets(b.get('avoid_phrases'))}")
+    return "\n\n".join(parts)
+
+
+def _fmt_review(rv: dict) -> str:
+    """교육윤리 검수 결과를 읽기 좋은 마크다운으로."""
+    status = {"approved": "✅ 승인", "revise": "✏️ 수정 필요",
+              "hold": "⛔ 보류", "risk": "🚨 위험"}.get(rv.get("review_status", ""), rv.get("review_status", ""))
+    risk = {"low": "낮음", "medium": "보통", "high": "높음"}.get(rv.get("risk_level", ""), rv.get("risk_level", ""))
+    return (
+        f"## 검수 결과: {status}  (리스크: {risk})\n\n"
+        f"## 발견된 문제\n{_bullets(rv.get('issues'))}\n\n"
+        f"## 수정 제안\n{_bullets(rv.get('revision_suggestions'))}\n\n"
+        f"> {rv.get('final_recommendation', '')}"
+    )
+
+
+def _fmt_score(s: dict) -> str:
+    """글 평가 점수를 읽기 좋은 마크다운으로."""
+    rows = [("훅", "hook"), ("가독성", "readability"), ("실천성", "actionability"),
+            ("브랜드핏", "brand_fit"), ("공감", "empathy")]
+    lines = [f"- {label}: {s.get(key, '?')}/10" for label, key in rows]
+    return (
+        f"## 총점 {s.get('total', '?')}/50\n"
+        + "\n".join(lines)
+        + f"\n\n**총평**: {s.get('one_line_review', '')}\n\n"
+        f"**가장 약한 부분**: {s.get('weakest_part', '')}"
+    )
+
+
 # ---------- stage 핸들러 ----------
 
 def handle_intake(card: dict):
@@ -111,8 +174,8 @@ def handle_research(card: dict):
 
 def _save_research(page_id: str, results: list[dict]):
     for r in results:
-        notion_state.append_section(
-            page_id, f"🔍 리서치: {r.get('research_focus', '')[:40]}", _fmt_json(r),
+        notion_state.append_formatted_section(
+            page_id, f"🔍 리서치: {r.get('research_focus', '')[:40]}", _fmt_research(r),
         )
 
 
@@ -141,17 +204,18 @@ def handle_keyword(card: dict):
     lines = []
     for k in keywords:
         line = (
-            f"{k.get('keyword_id')}. {k.get('keyword')} (총 {k.get('total_score')}점) "
-            f"- {k.get('core_message', '')}"
+            f"- **{k.get('keyword')}** ({k.get('keyword_id')}, 총 {k.get('total_score')}점) "
+            f"— {k.get('core_message', '')}"
         )
         if volumes:
-            line += f"\n   ↳ {naver_keywords.format_volume(volumes.get(k.get('keyword', '')))}"
+            line += f"\n  ↳ {naver_keywords.format_volume(volumes.get(k.get('keyword', '')))}"
         lines.append(line)
     table = "\n".join(lines)
-    notion_state.append_section(
+    notion_state.append_formatted_section(
         card["page_id"], "🏷️ 키워드 후보 (승인 필요)",
-        f"{table}\n\n승인 방법: approved_keyword 속성에 선택한 키워드를 입력하고 "
-        f"approval_status를 approved로 변경하세요.\n\n상세:\n{_fmt_json(keywords)}",
+        f"## 키워드 후보 (점수순)\n{table}\n\n"
+        f"> 승인 방법: 위 키워드 중 하나를 골라 approved_keyword 속성에 입력하고 "
+        f"approval_status를 approved로 바꾸세요.",
     )
     notion_state.update_card(
         card["page_id"], stage="keyword_approval", status="needs_human",
@@ -178,7 +242,7 @@ def handle_keyword_approved(card: dict):
         ),
         system=prompts.get_system(),
     )
-    notion_state.append_section(page_id, "📝 브리프", _fmt_json(brief))
+    notion_state.append_formatted_section(page_id, "📝 브리프", _fmt_brief(brief))
 
     formats = [f.strip() for f in card["format"].split(",") if f.strip()]
     supported = [f for f in formats if f in ("thread", "newsletter")] or ["thread"]
@@ -201,8 +265,8 @@ def handle_keyword_approved(card: dict):
         notion_state.append_section(page_id, f"✍️ 초안 ({fmt})", result["draft"])
 
         review = result["review"]
-        notion_state.append_section(
-            page_id, f"✅ 교육윤리 검수 ({fmt})", _fmt_json(review),
+        notion_state.append_formatted_section(
+            page_id, f"✅ 교육윤리 검수 ({fmt})", _fmt_review(review),
         )
         if rank.get(review.get("review_status", "revise"), 1) > rank[worst_review]:
             worst_review = review.get("review_status", "revise")
@@ -213,10 +277,10 @@ def handle_keyword_approved(card: dict):
                 prompts.QUALITY_SCORE.format(format=fmt, draft=result["draft"]),
                 system=prompts.get_system(),
             )
-            notion_state.append_section(
+            notion_state.append_formatted_section(
                 page_id,
                 f"📊 글 평가 ({fmt}) - 총 {score.get('total', '?')}/50점",
-                _fmt_json(score),
+                _fmt_score(score),
             )
         except Exception as e:
             log(f"{card['content_id']} 글 평가 실패 ({fmt}): {e}")
