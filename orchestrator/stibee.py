@@ -22,9 +22,10 @@ import requests
 BASE_URL = "https://api.stibee.com/v2"
 API_KEY = os.getenv("STIBEE_API_KEY", "")
 LIST_ID = os.getenv("STIBEE_LIST_ID", "")
-# 발신자: 스티비에 사전 인증된 발신 이메일이어야 한다 (워크스페이스 설정 → 발신자 정보)
-SENDER_EMAIL = os.getenv("STIBEE_SENDER_EMAIL", "")
-SENDER_NAME = os.getenv("STIBEE_SENDER_NAME", "드림그로우")
+# 발신자: 스티비에 사전 인증된 발신 이메일이어야 한다 (워크스페이스 설정 → 발신자 관리)
+# .strip(): Secret에 실수로 들어간 앞뒤 공백/개행 제거
+SENDER_EMAIL = os.getenv("STIBEE_SENDER_EMAIL", "").strip()
+SENDER_NAME = os.getenv("STIBEE_SENDER_NAME", "").strip() or "드림그로우"
 # 안전장치: 기본은 스티비에 '초안만 생성'하고 발송은 사람이 확인 후. true일 때만 자동 발송.
 AUTO_SEND = os.getenv("STIBEE_AUTO_SEND", "").lower() in ("1", "true", "yes", "on")
 
