@@ -79,15 +79,13 @@ def create_and_send(draft: str, subject: str = "") -> dict:
     content_html = markdown_to_html(draft)
     list_value = int(LIST_ID) if LIST_ID.isdigit() else LIST_ID
 
+    # 스티비 공식 예시 기준: listId(단수), senderEmail, senderName. content는 본문용 추가 시도.
     body = {
         "subject": subject,
-        "title": subject,
-        "senderName": SENDER_NAME,
         "senderEmail": SENDER_EMAIL,
-        "replyTo": SENDER_EMAIL,
-        "listIds": [list_value],
+        "senderName": SENDER_NAME,
+        "listId": list_value,
         "content": content_html,
-        "contentHtml": content_html,
     }
     create_resp = requests.post(
         f"{BASE_URL}/emails", headers=_headers(), json=body, timeout=60,
