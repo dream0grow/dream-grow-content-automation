@@ -63,26 +63,38 @@ def create_research_tasks(content_id: str, topic: str, audience: str) -> list[st
     return task_ids
 
 
-def poll_results(task_ids: list[str]) -> tuple[bool, list[dict]]:
+def poll_results(task_ids: list[str]) -> tuple[bool, list[dict], str]:
     """task들의 완료 여부와 structured output을 확인한다.
 
-    Returns: (모두 완료 여부, 완료된 결과 목록)
+    Returns: (모두 완료 여부, 완료된 결과 목록, 디버그 문자열)
+    디버그에는 응답 status와 top-level 키를 남겨 응답형식 불일치를 추적한다.
     """
     results = []
     all_done = True
+    debug_parts = []
     for task_id in task_ids:
         resp = requests.get(
             f"{MANUS_API_BASE}/v2/task.listMessages",
             headers=_headers(), params={"task_id": task_id}, timeout=60,
         )
-        resp.raise_for_status()
-        data = resp.json()
+        if resp.status_code >= 400:
+            all_done = False
+            debug_parts.append(f"{task_id[:8]}=HTTP {resp.status_code}:{resp.text[:120]}")
+            continue
+        try:
+            data = resp.json()
+        except ValueError:
+            all_done = False
+            debug_parts.append(f"{task_id[:8]}=비JSON응답")
+            continue
         output = _extract_structured_output(data)
         if output:
             results.append(output)
         else:
             all_done = False
-    return all_done, results
+            keys = ",".join(list(data.keys())[:6]) if isinstance(data, dict) else type(data).__name__
+            debug_parts.append(f"{task_id[:8]}=출력없음(keys:{keys})")
+    return all_done, results, " | ".join(debug_parts)
 
 
 def _extract_structured_output(data: dict) -> dict | None:

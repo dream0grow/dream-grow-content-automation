@@ -70,6 +70,8 @@ def card_from_page(page: dict) -> dict:
     get = lambda name: _plain(props[name]) if name in props else ""
     return {
         "page_id": page["id"],
+        "created_time": page.get("created_time", ""),
+        "last_edited_time": page.get("last_edited_time", ""),
         "topic": get("이름"),
         "content_id": get("content_id"),
         "stage": get("stage"),
@@ -86,6 +88,18 @@ def card_from_page(page: dict) -> dict:
 
 
 # ---------- 조회 ----------
+
+def age_minutes(card: dict) -> float:
+    """카드 생성 후 경과 분을 반환한다 (research 정체 판단용). 파싱 실패 시 큰 값."""
+    ts = card.get("last_edited_time") or card.get("created_time")
+    if not ts:
+        return 9999.0
+    try:
+        created = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return (datetime.now(timezone.utc) - created).total_seconds() / 60
+    except ValueError:
+        return 9999.0
+
 
 def query_cards(stage: str | None = None, status: str | None = None,
                 approval_status: str | None = None, page_size: int = 20) -> list[dict]:

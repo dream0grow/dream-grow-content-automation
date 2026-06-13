@@ -5,7 +5,8 @@ name: orchestrator
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # 정각(00/30분)은 GitHub 부하로 자주 누락되므로 비켜서 15분마다 실행
+    - cron: "8,23,38,53 * * * *"
   workflow_dispatch:
     inputs:
       stage:
