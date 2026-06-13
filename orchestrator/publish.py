@@ -117,12 +117,25 @@ def handle_publish(card: dict):
                                  last_error="발행 게이트 미충족 (review/approval)")
         return
 
-    if "thread" not in card["format"]:
+    formats = [f.strip() for f in card["format"].split(",") if f.strip()]
+
+    # 발행 전 문체 학습: 사람이 '✍️ 초안'을 수정했다면 AI 원본과 비교해 패턴 추출
+    from orchestrator import style_learn
+    for fmt in [f for f in formats if f in ("thread", "newsletter")]:
+        try:
+            style_learn.learn_from_edits(page_id, fmt)
+        except Exception as e:
+            print(f"문체 학습 실패 ({fmt}, 발행은 계속): {e}")
+
+    # 뉴스레터: Maily는 발행 생성 API를 제공하지 않아 붙여넣기용 최종본을 안내한다
+    if "newsletter" in formats:
         notion_state.append_section(
-            page_id, "📤 발행 안내",
-            f"format={card['format']}은 자동 발행 미지원입니다. "
-            "카드의 '✍️ 초안'을 복사해 수동 발행 후 stage를 published로 바꿔주세요.",
+            page_id, "📧 뉴스레터 발행 안내",
+            "'✍️ 초안 (newsletter)' 토글의 최종본을 복사해 maily.so 에디터에 "
+            "붙여넣어 발행하세요. (Maily가 발행 API를 제공하면 자동화 예정)",
         )
+
+    if "thread" not in formats:
         notion_state.update_card(page_id, status="needs_human")
         return
 
@@ -135,7 +148,10 @@ def handle_publish(card: dict):
         notion_state.update_card(page_id, status="needs_human")
         return
 
-    draft = notion_state.read_latest_section(page_id, "✍️ 초안")
+    draft = (
+        notion_state.read_latest_section(page_id, "✍️ 초안 (thread)")
+        or notion_state.read_latest_section(page_id, "✍️ 초안")
+    )
     if not draft.strip():
         raise RuntimeError("카드에서 '✍️ 초안' 섹션을 찾지 못했습니다")
 

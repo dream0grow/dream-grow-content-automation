@@ -18,7 +18,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from orchestrator import agent_dialogue, llm, manus_research, notion_state, prompts
+from orchestrator import (
+    agent_dialogue, llm, manus_research, naver_keywords, notion_state, prompts,
+)
 from orchestrator.config import MAX_CARDS_PER_RUN, require_notion
 
 
@@ -93,11 +95,25 @@ def handle_keyword(card: dict):
         scored.get("keywords", []),
         key=lambda k: k.get("total_score", 0), reverse=True,
     )
-    table = "\n".join(
-        f"{k.get('keyword_id')}. {k.get('keyword')} (총 {k.get('total_score')}점) "
-        f"- {k.get('core_message', '')}"
-        for k in keywords
-    )
+    # 네이버 검색광고 API로 실측 검색량/경쟁도 보강 (키 미설정/실패 시 점수만 표시)
+    volumes: dict = {}
+    if naver_keywords.available():
+        try:
+            volumes = naver_keywords.fetch_volumes(
+                [k.get("keyword", "") for k in keywords]
+            )
+        except Exception as e:
+            log(f"네이버 키워드도구 조회 실패 (점수만 표시): {e}")
+    lines = []
+    for k in keywords:
+        line = (
+            f"{k.get('keyword_id')}. {k.get('keyword')} (총 {k.get('total_score')}점) "
+            f"- {k.get('core_message', '')}"
+        )
+        if volumes:
+            line += f"\n   ↳ {naver_keywords.format_volume(volumes.get(k.get('keyword', '')))}"
+        lines.append(line)
+    table = "\n".join(lines)
     notion_state.append_section(
         card["page_id"], "🏷️ 키워드 후보 (승인 필요)",
         f"{table}\n\n승인 방법: approved_keyword 속성에 선택한 키워드를 입력하고 "
@@ -130,30 +146,62 @@ def handle_keyword_approved(card: dict):
     )
     notion_state.append_section(page_id, "📝 브리프", _fmt_json(brief))
 
-    fmt = (card["format"].split(",")[0] if card["format"] else "thread").strip()
+    formats = [f.strip() for f in card["format"].split(",") if f.strip()]
+    supported = [f for f in formats if f in ("thread", "newsletter")] or ["thread"]
     notion_state.update_card(page_id, stage="draft", status="running")
-    result = agent_dialogue.run_draft_dialogue(
-        brief, fmt, style_context=agent_dialogue.get_style_context(fmt),
-    )
-    notion_state.append_section(
-        page_id, f"💬 에이전트 토론 ({result['rounds']}라운드)", result["transcript"],
-    )
-    notion_state.append_section(page_id, f"✍️ 초안 ({fmt})", result["draft"])
 
-    review = result["review"]
-    notion_state.append_section(page_id, "✅ 교육윤리 검수", _fmt_json(review))
+    rank = {"approved": 0, "revise": 1, "hold": 2, "risk": 3}
+    worst_review = "approved"
+    for fmt in supported:
+        result = agent_dialogue.run_draft_dialogue(
+            brief, fmt, style_context=agent_dialogue.get_style_context(fmt),
+        )
+        notion_state.append_section(
+            page_id, f"💬 에이전트 토론 ({fmt}, {result['rounds']}라운드)",
+            result["transcript"],
+        )
+        # AI 원본은 문체 diff 학습용으로 보존, 사람은 '✍️ 초안'만 수정한다
+        notion_state.append_section(
+            page_id, f"🗄️ AI 원본 ({fmt}) - 수정 금지", result["draft"],
+        )
+        notion_state.append_section(page_id, f"✍️ 초안 ({fmt})", result["draft"])
+
+        review = result["review"]
+        notion_state.append_section(
+            page_id, f"✅ 교육윤리 검수 ({fmt})", _fmt_json(review),
+        )
+        if rank.get(review.get("review_status", "revise"), 1) > rank[worst_review]:
+            worst_review = review.get("review_status", "revise")
+
+        # 자동 글 평가 - 사람 검수자가 승인 판단에 참고
+        try:
+            score = llm.call_json(
+                prompts.QUALITY_SCORE.format(format=fmt, draft=result["draft"]),
+                system=prompts.get_system(),
+            )
+            notion_state.append_section(
+                page_id,
+                f"📊 글 평가 ({fmt}) - 총 {score.get('total', '?')}/50점",
+                _fmt_json(score),
+            )
+        except Exception as e:
+            log(f"{card['content_id']} 글 평가 실패 ({fmt}): {e}")
+
     notion_state.append_section(
         page_id, "⏸️ 발행 승인 요청",
-        "검수 결과와 '✍️ 초안'을 확인한 뒤 approval_status를 approved로 바꾸면 "
-        "Threads에 자동 발행됩니다 (THREADS Secret 설정 시). "
-        "수정이 필요하면 approval_status를 revision_requested로 바꾸고 코멘트를 남겨주세요.",
+        "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
+        "초안을 직접 수정해도 됩니다 ('✍️ 초안' 토글 안에서만, AI 원본은 그대로 두세요). "
+        "수정분은 발행 시 자동으로 문체 학습에 반영됩니다.\n"
+        "approval_status를 approved로 바꾸면 thread는 Threads에 자동 발행되고, "
+        "newsletter는 Maily 붙여넣기용 최종본이 안내됩니다. "
+        "수정 요청은 approval_status=revision_requested + 코멘트.",
     )
     notion_state.update_card(
         page_id, stage="approval", status="needs_human",
-        review_status=review.get("review_status", "revise"),
+        review_status=worst_review,
         approval_status="requested",
     )
-    log(f"{card['content_id']} 초안 + 검수 완료 → 발행 승인 대기 ⏸️")
+    log(f"{card['content_id']} 초안 {len(supported)}종 + 검수/평가 완료 → 발행 승인 대기 ⏸️")
 
 
 def handle_final_approved(card: dict):
