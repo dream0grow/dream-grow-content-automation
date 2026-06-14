@@ -306,8 +306,9 @@ def handle_keyword_approved(card: dict):
         "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
         "초안을 직접 수정해도 됩니다 ('✍️ 초안' 토글 안에서만, AI 원본은 그대로 두세요). "
         "수정분은 발행 시 자동으로 문체 학습에 반영됩니다.\n"
-        "approval_status를 approved로 바꾸면 thread는 Threads에 자동 발행되고, "
-        "newsletter는 Maily 붙여넣기용 최종본이 안내됩니다. "
+        "approval_status를 approved로 바꾸면 thread는 Threads에, "
+        "newsletter는 스티비로 자동 발행됩니다 (STIBEE_AUTO_SEND가 꺼져 있으면 "
+        "스티비에 초안만 생성되니 대시보드에서 확인 후 발송하세요). "
         "수정 요청은 approval_status=revision_requested + 코멘트.",
     )
     notion_state.update_card(

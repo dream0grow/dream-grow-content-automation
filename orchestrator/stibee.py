@@ -38,6 +38,18 @@ def _headers() -> dict:
     return {"AccessToken": API_KEY, "Content-Type": "application/json"}
 
 
+def _inline(escaped: str) -> str:
+    """이미 html.escape된 텍스트에 인라인 마크다운(볼드·링크)을 적용한다."""
+    escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
+    # [텍스트](http...url) → <a href="url">텍스트</a> (escape로 &는 &amp;가 되어 href에 안전)
+    escaped = re.sub(
+        r"\[(.+?)\]\((https?://[^)\s]+)\)",
+        r'<a href="\2">\1</a>',
+        escaped,
+    )
+    return escaped
+
+
 def markdown_to_html(text: str) -> str:
     """초안 Markdown을 이메일용 단순 HTML로 변환한다."""
     blocks = []
@@ -45,16 +57,21 @@ def markdown_to_html(text: str) -> str:
         para = para.strip()
         if not para:
             continue
+        lines = [ln for ln in para.split("\n") if ln.strip()]
         if para.startswith("### "):
-            blocks.append(f"<h3>{html.escape(para[4:])}</h3>")
+            blocks.append(f"<h3>{_inline(html.escape(para[4:]))}</h3>")
         elif para.startswith("## "):
-            blocks.append(f"<h2>{html.escape(para[3:])}</h2>")
+            blocks.append(f"<h2>{_inline(html.escape(para[3:]))}</h2>")
         elif para.startswith("# "):
-            blocks.append(f"<h1>{html.escape(para[2:])}</h1>")
+            blocks.append(f"<h1>{_inline(html.escape(para[2:]))}</h1>")
+        elif lines and all(ln.strip().startswith(("- ", "* ")) for ln in lines):
+            items = "".join(
+                f"<li>{_inline(html.escape(ln.strip()[2:]))}</li>" for ln in lines
+            )
+            blocks.append(f'<ul style="line-height:1.7">{items}</ul>')
         else:
             escaped = html.escape(para).replace("\n", "<br>")
-            escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
-            blocks.append(f'<p style="line-height:1.7">{escaped}</p>')
+            blocks.append(f'<p style="line-height:1.7">{_inline(escaped)}</p>')
     return (
         '<div style="max-width:640px;margin:0 auto;font-size:16px;color:#222">'
         + "\n".join(blocks) + "</div>"

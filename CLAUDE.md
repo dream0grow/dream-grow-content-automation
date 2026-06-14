@@ -88,14 +88,15 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 `publish.py._publish_newsletter` → `stibee.create_and_send`(이메일생성→HTML주입→AUTO_SEND면 발송). 실발송 성공 이력 있음.
 검토에서 발견한 갭과 **사용자가 승인한 다음 할 일**:
 
-- **[합의됨, 아직 미구현] 코드 수정 #1·#2·#4** (브랜치 `claude/fervent-bell-0iwlia`에서 작업 → PR):
-  - #1 (`publish.py`): newsletter **단독** 카드는 발송 성공해도 `published`로 안 넘어가고 `needs_human`에 머묾
-    (`publish.py:161-163`). → `_publish_newsletter`가 발송성공(bool) 반환하게 하고, thread 없는 카드는 sent=True면
+- **[구현 완료, 2026-06-14] 코드 수정 #1·#2·#4** (브랜치 `claude/vigilant-shannon-mcrpao`, PR 머지 대기):
+  - #1 (`publish.py`): newsletter **단독** 카드가 발송 성공해도 `published`로 안 넘어가던 문제 해결. ✅
+    `_publish_newsletter`가 실발송 성공 시 `True`(stibee `sent` 기반) 반환 → thread 없는 카드는 sent=True면
     `stage=published, status=done`, 아니면 needs_human.
-  - #2 (`stibee.py` `markdown_to_html`): 리스트(`- `)·링크(`[t](url)`) 렌더 안 됨 → 평문 출력. `_inline()` 헬퍼로
-    볼드+링크 처리 + `<ul><li>` 변환 추가.
-  - #4 (`run.py:310`): 발행 승인 안내 문구가 "Maily 붙여넣기"로 옛 표현 잔존 → 스티비 문구로 교정.
+  - #2 (`stibee.py` `markdown_to_html`): 리스트(`- `/`* `)·링크(`[t](url)`)가 평문으로 나오던 문제 해결. ✅
+    `_inline()` 헬퍼(볼드+링크) + `<ul><li>` 변환 추가. 로컬 렌더 테스트 통과.
+  - #4 (`run.py`): 발행 승인 안내 문구의 "Maily 붙여넣기" 옛 표현을 스티비 자동 발행 문구로 교정. ✅
   - (#3 제목 중복은 이번 범위 제외 — 사용자가 #1·#2·#4만 선택.)
+  - **남은 사용자 액션**: 이 브랜치를 PR로 main에 머지.
 - **[사용자 액션] test-stibee로 실발송 검증**: GitHub Actions → `test-stibee` → Run workflow
   (테스트 주소록에 실제 1통 발송, `STIBEE_AUTO_SEND=true` 강제). Claude는 직접 실행 불가.
 
