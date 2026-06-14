@@ -65,9 +65,11 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 
 - 시스템 완성: 리서치~키워드~브리프~토론초안~검수~발행(Threads/스티비) 전부 작동. **스티비 실제 발송 성공 확인**.
 - 핸드오프 시스템 가동: CLAUDE.md + `/dreamgrow-resume` 스킬 (PR #18 머지됨).
-- **Manus 429 백오프 추가 (2026-06-13)**: 카드 대량 처리 시 `task.create` 버스트가 Manus 레이트리밋(429)에 걸려
-  research 단계에서 8개가 일괄 실패했었음. `manus_research.py`에 `_request_with_retry`(429/5xx 지수 백오프 2→4→8→16초,
-  Retry-After 존중) + task.create 사이 1초 간격을 추가해 완화. 환경변수 `DG_MANUS_MAX_RETRIES`(기본 4)로 조절.
+- **Manus 429 백오프 추가 (2026-06-13, PR #19로 main 머지 완료 — HEAD `9247caa`)**: 카드 대량 처리 시 `task.create`
+  버스트가 Manus 레이트리밋(429)에 걸려 research 단계에서 8개가 일괄 실패했었음. `manus_research.py`에
+  `_request_with_retry`(429/5xx 지수 백오프 2→4→8→16초, Retry-After 존중) + task.create 사이 1초 간격을 추가해 완화.
+  환경변수 `DG_MANUS_MAX_RETRIES`(기본 4)로 조절. **머지 후 사용자가 orchestrator를 Run workflow로 재실행해야 효과 발생**
+  (cron은 main에서 도는데, 머지 전 11:19 수동 실행은 옛 코드라 8개가 또 429 실패했을 수 있음 → 재실행 필요).
 - **노션 카드 현황** (2026-06-13 갱신):
   - DG-2026-0001 (스마트폰 규칙): publish_ready, review·approval 모두 approved → 다음 orchestrator 실행 시 Threads 자동 발행
   - DG-2026-0002 (친구 문제): 키워드 승인 완료(approval_status=approved 처리함) → 다음 실행에 브리프→초안 진행
@@ -79,4 +81,21 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 - **다음 자동 진행 대기**: `DG_AUTO_APPROVE_KEYWORD=true` Secret이 켜져 있으면, orchestrator를 2~3회 실행 시
   검토용 카드들이 키워드 자동 채택 → 브리프 → 초안 → 검수까지 진행되어 "발행 승인 대기"로 모인다.
   (Claude는 Actions를 직접 실행 못 하므로 사용자가 Run workflow 클릭 필요)
+
+### 뉴스레터 자동화 검토 결과 (2026-06-14) — ⬇️ 다음 세션 이어받을 작업
+
+경로는 견고함: `format=newsletter` → 토론초안(16k토큰·3000~6000자) → `✍️ 초안 (newsletter)` →
+`publish.py._publish_newsletter` → `stibee.create_and_send`(이메일생성→HTML주입→AUTO_SEND면 발송). 실발송 성공 이력 있음.
+검토에서 발견한 갭과 **사용자가 승인한 다음 할 일**:
+
+- **[합의됨, 아직 미구현] 코드 수정 #1·#2·#4** (브랜치 `claude/fervent-bell-0iwlia`에서 작업 → PR):
+  - #1 (`publish.py`): newsletter **단독** 카드는 발송 성공해도 `published`로 안 넘어가고 `needs_human`에 머묾
+    (`publish.py:161-163`). → `_publish_newsletter`가 발송성공(bool) 반환하게 하고, thread 없는 카드는 sent=True면
+    `stage=published, status=done`, 아니면 needs_human.
+  - #2 (`stibee.py` `markdown_to_html`): 리스트(`- `)·링크(`[t](url)`) 렌더 안 됨 → 평문 출력. `_inline()` 헬퍼로
+    볼드+링크 처리 + `<ul><li>` 변환 추가.
+  - #4 (`run.py:310`): 발행 승인 안내 문구가 "Maily 붙여넣기"로 옛 표현 잔존 → 스티비 문구로 교정.
+  - (#3 제목 중복은 이번 범위 제외 — 사용자가 #1·#2·#4만 선택.)
+- **[사용자 액션] test-stibee로 실발송 검증**: GitHub Actions → `test-stibee` → Run workflow
+  (테스트 주소록에 실제 1통 발송, `STIBEE_AUTO_SEND=true` 강제). Claude는 직접 실행 불가.
 
