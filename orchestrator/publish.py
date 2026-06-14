@@ -107,31 +107,37 @@ def publish_chain(posts: list[str]) -> tuple[list[str], str]:
     return media_ids, permalink
 
 
-def _publish_newsletter(page_id: str):
-    """뉴스레터를 스티비로 발행한다. 실패는 카드에 기록하고 수동 안내로 폴백."""
+def _publish_newsletter(page_id: str) -> bool:
+    """뉴스레터를 스티비로 발행한다. 실제 발송에 성공하면 True를 반환한다.
+
+    Secret 미설정·초안 없음·발송 실패·예외는 모두 False (카드에 기록 후 수동 안내 폴백).
+    AUTO_SEND가 꺼져 초안만 생성된 경우도 sent=False라 False를 반환한다.
+    """
     from orchestrator import stibee
     draft = notion_state.read_latest_section(page_id, "✍️ 초안 (newsletter)")
     if not draft.strip():
-        return
+        return False
     if not stibee.available():
         notion_state.append_section(
             page_id, "📧 뉴스레터 발행 안내",
             "STIBEE_API_KEY/STIBEE_LIST_ID Secret이 없어 자동 발송을 건너뜁니다. "
             "'✍️ 초안 (newsletter)' 최종본을 스티비 에디터에 붙여넣어 발행하세요.",
         )
-        return
+        return False
     try:
         result = stibee.create_and_send(draft)
         notion_state.append_section(
             page_id, "📧 뉴스레터 발행 기록 (스티비)",
             f"{result['detail']}\n제목: {stibee.extract_subject(draft)}",
         )
+        return bool(result.get("sent"))
     except Exception as e:
         notion_state.append_section(
             page_id, "📧 뉴스레터 발행 실패 (스티비)",
             f"{e}\n\n'✍️ 초안 (newsletter)'를 스티비 에디터에 수동 붙여넣기 해주세요. "
             "오류 내용이 API payload 문제라면 orchestrator/stibee.py 조정이 필요합니다.",
         )
+        return False
 
 
 def handle_publish(card: dict):
@@ -155,11 +161,16 @@ def handle_publish(card: dict):
             print(f"문체 학습 실패 ({fmt}, 발행은 계속): {e}")
 
     # 뉴스레터: 스티비 API로 자동 발행 (미설정/실패 시 수동 붙여넣기 안내)
+    newsletter_sent = False
     if "newsletter" in formats:
-        _publish_newsletter(page_id)
+        newsletter_sent = _publish_newsletter(page_id)
 
     if "thread" not in formats:
-        notion_state.update_card(page_id, status="needs_human")
+        # newsletter 단독 카드: 실발송 성공이면 발행 완료 처리, 아니면 사람 확인 대기
+        if newsletter_sent:
+            notion_state.update_card(page_id, stage="published", status="done")
+        else:
+            notion_state.update_card(page_id, status="needs_human")
         return
 
     if not available():
