@@ -137,7 +137,8 @@
       <div class="game-sub">돌을 밟고 위로 올라가 아름다운 곶자왈로 가자!</div>
       <div class="howto">
         🕹️ <b>▲ 위 / ◀ 왼쪽 / ▶ 오른쪽</b> 버튼·방향키·화면 터치로 <b>위쪽 돌</b>로 점프!<br>
-        ⏰ 한 줄에 돌이 3~4개! 밟으면 <b>돌마다 다른 속도로 가라앉아요.</b> 빨리 다음 돌로!<br>
+        🌊 돌이 <b>위에서 아래로 계속 흘러내려요.</b> 멈추면 바닥 용암에 빠져요 — 계속 위로!<br>
+        ⏰ 한 줄에 돌이 3~4개! 밟으면 <b>돌마다 가라앉는 속도가 달라요.</b> 빠른 돌은 얼른 떠나기!<br>
         ❓ <b>금빛 돌</b>에 닿으면 곶자왈 퀴즈! 맞히면 <b>점수·아이템·목숨</b>을 줘요.<br>
         🚩 마지막 문제를 풀면 용암이 <b>초록빛 곶자왈</b>로 변해요!
         <div class="legend">
@@ -235,7 +236,10 @@
   // ---------- config ----------
   const COL_X = [210, 400, 590, 780];   // 4개 세로 라인의 x 위치
   const ROW_GAP = 122;                  // 줄 간격(세로)
-  const ANCHOR = 442;                   // 캐릭터가 머무는 화면 y
+  const TOP_MARGIN = 165;               // 캐릭터가 화면 위로 올라가면 카메라가 따라옴
+  const LAVA_Y = H - 56;                // 이 아래로 내려가면 용암에 빠짐
+  const SINK_DROP = 92;                 // 돌이 가라앉을 때 내려가는 정도(px)
+  const SCROLL_SPEED = [42, 62, 86];    // 스테이지별 자동 스크롤 속도(px/초) — 점점 빨라짐
   const TARGET_QUIZ = 5;
   const STAGE_MUL = [1, 0.78, 0.6];     // 스테이지별 가라앉기 속도 배수(작을수록 빠름)
   const STYPE = {
@@ -250,7 +254,7 @@
   // ---------- state ----------
   let state = "TITLE";
   let rows = [], genRow = 0, quizzesPlaced = 0, finalDone = false, goalRow = null;
-  let player = null, cameraY = 0, particles = [], shake = 0;
+  let player = null, cameraY = 0, particles = [], shake = 0, scrollPause = 0;
   let transformT = 0, greenness = 0, elapsed = 0, bubbleTimer = 0;
   let quizPool = [], currentQuizRow = null, currentQuiz = null, answered = false;
 
@@ -298,12 +302,13 @@
       row: 0, col: 1, lives: 3, score: 0,
       worldX: COL_X[1], worldY: rowBaseY(0),
       hopping: false, hopT: 0, hx0: 0, hy0: 0, hx1: 0, hy1: 0,
-      sinkT: 0, grace: 1.4, bob: 0, facing: 1,
+      sinkT: 0, grace: 1.6, bob: 0, facing: 1,
       fallSave: false, safeRows: 0, curSafe: true, quizzesSolved: 0
     };
     ensureRows(7);
     guaranteeSafeAbove();
-    cameraY = player.worldY - ANCHOR;
+    cameraY = player.worldY - 300;
+    scrollPause = 1.4;
     state = "PLAYING";
   }
 
@@ -386,27 +391,35 @@
     sfx.fall(); shake = 0.6; spawnSplash("#3a322c");
     loseLife("⚫ 돌이 뒤집혔어요!");
   }
-  function sinkDeath() {
-    if (player.fallSave) { player.fallSave = false; player.sinkT = 0; player.grace = 2.0; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); return; }
-    sfx.fall(); shake = 0.55; spawnSplash("#ff7a18");
-    loseLife("😵 돌이 가라앉았어요!");
+  function lavaDeath() {
+    if (player.fallSave) { player.fallSave = false; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); respawnLift(); return; }
+    sfx.fall(); shake = 0.6; spawnSplash("#ff7a18");
+    loseLife("😵 용암에 빠졌어요!");
   }
   function loseLife(msg) {
     player.lives--;
     if (player.lives <= 0) { endGame(false); return; }
-    respawnSafe();
+    respawnLift();
     showToast(msg + " 목숨 -1");
   }
-  function respawnSafe() {
-    const row = rows[player.row];
-    const safe = row.cols.filter(c => c.type !== "FLIP");
-    let pick = safe[0] || row.cols[0];
-    for (const c of safe) { const ta = STYPE[c.type] ? (STYPE[c.type].time || 0) : 99; const tb = STYPE[pick.type] ? (STYPE[pick.type].time || 0) : 99; if (ta > tb) pick = c; }
+  // 죽으면 위쪽 안전한 돌로 끌어올려 다시 시작
+  function respawnLift() {
+    let tr = player.row + 2;
+    ensureRows(tr + 4);
+    while (rows[tr] && rows[tr].type !== "normal") tr++;
+    ensureRows(tr + 4);
+    const row = rows[tr];
+    let safe = row.cols.filter(c => c.type !== "FLIP");
+    if (!safe.length) { row.cols[0].type = "SLOW"; safe = [row.cols[0]]; }
+    let pick = safe.reduce((a, b) => Math.abs(a.col - player.col) <= Math.abs(b.col - player.col) ? a : b);
     pick.sinkAnim = 0; pick.flip = 0;
-    player.col = pick.col;
+    player.row = tr; player.col = pick.col;
     player.worldX = pick.col === 1.5 ? 480 : COL_X[pick.col];
     player.worldY = pick.baseY;
     player.sinkT = 0; player.grace = 2.2; player.curSafe = true;
+    player.hopping = false;
+    scrollPause = 1.5;
+    cameraY = player.worldY - 210;
     guaranteeSafeAbove();
   }
 
@@ -520,6 +533,10 @@
     }
 
     if (state === "PLAYING") {
+      // 자동 스크롤: 돌이 위에서 아래로 계속 흘러내림(카메라가 위로 이동)
+      if (scrollPause > 0) scrollPause -= dt;
+      else if (!finalDone) cameraY -= SCROLL_SPEED[stageOf(player.row)] * dt;
+
       if (player.hopping) { startHop(dt); }
       else {
         player.bob += dt * 4;
@@ -528,12 +545,16 @@
         else if (s && !player.curSafe && (s.type === "SLOW" || s.type === "MEDSLOW" || s.type === "FAST")) {
           player.sinkT += dt;
           const thr = STYPE[s.type].time * STAGE_MUL[stageOf(player.row)];
-          s.sinkAnim = clamp(player.sinkT / thr, 0, 1);
-          if (player.sinkT >= thr) { sinkDeath(); }
+          s.sinkAnim = clamp(player.sinkT / thr, 0, 1);   // 가라앉을수록 더 빨리 바닥으로
         }
-        if (s) player.worldY = s.baseY + (s.sinkAnim || 0) * 46 + Math.sin(player.bob) * 2;
+        if (s) player.worldY = s.baseY + (s.sinkAnim || 0) * SINK_DROP + Math.sin(player.bob) * 2;
+
+        const psy = player.worldY - cameraY;             // 캐릭터의 화면상 y
+        if (psy < TOP_MARGIN) cameraY = lerp(cameraY, player.worldY - TOP_MARGIN, 0.25); // 너무 높으면 따라 올라감
+        if (player.grace <= 0 && psy > LAVA_Y) { lavaDeath(); }                          // 바닥 용암에 빠짐
       }
-      cameraY = lerp(cameraY, player.worldY - ANCHOR, 0.12);
+      // 스크롤로 드러나는 위쪽 줄까지 미리 생성
+      ensureRows(Math.max(player.row + 6, Math.ceil(-cameraY / ROW_GAP) + 3));
     }
 
     if (state === "TRANSFORM") {
@@ -603,7 +624,7 @@
 
   function drawRows(g) {
     if (!player) return;
-    const from = Math.max(0, player.row - 2), to = player.row + 6;
+    const from = Math.max(0, player.row - 6), to = player.row + 7;
     for (let r = to; r >= from; r--) {       // 위쪽부터 그려서 아래 돌이 위에 겹치게
       const row = rows[r]; if (!row) continue;
       for (const s of row.cols) {
