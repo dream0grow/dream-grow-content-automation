@@ -138,14 +138,13 @@
       <div class="howto">
         🕹️ <b>▲ 위 / ◀ 왼쪽 / ▶ 오른쪽</b> 버튼·방향키·화면 터치로 <b>위쪽 돌</b>로 점프!<br>
         🌊 돌이 <b>위에서 아래로 계속 흘러내려요.</b> 멈추면 바닥 용암에 빠져요 — 계속 위로!<br>
-        ⏰ 한 줄에 돌이 3~4개! 밟으면 <b>돌마다 가라앉는 속도가 달라요.</b> 빠른 돌은 얼른 떠나기!<br>
-        ❓ <b>금빛 돌</b>에 닿으면 곶자왈 퀴즈! 맞히면 <b>점수·아이템·목숨</b>을 줘요.<br>
+        ⏰ 한 줄에 <b>돌 2개!</b> 밟으면 <b>돌마다 가라앉는 속도가 달라요.</b> 빠른 돌은 얼른 떠나기!<br>
+        ❓ <b>금빛 돌</b>에 닿으면 곶자왈 퀴즈! 맞히면 <b>점수·낙하산·목숨</b>을 줘요.<br>
         🚩 마지막 문제를 풀면 용암이 <b>초록빛 곶자왈</b>로 변해요!
         <div class="legend">
-          <span>🟢 천천히(2.2초)</span>
-          <span>⚪ 보통(1.2초)</span>
-          <span>🟠 빠름(0.5초)</span>
-          <span>⚫ 뒤집히는 돌 = 밟으면 안 돼요!</span>
+          <span>🟢 천천히 · ⚪ 보통 · 🟠 빠름</span>
+          <span>⚫ 검정 = 빠를지 느릴지 몰라요!</span>
+          <span>❌ 빨간 X 돌 = 밟으면 끝!</span>
         </div>
       </div>
       <button id="startBtn" class="btn">게임 시작 🚀</button>
@@ -246,7 +245,8 @@
     SLOW:    { time: 2.2, body: "#5aa848", top: "#84d36a", tag: "🟢" },
     MEDSLOW: { time: 1.2, body: "#8a7d70", top: "#a99b8b", tag: "⚪" },
     FAST:    { time: 0.5, body: "#cf8a3a", top: "#ecc06a", tag: "🟠" },
-    FLIP:    { time: 0,   body: "#463f39", top: "#5e554d", tag: "⚫" },
+    FLIP:    { time: 0,   body: "#6b2b2b", top: "#8a3a3a", tag: "❌" },
+    MYSTERY: { time: 0,   body: "#26262b", top: "#3b3b42", tag: "⚫" },
     QUIZ:    { body: "#e0a92e", top: "#ffd24a" },
     GOAL:    { body: "#369e36", top: "#67c23a" }
   };
@@ -261,6 +261,12 @@
   function rowBaseY(r) { return -r * ROW_GAP; }
   function stageOf(r) { return r < 8 ? 0 : r < 16 ? 1 : 2; }
   function stoneAt(r, col) { return rows[r] ? rows[r].cols.find(c => c.col === col) : null; }
+  // 가라앉는 데 걸리는 시간(검정 미스터리 돌은 각자 숨겨진 시간). 안 가라앉는 돌은 null
+  function sinkTimeOf(s) {
+    if (s.type === "MYSTERY") return s.sinkTime;
+    if (s.type === "SLOW" || s.type === "MEDSLOW" || s.type === "FAST") return STYPE[s.type].time;
+    return null;
+  }
 
   function shuffle(arr) {
     for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
@@ -273,17 +279,31 @@
       return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 1.5, type: "GOAL", x: 480, baseY, sinkAnim: 0, safe: true }] };
     }
     if (r === 0) {
-      return { r, type: "normal", used: false, cols: [0, 1, 2, 3].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
+      return { r, type: "normal", used: false, cols: [1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
     }
     if (r % 5 === 0 && !finalDone && quizzesPlaced < TARGET_QUIZ) {
       quizzesPlaced++;
       const isFinal = quizzesPlaced >= TARGET_QUIZ;
       return { r, type: "quiz", used: false, isFinal, cols: [{ col: 1.5, type: "QUIZ", x: 480, baseY, sinkAnim: 0, safe: true }] };
     }
-    const n = Math.random() < 0.45 ? 3 : 4;
-    const idx = shuffle([0, 1, 2, 3]).slice(0, n).sort((a, b) => a - b);
-    const pool = shuffle(["SLOW", "MEDSLOW", "FAST", "FLIP"]).slice(0, n);
-    const cols = idx.map((ci, i) => ({ col: ci, type: pool[i], x: COL_X[ci], baseY, sinkAnim: 0, safe: false }));
+    // 한 줄에 돌 2개
+    const idx = shuffle([0, 1, 2, 3]).slice(0, 2).sort((a, b) => a - b);
+    const pickSafe = () => ["SLOW", "MEDSLOW", "FAST"][Math.floor(Math.random() * 3)];
+    let types;
+    const roll = Math.random();
+    if (r >= 4 && roll < 0.20) {
+      types = ["MYSTERY", "MYSTERY"];                 // 미스터리 줄: 두 돌 다 검정(동시 등장)
+    } else if (roll < 0.46) {
+      const safe = pickSafe();
+      types = Math.random() < 0.5 ? ["FLIP", safe] : [safe, "FLIP"];  // 뒤집히는 돌 1 + 안전한 돌 1
+    } else {
+      types = [pickSafe(), pickSafe()];               // 안전한 돌 2개(속도 제각각)
+    }
+    const cols = idx.map((ci, i) => {
+      const st = { col: ci, type: types[i], x: COL_X[ci], baseY, sinkAnim: 0, safe: false };
+      if (st.type === "MYSTERY") st.sinkTime = [0.5, 0.8, 1.2, 1.8, 2.2][Math.floor(Math.random() * 5)];
+      return st;
+    });
     return { r, type: "normal", used: false, cols };
   }
 
@@ -303,7 +323,7 @@
       worldX: COL_X[1], worldY: rowBaseY(0),
       hopping: false, hopT: 0, hx0: 0, hy0: 0, hx1: 0, hy1: 0,
       sinkT: 0, grace: 1.6, bob: 0, facing: 1,
-      fallSave: false, safeRows: 0, curSafe: true, quizzesSolved: 0
+      parachutes: 0, safeRows: 0, curSafe: true, quizzesSolved: 0
     };
     ensureRows(7);
     guaranteeSafeAbove();
@@ -368,7 +388,7 @@
     player.curSafe = s.safe || false;
     if (s.type === "FLIP") {
       if (player.safeRows > 0) { player.safeRows--; player.curSafe = true; showToast("🪨 돌다리가 막아줬어요!"); }
-      else if (player.fallSave) { player.fallSave = false; player.curSafe = true; showToast("🪂 낙하산이 구해줬어요!"); }
+      else if (player.parachutes > 0) { player.parachutes--; player.curSafe = true; showToast("🪂 낙하산이 구해줬어요!"); }
       else { flipDeath(s); return; }
     } else if (!s.safe && player.safeRows > 0) {
       player.safeRows--; player.curSafe = true;
@@ -392,7 +412,7 @@
     loseLife("⚫ 돌이 뒤집혔어요!");
   }
   function lavaDeath() {
-    if (player.fallSave) { player.fallSave = false; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); respawnLift(); return; }
+    if (player.parachutes > 0) { player.parachutes--; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); respawnLift(); return; }
     sfx.fall(); shake = 0.6; spawnSplash("#ff7a18");
     loseLife("😵 용암에 빠졌어요!");
   }
@@ -492,7 +512,7 @@
     if (p < 0.30) { player.score += 100; msg = "💎 보너스 +100점!"; }
     else if (p < 0.55) { player.lives = Math.min(5, player.lives + 1); msg = "❤️ 목숨 +1!"; }
     else if (p < 0.80) { player.safeRows += 2; msg = "🪨 튼튼한 돌다리! 다음 2칸 안전!"; }
-    else { player.fallSave = true; msg = "🪂 낙하산! 한 번 떨어져도 안전!"; }
+    else { player.parachutes++; msg = "🪂 낙하산 +1! 슬롯에 담겼어요!"; }
     sfx.reward(); showToast(msg);
   }
 
@@ -542,10 +562,13 @@
         player.bob += dt * 4;
         const s = stoneAt(player.row, player.col);
         if (player.grace > 0) { player.grace -= dt; if (s) s.sinkAnim = 0; }
-        else if (s && !player.curSafe && (s.type === "SLOW" || s.type === "MEDSLOW" || s.type === "FAST")) {
-          player.sinkT += dt;
-          const thr = STYPE[s.type].time * STAGE_MUL[stageOf(player.row)];
-          s.sinkAnim = clamp(player.sinkT / thr, 0, 1);   // 가라앉을수록 더 빨리 바닥으로
+        else if (s && !player.curSafe) {
+          const stime = sinkTimeOf(s);
+          if (stime != null) {
+            player.sinkT += dt;
+            const thr = stime * STAGE_MUL[stageOf(player.row)];
+            s.sinkAnim = clamp(player.sinkT / thr, 0, 1);   // 가라앉을수록 더 빨리 바닥으로
+          }
         }
         if (s) player.worldY = s.baseY + (s.sinkAnim || 0) * SINK_DROP + Math.sin(player.bob) * 2;
 
@@ -667,9 +690,12 @@
       ctx.strokeStyle = "rgba(90,40,0,0.5)"; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(x - 20, y - 8); ctx.lineTo(x - 4, y); ctx.lineTo(x - 12, y + 8); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(x + 22, y - 6); ctx.lineTo(x + 8, y + 2); ctx.stroke();
-    } else if (s.type === "FLIP") { // 위험 표시
+    } else if (s.type === "FLIP") { // 즉사: 빨간 X
       ctx.strokeStyle = "#ff5252"; ctx.lineWidth = 4;
       ctx.beginPath(); ctx.moveTo(x - 13, y - 9); ctx.lineTo(x + 13, y + 9); ctx.moveTo(x + 13, y - 9); ctx.lineTo(x - 13, y + 9); ctx.stroke();
+    } else if (s.type === "MYSTERY") { // 미스터리: 흰 물음표
+      ctx.fillStyle = "#fff"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("?", x, y + 8); ctx.textAlign = "left";
     }
 
     if (s.type === "QUIZ") {
@@ -686,40 +712,66 @@
     const bob = player.hopping ? 0 : Math.sin(player.bob) * 1.5;
     ctx.save();
     ctx.translate(cx, feetY + bob);
-    const tilt = player.hopping ? Math.sin(player.hopT * Math.PI) * 0.18 * player.facing : 0;
+    const tilt = player.hopping ? Math.sin(player.hopT * Math.PI) * 0.16 * player.facing : 0;
     ctx.rotate(tilt);
 
-    const GRAY = "#8d8f93", GRAY_D = "#6f7176", GRAY_L = "#a6a8ac";
-    // 발 (돌 위에 딱 붙음)
-    ctx.fillStyle = GRAY_D;
-    ctx.beginPath(); ctx.ellipse(-14, -2, 12, 7, 0, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(14, -2, 12, 7, 0, 0, TAU); ctx.fill();
+    const BODY = "#9c9ea1", HAT = "#8a8c8f", BRIM = "#7c7e81", OUT = "#3b3b3d", DOT = "#74767a";
+    const speckles = (arr) => { ctx.fillStyle = DOT; arr.forEach(d => { ctx.beginPath(); ctx.arc(d[0], d[1], d[2], 0, TAU); ctx.fill(); }); };
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = OUT; ctx.lineWidth = 3;
+
+    // 팔(양옆으로 활짝) — 몸 뒤
+    ctx.fillStyle = BODY;
+    ctx.save(); ctx.translate(-30, -28); ctx.rotate(0.6); roundRect(-9, -8, 18, 30, 9); ctx.fill(); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.translate(30, -28); ctx.rotate(-0.6); roundRect(-9, -8, 18, 30, 9); ctx.fill(); ctx.stroke(); ctx.restore();
+    // 발
+    ctx.beginPath(); ctx.ellipse(-12, -4, 11, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(12, -4, 11, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
     // 몸통
-    ctx.fillStyle = GRAY; roundRect(-26, -46, 52, 46, 22); ctx.fill();
-    // 팔 (한쪽은 인사하듯 위로)
-    ctx.fillStyle = GRAY;
-    ctx.save(); ctx.translate(-26, -34); ctx.rotate(-0.5); roundRect(-7, -6, 16, 13, 6); ctx.fill(); ctx.restore();
-    ctx.save(); ctx.translate(26, -40); ctx.rotate(-0.9); roundRect(-7, -7, 16, 14, 6); ctx.fill(); ctx.restore();
+    roundRect(-30, -60, 60, 58, 26); ctx.fill(); ctx.stroke();
+    speckles([[-9, -16, 2], [-2, -10, 1.6], [7, -20, 1.8], [2, -27, 1.4]]);
     // 머리
-    ctx.fillStyle = GRAY; ctx.beginPath(); ctx.arc(0, -62, 30, 0, TAU); ctx.fill();
-    // 귀
-    ctx.fillStyle = GRAY_L; ctx.beginPath(); ctx.arc(-26, -74, 12, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(26, -74, 12, 0, TAU); ctx.fill();
-    ctx.fillStyle = GRAY; ctx.beginPath(); ctx.arc(-26, -74, 6, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(26, -74, 6, 0, TAU); ctx.fill();
+    ctx.fillStyle = BODY; ctx.beginPath(); ctx.arc(0, -88, 35, 0, TAU); ctx.fill(); ctx.stroke();
+    speckles([[-18, -104, 2], [-9, -110, 1.5], [15, -106, 2], [21, -95, 1.6], [-23, -92, 1.6]]);
     // 눈
-    ctx.fillStyle = "#2a2a2a"; ctx.beginPath(); ctx.ellipse(-10, -64, 4.5, 6, 0, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.ellipse(10, -64, 4.5, 6, 0, 0, TAU); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-11.5, -66, 1.6, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(8.5, -66, 1.6, 0, TAU); ctx.fill();
-    // 볼 (발그레)
-    ctx.fillStyle = "rgba(255,120,120,0.75)"; ctx.beginPath(); ctx.arc(-17, -55, 6, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(17, -55, 6, 0, TAU); ctx.fill();
-    // 입
-    ctx.fillStyle = "#c0392b"; ctx.beginPath(); ctx.ellipse(0, -54, 4, 3, 0, 0, TAU); ctx.fill();
-    // 초록 모자 (벙거지)
-    ctx.fillStyle = "#7ac043"; ctx.beginPath(); ctx.ellipse(0, -82, 36, 12, 0, 0, TAU); ctx.fill();   // 챙
-    ctx.fillStyle = "#5fae34"; roundRect(-24, -104, 48, 26, 13); ctx.fill();                            // 윗부분
-    ctx.fillStyle = "#6fbf3e"; ctx.beginPath(); ctx.ellipse(0, -104, 24, 8, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#2c2c2e";
+    ctx.beginPath(); ctx.ellipse(-13, -88, 5, 7, 0, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(13, -88, 5, 7, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(-14.5, -90.5, 1.8, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(11.5, -90.5, 1.8, 0, TAU); ctx.fill();
+    // 볼 주근깨
+    speckles([[-23, -80, 1.5], [-26, -76, 1.5], [-20, -75, 1.5], [23, -80, 1.5], [26, -76, 1.5], [20, -75, 1.5]]);
+    // 입(작은 미소)
+    ctx.strokeStyle = OUT; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(0, -80, 5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+    // 모자 — 챙
+    ctx.strokeStyle = OUT; ctx.lineWidth = 3; ctx.fillStyle = BRIM;
+    ctx.beginPath(); ctx.ellipse(0, -112, 44, 11, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    // 모자 — 크라운
+    ctx.fillStyle = HAT;
+    ctx.beginPath(); ctx.moveTo(-26, -113); ctx.quadraticCurveTo(-30, -150, 0, -150); ctx.quadraticCurveTo(30, -150, 26, -113); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    speckles([[-8, -138, 2], [7, -132, 1.6], [15, -141, 1.5]]);
     ctx.restore();
 
-    if (player.fallSave) { ctx.font = "20px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🪂", cx, feetY - 130); ctx.textAlign = "left"; }
-    if (player.safeRows > 0) { ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText("🪨".repeat(player.safeRows), cx, feetY - 130); ctx.textAlign = "left"; }
+    if (player.safeRows > 0) { ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText("🪨".repeat(player.safeRows), cx, feetY - 168); ctx.textAlign = "left"; }
+  }
+
+  // 낙하산 아이콘
+  function drawParachute(cx, cy, s) {
+    for (let i = 0; i < 5; i++) {
+      const a0 = Math.PI + i * (Math.PI / 5), a1 = Math.PI + (i + 1) * (Math.PI / 5);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, s, a0, a1); ctx.closePath();
+      ctx.fillStyle = i % 2 ? "#fff3e0" : "#e8463f"; ctx.fill();
+    }
+    ctx.strokeStyle = "#b8362f"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, s, Math.PI, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - s, cy); ctx.lineTo(cx + s, cy); ctx.stroke();
+    ctx.strokeStyle = "#d8b478"; ctx.lineWidth = 1.4; ctx.beginPath();
+    [-0.85, -0.3, 0.3, 0.85].forEach(f => { ctx.moveTo(cx + f * s, cy); ctx.lineTo(cx, cy + s * 1.15); });
+    ctx.stroke();
+    ctx.fillStyle = "#8a5a2b"; roundRect(cx - 5, cy + s * 1.05, 10, 8, 2); ctx.fill();
   }
 
   function drawParticles() {
@@ -746,6 +798,19 @@
     ctx.font = "14px sans-serif"; ctx.fillStyle = "#ffe9b0";
     ctx.fillText(`곶자왈 퀴즈 ${Math.min(player.quizzesSolved, TARGET_QUIZ)}/${TARGET_QUIZ}`, W / 2, 58);
     ctx.textAlign = "left";
+
+    // 낙하산 아이템 슬롯
+    const bx = 14, by = 66, bw = 116, bh = 52;
+    ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(bx, by, bw, bh, 12); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.lineWidth = 2; roundRect(bx + 6, by + 6, 40, 40, 8); ctx.stroke();
+    const have = player.parachutes > 0;
+    ctx.globalAlpha = have ? 1 : 0.3;
+    drawParachute(bx + 26, by + 23, 14);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#ffd24a"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("낙하산", bx + 54, by + 22);
+    ctx.fillStyle = have ? "#fff" : "#888"; ctx.font = "bold 22px sans-serif";
+    ctx.fillText("×" + player.parachutes, bx + 54, by + 44);
   }
 
   // ---------- utils ----------
