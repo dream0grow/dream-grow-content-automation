@@ -70,6 +70,8 @@
   .stageBtn[data-stage="2"]:active{box-shadow:0 2px 0 #b39bdf;}
   .stageBtn[data-stage="3"]{box-shadow:0 6px 0 #d6a96b;}
   .stageBtn[data-stage="3"]:active{box-shadow:0 2px 0 #d6a96b;}
+  .stageBtn.locked{opacity:.5; filter:grayscale(.6); cursor:not-allowed;}
+  .stageBtn.locked:active{transform:none;}
 
   /* ---- HUD ---- */
   #hud{
@@ -162,7 +164,7 @@
       <button class="btn stageBtn" data-stage="2"><span class="se">🦋</span>2단계<small>나비와 새</small></button>
       <button class="btn stageBtn" data-stage="3"><span class="se">🪲</span>3단계<small>곤충과 비밀</small></button>
     </div>
-    <div class="sub" style="opacity:.85">단계가 올라갈수록 어려워져요! 각 단계 <b>10문제</b>씩, 빨리 도착할수록 등수가 높아요 🏁</div>
+    <div class="sub" style="opacity:.85"><b>1단계</b>부터 시작! 단계를 깨면 다음 단계가 <b>열려요 🔓</b>. 각 단계 <b>10문제</b>, 빨리 도착할수록 등수가 높아요 🏁</div>
   </div>
 
   <!-- 결과 화면 -->
@@ -171,7 +173,8 @@
     <div id="resultStat"></div>
     <div id="board"></div>
     <div class="btnRow">
-      <button class="btn" id="retryBtn">🔁 다시 도전</button>
+      <button class="btn hidden" id="nextBtn">▶️ 다음 단계</button>
+      <button class="btn ghost" id="retryBtn">🔁 다시 도전</button>
       <button class="btn ghost" id="backBtn">🧭 단계 선택</button>
       <button class="btn ghost" id="shareBtn">🔗 친구에게 공유</button>
     </div>
@@ -307,6 +310,7 @@ function showStart(){
   hud.classList.add("hidden"); quizBox.classList.add("hidden");
   resultScreen.classList.add("hidden");
   startScreen.classList.remove("hidden");
+  refreshStageButtons();
 }
 
 function beginRunInterval(ms){
@@ -345,14 +349,13 @@ function chooseAnswer(btn, correct){
   if(correct){
     btn.classList.add("correct");
     beep(660,0.08); beep(880,0.08,0.08);
-    throwStone();
+    throwStone();           // state="throw" — 던지기→깨부수기 애니메이션
   }else{
     btn.classList.add("wrong");
     // 정답도 표시
     [...choicesEl.children].forEach(c=>{ if(c.textContent===item.a) c.classList.add("correct"); });
-    loseLife(); resolveDelay=1000;
+    loseLife(); resolveDelay=1000; state="resolve";
   }
-  state="resolve";
 }
 
 function timeUp(){
@@ -366,7 +369,7 @@ function timeUp(){
 function throwStone(){
   state="throw"; throwT=0; charHop=0.5;
   const cx=W*0.26;
-  proj={ t:-150, dur:340, x0:cx-8, y0:GROUND-100, tx:rock.x, ty:rock.y-4, x:cx-8, y:GROUND-100, spin:0, trail:[] };
+  proj={ t:-250, dur:380, x0:cx-8, y0:GROUND-100, tx:rock.x, ty:rock.y-4, x:cx-8, y:GROUND-100, spin:0, trail:[] };
   beep(420,0.06);
 }
 
@@ -407,10 +410,26 @@ function scoreKey(){ return LS_KEY+"_s"+stage; }
 function loadScores(){ try{return JSON.parse(localStorage.getItem(scoreKey()))||[];}catch(e){return [];} }
 function saveScores(a){ try{localStorage.setItem(scoreKey(),JSON.stringify(a));}catch(e){} }
 
+// 단계 해금: 1단계 클리어해야 2단계, 2단계 클리어해야 3단계
+const UNLOCK_KEY="gotjawal_unlocked";
+function getUnlocked(){ try{return Math.min(3,Math.max(1,+(localStorage.getItem(UNLOCK_KEY)||1)));}catch(e){return 1;} }
+function setUnlocked(n){ try{ if(n>getUnlocked()) localStorage.setItem(UNLOCK_KEY,String(Math.min(3,n))); }catch(e){} }
+function refreshStageButtons(){
+  const unlocked=getUnlocked();
+  document.querySelectorAll(".stageBtn").forEach(btn=>{
+    const s=+btn.dataset.stage, locked=s>unlocked;
+    btn.classList.toggle("locked", locked);
+    btn.disabled=locked;
+    btn.querySelector(".se").textContent = locked ? "🔒" : STAGES[s].emoji;
+    btn.title = locked ? `${s-1}단계를 깨면 열려요!` : "";
+  });
+}
+
 function endGame(cleared){
   hud.classList.add("hidden"); quizBox.classList.add("hidden");
   state = cleared ? "clear" : "over";
   const stat=$("#resultStat"), title=$("#resultTitle"), board=$("#board");
+  const nextBtn=$("#nextBtn");
 
   if(cleared){
     const timeSec = elapsed/1000;
@@ -418,20 +437,28 @@ function endGame(cleared){
     const entry={name:playerName, time:+timeSec.toFixed(1), date:Date.now()};
     scores.push(entry); scores.sort((a,b)=>a.time-b.time); saveScores(scores);
     const rank=scores.indexOf(entry)+1;
+    setUnlocked(stage+1);   // 다음 단계 해금
 
     title.textContent=`🏁 ${stage}단계 클리어!`;
+    const nextLine = stage<3
+      ? `<br>🎉 <b>${stage+1}단계 · ${STAGES[stage+1].name}</b>가 열렸어요!`
+      : `<br>🏆 모든 단계를 깼어요! 진정한 곶자왈 박사!`;
     stat.innerHTML=`<span class="big">${rank}등</span>
       ${STAGES[stage].emoji} <b>${stage}단계 · ${STAGES[stage].name}</b><br>
       <b>${playerName}</b> 선수, 기록 <b>${timeSec.toFixed(1)}초</b>!<br>
-      남은 생명 ${"❤️".repeat(Math.max(0,lives))||"없음"}`;
+      남은 생명 ${"❤️".repeat(Math.max(0,lives))||"없음"}${nextLine}`;
     renderBoard(board, scores, entry);
     board.classList.remove("hidden");
+    // 다음 단계 버튼: 클리어 + 다음 단계가 있을 때만
+    if(stage<3){ nextBtn.textContent=`▶️ ${stage+1}단계 도전`; nextBtn.classList.remove("hidden"); }
+    else nextBtn.classList.add("hidden");
     if(rank===1) burst();
     beep(523,0.12);beep(659,0.12,0.12);beep(784,0.16,0.24);
   }else{
     title.textContent="💥 게임 오버";
     stat.innerHTML=`돌을 너무 많이 맞았어요!<br><b>${qIndex+1}번 문제</b>에서 생명이 모두 사라졌어요.<br>다시 도전해볼까요?`;
     board.classList.add("hidden");
+    nextBtn.classList.add("hidden");
     beep(200,0.2,0,"sawtooth");
   }
   resultScreen.classList.remove("hidden");
@@ -555,10 +582,10 @@ function drawCharacter(){
   ctx.beginPath(); ctx.moveTo(-6,40); ctx.lineTo(-6+legSwing,72); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(8,40); ctx.lineTo(8-legSwing,72); ctx.stroke();
 
-  // 뒷팔 + 손 (몸통보다 먼저 → 뒤쪽). 달릴 때 뒤로 스윙
+  // 뒷팔 + 손 (몸통보다 먼저 → 뒤쪽). 어깨는 몸통 옆구리(y≈16)에서 시작
   ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=10; ctx.lineCap="round";
-  const bhx=-26-legSwing*0.5, bhy=30+legSwing*0.25;
-  ctx.beginPath(); ctx.moveTo(-12,3); ctx.quadraticCurveTo(-22,16,bhx,bhy); ctx.stroke();
+  const bhx=-30-legSwing*0.5, bhy=38+legSwing*0.25;
+  ctx.beginPath(); ctx.moveTo(-16,16); ctx.quadraticCurveTo(-28,28,bhx,bhy); ctx.stroke();
   ctx.fillStyle="#8fd694"; ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=2;
   ctx.beginPath(); ctx.arc(bhx,bhy,7,0,7); ctx.fill(); ctx.stroke();
 
@@ -586,16 +613,16 @@ function drawCharacter(){
   ctx.beginPath(); ctx.arc(-16,16,5,0,7); ctx.fill();
   ctx.beginPath(); ctx.arc(16,16,5,0,7); ctx.fill();
 
-  // 앞팔 + 손 (몸통 앞 → 잘 보임). 던질 때: 와인드업(뒤로)→던지기(앞으로)
-  let hx=28+legSwing*0.5, hy=28-legSwing*0.25;   // 평소 달릴 때 스윙
+  // 앞팔 + 손 (몸통 앞 → 잘 보임). 어깨는 옆구리(y≈16). 던질 때: 와인드업(뒤로 위)→던지기(앞으로)
+  let hx=30+legSwing*0.5, hy=38-legSwing*0.25;   // 평소 달릴 때 스윙
   if(state==="throw"){
-    if(throwT<0.45){ const u=throwT/0.45; hx=lerp(28,-16,u); hy=lerp(28,-30,u); }      // 와인드업
-    else { const u=(throwT-0.45)/0.55; hx=lerp(-16,42,u); hy=lerp(-30,6,u); }           // 던지기
+    if(throwT<0.45){ const u=throwT/0.45; hx=lerp(30,-14,u); hy=lerp(38,-30,u); }       // 와인드업(머리 뒤 위로)
+    else { const u=(throwT-0.45)/0.55; hx=lerp(-14,48,u); hy=lerp(-30,12,u); }           // 던지기(앞으로)
   }
   // 팔(어깨→손, 팔꿈치 굽힘)
-  const ex=(12+hx)/2 + (state==="throw"&&throwT<0.45?-8:6), ey=(3+hy)/2-8;
+  const ex=(16+hx)/2 + (state==="throw"&&throwT<0.45?-8:6), ey=(16+hy)/2-6;
   ctx.strokeStyle="#3aa85e"; ctx.lineWidth=10; ctx.lineCap="round";
-  ctx.beginPath(); ctx.moveTo(12,3); ctx.quadraticCurveTo(ex,ey,hx,hy); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(16,16); ctx.quadraticCurveTo(ex,ey,hx,hy); ctx.stroke();
   // 손
   ctx.fillStyle="#a6e3aa"; ctx.beginPath(); ctx.arc(hx,hy,8,0,7); ctx.fill();
   ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=2; ctx.stroke();
@@ -701,7 +728,7 @@ function loop(now){
     if(k>=1) timeUp();
   }
   else if(state==="throw"){
-    throwT=Math.min(1, throwT+dt*0.0034);
+    throwT=Math.min(1, throwT+dt*0.002);
     proj.t+=dt; const k=Math.max(0, Math.min(1, proj.t/proj.dur));
     proj.x = proj.x0 + (proj.tx-proj.x0)*k;
     proj.y = proj.y0 + (proj.ty-proj.y0)*k - Math.sin(k*Math.PI)*80; // 포물선
@@ -747,6 +774,7 @@ document.querySelectorAll(".stageBtn").forEach(btn=>{
     startGame(+btn.dataset.stage);
   };
 });
+$("#nextBtn").onclick=()=>{ if(stage<3) startGame(stage+1); };  // 다음 단계로
 $("#retryBtn").onclick=()=>startGame();   // 같은 단계 다시
 $("#backBtn").onclick=showStart;          // 단계 선택으로
 $("#shareBtn").onclick=async ()=>{
@@ -758,6 +786,7 @@ $("#shareBtn").onclick=async ()=>{
   }catch(e){}
 };
 
+refreshStageButtons();   // 시작 화면 잠금 상태 반영
 requestAnimationFrame(loop);
 })();
 </script>
