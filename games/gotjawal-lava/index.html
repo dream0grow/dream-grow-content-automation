@@ -233,18 +233,19 @@
   ];
 
   // ---------- config ----------
-  const COL_X = [210, 400, 590, 780];   // 4개 세로 라인의 x 위치
+  const COL_X = [330, 630];             // 2개 세로 라인(1·2번)의 x 위치
   const ROW_GAP = 122;                  // 줄 간격(세로)
   const TOP_MARGIN = 165;               // 캐릭터가 화면 위로 올라가면 카메라가 따라옴
   const LAVA_Y = H - 56;                // 이 아래로 내려가면 용암에 빠짐
   const SINK_DROP = 92;                 // 돌이 가라앉을 때 내려가는 정도(px)
-  const SCROLL_SPEED = [42, 62, 86];    // 스테이지별 자동 스크롤 속도(px/초) — 점점 빨라짐
+  const SCROLL_SPEED = [70, 98, 128];   // 스테이지별 자동 스크롤 속도(px/초) — 점점 빨라짐
   const TARGET_QUIZ = 5;
   const STAGE_MUL = [1, 0.78, 0.6];     // 스테이지별 가라앉기 속도 배수(작을수록 빠름)
+  const MYSTERY_TIMES = [0.2, 0.5, 1.0];// 검정 돌이 숨기는 가라앉기 시간 후보
   const STYPE = {
-    SLOW:    { time: 2.2, body: "#5aa848", top: "#84d36a", tag: "🟢" },
-    MEDSLOW: { time: 1.2, body: "#8a7d70", top: "#a99b8b", tag: "⚪" },
-    FAST:    { time: 0.5, body: "#cf8a3a", top: "#ecc06a", tag: "🟠" },
+    SLOW:    { time: 1.0, body: "#5aa848", top: "#84d36a", tag: "🟢" },
+    MEDSLOW: { time: 0.5, body: "#8a7d70", top: "#a99b8b", tag: "⚪" },
+    FAST:    { time: 0.2, body: "#cf8a3a", top: "#ecc06a", tag: "🟠" },
     FLIP:    { time: 0,   body: "#6b2b2b", top: "#8a3a3a", tag: "❌" },
     MYSTERY: { time: 0,   body: "#26262b", top: "#3b3b42", tag: "⚫" },
     QUIZ:    { body: "#e0a92e", top: "#ffd24a" },
@@ -276,18 +277,17 @@
   function makeRow(r) {
     const baseY = rowBaseY(r);
     if (goalRow !== null && r >= goalRow) {
-      return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 1.5, type: "GOAL", x: 480, baseY, sinkAnim: 0, safe: true }] };
+      return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 0.5, type: "GOAL", x: 480, baseY, sinkAnim: 0, safe: true }] };
     }
     if (r === 0) {
-      return { r, type: "normal", used: false, cols: [1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
+      return { r, type: "normal", used: false, cols: [0, 1].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
     }
     if (r % 5 === 0 && !finalDone && quizzesPlaced < TARGET_QUIZ) {
       quizzesPlaced++;
       const isFinal = quizzesPlaced >= TARGET_QUIZ;
-      return { r, type: "quiz", used: false, isFinal, cols: [{ col: 1.5, type: "QUIZ", x: 480, baseY, sinkAnim: 0, safe: true }] };
+      return { r, type: "quiz", used: false, isFinal, cols: [{ col: 0.5, type: "QUIZ", x: 480, baseY, sinkAnim: 0, safe: true }] };
     }
-    // 한 줄에 돌 2개
-    const idx = shuffle([0, 1, 2, 3]).slice(0, 2).sort((a, b) => a - b);
+    // 두 레인(1·2번)에 항상 돌이 하나씩
     const pickSafe = () => ["SLOW", "MEDSLOW", "FAST"][Math.floor(Math.random() * 3)];
     let types;
     const roll = Math.random();
@@ -299,9 +299,9 @@
     } else {
       types = [pickSafe(), pickSafe()];               // 안전한 돌 2개(속도 제각각)
     }
-    const cols = idx.map((ci, i) => {
-      const st = { col: ci, type: types[i], x: COL_X[ci], baseY, sinkAnim: 0, safe: false };
-      if (st.type === "MYSTERY") st.sinkTime = [0.5, 0.8, 1.2, 1.8, 2.2][Math.floor(Math.random() * 5)];
+    const cols = [0, 1].map(ci => {
+      const st = { col: ci, type: types[ci], x: COL_X[ci], baseY, sinkAnim: 0, safe: false };
+      if (st.type === "MYSTERY") st.sinkTime = MYSTERY_TIMES[Math.floor(Math.random() * MYSTERY_TIMES.length)];
       return st;
     });
     return { r, type: "normal", used: false, cols };
@@ -319,14 +319,13 @@
     particles = []; shake = 0; transformT = 0; greenness = 0; elapsed = 0; bubbleTimer = 0;
     quizPool = shuffle(QUIZZES.slice());
     player = {
-      row: 0, col: 1, lives: 3, score: 0,
-      worldX: COL_X[1], worldY: rowBaseY(0),
+      row: 0, col: 0, lives: 3, score: 0,
+      worldX: COL_X[0], worldY: rowBaseY(0),
       hopping: false, hopT: 0, hx0: 0, hy0: 0, hx1: 0, hy1: 0,
       sinkT: 0, grace: 1.6, bob: 0, facing: 1,
       parachutes: 0, safeRows: 0, curSafe: true, quizzesSolved: 0
     };
     ensureRows(7);
-    guaranteeSafeAbove();
     cameraY = player.worldY - 300;
     scrollPause = 1.4;
     state = "PLAYING";
@@ -335,18 +334,6 @@
   // ---------- movement ----------
   function nearest(cols, c) {
     return cols.reduce((a, b) => Math.abs(a.col - c) <= Math.abs(b.col - c) ? a : b);
-  }
-  // 바로 위(▲)로 가는 돌은 항상 안전하도록 보장 → 막히는 상황 방지(왼/오른쪽은 위험 선택지로 남김)
-  function guaranteeSafeAbove() {
-    const nr = player.row + 1;
-    ensureRows(nr + 6);
-    const row = rows[nr];
-    if (!row || row.type !== "normal") return;
-    const near = nearest(row.cols, player.col);
-    if (near.type === "FLIP") {
-      const alt = row.cols.find(c => c.type !== "FLIP");
-      if (alt) { const t = near.type; near.type = alt.type; alt.type = t; }
-    }
   }
   function ascend(dir) { // dir: -1 왼쪽 / 0 위 / +1 오른쪽
     if (state !== "PLAYING" || player.hopping) return;
@@ -373,14 +360,13 @@
 
   function onLand() {
     player.row = player._toRow; player.col = player._toCol;
-    player.worldX = COL_X[player.col] !== undefined ? (player.col === 1.5 ? 480 : COL_X[player.col]) : 480;
     const row = rows[player.row];
     const s = stoneAt(player.row, player.col) || row.cols[0];
+    player.worldX = s.x;
     player.worldY = s.baseY;
     player.sinkT = 0; player.grace = 0.3;
     player.score += 10;                              // 칸마다 +10점
     ensureRows(player.row + 6);
-    guaranteeSafeAbove();
 
     if (row.type === "goal") { startTransform(); return; }
 
@@ -398,7 +384,7 @@
   }
 
   function startHop(dt) {
-    player.hopT += dt * 3.2;
+    player.hopT += dt * 3.8;
     const t = clamp(player.hopT, 0, 1);
     player.worldX = lerp(player.hx0, player.hx1, t);
     player.worldY = lerp(player.hy0, player.hy1, t) - Math.sin(Math.PI * t) * 95;
@@ -434,13 +420,12 @@
     let pick = safe.reduce((a, b) => Math.abs(a.col - player.col) <= Math.abs(b.col - player.col) ? a : b);
     pick.sinkAnim = 0; pick.flip = 0;
     player.row = tr; player.col = pick.col;
-    player.worldX = pick.col === 1.5 ? 480 : COL_X[pick.col];
+    player.worldX = pick.x;
     player.worldY = pick.baseY;
     player.sinkT = 0; player.grace = 2.2; player.curSafe = true;
     player.hopping = false;
     scrollPause = 1.5;
     cameraY = player.worldY - 210;
-    guaranteeSafeAbove();
   }
 
   // ---------- toast ----------
@@ -490,8 +475,8 @@
       if (row.isFinal) {
         finalDone = true; goalRow = player.row + 2;
         ensureRows(goalRow);
-        rows[player.row + 1] = { r: player.row + 1, type: "normal", used: false, cols: [1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true })) };
-        rows[goalRow] = { r: goalRow, type: "goal", used: false, cols: [{ col: 1.5, type: "GOAL", x: 480, baseY: rowBaseY(goalRow), sinkAnim: 0, safe: true }] };
+        rows[player.row + 1] = { r: player.row + 1, type: "normal", used: false, cols: [0, 1].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true })) };
+        rows[goalRow] = { r: goalRow, type: "goal", used: false, cols: [{ col: 0.5, type: "GOAL", x: 480, baseY: rowBaseY(goalRow), sinkAnim: 0, safe: true }] };
         fb.textContent = "🎉 마지막 문제 정답! 안전한 곳이 보여요!";
       } else {
         giveReward();
@@ -501,7 +486,7 @@
       fb.textContent = "❌ 아쉬워요! 목숨 -1"; fb.style.color = "#e03131";
       player.lives--; shake = 0.4;
       if (row.isFinal && player.lives > 0) {
-        rows[player.row + 1] = { r: player.row + 1, type: "quiz", used: false, isFinal: true, cols: [{ col: 1.5, type: "QUIZ", x: 480, baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true }] };
+        rows[player.row + 1] = { r: player.row + 1, type: "quiz", used: false, isFinal: true, cols: [{ col: 0.5, type: "QUIZ", x: 480, baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true }] };
       }
     }
     document.getElementById("quizNextWrap").classList.remove("hidden");
@@ -672,15 +657,15 @@
     }
     // 그림자(용암 위 반사)
     ctx.globalAlpha = 0.22 * (1 - sink); ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.ellipse(x, y + 30, 58 * (1 - sink * 0.4), 11, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.ellipse(x, y + 32, 66 * (1 - sink * 0.4), 12, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
 
     ctx.save();
     if (flip > 0) { ctx.translate(x, y); ctx.rotate(flip * 0.5); ctx.translate(-x, -y); }
     ctx.globalAlpha = clamp(1 - sink * 0.8, 0.15, 1);
     // 몸체
-    ctx.fillStyle = def.body; roundRect(x - 58, y - 4, 116, 36, 14); ctx.fill();
+    ctx.fillStyle = def.body; roundRect(x - 66, y - 4, 132, 38, 15); ctx.fill();
     // 윗면
-    ctx.fillStyle = def.top; ctx.beginPath(); ctx.ellipse(x, y - 2, 58, 16, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = def.top; ctx.beginPath(); ctx.ellipse(x, y - 2, 66, 17, 0, 0, TAU); ctx.fill();
 
     if (s.type === "SLOW") { // 이끼
       ctx.fillStyle = "#3f8e34";
