@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🌿 스피드 식물 퀴즈 게임 — 곶자왈 달리기</title>
+<title>🌿 스피드 곶자왈 퀴즈 게임 — 식물·나비·곤충 달리기</title>
 <style>
   :root{
     --green:#2f8f4e; --green-d:#1f6b39; --leaf:#8fd694;
@@ -60,6 +60,16 @@
   .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #cfa11f;}
   .btn.ghost{background:rgba(255,255,255,.92); color:var(--green-d); box-shadow:0 6px 0 #9fc7ab;}
   .btn.ghost:active{box-shadow:0 2px 0 #9fc7ab;}
+  .stagePick{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+  .stageBtn{display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:12px 18px; background:#fff; color:var(--green-d); box-shadow:0 6px 0 #9fc7ab; line-height:1.1;}
+  .stageBtn:active{box-shadow:0 2px 0 #9fc7ab;}
+  .stageBtn .se{font-size:clamp(22px,5vw,30px);}
+  .stageBtn small{font-weight:700; font-size:clamp(10px,2.2vw,13px); opacity:.8;}
+  .stageBtn[data-stage="2"]{box-shadow:0 6px 0 #b39bdf;}
+  .stageBtn[data-stage="2"]:active{box-shadow:0 2px 0 #b39bdf;}
+  .stageBtn[data-stage="3"]{box-shadow:0 6px 0 #d6a96b;}
+  .stageBtn[data-stage="3"]:active{box-shadow:0 2px 0 #d6a96b;}
 
   /* ---- HUD ---- */
   #hud{
@@ -144,16 +154,15 @@
 
   <!-- 시작 화면 -->
   <div id="startScreen" class="screen">
-    <h1>🌿 스피드 식물 퀴즈 게임</h1>
-    <div class="sub">곶자왈 숲을 달려라! 돌이 굴러오면 <b>식물 퀴즈</b>를 풀어서 부숴버려요.</div>
-    <div class="rules">
-      🏃 캐릭터가 달리는 동안 <b>돌</b>이 다가와요.<br>
-      ✅ 정답을 고르면 돌이 <b>와장창</b> 부서지고 안전!<br>
-      ❌ 틀리거나 늦으면 돌에 부딪혀 <b>생명 ❤️ 하나</b>가 사라져요.<br>
-      🏁 퀴즈 <b>10개</b>를 다 풀고 <b>빨리 도착</b>할수록 등수가 높아요!
-    </div>
+    <h1>🌿 스피드 곶자왈 퀴즈 게임</h1>
+    <div class="sub">곶자왈 숲을 달려라! 돌이 굴러오면 <b>퀴즈</b>를 풀어서 던져 부숴요. 정답이면 안전, 틀리면 <b>생명 ❤️</b> 감소!</div>
     <input id="name" maxlength="8" placeholder="이름 (예: 지호)" value="">
-    <button class="btn" id="startBtn">🚀 출발!</button>
+    <div class="stagePick">
+      <button class="btn stageBtn" data-stage="1"><span class="se">🌿</span>1단계<small>곶자왈 식물</small></button>
+      <button class="btn stageBtn" data-stage="2"><span class="se">🦋</span>2단계<small>나비와 새</small></button>
+      <button class="btn stageBtn" data-stage="3"><span class="se">🪲</span>3단계<small>곤충과 비밀</small></button>
+    </div>
+    <div class="sub" style="opacity:.85">단계가 올라갈수록 어려워져요! 각 단계 <b>10문제</b>씩, 빨리 도착할수록 등수가 높아요 🏁</div>
   </div>
 
   <!-- 결과 화면 -->
@@ -163,6 +172,7 @@
     <div id="board"></div>
     <div class="btnRow">
       <button class="btn" id="retryBtn">🔁 다시 도전</button>
+      <button class="btn ghost" id="backBtn">🧭 단계 선택</button>
       <button class="btn ghost" id="shareBtn">🔗 친구에게 공유</button>
     </div>
     <div class="shareNote">랭킹은 이 기기에 저장돼요. 친구와 같은 기기·링크로 겨뤄보세요!</div>
@@ -174,34 +184,80 @@
 "use strict";
 
 /* =========================================================
-   곶자왈 식물 퀴즈 (정답 + 오답 보기)
+   곶자왈 퀴즈 3단계 (총 30문제) — 단계가 오를수록 어려워짐
+   각 문제: { q:질문, a:정답, w:[오답2개] }
    ========================================================= */
-const QUESTIONS = [
-  { q:"곶자왈을 대표하는 늘푸른나무로, 작은 도토리 같은 열매가 열리는 것은?",
-    a:"구실잣밤나무", w:["으름덩굴","다래"] },
-  { q:"열매가 바나나처럼 생겨 '한국의 바나나'라고도 불리는 덩굴식물은?",
-    a:"으름덩굴", w:["종가시나무","개가시나무"] },
-  { q:"제주에서만 자라는 아주 귀한 고사리로, 곶자왈 습지에 사는 멸종위기 식물은?",
-    a:"제주고사리삼", w:["다래","구실잣밤나무"] },
-  { q:"키위(참다래)와 친척으로, 작고 달콤한 초록 열매가 열리는 덩굴은?",
-    a:"다래", w:["개가시나무","으름덩굴"] },
-  { q:"참나무 종류로 사철 잎이 푸르고, 곶자왈에서 흔히 보이는 가시나무는?",
-    a:"종가시나무", w:["제주고사리삼","으름덩굴"] },
-  { q:"잎 뒷면이 황금빛을 띠고, 수가 적어 보호받는 멸종위기 참나무는?",
-    a:"개가시나무", w:["다래","구실잣밤나무"] },
-  { q:"'곶자왈'은 무엇을 뜻하는 제주말일까요?",
-    a:"나무와 덩굴이 우거진 숲", w:["넓은 모래밭","깊은 바닷속"] },
-  { q:"으름덩굴·다래처럼 다른 나무를 타고 올라가며 자라는 식물을?",
-    a:"덩굴식물", w:["바닷말","버섯"] },
-  { q:"구실잣밤나무·종가시나무처럼 겨울에도 잎이 푸른 나무를?",
-    a:"늘푸른나무(상록수)", w:["잎지는나무","풀"] },
-  { q:"제주고사리삼·개가시나무처럼 수가 매우 적어 지켜야 할 식물을?",
-    a:"멸종위기 식물", w:["잡초","외래식물"] },
-];
+const STAGES = {
+  1: { name:"곶자왈 식물", emoji:"🌿", qs:[
+    { q:"곶자왈을 대표하는 늘푸른나무로, 작은 도토리 같은 열매가 열리는 것은?",
+      a:"구실잣밤나무", w:["으름덩굴","다래"] },
+    { q:"열매가 바나나처럼 생겨 '한국의 바나나'라고도 불리는 덩굴식물은?",
+      a:"으름덩굴", w:["종가시나무","개가시나무"] },
+    { q:"제주에서만 자라는 아주 귀한 고사리로, 곶자왈 습지에 사는 멸종위기 식물은?",
+      a:"제주고사리삼", w:["다래","구실잣밤나무"] },
+    { q:"키위(참다래)와 친척으로, 작고 달콤한 초록 열매가 열리는 덩굴은?",
+      a:"다래", w:["개가시나무","으름덩굴"] },
+    { q:"참나무 종류로 사철 잎이 푸르고, 곶자왈에서 흔히 보이는 가시나무는?",
+      a:"종가시나무", w:["제주고사리삼","으름덩굴"] },
+    { q:"잎 뒷면이 황금빛을 띠고, 수가 적어 보호받는 멸종위기 참나무는?",
+      a:"개가시나무", w:["다래","구실잣밤나무"] },
+    { q:"'곶자왈'은 무엇을 뜻하는 제주말일까요?",
+      a:"나무와 덩굴이 우거진 숲", w:["넓은 모래밭","깊은 바닷속"] },
+    { q:"으름덩굴·다래처럼 다른 나무를 타고 올라가며 자라는 식물을?",
+      a:"덩굴식물", w:["바닷말","버섯"] },
+    { q:"구실잣밤나무·종가시나무처럼 겨울에도 잎이 푸른 나무를?",
+      a:"늘푸른나무(상록수)", w:["잎지는나무","풀"] },
+    { q:"제주고사리삼·개가시나무처럼 수가 매우 적어 지켜야 할 식물을?",
+      a:"멸종위기 식물", w:["잡초","외래식물"] },
+  ]},
+  2: { name:"곶자왈 나비와 새", emoji:"🦋", qs:[
+    { q:"노란 바탕에 검은 줄무늬가 호랑이처럼 화려한, 우리나라 대표 큰 나비는?",
+      a:"호랑나비", w:["배추흰나비","청띠제비나비"] },
+    { q:"텃밭의 배추·무 둘레에서 흔히 보이는, 하얀 날개의 친근한 나비는?",
+      a:"배추흰나비", w:["호랑나비","남방남색부전나비"] },
+    { q:"검은 날개 가운데를 하늘빛(청록) 띠가 가로지르는 멋진 나비는?",
+      a:"청띠제비나비", w:["호랑나비","배추흰나비"] },
+    { q:"남쪽 따뜻한 곳에 살며 날개가 보랏빛·남색으로 반짝이는 작은 부전나비는?",
+      a:"남방남색부전나비", w:["배추흰나비","호랑나비"] },
+    { q:"여덟 가지 고운 빛깔을 지녀 '숲속 보석'이라 불리는, 곶자왈에 찾아오는 여름철새는?",
+      a:"팔색조", w:["직박구리","박새"] },
+    { q:"나무를 '따다닥' 두드려 구멍을 내고 벌레를 잡아먹는, 곶자왈의 큰 딱따구리는?",
+      a:"큰오색딱따구리", w:["박새","직박구리"] },
+    { q:"가슴 한가운데에 검은 넥타이 같은 줄무늬가 있는, 작고 흔한 텃새는?",
+      a:"박새", w:["팔색조","큰유리새"] },
+    { q:"'삐익 삐익' 시끄럽게 울며 무리지어 다니는, 숲에서 흔한 회갈색 새는?",
+      a:"직박구리", w:["박새","팔색조"] },
+    { q:"수컷의 등이 보석처럼 파랗고(유리빛), 여름에 찾아오는 아름다운 새는?",
+      a:"큰유리새", w:["동박새","직박구리"] },
+    { q:"동백꽃 꿀을 좋아하고 눈 둘레가 하얀 테로 둘린, 제주 숲의 연두빛 작은 새는?",
+      a:"동박새", w:["박새","팔색조"] },
+  ]},
+  3: { name:"곶자왈 곤충과 비밀", emoji:"🪲", qs:[
+    { q:"등에 점 두 개가 또렷한, 곶자왈에 사는 멸종위기 사슴벌레는?",
+      a:"두점박이사슴벌레", w:["반딧불이","물장군"] },
+    { q:"여름밤 꽁무니에서 노란 빛을 깜빡여 '개똥벌레'라고도 불리는 곤충은?",
+      a:"반딧불이", w:["물장군","비단벌레"] },
+    { q:"맑은 물속에 사는, 우리나라에서 가장 큰 물속 곤충(멸종위기)은?",
+      a:"물장군", w:["반딧불이","두점박이사슴벌레"] },
+    { q:"날개가 초록·빨강 금속처럼 비단빛으로 반짝여 옛 장신구에도 쓰인 멸종위기 곤충은?",
+      a:"비단벌레", w:["물장군","반딧불이"] },
+    { q:"동물의 똥을 굴려 경단을 만들고 땅을 깨끗하게 해 주는 멸종위기 소똥구리는?",
+      a:"애기뿔소똥구리", w:["두점박이사슴벌레","물장군"] },
+    { q:"곶자왈은 옛날 화산이 터질 때 흘러나온 무엇이 굳어서 생긴 숲일까요?",
+      a:"용암(이 굳은 돌)", w:["바닷물","모래"] },
+    { q:"곶자왈에 많은, 구멍이 송송 뚫린 검은색 화산암의 이름은?",
+      a:"현무암", w:["대리석","갯벌 진흙"] },
+    { q:"현무암의 구멍으로 빗물이 잘 스며들어, 곶자왈이 길러 주는 깨끗한 물은?",
+      a:"지하수", w:["바닷물","흙탕물"] },
+    { q:"곶자왈이 특히 소중한 가장 큰 까닭은?",
+      a:"다양한 동식물이 살고 깨끗한 물을 만들어서", w:["건물 짓기 좋아서","주차장으로 좋아서"] },
+    { q:"곶자왈이 점점 사라지는 가장 큰 까닭은?",
+      a:"골프장·도로·건물을 지으려고 숲을 밀어서", w:["나무가 스스로 사라져서","비가 너무 많이 와서"] },
+  ]},
+};
 
-const TOTAL_Q = QUESTIONS.length;
 const ROCK_TIME = 8000;   // 돌이 캐릭터까지 오는 시간(ms) = 제한시간
-const LS_KEY = "gotjawal_quiz_scores_v1";
+const LS_KEY = "gotjawal_quiz_scores_v1";   // + 단계번호
 
 /* =========================================================
    DOM
@@ -218,7 +274,7 @@ const W=cv.width, H=cv.height, GROUND=H*0.78;
    게임 상태
    ========================================================= */
 let state="start";          // start | run | quiz | throw | resolve | over | clear
-let lives, qIndex, order, playerName;
+let lives, qIndex, order, playerName, stage=1, totalQ=10;
 let runStart, elapsed=0;
 let phaseTimer=0, scroll=0, runFrame=0;
 let rock=null, particles=[], answered=false;
@@ -232,16 +288,25 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 /* =========================================================
    시작 / 리셋
    ========================================================= */
-function startGame(){
+function startGame(stg){
+  if(stg) stage=stg;
+  totalQ=STAGES[stage].qs.length;
   playerName = ($("#name").value || "도전자").trim().slice(0,8) || "도전자";
-  lives=3; qIndex=0; order=shuffle([...Array(TOTAL_Q).keys()]);
-  elapsed=0; particles=[]; rock=null; scroll=0;
+  lives=3; qIndex=0; order=shuffle([...Array(totalQ).keys()]);
+  elapsed=0; particles=[]; rock=null; scroll=0; proj=null;
   runStart=performance.now();
   startScreen.classList.add("hidden");
   resultScreen.classList.add("hidden");
   hud.classList.remove("hidden");
   updateHud();
   beginRunInterval(700);   // 짧게 달리다 첫 돌 등장
+}
+
+function showStart(){
+  state="start"; rock=null; proj=null;
+  hud.classList.add("hidden"); quizBox.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+  startScreen.classList.remove("hidden");
 }
 
 function beginRunInterval(ms){
@@ -258,7 +323,7 @@ function spawnRock(){
    퀴즈 표시 / 채점
    ========================================================= */
 function showQuestion(){
-  const item=QUESTIONS[order[qIndex]];
+  const item=STAGES[stage].qs[order[qIndex]];
   const opts=shuffle([item.a, ...item.w]);
   questionEl.textContent=item.q;
   choicesEl.innerHTML="";
@@ -276,7 +341,7 @@ function chooseAnswer(btn, correct){
   if(answered) return;
   answered=true;
   [...choicesEl.children].forEach(c=>c.style.pointerEvents="none");
-  const item=QUESTIONS[order[qIndex]];
+  const item=STAGES[stage].qs[order[qIndex]];
   if(correct){
     btn.classList.add("correct");
     beep(660,0.08); beep(880,0.08,0.08);
@@ -293,7 +358,7 @@ function chooseAnswer(btn, correct){
 function timeUp(){
   if(answered) return;
   answered=true;
-  const item=QUESTIONS[order[qIndex]];
+  const item=STAGES[stage].qs[order[qIndex]];
   [...choicesEl.children].forEach(c=>{ c.style.pointerEvents="none"; if(c.textContent===item.a) c.classList.add("correct"); });
   loseLife(); resolveDelay=1000; state="resolve";
 }
@@ -301,7 +366,7 @@ function timeUp(){
 function throwStone(){
   state="throw"; throwT=0; charHop=0.5;
   const cx=W*0.26;
-  proj={ t:-150, dur:340, x0:cx+30, y0:GROUND-118, tx:rock.x, ty:rock.y, x:cx+30, y:GROUND-118, spin:0 };
+  proj={ t:-150, dur:340, x0:cx-8, y0:GROUND-100, tx:rock.x, ty:rock.y-4, x:cx-8, y:GROUND-100, spin:0, trail:[] };
   beep(420,0.06);
 }
 
@@ -322,7 +387,7 @@ function advance(){
   quizBox.classList.add("hidden");
   if(lives<=0){ endGame(false); return; }
   qIndex++;
-  if(qIndex>=TOTAL_Q){ endGame(true); return; }
+  if(qIndex>=totalQ){ endGame(true); return; }
   updateHud();
   beginRunInterval(550);
 }
@@ -332,14 +397,15 @@ function advance(){
    ========================================================= */
 function updateHud(){
   livesEl.textContent = "❤️".repeat(Math.max(0,lives)) + "🤍".repeat(Math.max(0,3-lives));
-  progEl.textContent = `문제 ${Math.min(qIndex+1,TOTAL_Q)} / ${TOTAL_Q}`;
+  progEl.textContent = `${STAGES[stage].emoji} ${stage}단계  ${Math.min(qIndex+1,totalQ)}/${totalQ}`;
 }
 
 /* =========================================================
    종료 / 랭킹
    ========================================================= */
-function loadScores(){ try{return JSON.parse(localStorage.getItem(LS_KEY))||[];}catch(e){return [];} }
-function saveScores(a){ try{localStorage.setItem(LS_KEY,JSON.stringify(a));}catch(e){} }
+function scoreKey(){ return LS_KEY+"_s"+stage; }
+function loadScores(){ try{return JSON.parse(localStorage.getItem(scoreKey()))||[];}catch(e){return [];} }
+function saveScores(a){ try{localStorage.setItem(scoreKey(),JSON.stringify(a));}catch(e){} }
 
 function endGame(cleared){
   hud.classList.add("hidden"); quizBox.classList.add("hidden");
@@ -353,8 +419,9 @@ function endGame(cleared){
     scores.push(entry); scores.sort((a,b)=>a.time-b.time); saveScores(scores);
     const rank=scores.indexOf(entry)+1;
 
-    title.textContent="🏁 무사히 도착!";
+    title.textContent=`🏁 ${stage}단계 클리어!`;
     stat.innerHTML=`<span class="big">${rank}등</span>
+      ${STAGES[stage].emoji} <b>${stage}단계 · ${STAGES[stage].name}</b><br>
       <b>${playerName}</b> 선수, 기록 <b>${timeSec.toFixed(1)}초</b>!<br>
       남은 생명 ${"❤️".repeat(Math.max(0,lives))||"없음"}`;
     renderBoard(board, scores, entry);
@@ -487,15 +554,13 @@ function drawCharacter(){
   ctx.strokeStyle="#2c6b3a"; ctx.lineWidth=12; ctx.lineCap="round";
   ctx.beginPath(); ctx.moveTo(-6,40); ctx.lineTo(-6+legSwing,72); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(8,40); ctx.lineTo(8-legSwing,72); ctx.stroke();
-  // 뒷팔
-  ctx.beginPath(); ctx.moveTo(0,5); ctx.lineTo(-legSwing-4,28); ctx.stroke();
-  // 앞팔 (던질 때 와인드업→던지기)
-  let armX=legSwing+4, armY=28;
-  if(state==="throw"){
-    if(throwT<0.45){ const u=throwT/0.45; armX=lerp(legSwing+4,-14,u); armY=lerp(28,-20,u); }
-    else { const u=(throwT-0.45)/0.55; armX=lerp(-14,32,u); armY=lerp(-20,2,u); }
-  }
-  ctx.beginPath(); ctx.moveTo(0,5); ctx.lineTo(armX,armY); ctx.stroke();
+
+  // 뒷팔 + 손 (몸통보다 먼저 → 뒤쪽). 달릴 때 뒤로 스윙
+  ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=10; ctx.lineCap="round";
+  const bhx=-26-legSwing*0.5, bhy=30+legSwing*0.25;
+  ctx.beginPath(); ctx.moveTo(-12,3); ctx.quadraticCurveTo(-22,16,bhx,bhy); ctx.stroke();
+  ctx.fillStyle="#8fd694"; ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(bhx,bhy,7,0,7); ctx.fill(); ctx.stroke();
 
   // 몸 (새싹 친구)
   const grd=ctx.createLinearGradient(0,-30,0,45);
@@ -521,10 +586,29 @@ function drawCharacter(){
   ctx.beginPath(); ctx.arc(-16,16,5,0,7); ctx.fill();
   ctx.beginPath(); ctx.arc(16,16,5,0,7); ctx.fill();
 
+  // 앞팔 + 손 (몸통 앞 → 잘 보임). 던질 때: 와인드업(뒤로)→던지기(앞으로)
+  let hx=28+legSwing*0.5, hy=28-legSwing*0.25;   // 평소 달릴 때 스윙
+  if(state==="throw"){
+    if(throwT<0.45){ const u=throwT/0.45; hx=lerp(28,-16,u); hy=lerp(28,-30,u); }      // 와인드업
+    else { const u=(throwT-0.45)/0.55; hx=lerp(-16,42,u); hy=lerp(-30,6,u); }           // 던지기
+  }
+  // 팔(어깨→손, 팔꿈치 굽힘)
+  const ex=(12+hx)/2 + (state==="throw"&&throwT<0.45?-8:6), ey=(3+hy)/2-8;
+  ctx.strokeStyle="#3aa85e"; ctx.lineWidth=10; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(12,3); ctx.quadraticCurveTo(ex,ey,hx,hy); ctx.stroke();
+  // 손
+  ctx.fillStyle="#a6e3aa"; ctx.beginPath(); ctx.arc(hx,hy,8,0,7); ctx.fill();
+  ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=2; ctx.stroke();
+  // 던지기 직전 손에 쥔 돌
+  if(state==="throw" && proj && proj.t<0){
+    ctx.fillStyle="#8a8a92"; ctx.strokeStyle="#5a5a62"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(hx+2,hy-3,7,0,7); ctx.fill(); ctx.stroke();
+  }
+
   ctx.restore();
 
   // 달릴 때 먼지
-  if(state==="run"||state==="quiz"){
+  if(state==="run"||state==="quiz"||state==="throw"){
     ctx.fillStyle="rgba(255,255,255,.5)";
     for(let i=0;i<3;i++){ const px=x-40-i*18-(runFrame*4%20); ctx.beginPath(); ctx.arc(px,GROUND-10,5-i,0,7); ctx.fill();}
   }
@@ -552,18 +636,28 @@ function drawRock(){
 
 function drawProjectile(){
   if(!proj || proj.t<0) return;
+  // 꼬리(자취)
+  proj.trail.push({x:proj.x,y:proj.y});
+  if(proj.trail.length>8) proj.trail.shift();
+  proj.trail.forEach((t,i)=>{
+    ctx.globalAlpha=(i+1)/proj.trail.length*0.5;
+    ctx.fillStyle="rgba(180,180,190,1)";
+    ctx.beginPath(); ctx.arc(t.x,t.y,3+i*0.6,0,7); ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  // 날아가는 돌
   ctx.save();
   ctx.translate(proj.x, proj.y); ctx.rotate(proj.spin);
-  // 작은 돌
-  ctx.fillStyle="#8a8a92"; ctx.strokeStyle="#5a5a62"; ctx.lineWidth=2;
+  const grd=ctx.createLinearGradient(-14,-14,14,14);
+  grd.addColorStop(0,"#a6a6ae"); grd.addColorStop(1,"#5e5e66");
+  ctx.fillStyle=grd; ctx.strokeStyle="#46464d"; ctx.lineWidth=3;
   ctx.beginPath();
-  const p=[[-9,-3],[-3,-9],[7,-7],[9,3],[2,9],[-7,7]];
+  const p=[[-13,-4],[-5,-13],[10,-10],[13,4],[3,13],[-10,10]];
   p.forEach((q,i)=> i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
   ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle="rgba(0,0,0,.2)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(-4,-6); ctx.lineTo(2,2); ctx.stroke();
   ctx.restore();
-  // 꼬리 먼지
-  ctx.fillStyle="rgba(255,255,255,.4)";
-  ctx.beginPath(); ctx.arc(proj.x-12,proj.y+4,4,0,7); ctx.fill();
 }
 
 function drawParticles(dt){
@@ -647,18 +741,22 @@ function loop(now){
 /* =========================================================
    이벤트
    ========================================================= */
-$("#startBtn").onclick=()=>{ if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}} startGame(); };
-$("#retryBtn").onclick=startGame;
+document.querySelectorAll(".stageBtn").forEach(btn=>{
+  btn.onclick=()=>{
+    if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+    startGame(+btn.dataset.stage);
+  };
+});
+$("#retryBtn").onclick=()=>startGame();   // 같은 단계 다시
+$("#backBtn").onclick=showStart;          // 단계 선택으로
 $("#shareBtn").onclick=async ()=>{
   const url=location.href;
-  const text=`🌿 스피드 식물 퀴즈 게임! 곶자왈 식물 박사에 도전해봐 — 내 기록을 깨보시지! ${url}`;
+  const text=`🌿 스피드 곶자왈 퀴즈 게임! 곶자왈 박사에 도전해봐 — 내 기록을 깨보시지! ${url}`;
   try{
-    if(navigator.share){ await navigator.share({title:"스피드 식물 퀴즈 게임", text, url}); }
+    if(navigator.share){ await navigator.share({title:"스피드 곶자왈 퀴즈 게임", text, url}); }
     else { await navigator.clipboard.writeText(text); alert("공유 링크를 복사했어요! 친구에게 붙여넣어 보내세요 📨"); }
   }catch(e){}
 };
-// 엔터로 시작
-$("#name").addEventListener("keydown",e=>{ if(e.key==="Enter") startGame(); });
 
 requestAnimationFrame(loop);
 })();
