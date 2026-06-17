@@ -5,149 +5,110 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>곶자왈 곤충 탐험대 🐛</title>
 <style>
-  :root{
-    --leaf:#3f7d36; --leaf-dark:#2c5a26; --bark:#6b4a2b; --bark-dark:#4a3119;
-    --rock:#8d9aa0; --rock-dark:#5f6a70; --cream:#fff8e7; --gold:#ffcb45;
-  }
+  :root{ --leaf:#3f7d36; --leaf-dark:#234d1f; --bark:#6b4a2b; --cream:#fff8e7; --gold:#ffcb45; }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{margin:0; height:100%;}
   body{
     font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
-    background:radial-gradient(circle at 50% 0%, #6fae57, #2f6b3a 60%, #224d2c);
-    color:#2a2a2a; overflow:hidden; user-select:none;
+    background:#1d3320; color:#2a2a2a; overflow:hidden; user-select:none;
     display:flex; align-items:center; justify-content:center; min-height:100dvh;
   }
-  #app{width:min(960px,100vw); height:min(640px,100dvh); position:relative;}
+  #app{width:min(960px,100vw); height:min(660px,100dvh); position:relative; overflow:hidden;}
 
-  /* ---------- 공통 화면 ---------- */
   .screen{position:absolute; inset:0; display:none; flex-direction:column;}
   .screen.active{display:flex;}
 
-  /* ---------- 인트로 / 결과 ---------- */
-  .card{
-    margin:auto; width:min(440px,90%); background:var(--cream);
-    border-radius:26px; padding:26px 24px; text-align:center;
-    box-shadow:0 14px 40px rgba(0,0,0,.35); border:4px solid #fff;
-  }
-  .card h1{margin:.1em 0 .2em; font-size:1.9rem; color:#2c5a26;}
+  /* 인트로 / 결과 카드 */
+  .card{margin:auto; width:min(460px,92%); background:var(--cream); border-radius:26px;
+    padding:24px 22px; text-align:center; box-shadow:0 14px 40px rgba(0,0,0,.45); border:4px solid #fff;
+    max-height:94%; overflow:auto;}
+  .card h1{margin:.1em 0 .2em; font-size:1.8rem; color:#2c5a26;}
   .card h2{margin:.1em 0 .3em; font-size:1.5rem; color:#2c5a26;}
-  .card p{font-size:1.02rem; line-height:1.6; margin:.5em 0;}
-  .rules{text-align:left; background:#fff; border-radius:16px; padding:14px 16px; margin:14px 0; font-size:.98rem; line-height:1.7;}
+  .card p{font-size:1.02rem; line-height:1.55; margin:.45em 0;}
+  .rules{text-align:left; background:#fff; border-radius:16px; padding:14px 16px; margin:12px 0; font-size:.97rem; line-height:1.65;}
   .rules b{color:#b5651d;}
-  .btn{
-    display:inline-block; margin-top:14px; padding:14px 30px; border:none;
-    border-radius:999px; font-size:1.2rem; font-weight:800; color:#3a2a00;
+  .btn{display:inline-block; margin-top:12px; padding:13px 28px; border:none; border-radius:999px;
+    font-size:1.15rem; font-weight:800; color:#3a2a00;
     background:linear-gradient(180deg,#ffe07a,var(--gold));
-    box-shadow:0 6px 0 #c9962a, 0 10px 18px rgba(0,0,0,.25); cursor:pointer;
-  }
+    box-shadow:0 6px 0 #c9962a, 0 10px 18px rgba(0,0,0,.25); cursor:pointer;}
   .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #c9962a;}
 
-  /* ---------- HUD ---------- */
-  #hud{
-    display:flex; align-items:center; gap:8px; padding:8px 12px;
-    background:rgba(20,50,25,.55); backdrop-filter:blur(4px); color:#fff;
-    font-weight:700; font-size:1rem; flex-wrap:wrap;
-  }
-  #hud .box{background:rgba(255,255,255,.16); padding:5px 10px; border-radius:12px; display:flex; align-items:center; gap:4px;}
+  /* HUD */
+  #hud{display:flex; align-items:center; gap:7px; padding:7px 11px; z-index:5;
+    background:rgba(15,40,20,.62); backdrop-filter:blur(4px); color:#fff; font-weight:700; font-size:.98rem; flex-wrap:wrap;}
+  #hud .box{background:rgba(255,255,255,.16); padding:4px 9px; border-radius:11px;}
   #dex{display:flex; gap:5px; margin-left:auto;}
-  #dex .slot{
-    width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.18);
-    border:2px dashed rgba(255,255,255,.5); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:.7rem;
-  }
+  #dex .slot{width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,.18);
+    border:2px dashed rgba(255,255,255,.5); overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:.8rem; color:#fff;}
   #dex .slot img{width:100%; height:100%; object-fit:cover;}
   #dex .slot.done{border-style:solid; border-color:var(--gold);}
 
-  /* ---------- 무대 ---------- */
-  #stage{
-    position:relative; flex:1;
-    background:
-      radial-gradient(120% 60% at 50% -10%, #bfe39a 0%, transparent 55%),
-      linear-gradient(180deg,#5d8f4a 0%, #3e6b34 45%, #5b4a32 75%, #4a3a26 100%);
-    overflow:hidden;
-  }
-  #stage::after{ /* 바닥 낙엽 느낌 */
-    content:""; position:absolute; inset:0; pointer-events:none;
-    background-image:radial-gradient(rgba(90,60,30,.25) 1.5px, transparent 2px);
-    background-size:26px 26px; opacity:.5;
-  }
-  .obj{position:absolute; transform:translate(-50%,-50%); cursor:pointer; transition:transform .08s; touch-action:manipulation;}
-  .obj:active{transform:translate(-50%,-50%) scale(.93);}
-  .obj.used{pointer-events:none; opacity:.55; filter:grayscale(.4);}
+  /* 무대 + 배경 사진 */
+  #stage{position:relative; flex:1; overflow:hidden;
+    background:linear-gradient(180deg,#5d8f4a,#3e6b34 45%,#4a3a26);}
+  #bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
+  #stage::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.28));}
 
-  /* 돌 */
-  .rock{width:84px; height:62px;}
-  .rock .body{
-    width:100%; height:100%; border-radius:50% 50% 45% 45%/60% 60% 40% 40%;
-    background:radial-gradient(circle at 35% 30%, #aab4b9, var(--rock) 55%, var(--rock-dark));
-    box-shadow:inset -6px -8px 12px rgba(0,0,0,.35), 0 8px 10px rgba(0,0,0,.3);
-    position:relative;
-  }
-  .rock .moss{position:absolute; left:8%; bottom:0; width:84%; height:42%;
-    background:radial-gradient(circle at 30% 40%, #7fae4d, transparent 60%),
-              radial-gradient(circle at 70% 60%, #6fa043, transparent 55%);
-    border-radius:0 0 45% 45%/0 0 100% 100%; opacity:.85;}
-  /* 단서: 곤충 흔적(반짝) / 숨골(구멍) */
-  .clue{position:absolute; top:-10px; left:50%; transform:translateX(-50%);
-    font-size:1.1rem; animation:bob 1.1s ease-in-out infinite;}
-  .hole{position:absolute; left:50%; top:52%; transform:translate(-50%,-50%);
-    width:40%; height:46%; border-radius:50%;
-    background:radial-gradient(circle at 50% 35%, #000 35%, #1c1c1c 70%, #2c2c2c);
-    box-shadow:inset 0 4px 8px rgba(0,0,0,.9);}
-  @keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-4px);}}
+  /* 나무 줄 */
+  .trees{position:relative; z-index:3; display:flex; justify-content:space-around;
+    align-items:flex-end; padding:6px 12px 0; height:23%;}
+  .tree{position:relative; width:78px; height:100%; cursor:pointer; transition:transform .12s; touch-action:manipulation;}
+  .tree:active{transform:scale(.95);}
+  .tree .canopy{position:absolute; left:50%; top:2%; transform:translateX(-50%); width:78px; height:62%;
+    border-radius:50%; background:radial-gradient(circle at 40% 35%, #6fbf52, var(--leaf) 62%, var(--leaf-dark));
+    box-shadow:inset -8px -10px 16px rgba(0,0,0,.28), 0 4px 8px rgba(0,0,0,.25);}
+  .tree .trunk{position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:20px; height:42%;
+    border-radius:8px; background:linear-gradient(90deg,#3c2c1c,var(--bark) 50%,#3c2c1c);}
+  .tree.used{pointer-events:none;}
+  .tree.fallen{transform:translate(-40%,10%) rotate(-72deg); opacity:.7; transition:transform .5s;}
+  .tree.quizzed .canopy{filter:grayscale(.3) brightness(.9);}
+  .tree.quizzed::after{content:"✓"; position:absolute; left:50%; top:24%; transform:translateX(-50%);
+    color:#fff; font-weight:900; font-size:1.4rem; text-shadow:0 1px 3px rgba(0,0,0,.6);}
 
-  /* 나무 */
-  .tree{width:90px; height:150px;}
-  .tree .trunk{position:absolute; left:50%; bottom:0; transform:translateX(-50%);
-    width:26px; height:88px; border-radius:10px;
-    background:linear-gradient(90deg,var(--bark-dark),var(--bark) 50%,var(--bark-dark));}
-  .tree .canopy{position:absolute; left:50%; top:0; transform:translateX(-50%);
-    width:90px; height:80px; border-radius:50%;
-    background:radial-gradient(circle at 40% 35%, #6fbf52, var(--leaf) 60%, var(--leaf-dark));
-    box-shadow:inset -8px -10px 16px rgba(0,0,0,.25);}
-  .tree .sign{position:absolute; left:50%; top:30px; transform:translateX(-50%);
-    font-size:1.5rem; font-weight:900; color:#fff; text-shadow:0 2px 3px rgba(0,0,0,.4);}
-  /* 죽은 나무 (기울고 잎 없음) */
-  .tree.dead{transform:translate(-50%,-50%) rotate(-13deg);}
-  .tree.dead .trunk{height:104px; width:22px;
-    background:linear-gradient(90deg,#3c2c1c,#6a5236 50%,#3c2c1c);}
-  .tree.dead .branch{position:absolute; left:50%; bottom:70px; width:54px; height:8px;
-    background:#5a4630; transform:translateX(-30%) rotate(-25deg); border-radius:6px;}
-  .tree.dead .branch.b2{bottom:48px; transform:translateX(-70%) rotate(22deg); width:44px;}
-  .tree.dead .warn{position:absolute; left:50%; top:6px; transform:translateX(-50%); font-size:1.3rem;}
+  /* 돌 격자 */
+  #grid{position:relative; z-index:3; flex:1; display:grid; grid-template-columns:repeat(4,1fr);
+    gap:2.2%; padding:3% 6% 5%; align-content:center;}
+  .stone{position:relative; aspect-ratio:1/1; cursor:pointer; transition:transform .08s; touch-action:manipulation;
+    display:flex; align-items:center; justify-content:center;}
+  .stone:active{transform:scale(.94);}
+  .stone .rock{position:absolute; inset:0; border-radius:48% 48% 44% 44%/58% 58% 42% 42%;
+    background:radial-gradient(circle at 36% 30%, #b3bcc1, #8d9aa0 55%, #5f6a70);
+    box-shadow:inset -5px -7px 11px rgba(0,0,0,.4), 0 5px 9px rgba(0,0,0,.35);}
+  .stone .moss{position:absolute; left:10%; bottom:0; width:80%; height:40%;
+    background:radial-gradient(circle at 35% 50%, #7fae4d, transparent 62%); border-radius:0 0 44% 44%/0 0 100% 100%; opacity:.8;}
+  .stone .face{position:relative; z-index:2; font-weight:900; font-size:1.5rem; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.5);}
+  .stone img{position:relative; z-index:2; width:84%; height:84%; object-fit:cover; border-radius:12px; border:2px solid #fff;}
+  .stone.revealed .rock{filter:brightness(.92);}
+  /* 숨골 */
+  .stone.hole .rock{background:radial-gradient(circle at 50% 42%, #000 30%, #1a1a1a 60%, #333);}
+  .stone.flag .rock{background:radial-gradient(circle at 50% 42%, #000 30%, #1a1a1a 60%, #333);}
+  .num1{color:#7fd1ff!important;} .num2{color:#9cff8a!important;} .num3{color:#ffd36b!important;}
+  .num4,.num5,.num6{color:#ff9b6b!important;}
 
-  .tag{position:absolute; left:50%; bottom:-16px; transform:translateX(-50%);
-    font-size:.72rem; font-weight:800; color:#fff; background:rgba(0,0,0,.45);
-    padding:1px 7px; border-radius:8px; white-space:nowrap;}
-
-  /* ---------- 토스트 ---------- */
-  #toast{position:absolute; left:50%; bottom:20px; transform:translateX(-50%) translateY(20px);
-    background:rgba(0,0,0,.82); color:#fff; padding:12px 20px; border-radius:14px;
-    font-size:1.05rem; font-weight:700; opacity:0; transition:.25s; pointer-events:none; max-width:88%; text-align:center;}
+  /* 토스트 */
+  #toast{position:absolute; left:50%; bottom:16px; transform:translateX(-50%) translateY(20px); z-index:8;
+    background:rgba(0,0,0,.84); color:#fff; padding:11px 18px; border-radius:14px; font-size:1.02rem; font-weight:700;
+    opacity:0; transition:.25s; pointer-events:none; max-width:90%; text-align:center;}
   #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
-  /* ---------- 모달(퀴즈 / 곤충발견) ---------- */
-  #overlay{position:absolute; inset:0; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; z-index:20; padding:14px;}
+  /* 모달 */
+  #overlay{position:absolute; inset:0; background:rgba(0,0,0,.58); display:none; align-items:center; justify-content:center; z-index:20; padding:14px;}
   #overlay.show{display:flex;}
-  .modal{background:var(--cream); width:min(420px,94%); border-radius:22px; padding:22px; text-align:center; box-shadow:0 14px 40px rgba(0,0,0,.4); border:4px solid #fff;}
-  .modal h3{margin:.1em 0 .5em; font-size:1.35rem; color:#2c5a26;}
-  .modal .photo{width:200px; height:150px; object-fit:cover; border-radius:16px; border:4px solid #fff; box-shadow:0 6px 14px rgba(0,0,0,.3); background:#dfe7d6;}
-  .ph-fallback{width:200px; height:150px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#cfe0bf; border:4px solid #fff; font-size:3rem;}
-  .choices{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
-  .choice{padding:13px; border-radius:14px; border:3px solid #d9c89a; background:#fff; font-size:1.08rem; font-weight:700; cursor:pointer;}
+  .modal{background:var(--cream); width:min(430px,94%); border-radius:22px; padding:20px; text-align:center;
+    box-shadow:0 14px 40px rgba(0,0,0,.45); border:4px solid #fff; max-height:94%; overflow:auto;}
+  .modal h3{margin:.1em 0 .4em; font-size:1.3rem; color:#2c5a26;}
+  .modal .photo{width:210px; height:160px; object-fit:cover; border-radius:16px; border:4px solid #fff; box-shadow:0 6px 14px rgba(0,0,0,.3); background:#cfe0bf;}
+  .ph-fallback{width:210px; height:160px; border-radius:16px; display:inline-flex; flex-direction:column; align-items:center; justify-content:center; background:#cfe0bf; border:4px solid #fff; font-size:3rem;}
+  .choices{display:flex; flex-direction:column; gap:9px; margin-top:14px;}
+  .choice{padding:12px; border-radius:14px; border:3px solid #d9c89a; background:#fff; font-size:1.05rem; font-weight:700; cursor:pointer;}
   .choice:active{transform:scale(.97);}
   .choice.correct{background:#cdeeb5; border-color:#5ea03a;}
   .choice.wrong{background:#f6c7c7; border-color:#cf5b5b;}
-  .fact{font-size:1rem; line-height:1.6; margin:12px 4px;}
+  .fact{font-size:1rem; line-height:1.55; margin:12px 4px;}
 
-  /* 화면 흔들림 */
-  @keyframes shake{0%,100%{transform:translate(0,0);}20%{transform:translate(-8px,4px);}40%{transform:translate(8px,-3px);}60%{transform:translate(-6px,5px);}80%{transform:translate(6px,-4px);}}
-  .shake{animation:shake .4s;}
-
-  @media(max-width:560px){
-    .rock{width:70px;height:52px;} .tree{width:74px;height:128px;}
-    .tree .canopy{width:74px;height:66px;} .tree .trunk{height:72px;}
-    .card h1{font-size:1.6rem;}
-  }
+  @keyframes shake{0%,100%{transform:translate(0,0);}20%{transform:translate(-9px,4px);}40%{transform:translate(9px,-3px);}60%{transform:translate(-7px,5px);}80%{transform:translate(7px,-4px);}}
+  .shake{animation:shake .42s;}
 </style>
 </head>
 <body>
@@ -157,14 +118,15 @@
   <section id="intro" class="screen active">
     <div class="card">
       <h1>🌿 곶자왈 곤충 탐험대 🐛</h1>
-      <p>곶자왈에 숨은 곤충 <b>3마리</b>를 모두 찾아 도감을 채워요!</p>
+      <p>곶자왈 돌 속에 숨은 곤충 <b>3마리</b>를 찾아라!<br>똑같이 생긴 돌… 어디에 곤충이, 어디에 위험이?</p>
       <div class="rules">
-        🪨 <b>돌</b>을 톡! → 곤충이 나와요. 하지만 <b>어두운 구멍(숨골)</b>은 빠지면 목숨 ↓<br>
-        🌳 <b>푸른 나무(❓)</b>를 톡! → 퀴즈를 맞히면 <b>잠자리채·채집통</b>을 만들어요<br>
-        🪵 <b>쓰러질 듯 기운 죽은 나무</b>는 건드리면 위험해요! 목숨 ↓<br>
-        🔎 곤충은 알맞은 도구가 있어야 잡을 수 있어요<br>
-        ❤️ 목숨 3개로 시작 — 잘 보고 톡! 누르세요
+        🪨 돌은 전부 <b>똑같이</b> 생겼어요. 눌러야 안에 뭐가 있는지 알 수 있어요.<br>
+        🔢 안전한 돌을 까면 <b>숫자</b>가 떠요 = <b>둘레 8칸에 숨은 숨골 개수</b>! 숫자로 위험을 <b>추리</b>해요.<br>
+        🕳️ <b>숨골</b>을 누르면 빠져서 목숨 ↓ &nbsp; ❤️ 하트를 찾으면 목숨 ↑<br>
+        🌳 나무를 누르면 퀴즈(맞히면 🔦돋보기로 숨골 한 곳을 알려줘요). 단, <b>썩은 나무</b>면 쓰러져 목숨 ↓<br>
+        🐛 곤충을 찾으면 <b>곤충 퀴즈</b>를 풀어요. 맞히면 보너스 점수 ⭐
       </div>
+      <p style="font-size:.92rem;color:#777">목숨 3개 · 곤충 3마리를 다 찾으면 승리!</p>
       <button class="btn" onclick="startGame()">탐험 시작! ▶</button>
     </div>
   </section>
@@ -173,271 +135,321 @@
   <section id="game" class="screen">
     <div id="hud">
       <div class="box" id="lives">❤️❤️❤️</div>
-      <div class="box" id="tools">🛠️ 도구 없음</div>
+      <div class="box" id="score">⭐ 0</div>
       <div class="box" id="count">🐛 0 / 3</div>
       <div id="dex"></div>
     </div>
-    <div id="stage"></div>
-    <div id="toast"></div>
+    <div id="stage">
+      <img id="bg" alt="">
+      <div class="trees" id="trees"></div>
+      <div id="grid"></div>
+      <div id="toast"></div>
+    </div>
   </section>
 
   <!-- 결과 -->
   <section id="result" class="screen">
     <div class="card">
-      <h2 id="result-title">🎉 곶자왈 지킴이 성공!</h2>
+      <h2 id="result-title"></h2>
       <p id="result-msg"></p>
-      <div id="result-dex" style="display:flex; gap:10px; justify-content:center; margin:14px 0; flex-wrap:wrap;"></div>
+      <div id="result-dex" style="display:flex; gap:10px; justify-content:center; margin:12px 0; flex-wrap:wrap;"></div>
       <button class="btn" onclick="startGame()">다시 도전 🔁</button>
     </div>
   </section>
 
-  <!-- 모달 -->
   <div id="overlay"><div class="modal" id="modal"></div></div>
 </div>
 
 <script>
 /* =========================================================
-   곶자왈 곤충 탐험대 — 스테이지 1 (곤충 3마리)
-   곤충 사진: 위키미디어 공용(자유 라이선스) 직링크
+   곶자왈 곤충 탐험대 — 스테이지 1
+   · 돌 4x4 격자: 운(숨은 내용) + 추리(둘레 숨골 숫자, 지뢰찾기식)
+   · 곤충 사진/배경 = 로컬 assets 파일 (파일명에 곤충 이름)
    ========================================================= */
 
-// 실제 곶자왈/한국 서식 곤충 — 위키미디어 공용 이미지
-const FP = "https://commons.wikimedia.org/wiki/Special:FilePath/";
-const INSECTS = {
-  beetle: {
-    name:"넓적사슴벌레", emoji:"🪲", tool:"box",
-    img: FP + "Lucanidae%20-%20Dorcus%20titanus-002.JPG?width=480",
-    fact:"멋진 큰 뿔처럼 보이는 건 사실 <b>큰 턱</b>이에요. 밤에 나무 수액을 먹고 힘겨루기를 해요!"
-  },
-  mantis: {
-    name:"왕사마귀", emoji:"🦗", tool:"net",
-    img: FP + "Tenodera%20sinensis%20(Chinese%20praying%20mantis)%20(Newark,%20Ohio,%20USA)%201%20(31503867486).jpg?width=480",
-    fact:"낫처럼 생긴 <b>앞다리</b>로 먹이를 꽉 잡는 곶자왈의 사냥꾼이에요."
-  },
-  waterbug: {
-    name:"물장군", emoji:"🐛", tool:"box",
-    img: FP + "Lethocerus%20deyrollei.jpg?width=480",
-    fact:"곶자왈 <b>물웅덩이</b>에 사는 우리나라에서 가장 큰 물벌레! 멸종위기종이라 아주 귀해요."
-  }
-};
+const ASSET = "assets/";
+const EXTS  = [".jpg",".jpeg",".png",".JPG",".PNG"];
 
-// 퀴즈 (2학년 눈높이)
-const QUIZZES = [
-  {q:"물장군은 어디에서 살까요?", a:["물웅덩이 속","뜨거운 사막","하얀 눈 위"], c:0},
-  {q:"사슴벌레의 큰 뿔처럼 보이는 건 사실 무엇일까요?", a:["큰 턱(입)","긴 코","꼬리"], c:0},
-  {q:"사마귀는 앞다리로 무엇을 할까요?", a:["먹이를 잡아요","헤엄쳐요","땅을 파요"], c:0},
-  {q:"곶자왈에서 깊고 어두운 구멍(숨골)을 보면?", a:["손대지 않고 피해요","손을 쑥 넣어요"], c:0},
-  {q:"곤충은 다리가 모두 몇 개일까요?", a:["6개","4개","8개"], c:0}
-];
-
-// 위치 슬롯
-const TREE_SLOTS = [ {x:14,y:26},{x:40,y:18},{x:64,y:22},{x:87,y:30} ];
-const ROCK_SLOTS = [ {x:11,y:56},{x:30,y:72},{x:49,y:55},{x:67,y:70},
-                     {x:86,y:58},{x:20,y:88},{x:51,y:87},{x:82,y:86} ];
-
-let state;
-const $ = s => document.querySelector(s);
-const stage = $("#stage");
-
-function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]];} return a; }
-
-function startGame(){
-  state = { lives:3, tools:[], caught:[], quizIdx:0 };
-  showScreen("game");
-  buildStage();
-  updateHUD();
+/* 로컬 이미지 로더: 여러 확장자 시도 → 실패 시 이모지 폴백 */
+function loadImg(img, base, emoji, label){
+  let i = 0; const urls = EXTS.map(e => ASSET + base + e);
+  img.src = urls[i];
+  img.onerror = () => {
+    i++;
+    if (i < urls.length) { img.src = urls[i]; }
+    else {
+      const d = document.createElement("div");
+      d.className = "ph-fallback";
+      d.innerHTML = emoji + (label ? `<div style="font-size:.95rem;margin-top:4px">${label}</div>` : "");
+      if (img.parentNode) img.replaceWith(d);
+    }
+  };
 }
 
+/* 곤충 데이터 — 파일명은 곤충 이름 (사용자가 assets/에 넣을 사진) */
+const INSECTS = {
+  "왕사마귀":      { emoji:"🦗", file:"왕사마귀",
+    quiz:{ q:"왕사마귀가 낫처럼 생긴 앞다리로 하는 일은?", a:["먹이를 잡는 사냥","물에서 헤엄","땅굴 파기"], c:0 } },
+  "두점박이사슴벌레":{ emoji:"🪲", file:"두점박이사슴벌레",
+    quiz:{ q:"사슴벌레의 큰 뿔처럼 보이는 것의 정체는?", a:["큰 턱(입)","긴 코","꼬리"], c:0 } },
+  "뚱보귀뚜라미":  { emoji:"🦗", file:"뚱보귀뚜라미",
+    quiz:{ q:"귀뚜라미는 어떻게 ‘귀뚤귀뚤’ 소리를 낼까?", a:["앞날개를 비벼서","입으로 노래해서","다리를 굴러서"], c:0 } },
+  "애기뿔소똥구리":{ emoji:"🪲", file:"애기뿔소똥구리",
+    quiz:{ q:"소똥구리가 똥을 동그랗게 굴리는 까닭은?", a:["먹이로 쓰고 알을 낳으려고","공놀이하려고","길을 막으려고"], c:0 } },
+  "메뚜기":        { emoji:"🦗", file:"메뚜기",
+    quiz:{ q:"메뚜기가 멀리 점프할 수 있는 비결은?", a:["크고 힘센 뒷다리","날개가 네 쌍","긴 더듬이"], c:0 } }
+};
+
+/* 스테이지 1에서 찾을 곤충 3종 */
+const STAGE1 = ["왕사마귀","두점박이사슴벌레","뚱보귀뚜라미"];
+
+/* 나무 상식 퀴즈 */
+const TREE_QUIZ = [
+  { q:"곶자왈에서 깊고 어두운 구멍(숨골)을 만나면?", a:["가까이 가지 않고 피한다","손을 쑥 넣어 본다"], c:0 },
+  { q:"곤충의 다리는 모두 몇 개일까?", a:["6개","4개","8개"], c:0 },
+  { q:"곶자왈은 어느 섬에 있는 숲일까?", a:["제주도","울릉도","거제도"], c:0 },
+  { q:"곤충의 몸은 크게 몇 부분으로 나뉠까?", a:["머리·가슴·배 3부분","2부분","1부분"], c:0 }
+];
+
+const GRID_N = 16, COLS = 4;
+let state, cells, treeRoles, quizPick;
+const $ = s => document.querySelector(s);
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function startGame(){
+  state = { lives:3, score:0, found:0, caught:[], start:Date.now() };
+  quizPick = 0;
+  showScreen("game");
+  // 배경 사진
+  const bg = $("#bg"); bg.style.display="";
+  bg.onerror = ()=>{ bg.style.display="none"; };
+  bg.src = ASSET + "배경.jpg";
+  bg.onerror = ()=>{ bg.src = ASSET+"배경.png"; bg.onerror=()=>{ bg.style.display="none"; }; };
+  buildTrees();
+  buildGrid();
+  updateHUD();
+}
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $("#"+id).classList.add("active");
   $("#overlay").classList.remove("show");
 }
 
-/* ---------- 무대 만들기 ---------- */
-function buildStage(){
-  stage.innerHTML = "";
-
-  // 나무 역할: 푸른나무(퀴즈) 2 + 죽은나무(위험) 2
-  const treeRoles = shuffle(["quiz","quiz","dead","dead"]);
-  shuffle(TREE_SLOTS).forEach((p,i)=> addTree(p, treeRoles[i]));
-
-  // 돌 역할: 곤충3 + 숨골2 + 빈돌2 + 하트1
-  const insectKeys = Object.keys(INSECTS); // beetle, mantis, waterbug
-  const rockRoles = shuffle([
-    {t:"insect",k:insectKeys[0]},{t:"insect",k:insectKeys[1]},{t:"insect",k:insectKeys[2]},
-    {t:"hole"},{t:"hole"},{t:"empty"},{t:"empty"},{t:"heart"}
-  ]);
-  shuffle(ROCK_SLOTS).forEach((p,i)=> addRock(p, rockRoles[i]));
+/* ---------- 나무 ---------- */
+function buildTrees(){
+  const box = $("#trees"); box.innerHTML="";
+  treeRoles = shuffle(["quiz","quiz","dead"]); // 겉모습 동일, 역할은 비밀
+  treeRoles.forEach((role,i)=>{
+    const t = document.createElement("div");
+    t.className="tree";
+    t.innerHTML = `<div class="canopy"></div><div class="trunk"></div>`;
+    t.onclick = ()=> tapTree(t, role);
+    box.appendChild(t);
+  });
 }
-
-function place(el,p){ el.style.left=p.x+"%"; el.style.top=p.y+"%"; stage.appendChild(el); }
-
-function addTree(p, role){
-  const el = document.createElement("div");
-  el.className = "obj tree" + (role==="dead" ? " dead" : "");
-  if(role==="dead"){
-    el.innerHTML = `<div class="warn">⚠️</div><div class="branch"></div><div class="branch b2"></div><div class="trunk"></div>`;
-  }else{
-    el.innerHTML = `<div class="canopy"></div><div class="sign">❓</div><div class="trunk"></div>`;
-  }
-  el.onclick = ()=> tapTree(el, role);
-  place(el,p);
-}
-
-function addRock(p, role){
-  const el = document.createElement("div");
-  el.className = "obj rock";
-  let inner = `<div class="body"><div class="moss"></div></div>`;
-  if(role.t==="hole")   inner += `<div class="hole"></div>`;
-  if(role.t==="insect") inner += `<div class="clue">✨</div>`;   // 곤충 흔적 단서
-  el.innerHTML = inner;
-  el.onclick = ()=> tapRock(el, role);
-  place(el,p);
-}
-
-/* ---------- 상호작용 ---------- */
 function tapTree(el, role){
   if(el.classList.contains("used")) return;
   if(role==="dead"){
-    loseLife("🪵 죽은 나무가 쓰러졌어요! 조심!");
-    el.classList.add("used");
+    el.classList.add("used","fallen");
+    loseLife("🪵 썩은 나무였어요! 쓰러져서 목숨 −1");
   }else{
-    openQuiz(el);
+    openTreeQuiz(el);
   }
 }
-
-function tapRock(el, role){
-  if(el.classList.contains("used")) return;
-  if(role.t==="hole"){
-    loseLife("🕳️ 숨골에 빠졌어요! 어두운 구멍은 피해요.");
-    el.classList.add("used");
-  }else if(role.t==="heart"){
-    state.lives++; updateHUD();
-    el.classList.add("used"); toast("❤️ 숨은 하트 발견! 목숨 +1");
-  }else if(role.t==="empty"){
-    el.classList.add("used"); toast("🍃 여긴 아무것도 없네요.");
-  }else if(role.t==="insect"){
-    const ins = INSECTS[role.k];
-    if(state.tools.includes(ins.tool)){
-      el.classList.add("used");
-      catchInsect(role.k);
-    }else{
-      const need = ins.tool==="net" ? "잠자리채 🥅" : "채집통 🪣";
-      toast(`${ins.emoji} ${ins.name} 발견! ${need}가 필요해요. 나무 퀴즈로 만들어요!`);
-      // 흔적 강조
-      const c = el.querySelector(".clue"); if(c) c.textContent = ins.emoji;
-    }
-  }
-}
-
-/* ---------- 퀴즈 ---------- */
-function openQuiz(treeEl){
-  const quiz = QUIZZES[state.quizIdx % QUIZZES.length];
-  state.quizIdx++;
+function openTreeQuiz(treeEl){
+  const quiz = TREE_QUIZ[quizPick % TREE_QUIZ.length]; quizPick++;
   const m = $("#modal");
-  m.innerHTML = `<h3>🌳 곶자왈 퀴즈</h3><p style="font-size:1.1rem;font-weight:700">${quiz.q}</p>
+  m.innerHTML = `<h3>🌳 곶자왈 퀴즈</h3><p style="font-size:1.08rem;font-weight:700">${quiz.q}</p>
     <div class="choices">${quiz.a.map((t,i)=>`<button class="choice" data-i="${i}">${t}</button>`).join("")}</div>`;
   $("#overlay").classList.add("show");
   m.querySelectorAll(".choice").forEach(btn=>{
-    btn.onclick = ()=>{
-      const i = +btn.dataset.i;
-      if(i===quiz.c){
-        btn.classList.add("correct");
-        setTimeout(()=>{ $("#overlay").classList.remove("show"); rewardTool(treeEl); }, 550);
+    btn.onclick=()=>{
+      if(+btn.dataset.i===quiz.c){
+        btn.classList.add("correct"); state.score+=20;
+        setTimeout(()=>{ $("#overlay").classList.remove("show"); treeEl.classList.add("used","quizzed"); useMagnify(); updateHUD(); }, 520);
       }else{
-        btn.classList.add("wrong");
-        setTimeout(()=>btn.classList.remove("wrong"), 600);
-        toast("아쉬워요! 다시 한 번 생각해봐요 🤔");
+        btn.classList.add("wrong"); setTimeout(()=>btn.classList.remove("wrong"),600);
+        toast("아쉬워요! 다시 생각해봐요 🤔");
       }
     };
   });
 }
-
-function rewardTool(treeEl){
-  treeEl.classList.add("used");
-  if(!state.tools.includes("box")){
-    state.tools.push("box"); toast("🪣 채집통을 만들었어요! 사슴벌레·물장군을 잡을 수 있어요.");
-  }else if(!state.tools.includes("net")){
-    state.tools.push("net"); toast("🥅 잠자리채를 만들었어요! 사마귀를 잡을 수 있어요.");
+/* 🔦 돋보기: 아직 숨어있는 숨골 한 곳을 깃발로 알려줌 (없으면 목숨 +1) */
+function useMagnify(){
+  const hidden = cells.filter(c=>c.type==="hole" && !c.revealed && !c.flag);
+  if(hidden.length){
+    const c = hidden[Math.random()*hidden.length|0];
+    c.flag=true; c.el.classList.add("flag","revealed");
+    c.el.querySelector(".face")?.remove();
+    const f=document.createElement("div"); f.className="face"; f.textContent="🚩"; c.el.appendChild(f);
+    c.el.style.pointerEvents="none";
+    toast("🔦 돋보기가 숨골 한 곳(🚩)을 찾았어요! 피해 가세요.");
   }else{
-    state.lives++; toast("도구가 충분해요! 보너스 목숨 ❤️ +1");
+    state.lives++; toast("🔦 숨골이 안 보여요 → 보너스 목숨 ❤️ +1");
+  }
+}
+
+/* ---------- 돌 격자 ---------- */
+function buildGrid(){
+  const grid = $("#grid"); grid.innerHTML="";
+  // 내용 배치: 곤충3 + 숨골5 + 하트1 + 빈7
+  const contents = shuffle([
+    {type:"insect",key:STAGE1[0]},{type:"insect",key:STAGE1[1]},{type:"insect",key:STAGE1[2]},
+    {type:"hole"},{type:"hole"},{type:"hole"},{type:"hole"},{type:"hole"},
+    {type:"heart"},
+    {type:"empty"},{type:"empty"},{type:"empty"},{type:"empty"},{type:"empty"},{type:"empty"},{type:"empty"}
+  ]);
+  cells = contents.map((c,i)=>({ ...c, i, revealed:false, flag:false }));
+  cells.forEach(c=>{
+    const el = document.createElement("div");
+    el.className="stone";
+    el.innerHTML = `<div class="rock"><div class="moss"></div></div>`;
+    el.onclick = ()=> tapStone(c);
+    c.el = el; grid.appendChild(el);
+  });
+}
+function neighbors(i){
+  const r=Math.floor(i/COLS), col=i%COLS, out=[];
+  for(let dr=-1;dr<=1;dr++) for(let dc=-1;dc<=1;dc++){
+    if(!dr&&!dc) continue;
+    const nr=r+dr, nc=col+dc;
+    if(nr>=0&&nr<COLS&&nc>=0&&nc<COLS) out.push(nr*COLS+nc);
+  }
+  return out;
+}
+function holeCount(i){ return neighbors(i).filter(j=>cells[j].type==="hole").length; }
+
+function tapStone(c){
+  if(c.revealed || c.flag) return;
+  c.revealed=true; c.el.classList.add("revealed");
+
+  if(c.type==="hole"){
+    c.el.classList.add("hole");
+    setFace(c,"💥");
+    loseLife("🕳️ 숨골에 빠졌어요! 목숨 −1");
+  }
+  else if(c.type==="heart"){
+    state.lives++; setFace(c,"❤️"); updateHUD();
+    toast("❤️ 숨은 하트 발견! 목숨 +1");
+  }
+  else if(c.type==="empty"){
+    const n = holeCount(c.i);
+    setFace(c, n===0 ? "·" : String(n));
+    if(n>0) c.el.querySelector(".face").classList.add("num"+Math.min(n,6));
+  }
+  else if(c.type==="insect"){
+    // 사진 썸네일 표시 후 채집 퀴즈
+    const img=document.createElement("img"); c.el.querySelector(".face")?.remove(); c.el.appendChild(img);
+    loadImg(img, INSECTS[c.key].file, INSECTS[c.key].emoji, "");
+    c.el.style.pointerEvents="none";
+    openCatchQuiz(c.key);
+  }
+}
+function setFace(c, txt){
+  c.el.querySelector(".face")?.remove();
+  const f=document.createElement("div"); f.className="face"; f.textContent=txt; c.el.appendChild(f);
+}
+
+/* ---------- 곤충 채집 → 곤충 퀴즈 ---------- */
+function openCatchQuiz(key){
+  const ins=INSECTS[key], quiz=ins.quiz;
+  const m=$("#modal");
+  m.innerHTML = `<h3>${ins.emoji} ${key} 발견!</h3>
+    <img class="photo" id="catchphoto" alt="${key}">
+    <p style="font-size:1.06rem;font-weight:700;margin:12px 4px">${quiz.q}</p>
+    <div class="choices">${quiz.a.map((t,i)=>`<button class="choice" data-i="${i}">${t}</button>`).join("")}</div>`;
+  $("#overlay").classList.add("show");
+  loadImg($("#catchphoto"), ins.file, ins.emoji, key);
+  m.querySelectorAll(".choice").forEach(btn=>{
+    btn.onclick=()=>{
+      const ok = +btn.dataset.i===quiz.c;
+      m.querySelectorAll(".choice").forEach(b=>b.style.pointerEvents="none");
+      btn.classList.add(ok?"correct":"wrong");
+      if(!ok) m.querySelectorAll(".choice")[quiz.c].classList.add("correct");
+      collectInsect(key, ok);
+      setTimeout(()=> showCatchResult(key, ok), 700);
+    };
+  });
+}
+function collectInsect(key, ok){
+  if(!state.caught.includes(key)){
+    state.caught.push(key); state.found++;
+    state.score += 100 + (ok?50:0);
   }
   updateHUD();
 }
-
-/* ---------- 채집 ---------- */
-function catchInsect(key){
-  const ins = INSECTS[key];
-  state.caught.push(key);
-  updateHUD();
-  const m = $("#modal");
-  m.innerHTML = `<h3>${ins.emoji} ${ins.name} 채집 성공!</h3>
-    <img class="photo" src="${ins.img}" alt="${ins.name}"
-         onerror="this.outerHTML='<div class=&quot;ph-fallback&quot;>${ins.emoji}<div style=&quot;font-size:1rem;margin-top:6px&quot;>${ins.name}</div></div>'">
-    <p class="fact">${ins.fact}</p>
+function showCatchResult(key, ok){
+  const ins=INSECTS[key], m=$("#modal");
+  m.innerHTML = `<h3>${ok?"정답! ⭐":"아쉬워요"} ${ins.emoji} ${key} 채집!</h3>
+    <img class="photo" id="catchphoto2" alt="${key}">
+    <p class="fact">${ok?"퀴즈를 맞혀 보너스 점수를 얻었어요!":"그래도 곤충은 채집했어요. 다음엔 퀴즈도 맞혀봐요!"}<br>
+       남은 곤충 <b>${3-state.found}</b>마리</p>
     <button class="btn" onclick="closePopup()">좋아요! 👍</button>`;
-  $("#overlay").classList.add("show");
+  loadImg($("#catchphoto2"), ins.file, ins.emoji, key);
 }
-
 function closePopup(){
   $("#overlay").classList.remove("show");
-  if(state.caught.length>=3) win();
+  if(state.found>=3) win();
 }
 
 /* ---------- 목숨 / HUD ---------- */
 function loseLife(msg){
   state.lives--; updateHUD(); toast(msg);
-  $("#app").classList.add("shake");
-  setTimeout(()=>$("#app").classList.remove("shake"), 420);
-  if(state.lives<=0) setTimeout(lose, 700);
+  $("#app").classList.add("shake"); setTimeout(()=>$("#app").classList.remove("shake"),420);
+  if(state.lives<=0) setTimeout(lose, 750);
 }
-
 function updateHUD(){
   $("#lives").textContent = state.lives>0 ? "❤️".repeat(state.lives) : "💀";
-  const tnames = [];
-  if(state.tools.includes("box")) tnames.push("🪣채집통");
-  if(state.tools.includes("net")) tnames.push("🥅잠자리채");
-  $("#tools").textContent = tnames.length ? "🛠️ "+tnames.join(" ") : "🛠️ 도구 없음";
-  $("#count").textContent = `🐛 ${state.caught.length} / 3`;
-  // 도감
-  const keys = Object.keys(INSECTS);
-  $("#dex").innerHTML = keys.map(k=>{
-    const done = state.caught.includes(k); const ins = INSECTS[k];
-    return done
-      ? `<div class="slot done"><img src="${ins.img}" alt="${ins.name}" onerror="this.parentNode.textContent='${ins.emoji}'"></div>`
-      : `<div class="slot">?</div>`;
-  }).join("");
+  $("#score").textContent = "⭐ "+state.score;
+  $("#count").textContent = `🐛 ${state.found} / 3`;
+  $("#dex").innerHTML="";
+  STAGE1.forEach(key=>{
+    const slot=document.createElement("div"); slot.className="slot";
+    if(state.caught.includes(key)){
+      slot.classList.add("done"); const img=document.createElement("img");
+      slot.appendChild(img); loadImg(img, INSECTS[key].file, INSECTS[key].emoji, "");
+    }else slot.textContent="?";
+    $("#dex").appendChild(slot);
+  });
 }
 
 /* ---------- 토스트 ---------- */
 let toastTimer;
-function toast(msg){
-  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"), 2300);
-}
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2400); }
 
 /* ---------- 종료 ---------- */
+function finalScore(){
+  const sec = Math.round((Date.now()-state.start)/1000);
+  const timeBonus = Math.max(0, 120-sec);
+  return { sec, timeBonus, total: state.score + state.lives*30 + timeBonus };
+}
 function win(){
-  $("#result-title").textContent = "🎉 곶자왈 지킴이 성공!";
-  $("#result-msg").innerHTML = `곤충 3마리를 모두 찾았어요!<br>남은 목숨 ❤️ ${state.lives}개. 정말 멋진 탐험가예요!`;
+  const s=finalScore();
+  $("#result-title").textContent="🎉 곶자왈 지킴이 성공!";
+  $("#result-msg").innerHTML = `곤충 3마리를 모두 찾았어요!<br>
+    ⭐점수 ${state.score} + 목숨 ${state.lives}×30 + 시간보너스 ${s.timeBonus}<br>
+    <b style="font-size:1.2rem;color:#b5651d">최종 ${s.total}점</b> · ${s.sec}초`;
   fillResultDex(); showScreen("result");
 }
 function lose(){
-  $("#result-title").textContent = "😢 목숨을 모두 잃었어요";
-  $("#result-msg").innerHTML = `${state.caught.length}마리를 찾았어요.<br>숨골과 죽은 나무를 잘 피해서 다시 도전해요!`;
+  $("#result-title").textContent="😢 목숨을 모두 잃었어요";
+  $("#result-msg").innerHTML = `${state.found}마리를 찾았어요.<br>숫자로 숨골을 추리하고 🔦돋보기를 잘 쓰면 더 멀리 갈 수 있어요!`;
   fillResultDex(); showScreen("result");
 }
 function fillResultDex(){
-  $("#result-dex").innerHTML = Object.keys(INSECTS).map(k=>{
-    const ins=INSECTS[k]; const done=state.caught.includes(k);
-    return `<div style="text-align:center;width:90px">
-      <div class="slot ${done?'done':''}" style="width:80px;height:80px;margin:auto">
-        ${done?`<img src="${ins.img}" onerror="this.parentNode.textContent='${ins.emoji}'">`:'❓'}
-      </div>
-      <div style="color:#2c5a26;font-weight:800;font-size:.85rem;margin-top:4px">${done?ins.name:'？'}</div>
-    </div>`;
-  }).join("");
+  const box=$("#result-dex"); box.innerHTML="";
+  STAGE1.forEach(key=>{
+    const done=state.caught.includes(key);
+    const wrap=document.createElement("div"); wrap.style.cssText="text-align:center;width:92px";
+    const slot=document.createElement("div"); slot.className="slot "+(done?"done":""); slot.style.cssText="width:82px;height:82px;margin:auto";
+    if(done){ const img=document.createElement("img"); slot.appendChild(img); loadImg(img, INSECTS[key].file, INSECTS[key].emoji,""); }
+    else slot.textContent="❓";
+    const name=document.createElement("div"); name.style.cssText="color:#2c5a26;font-weight:800;font-size:.82rem;margin-top:4px";
+    name.textContent = done?key:"？";
+    wrap.appendChild(slot); wrap.appendChild(name); box.appendChild(wrap);
+  });
 }
 </script>
 </body>
