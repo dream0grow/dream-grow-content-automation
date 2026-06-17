@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>곶자왈 곤충 찾기 타워</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body { height:100%; background:#0b1f17; overflow:hidden;
+    font-family:"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+  #wrap { position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+  canvas { display:block; background:#123127; touch-action:none; }
+
+  /* 공통 오버레이 */
+  .overlay { position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center; color:#fff;
+    padding:24px; z-index:20; }
+  .panel { background:rgba(8,28,20,.92); border:3px solid #6fd49b; border-radius:20px;
+    padding:26px 22px; max-width:340px; width:90%; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+  h1 { font-size:26px; color:#aef5c6; text-shadow:2px 2px 0 #0a3d28; line-height:1.3; margin-bottom:6px; }
+  .sub { color:#cfeede; font-size:14px; margin:10px 0 16px; line-height:1.6; }
+  .btn { display:inline-block; background:#33c46e; color:#06281a; font-weight:800;
+    font-size:20px; border:none; border-radius:14px; padding:14px 30px; margin-top:8px;
+    cursor:pointer; box-shadow:0 5px 0 #1d8a48; }
+  .btn:active { transform:translateY(4px); box-shadow:0 1px 0 #1d8a48; }
+  .help { text-align:left; font-size:13px; color:#bfe6d3; line-height:1.9; margin:6px 0 14px; }
+  .help b { color:#ffe07a; }
+  .hide { display:none !important; }
+
+  /* 도감 줄 */
+  .dex { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:8px 0 4px; }
+  .dex .slot { width:46px; height:46px; border-radius:10px; background:rgba(255,255,255,.08);
+    border:2px solid #3f6b56; display:flex; align-items:center; justify-content:center; font-size:24px; }
+  .dex .slot.got { background:#1f6b46; border-color:#aef5c6; }
+  .dex .slot small { font-size:9px; }
+
+  /* HUD */
+  #hud { position:absolute; top:0; left:0; right:0; z-index:10; display:flex;
+    justify-content:space-between; align-items:flex-start; padding:10px 12px; pointer-events:none; }
+  #hud .box { background:rgba(7,26,18,.7); border-radius:12px; padding:6px 10px; color:#eafff3; font-weight:700; }
+  #lives { font-size:18px; letter-spacing:2px; }
+  #hudRight { text-align:right; }
+  #height { font-size:18px; color:#ffe07a; }
+  #dexHud { font-size:13px; margin-top:4px; }
+
+  /* 모바일 조작 버튼 */
+  #touch { position:absolute; inset:0; z-index:15; display:none; }
+  #touch .pad { position:absolute; bottom:18px; width:78px; height:78px; border-radius:50%;
+    background:rgba(255,255,255,.13); border:2px solid rgba(255,255,255,.35); color:#fff;
+    font-size:30px; display:flex; align-items:center; justify-content:center; pointer-events:auto; }
+  #bLeft { left:16px; }
+  #bRight { left:104px; }
+  #bJump { right:16px; width:96px; height:96px; bottom:18px; background:rgba(80,220,140,.25); border-color:#7fe3a8; }
+  .quizBtn { display:block; width:100%; background:#10402c; color:#eafff3; border:2px solid #4f8a6c;
+    border-radius:12px; padding:13px; font-size:16px; font-weight:700; margin-top:10px; cursor:pointer; }
+  .quizBtn:active { background:#1c5c3f; }
+  #quizFeedback { margin-top:12px; font-size:16px; font-weight:800; min-height:22px; }
+  .qhead { font-size:34px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hide">
+    <div class="box"><span id="lives">❤️❤️❤️❤️❤️</span></div>
+    <div id="hudRight">
+      <div class="box"><span id="height">0 m</span></div>
+      <div class="box" id="dexHud">곤충 0/5</div>
+    </div>
+  </div>
+
+  <!-- 모바일 터치 패드 -->
+  <div id="touch">
+    <div class="pad" id="bLeft">◀</div>
+    <div class="pad" id="bRight">▶</div>
+    <div class="pad" id="bJump">점프</div>
+  </div>
+
+  <!-- 시작 화면 -->
+  <div class="overlay" id="startScreen">
+    <div class="panel">
+      <h1>🪲 곶자왈<br>곤충 찾기 타워</h1>
+      <div class="sub">물장군이 되어 타워를 올라가자!<br>퀴즈를 맞히고 곶자왈 곤충을 모아요.</div>
+      <div class="help">
+        🌋 <b>10초</b>마다 용암이 차올라요. 멈추지 말고 올라가세요!<br>
+        💣 <b>폭탄</b>을 건드리면 펑! 떨어져요.<br>
+        🧱 <b>금 간 블록</b>은 밟으면 사라져요.<br>
+        ❓ <b>물음표 블록</b>에서 곤충 퀴즈가 나와요.<br>
+        ❤️ 목숨 5개! 곤충 5마리를 다 모으면 승리!
+      </div>
+      <div class="help">
+        조작 — PC: <b>← →</b> 이동, <b>스페이스/↑</b> 점프<br>
+        폰: 화면 아래 버튼
+      </div>
+      <button class="btn" id="startBtn">시작하기 ▶</button>
+    </div>
+  </div>
+
+  <!-- 퀴즈 화면 -->
+  <div class="overlay hide" id="quizScreen">
+    <div class="panel">
+      <div class="qhead" id="quizEmoji">❓</div>
+      <h1 id="quizTitle" style="font-size:20px;">곤충 퀴즈</h1>
+      <div class="sub" id="quizQ">문제</div>
+      <div id="quizOptions"></div>
+      <div id="quizFeedback"></div>
+    </div>
+  </div>
+
+  <!-- 게임오버 -->
+  <div class="overlay hide" id="overScreen">
+    <div class="panel">
+      <h1>🌋 게임 오버</h1>
+      <div class="sub" id="overMsg">용암에 닿았어요…</div>
+      <div class="dex" id="overDex"></div>
+      <div class="sub" id="overScore"></div>
+      <button class="btn" id="retryBtn">다시 하기 ↻</button>
+    </div>
+  </div>
+
+  <!-- 승리 -->
+  <div class="overlay hide" id="winScreen">
+    <div class="panel">
+      <h1>🏆 도감 완성!</h1>
+      <div class="sub">곶자왈 곤충 5마리를 모두 모았어요!<br>물장군 박사님 인정! 🪲</div>
+      <div class="dex" id="winDex"></div>
+      <div class="sub" id="winScore"></div>
+      <button class="btn" id="winBtn">한 번 더 ↻</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================
+   곶자왈 곤충 찾기 타워 — 단일 HTML 게임 (Canvas)
+   ========================================================= */
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// 가상 해상도(세로 타워). 실제 화면에 맞춰 스케일.
+const VW = 480, VH = 800;
+let scale = 1, offX = 0, offY = 0;
+function resize(){
+  const w = window.innerWidth, h = window.innerHeight;
+  scale = Math.min(w/VW, h/VH);
+  canvas.width = VW*scale; canvas.height = VH*scale;
+  canvas.style.width = VW*scale+'px'; canvas.style.height = VH*scale+'px';
+  ctx.setTransform(scale,0,0,scale,0,0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ---------- 곤충 도감 데이터 + 퀴즈 ----------
+const INSECTS = [
+  { key:'muljanggun', name:'물장군', emoji:'🪲',
+    q:'물장군은 어디에서 살까요?',
+    options:['연못이나 물속','뜨거운 사막','높은 나무 꼭대기'], answer:0,
+    fact:'물장군은 우리나라에서 가장 큰 물에 사는 곤충(노린재류)이에요!' },
+  { key:'mantis_big', name:'왕사마귀', emoji:'🦗',
+    q:'왕사마귀가 사냥할 때 쓰는 것은?',
+    options:['커다란 앞다리','긴 더듬이','넓은 날개'], answer:0,
+    fact:'왕사마귀는 낫처럼 생긴 앞다리로 다른 곤충을 잡아요.' },
+  { key:'dungbeetle', name:'애기뿔소똥구리', emoji:'🪲',
+    q:'애기뿔소똥구리가 좋아하는 것은?',
+    options:['동물의 똥','달콤한 꿀','반짝이는 돌'], answer:0,
+    fact:'소똥을 먹고 굴려요. 지금은 보호가 필요한 귀한 곤충이에요.' },
+  { key:'jeju_beetle', name:'제주홍단딱정벌레', emoji:'🐞',
+    q:'제주홍단딱정벌레를 많이 볼 수 있는 곳은?',
+    options:['제주도','북극','바닷속'], answer:0,
+    fact:'제주도에 사는 딱정벌레로, 붉은빛이 도는 예쁜 곤충이에요.' },
+  { key:'mantis_small', name:'애기사마귀', emoji:'🦗',
+    q:'애기사마귀는 사마귀 중에서 어떤 편일까요?',
+    options:['몸집이 작은 편','세상에서 제일 큰 편','다리가 없는 편'], answer:0,
+    fact:'이름처럼 몸집이 작은 사마귀예요.' },
+];
+
+// ---------- 게임 상태 ----------
+const G = {
+  state:'start',           // start | play | quiz | over | win
+  lives:5,
+  collected:[],            // insect key 모음
+  player:null,
+  platforms:[],
+  cameraY:0,
+  topGen:0,                // 가장 위로 생성한 y
+  lavaY:0,                 // 용암 윗면 (world y, 클수록 아래)
+  lavaRate:0,              // px/초
+  elapsed:0,
+  bestY:0,                 // 가장 높이 올라간 (가장 작은 y)
+  nextQuizCounter:5,       // 몇 칸마다 퀴즈 블록
+  quizCycle:0,
+  invuln:0,                // 무적 시간(초)
+  shake:0,
+};
+
+// 물리 상수
+const GRAV = 0.62, MOVE = 4.6, JUMP_V = -12.6;  // 점프 최고높이 ≈ 128px (칸 간격보다 살짝 큼 → 한 번에 한 칸)
+const METER = 80;          // 1m = 80px
+const P_W = 38, P_H = 30;  // 플레이어 크기
+
+// 입력
+const keys = { left:false, right:false, jump:false };
+document.addEventListener('keydown', e=>{
+  if(['ArrowLeft','a','A'].includes(e.key)) keys.left=true;
+  if(['ArrowRight','d','D'].includes(e.key)) keys.right=true;
+  if([' ','ArrowUp','w','W'].includes(e.key)){ keys.jump=true; e.preventDefault(); }
+});
+document.addEventListener('keyup', e=>{
+  if(['ArrowLeft','a','A'].includes(e.key)) keys.left=false;
+  if(['ArrowRight','d','D'].includes(e.key)) keys.right=false;
+  if([' ','ArrowUp','w','W'].includes(e.key)) keys.jump=false;
+});
+// 터치 패드
+function bindPad(id, on){
+  const el = document.getElementById(id);
+  const set=v=>e=>{ e.preventDefault(); on(v); };
+  el.addEventListener('touchstart', set(true), {passive:false});
+  el.addEventListener('touchend', set(false), {passive:false});
+  el.addEventListener('touchcancel', set(false), {passive:false});
+  el.addEventListener('mousedown', set(true));
+  el.addEventListener('mouseup', set(false));
+  el.addEventListener('mouseleave', set(false));
+}
+bindPad('bLeft', v=>keys.left=v);
+bindPad('bRight', v=>keys.right=v);
+bindPad('bJump', v=>keys.jump=v);
+// 터치 디바이스면 패드 표시
+if('ontouchstart' in window || navigator.maxTouchPoints>0){
+  document.getElementById('touch').style.display='block';
+}
+
+// ---------- 플랫폼 생성 ----------
+// type: normal | fragile | bomb | quiz
+function makePlatform(x,y,w,type,insect){
+  return { x,y,w,h:16,type,insect:insect||null,
+           broken:false, breakT:0, answered:false, dead:false };
+}
+
+function spawnInitial(){
+  G.platforms = [];
+  // 시작 발판 (넓게)
+  G.platforms.push(makePlatform(VW/2-70, VH-120, 140, 'normal'));
+  G.topGen = VH-120;
+  G.lastCenter = VW/2;
+  G.genIndex = 0;
+  // 위쪽으로 채우기
+  for(let i=0;i<14;i++) generateNext();
+}
+
+function generateNext(){
+  G.genIndex++;
+  const gap = 66 + Math.random()*34;          // 세로 간격 (점프 최대 높이보다 작게 → 항상 도달 가능)
+  const y = G.topGen - gap;
+  const w = 76 + Math.random()*46;            // 발판 폭(넓게 → 착지 쉽게)
+  // 이전 발판 중심에서 도달 가능한 범위(±150px) 안에만 배치 → 2학년도 갈 수 있게
+  let center = G.lastCenter + (Math.random()*2-1)*150;
+  center = Math.max(14+w/2, Math.min(VW-14-w/2, center));
+  const x = center - w/2;
+
+  let type = 'normal';
+  G.nextQuizCounter--;
+  let insect = null;
+  if(G.nextQuizCounter<=0){
+    // 아직 못 모은 곤충 위주로 퀴즈 배정
+    const remaining = INSECTS.filter(it=>!G.collected.includes(it.key));
+    const pool = remaining.length? remaining : INSECTS;
+    insect = pool[G.quizCycle % pool.length];
+    G.quizCycle++;
+    type='quiz';
+    G.nextQuizCounter = 4 + Math.floor(Math.random()*2);
+  } else if(G.genIndex > 4){
+    // 처음 4칸은 안전하게(폭탄/깨지는 블록 없음)
+    const r = Math.random();
+    if(r<0.15) type='bomb';
+    else if(r<0.36) type='fragile';
+  }
+  G.platforms.push(makePlatform(x,y,w,type,insect));
+  G.topGen = y;
+  G.lastCenter = center;
+}
+
+// ---------- 플레이어 ----------
+function newPlayer(){
+  return { x:VW/2-P_W/2, y:VH-120-P_H, vx:0, vy:0, onGround:false, face:1, hurtT:0 };
+}
+
+// ---------- 게임 시작/리셋 ----------
+function startGame(){
+  G.state='play';
+  G.lives=5; G.collected=[]; G.elapsed=0;
+  G.nextQuizCounter=4; G.quizCycle=0; G.invuln=0; G.shake=0;
+  spawnInitial();
+  G.player = newPlayer();
+  G.bestY = G.player.y;
+  G.cameraY = 0;
+  // 용암: 시작 발판보다 충분히 아래에서 시작
+  G.lavaY = VH + 180;
+  G.lavaRate = 20;          // px/초 (초기, 천천히)
+  updateHUD();
+  show('hud'); hideAll(['startScreen','overScreen','winScreen','quizScreen']);
+}
+
+// ---------- 죽음 처리 ----------
+function loseLife(reason){
+  if(G.invuln>0) return;
+  G.lives--;
+  G.shake = 0.4;
+  updateHUD();
+  if(G.lives<=0){ gameOver(reason); return; }
+  // 부활: 용암 위 안전한 발판으로 올림 + 용암 내려주기
+  respawn();
+  G.invuln = 1.6;
+}
+
+function respawn(){
+  // 현재 카메라 화면 안에서 용암보다 위에 있는 발판 중 하나에 올려놓기
+  const safe = G.platforms
+    .filter(p=>!p.dead && p.type!=='bomb' && p.y < G.lavaY-120 && p.y > G.cameraY+60)
+    .sort((a,b)=>b.y-a.y); // 아래쪽(가까운) 우선
+  let target = safe[0];
+  if(!target){
+    // 없으면 새로 하나 만들어줌
+    target = makePlatform(VW/2-60, G.cameraY+VH*0.5, 120, 'normal');
+    G.platforms.push(target);
+  }
+  const p=G.player;
+  p.x = target.x + target.w/2 - P_W/2;
+  p.y = target.y - P_H;
+  p.vx=0; p.vy=0; p.onGround=true; p.hurtT=0.5;
+  // 용암을 화면 아래로 충분히 내려서 숨 돌릴 틈
+  G.lavaY = Math.max(G.lavaY, target.y + 260);
+}
+
+function gameOver(reason){
+  G.state='over';
+  document.getElementById('overMsg').textContent =
+    reason==='bomb' ? '폭탄이 펑! 터졌어요 💥' :
+    reason==='fall' ? '아래로 떨어졌어요…' : '용암에 닿았어요… 🌋';
+  document.getElementById('overScore').innerHTML =
+    `최고 높이 <b style="color:#ffe07a">${heightMeters()} m</b> · 곤충 ${G.collected.length}/5`;
+  renderDex(document.getElementById('overDex'));
+  hide('hud'); show('overScreen');
+}
+
+function winGame(){
+  G.state='win';
+  document.getElementById('winScore').innerHTML =
+    `최고 높이 <b style="color:#ffe07a">${heightMeters()} m</b>`;
+  renderDex(document.getElementById('winDex'));
+  hide('hud'); show('winScreen');
+}
+
+function heightMeters(){
+  return Math.max(0, Math.round((VH-120 - G.bestY)/METER));
+}
+
+// ---------- 퀴즈 ----------
+let activeQuiz = null;
+function openQuiz(platform){
+  activeQuiz = platform;
+  G.state='quiz';
+  const it = platform.insect;
+  document.getElementById('quizEmoji').textContent = it.emoji;
+  document.getElementById('quizTitle').textContent = `${it.name} 퀴즈`;
+  document.getElementById('quizQ').textContent = it.q;
+  document.getElementById('quizFeedback').textContent='';
+  const box = document.getElementById('quizOptions');
+  box.innerHTML='';
+  it.options.forEach((opt,i)=>{
+    const b=document.createElement('button');
+    b.className='quizBtn'; b.textContent=opt;
+    b.onclick=()=>answerQuiz(i,b);
+    box.appendChild(b);
+  });
+  show('quizScreen');
+}
+function answerQuiz(i,btn){
+  const it = activeQuiz.insect;
+  const fb = document.getElementById('quizFeedback');
+  [...document.querySelectorAll('.quizBtn')].forEach(b=>b.disabled=true);
+  if(i===it.answer){
+    btn.style.background='#1d7a47'; btn.style.borderColor='#aef5c6';
+    fb.style.color='#aef5c6';
+    fb.textContent = `정답! ${it.name} 획득 🎉`;
+    if(!G.collected.includes(it.key)) G.collected.push(it.key);
+    activeQuiz.answered=true; activeQuiz.type='normal';
+    updateHUD();
+    setTimeout(()=>{
+      hide('quizScreen');
+      if(G.collected.length>=INSECTS.length){ winGame(); }
+      else { G.state='play'; G.invuln=Math.max(G.invuln,0.6); }
+    }, 1300);
+  } else {
+    btn.style.background='#7a1d1d'; btn.style.borderColor='#f5aeae';
+    fb.style.color='#ffb3b3';
+    fb.textContent = '아쉬워요! 다시 도전해요';
+    // 정답 위치 표시
+    const bs=[...document.querySelectorAll('.quizBtn')];
+    bs[it.answer].style.background='#1d7a47';
+    setTimeout(()=>{
+      hide('quizScreen'); G.state='play'; G.invuln=Math.max(G.invuln,0.6);
+      // 퀴즈 블록은 유지 → 다시 밟으면 재도전 가능
+    }, 1400);
+  }
+}
+
+// ---------- 업데이트 ----------
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.033, (now-last)/1000);
+  last = now;
+  if(G.state==='play') update(dt);
+  render(dt);
+  requestAnimationFrame(loop);
+}
+
+function update(dt){
+  const p = G.player;
+  G.elapsed += dt;
+  if(G.invuln>0) G.invuln-=dt;
+  if(G.shake>0) G.shake-=dt;
+
+  // 용암 차오름: 시간이 지날수록 조금씩 빨라짐
+  G.lavaRate = 20 + G.elapsed*0.8;     // 초당 가속(완만)
+  G.lavaY -= G.lavaRate*dt;            // 위로(작아짐)
+
+  // 좌우 이동
+  if(keys.left){ p.vx=-MOVE; p.face=-1; }
+  else if(keys.right){ p.vx=MOVE; p.face=1; }
+  else p.vx*=0.7;
+
+  // 점프
+  if(keys.jump && p.onGround){ p.vy=JUMP_V; p.onGround=false; }
+
+  // 중력
+  p.vy += GRAV;
+  if(p.vy>16) p.vy=16;
+
+  // 수평 이동 + 벽
+  p.x += p.vx;
+  if(p.x<0) p.x=0;
+  if(p.x+P_W>VW) p.x=VW-P_W;
+
+  // 수직 이동 + 충돌 (떨어질 때만 발판 위에 착지)
+  const prevBottom = p.y+P_H;
+  p.y += p.vy;
+  p.onGround=false;
+  if(p.vy>=0){
+    for(const pf of G.platforms){
+      if(pf.dead) continue;
+      const bottom = p.y+P_H;
+      if(p.x+P_W>pf.x+4 && p.x<pf.x+pf.w-4){
+        if(prevBottom<=pf.y+2 && bottom>=pf.y && bottom<=pf.y+pf.h+12){
+          p.y = pf.y-P_H; p.vy=0; p.onGround=true;
+          onLand(pf);
+          break;
+        }
+      }
+    }
+  }
+
+  // 폭탄 충돌 (발판 위 폭탄 몸체)
+  for(const pf of G.platforms){
+    if(pf.dead || pf.type!=='bomb') continue;
+    const bx=pf.x+pf.w/2, by=pf.y-12;
+    if(Math.abs((p.x+P_W/2)-bx)<22 && Math.abs((p.y+P_H/2)-by)<26){
+      pf.dead=true; loseLife('bomb'); break;
+    }
+  }
+
+  // 카메라: 위로만 따라감
+  const targetCam = p.y - VH*0.52;
+  if(targetCam < G.cameraY) G.cameraY = targetCam;
+  if(p.y < G.bestY) G.bestY = p.y;
+
+  // 위쪽 더 생성
+  while(G.topGen > G.cameraY - VH){ generateNext(); }
+  // 화면 아래로 한참 지난 발판 정리
+  G.platforms = G.platforms.filter(pf=> pf.y < G.cameraY+VH+200);
+
+  // 깨지는 발판 타이머
+  for(const pf of G.platforms){
+    if(pf.type==='fragile' && pf.breakT>0){
+      pf.breakT -= dt;
+      if(pf.breakT<=0) pf.dead=true;
+    }
+  }
+
+  // 용암 닿음 / 추락
+  if(p.y+P_H >= G.lavaY){ loseLife('lava'); }
+  if(p.y > G.cameraY + VH + 120){ loseLife('fall'); }
+
+  updateHUD();
+}
+
+function onLand(pf){
+  if(pf.type==='fragile' && pf.breakT<=0){ pf.breakT=0.45; }
+  if(pf.type==='quiz' && pf.insect && !pf.answered){
+    openQuiz(pf);
+  }
+}
+
+// ---------- 렌더 ----------
+function render(dt){
+  ctx.clearRect(0,0,VW,VH);
+
+  // 흔들림
+  let sx=0, sy=0;
+  if(G.shake>0){ sx=(Math.random()-0.5)*10*G.shake; sy=(Math.random()-0.5)*10*G.shake; }
+  ctx.save();
+  ctx.translate(sx,sy);
+
+  drawBackground();
+
+  if(G.state!=='start'){
+    ctx.save();
+    ctx.translate(0, -G.cameraY);   // 카메라
+    drawPlatforms();
+    drawPlayer();
+    drawLava();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function drawBackground(){
+  // 곶자왈 숲 그라데이션
+  const g = ctx.createLinearGradient(0,0,0,VH);
+  g.addColorStop(0,'#1d5b41');
+  g.addColorStop(0.5,'#123127');
+  g.addColorStop(1,'#0c241b');
+  ctx.fillStyle=g; ctx.fillRect(0,0,VW,VH);
+  // 은은한 나뭇잎 점
+  ctx.fillStyle='rgba(120,200,150,0.06)';
+  for(let i=0;i<26;i++){
+    const x=(i*97+ (G.cameraY*0.2))%VW;
+    const y=(i*53 - (G.cameraY*0.1))%VH;
+    ctx.beginPath(); ctx.ellipse((x+VW)%VW,(y+VH)%VH, 26,12, i,0,7); ctx.fill();
+  }
+}
+
+function drawPlatforms(){
+  for(const pf of G.platforms){
+    if(pf.dead) continue;
+    const x=pf.x, y=pf.y, w=pf.w, h=pf.h;
+    if(pf.type==='fragile'){
+      // 금 간 돌 발판
+      const a = pf.breakT>0 ? 0.4+0.6*(pf.breakT/0.45) : 1;
+      ctx.globalAlpha=a;
+      roundRect(x,y,w,h,6,'#6b5a44','#3c3020');
+      ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      ctx.moveTo(x+w*0.3,y); ctx.lineTo(x+w*0.4,y+h);
+      ctx.moveTo(x+w*0.65,y); ctx.lineTo(x+w*0.55,y+h);
+      ctx.stroke();
+      ctx.globalAlpha=1;
+    } else if(pf.type==='quiz'){
+      roundRect(x,y,w,h,7,'#caa53a','#7a6212');
+      // 물음표 표지
+      ctx.fillStyle='#3a2c06'; ctx.font='bold 22px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('❓', x+w/2, y-14);
+    } else {
+      // 일반: 이끼 낀 곶자왈 바위
+      roundRect(x,y,w,h,7,'#4f7a52','#2d4a30');
+      ctx.fillStyle='#7fc079';
+      ctx.beginPath(); ctx.ellipse(x+w*0.3,y+3,10,3,0,0,7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x+w*0.7,y+3,8,3,0,0,7); ctx.fill();
+    }
+    // 폭탄
+    if(pf.type==='bomb'){
+      const bx=x+w/2, by=y-12;
+      ctx.fillStyle='#111';
+      ctx.beginPath(); ctx.arc(bx,by,12,0,7); ctx.fill();
+      ctx.strokeStyle='#caa53a'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(bx+6,by-9); ctx.quadraticCurveTo(bx+14,by-20,bx+10,by-22); ctx.stroke();
+      ctx.fillStyle='#ff5a2b';
+      ctx.beginPath(); ctx.arc(bx+10,by-23,3,0,7); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(bx-4,by-4,3,0,7); ctx.fill();
+    }
+  }
+}
+
+function drawLava(){
+  const top = G.lavaY;
+  if(top > G.cameraY+VH+40) return;
+  const g=ctx.createLinearGradient(0,top,0,top+VH);
+  g.addColorStop(0,'#ffcf3a'); g.addColorStop(0.15,'#ff7a1a'); g.addColorStop(1,'#b81b00');
+  ctx.fillStyle=g;
+  // 출렁이는 윗면
+  ctx.beginPath();
+  ctx.moveTo(0, top+VH);
+  ctx.lineTo(0, top);
+  const t=performance.now()/300;
+  for(let x=0;x<=VW;x+=20){
+    ctx.lineTo(x, top + Math.sin(x*0.05+t)*6);
+  }
+  ctx.lineTo(VW, top+VH);
+  ctx.closePath(); ctx.fill();
+  // 반짝이는 거품
+  ctx.fillStyle='rgba(255,240,180,0.7)';
+  for(let i=0;i<6;i++){
+    const x=(i*83+ (performance.now()/20))%VW;
+    ctx.beginPath(); ctx.arc(x, top+10+Math.sin(t+i)*4, 2.5,0,7); ctx.fill();
+  }
+}
+
+function drawPlayer(){
+  const p=G.player;
+  // 무적 깜빡임
+  if(G.invuln>0 && Math.floor(G.invuln*12)%2===0) return;
+  const cx=p.x+P_W/2, cy=p.y+P_H/2;
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.scale(p.face,1);
+
+  // 물장군: 갈색 납작한 몸 + 큰 앞다리 + 큰 눈 (귀엽게)
+  // 뒷다리
+  ctx.strokeStyle='#5b3a1f'; ctx.lineWidth=3; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-8,6); ctx.lineTo(-18,14); ctx.moveTo(8,6); ctx.lineTo(18,14); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-10,2); ctx.lineTo(-20,4); ctx.moveTo(10,2); ctx.lineTo(20,4); ctx.stroke();
+
+  // 몸통 (방패 모양 타원)
+  const bg=ctx.createLinearGradient(0,-16,0,16);
+  bg.addColorStop(0,'#9c6b3a'); bg.addColorStop(1,'#6e4622');
+  ctx.fillStyle=bg;
+  ctx.beginPath(); ctx.ellipse(0,2,16,18,0,0,7); ctx.fill();
+  // 등 가운데 선
+  ctx.strokeStyle='rgba(40,25,10,0.6)'; ctx.lineWidth=1.6;
+  ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(0,18); ctx.stroke();
+  // 날개 무늬
+  ctx.strokeStyle='rgba(40,25,10,0.3)';
+  ctx.beginPath(); ctx.moveTo(-6,-6); ctx.lineTo(-9,16); ctx.moveTo(6,-6); ctx.lineTo(9,16); ctx.stroke();
+
+  // 머리
+  ctx.fillStyle='#5e3c1d';
+  ctx.beginPath(); ctx.ellipse(0,-15,9,7,0,0,7); ctx.fill();
+  // 큰 눈
+  ctx.fillStyle='#fff';
+  ctx.beginPath(); ctx.arc(-4.5,-16,3.4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(4.5,-16,3.4,0,7); ctx.fill();
+  ctx.fillStyle='#111';
+  ctx.beginPath(); ctx.arc(-3.8,-16,1.7,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(5.2,-16,1.7,0,7); ctx.fill();
+
+  // 커다란 앞다리(낫 모양) — 들어올린 모습
+  ctx.strokeStyle='#5b3a1f'; ctx.lineWidth=3.4;
+  ctx.beginPath(); ctx.moveTo(-9,-10); ctx.quadraticCurveTo(-20,-18,-15,-26); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(9,-10); ctx.quadraticCurveTo(20,-18,15,-26); ctx.stroke();
+
+  ctx.restore();
+}
+
+// 둥근 사각형 채우기
+function roundRect(x,y,w,h,r,fill,stroke){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  ctx.fillStyle=fill; ctx.fill();
+  if(stroke){ ctx.lineWidth=2; ctx.strokeStyle=stroke; ctx.stroke(); }
+}
+
+// ---------- HUD / 화면 전환 ----------
+function updateHUD(){
+  document.getElementById('lives').textContent = '❤️'.repeat(Math.max(0,G.lives)) || '💀';
+  document.getElementById('height').textContent = heightMeters()+' m';
+  document.getElementById('dexHud').textContent = `곤충 ${G.collected.length}/5`;
+}
+function renderDex(container){
+  container.innerHTML='';
+  INSECTS.forEach(it=>{
+    const got=G.collected.includes(it.key);
+    const d=document.createElement('div');
+    d.className='slot'+(got?' got':'');
+    d.innerHTML = got? it.emoji : '<small>?</small>';
+    d.title=it.name;
+    container.appendChild(d);
+  });
+}
+function show(id){ document.getElementById(id).classList.remove('hide'); }
+function hide(id){ document.getElementById(id).classList.add('hide'); }
+function hideAll(ids){ ids.forEach(hide); }
+
+// 버튼
+document.getElementById('startBtn').onclick = startGame;
+document.getElementById('retryBtn').onclick = startGame;
+document.getElementById('winBtn').onclick = startGame;
+
+// 시작
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
