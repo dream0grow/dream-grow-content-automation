@@ -148,7 +148,11 @@
           <span>❌ 빨간 X 돌 = 밟으면 끝!</span>
         </div>
       </div>
-      <button id="startBtn" class="btn">게임 시작 🚀</button>
+      <div style="font-size:clamp(13px,2vw,17px); color:#ffe9b0; margin-bottom:10px;">난이도를 골라 시작하세요</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
+        <button id="startEasy" class="btn green">🌱 초급 시작<br><span style="font-size:12px;font-weight:600;">천천히 · 1~2학년 퀴즈</span></button>
+        <button id="startHard" class="btn">🔥 고급 시작<br><span style="font-size:12px;font-weight:600;">빠르게 · 고학년 퀴즈</span></button>
+      </div>
     </div>
 
     <!-- Quiz modal -->
@@ -233,8 +237,24 @@
     { topic: "곶자왈을 지키는 방법", q: "곶자왈을 오래오래 지키려면 나무를?", a: ["심고 아껴 주기", "다 베어 버리기", "불태우기"], ex: "나무를 심고 아끼면 곶자왈이 더 푸르고 건강해져요." }
   ];
 
+  // 고급(고학년)용 어려운 퀴즈  a[0] = 정답
+  const QUIZZES_HARD = [
+    { topic: "곶자왈의 뜻", q: "'곶자왈'에서 '곶'은 숲을 뜻해요. 그렇다면 '자왈'은 무엇을 뜻할까요?", a: ["나무·덩굴과 돌이 엉킨 덤불", "모래밭", "바닷가 절벽"], ex: "곶자왈은 '숲(곶)'과 '돌·가시덤불(자왈)'을 합친 제주말로, 용암 위에 우거진 숲을 뜻해요." },
+    { topic: "곶자왈의 땅", q: "곶자왈 바닥을 이루는, 용암이 굳어 생긴 구멍 많은 검은 돌의 이름은?", a: ["현무암", "화강암", "대리석"], ex: "곶자왈은 화산이 분출한 용암이 식어 굳은 '현무암'으로 덮여 있어요." },
+    { topic: "곶자왈의 역할", q: "곶자왈이 '제주의 생명수 창고'라 불리는 가장 큰 까닭은?", a: ["빗물을 땅속으로 스며들게 해 지하수를 채워서", "농사를 많이 지어서", "관광객이 많아서"], ex: "구멍 많은 곶자왈 땅은 빗물을 지하로 보내 제주 사람들이 쓰는 지하수를 만들어요." },
+    { topic: "곶자왈의 생태", q: "곶자왈에는 따뜻한 지방 식물과 추운 지방 식물이 함께 자라요. 그 까닭으로 알맞은 것은?", a: ["돌 틈 덕분에 겨울엔 따뜻하고 여름엔 시원해 온도가 일정해서", "비가 전혀 안 와서", "햇빛이 아주 강해서"], ex: "곶자왈은 돌 틈으로 공기가 드나들어 온도 변화가 적어, 남방·북방 식물이 함께 살 수 있어요." },
+    { topic: "곶자왈의 가치", q: "여러 동식물이 어우러져 사는 곶자왈을 부르는 말로 알맞은 것은?", a: ["생태계의 보고(보물창고)", "사막", "황무지"], ex: "생물다양성이 풍부한 곶자왈은 '생태계의 보고'라고 불려요." },
+    { topic: "곶자왈의 위협", q: "곶자왈을 파괴하는 개발이 아닌 것은?", a: ["나무 심기", "골프장 건설", "도로·택지 개발"], ex: "골프장·도로·건물 개발은 곶자왈을 없애지만, 나무 심기는 숲을 되살리는 일이에요." },
+    { topic: "곶자왈의 위협", q: "곶자왈의 돌과 숲이 사라지면 가장 먼저 나빠지는 것은?", a: ["깨끗한 지하수가 줄어듦", "자동차가 늘어남", "비가 멈춤"], ex: "빗물을 걸러 주던 곶자왈이 사라지면 깨끗한 지하수가 줄고 더러워져요." },
+    { topic: "곶자왈 보전", q: "곶자왈 같은 소중한 자연을 지키려고 나라가 하는 일로 알맞은 것은?", a: ["보호지역으로 정해 함부로 개발하지 못하게 함", "모두 농경지로 바꿈", "나무를 베어 주차장을 만듦"], ex: "곶자왈을 보전지역으로 지정해 개발을 막고 지켜요." },
+    { topic: "곶자왈 보전", q: "곶자왈을 오래 지키는 '지속가능한' 탐방 행동으로 알맞은 것은?", a: ["정해진 탐방로로만 다니고 흔적을 남기지 않기", "희귀 식물 캐 오기", "큰 소리로 음악 틀기"], ex: "정해진 길로만 다니고 쓰레기를 남기지 않아야 곶자왈을 오래 지킬 수 있어요." },
+    { topic: "곶자왈의 지형", q: "곶자왈의 '숨골'은 어떤 곳일까요?", a: ["땅속과 바깥 공기가 드나들어 온도를 조절하는 구멍", "물을 끓이는 곳", "동물이 겨울잠 자는 굴"], ex: "숨골은 땅속 공기가 드나드는 구멍으로, 주변 온도를 일정하게 만들어 줘요." },
+    { topic: "곶자왈의 가치", q: "용암 동굴·숨골이 있는 곶자왈이 학술적으로 중요한 까닭은?", a: ["화산 활동의 흔적을 연구할 수 있어서", "금이 나와서", "온천이 솟아서"], ex: "곶자왈의 용암 지형은 화산이 어떻게 활동했는지 보여 주는 귀중한 자연 기록이에요." },
+    { topic: "곶자왈 실천", q: "곶자왈을 지키기 위해 생활 속에서 실천할 수 있는 일로 가장 알맞은 것은?", a: ["물·전기를 아끼고 자연을 아끼는 습관 기르기", "일회용품 많이 쓰기", "숲에 새 길을 마구 내기"], ex: "자원을 아끼고 자연을 소중히 여기는 작은 습관이 곶자왈을 지키는 큰 힘이 돼요." }
+  ];
+
   // ---------- config ----------
-  const COL_X = [330, 630];             // 2개 세로 라인(1·2번)의 x 위치
+  const COL_X = [240, 480, 720];        // 3개 세로 라인(왼·가운데·오른쪽)의 x 위치
   const ROW_GAP = 122;                  // 줄 간격(세로)
   const TOP_MARGIN = 165;               // 캐릭터가 화면 위로 올라가면 카메라가 따라옴
   const LAVA_Y = H - 56;                // 이 아래로 내려가면 용암에 빠짐
@@ -252,9 +272,15 @@
     QUIZ:    { body: "#e0a92e", top: "#ffd24a" },
     GOAL:    { body: "#369e36", top: "#67c23a" }
   };
+  // 난이도: 초급=느리게+쉬운 퀴즈 / 고급=원래 속도+어려운 퀴즈
+  const DIFF = {
+    easy: { label: "초급", scrollMul: 0.6, sinkMul: 1.6, quizzes: QUIZZES },
+    hard: { label: "고급", scrollMul: 1.0, sinkMul: 1.0, quizzes: QUIZZES_HARD }
+  };
 
   // ---------- state ----------
   let state = "TITLE";
+  let diffKey = "easy", diff = DIFF.easy;
   let rows = [], genRow = 0, quizzesPlaced = 0, finalDone = false, goalRow = null;
   let player = null, cameraY = 0, particles = [], shake = 0, scrollPause = 0;
   let transformT = 0, greenness = 0, elapsed = 0, bubbleTimer = 0;
@@ -278,30 +304,33 @@
   function makeRow(r) {
     const baseY = rowBaseY(r);
     if (goalRow !== null && r >= goalRow) {
-      return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 0.5, type: "GOAL", x: 480, baseY, sinkAnim: 0, safe: true }] };
+      return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 1, type: "GOAL", x: COL_X[1], baseY, sinkAnim: 0, safe: true }] };
     }
     if (r === 0) {
-      return { r, type: "normal", used: false, cols: [0, 1].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
+      return { r, type: "normal", used: false, cols: [0, 1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
     }
     if (r % 5 === 0 && !finalDone && quizzesPlaced < TARGET_QUIZ) {
       quizzesPlaced++;
       const isFinal = quizzesPlaced >= TARGET_QUIZ;
-      return { r, type: "quiz", used: false, isFinal, cols: [{ col: 0.5, type: "QUIZ", x: 480, baseY, sinkAnim: 0, safe: true }] };
+      return { r, type: "quiz", used: false, isFinal, cols: [{ col: 1, type: "QUIZ", x: COL_X[1], baseY, sinkAnim: 0, safe: true }] };
     }
-    // 두 레인(1·2번)에 항상 돌이 하나씩
+    // 가운데(1번)는 항상 있고, 옆 칸이 붙어 인접 점프만 — 가운데엔 즉사 돌이 절대 안 옴
     const pickSafe = () => ["SLOW", "MEDSLOW", "FAST"][Math.floor(Math.random() * 3)];
-    let types;
+    const cfg = Math.random();
+    const lanes = cfg < 0.35 ? [0, 1] : cfg < 0.70 ? [1, 2] : [0, 1, 2];
+    const typeFor = {};
     const roll = Math.random();
-    if (r >= 4 && roll < 0.20) {
-      types = ["MYSTERY", "MYSTERY"];                 // 미스터리 줄: 두 돌 다 검정(동시 등장)
+    if (r >= 4 && roll < 0.18) {
+      lanes.forEach(c => typeFor[c] = "MYSTERY");           // 미스터리 줄: 모두 검정(동시 등장)
     } else if (roll < 0.46) {
-      const safe = pickSafe();
-      types = Math.random() < 0.5 ? ["FLIP", safe] : [safe, "FLIP"];  // 뒤집히는 돌 1 + 안전한 돌 1
+      const sides = lanes.filter(c => c !== 1);
+      const flipLane = sides[Math.floor(Math.random() * sides.length)];   // 즉사 돌은 옆 칸에만
+      lanes.forEach(c => typeFor[c] = (c === flipLane) ? "FLIP" : pickSafe());
     } else {
-      types = [pickSafe(), pickSafe()];               // 안전한 돌 2개(속도 제각각)
+      lanes.forEach(c => typeFor[c] = pickSafe());
     }
-    const cols = [0, 1].map(ci => {
-      const st = { col: ci, type: types[ci], x: COL_X[ci], baseY, sinkAnim: 0, safe: false };
+    const cols = lanes.map(ci => {
+      const st = { col: ci, type: typeFor[ci], x: COL_X[ci], baseY, sinkAnim: 0, safe: false };
       if (st.type === "MYSTERY") st.sinkTime = MYSTERY_TIMES[Math.floor(Math.random() * MYSTERY_TIMES.length)];
       return st;
     });
@@ -318,10 +347,10 @@
   function newGame() {
     rows = []; genRow = 0; quizzesPlaced = 0; finalDone = false; goalRow = null;
     particles = []; shake = 0; transformT = 0; greenness = 0; elapsed = 0; bubbleTimer = 0;
-    quizPool = shuffle(QUIZZES.slice());
+    quizPool = shuffle(diff.quizzes.slice());
     player = {
-      row: 0, col: 0, lives: 3, score: 0,
-      worldX: COL_X[0], worldY: rowBaseY(0),
+      row: 0, col: 1, lives: 3, score: 0,
+      worldX: COL_X[1], worldY: rowBaseY(0),
       hopping: false, hopT: 0, hx0: 0, hy0: 0, hx1: 0, hy1: 0,
       sinkT: 0, grace: 1.6, bob: 0, facing: 1,
       parachutes: 0, safeRows: 0, curSafe: true, quizzesSolved: 0
@@ -439,7 +468,7 @@
   // ---------- quiz ----------
   function openQuiz(row) {
     state = "QUIZ"; currentQuizRow = row; answered = false;
-    if (quizPool.length === 0) quizPool = shuffle(QUIZZES.slice());
+    if (quizPool.length === 0) quizPool = shuffle(diff.quizzes.slice());
     const base = quizPool.splice(Math.floor(Math.random() * quizPool.length), 1)[0];  // 랜덤 출제(중복 없이)
     const opts = base.a.map((text, i) => ({ text, correct: i === 0 }));
     shuffle(opts);
@@ -474,8 +503,8 @@
       if (row.isFinal) {
         finalDone = true; goalRow = player.row + 2;
         ensureRows(goalRow);
-        rows[player.row + 1] = { r: player.row + 1, type: "normal", used: false, cols: [0, 1].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true })) };
-        rows[goalRow] = { r: goalRow, type: "goal", used: false, cols: [{ col: 0.5, type: "GOAL", x: 480, baseY: rowBaseY(goalRow), sinkAnim: 0, safe: true }] };
+        rows[player.row + 1] = { r: player.row + 1, type: "normal", used: false, cols: [0, 1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true })) };
+        rows[goalRow] = { r: goalRow, type: "goal", used: false, cols: [{ col: 1, type: "GOAL", x: COL_X[1], baseY: rowBaseY(goalRow), sinkAnim: 0, safe: true }] };
         fb.textContent = "🎉 마지막 문제 정답! 안전한 곳이 보여요!";
       } else {
         giveReward();
@@ -485,7 +514,7 @@
       fb.textContent = "❌ 아쉬워요! 목숨 -1"; fb.style.color = "#e03131";
       player.lives--; shake = 0.4;
       if (row.isFinal && player.lives > 0) {
-        rows[player.row + 1] = { r: player.row + 1, type: "quiz", used: false, isFinal: true, cols: [{ col: 0.5, type: "QUIZ", x: 480, baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true }] };
+        rows[player.row + 1] = { r: player.row + 1, type: "quiz", used: false, isFinal: true, cols: [{ col: 1, type: "QUIZ", x: COL_X[1], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true }] };
       }
     }
     document.getElementById("quizNextWrap").classList.remove("hidden");
@@ -539,7 +568,7 @@
     if (state === "PLAYING") {
       // 자동 스크롤: 돌이 위에서 아래로 계속 흘러내림(카메라가 위로 이동)
       if (scrollPause > 0) scrollPause -= dt;
-      else if (!finalDone) cameraY -= SCROLL_SPEED[stageOf(player.row)] * dt;
+      else if (!finalDone) cameraY -= SCROLL_SPEED[stageOf(player.row)] * diff.scrollMul * dt;
 
       if (player.hopping) { startHop(dt); }
       else {
@@ -550,7 +579,7 @@
           const stime = sinkTimeOf(s);
           if (stime != null) {
             player.sinkT += dt;
-            const thr = stime * STAGE_MUL[stageOf(player.row)];
+            const thr = stime * STAGE_MUL[stageOf(player.row)] * diff.sinkMul;
             s.sinkAnim = clamp(player.sinkT / thr, 0, 1);
             if (player.sinkT >= thr) { sinkDeath(); }       // 돌이 다 가라앉아 용암에 닿음 → 죽음
           }
@@ -780,7 +809,7 @@
     const st = stageOf(player.row) + 1;
     ctx.textAlign = "center"; ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(W / 2 - 100, 14, 200, 34, 10); ctx.fill();
     ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif";
-    ctx.fillText(`스테이지 ${st}/3 · ${["느림", "빠름", "매우 빠름"][st - 1]}`, W / 2, 38);
+    ctx.fillText(`${diff.label} · 스테이지 ${st}/3`, W / 2, 38);
     ctx.font = "14px sans-serif"; ctx.fillStyle = "#ffe9b0";
     ctx.fillText(`곶자왈 퀴즈 ${Math.min(player.quizzesSolved, TARGET_QUIZ)}/${TARGET_QUIZ}`, W / 2, 58);
     ctx.textAlign = "left";
@@ -843,14 +872,17 @@
   };
 
   // ---------- screens & input ----------
-  function startGame() {
+  function startGame(key) {
+    diffKey = (key === "hard") ? "hard" : "easy";
+    diff = DIFF[diffKey];
     document.getElementById("titleScreen").classList.add("hidden");
     document.getElementById("endScreen").classList.add("hidden");
     document.getElementById("quizModal").classList.add("hidden");
     newGame();
   }
-  document.getElementById("startBtn").onclick = startGame;
-  document.getElementById("restartBtn").onclick = startGame;
+  document.getElementById("startEasy").onclick = () => startGame("easy");
+  document.getElementById("startHard").onclick = () => startGame("hard");
+  document.getElementById("restartBtn").onclick = () => startGame(diffKey);
 
   function endGame(won) {
     state = "END";
@@ -866,7 +898,7 @@
   }
 
   window.addEventListener("keydown", (e) => {
-    if (state === "TITLE") { if (e.key === "Enter") startGame(); return; }
+    if (state === "TITLE") { if (e.key === "Enter") startGame("easy"); return; }
     if (e.key === "ArrowLeft") { e.preventDefault(); ascend(-1); }
     else if (e.key === "ArrowRight") { e.preventDefault(); ascend(1); }
     else if (e.key === "ArrowUp" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); ascend(0); }
