@@ -14,12 +14,8 @@
     user-select: none;
   }
   #wrap {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative; width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
     background: radial-gradient(circle at 50% 30%, #3a1810, #120808);
   }
   #stage {
@@ -28,139 +24,98 @@
     aspect-ratio: 16 / 10;
     max-height: 100vh;
     box-shadow: 0 0 60px rgba(255,90,20,0.25);
-    border-radius: 12px;
-    overflow: hidden;
-    background: #000;
+    border-radius: 12px; overflow: hidden; background: #000;
   }
   canvas { display: block; width: 100%; height: 100%; }
 
-  /* ===== Overlays ===== */
   .overlay {
     position: absolute; inset: 0;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    text-align: center;
-    padding: 4%;
-    color: #fff;
-    z-index: 10;
+    text-align: center; padding: 4%; color: #fff; z-index: 10;
   }
   .hidden { display: none !important; }
 
-  /* Title */
   #titleScreen { background: linear-gradient(160deg, rgba(60,20,8,0.92), rgba(20,8,6,0.96)); }
   .game-title {
-    font-size: clamp(28px, 5.2vw, 60px);
-    font-weight: 900;
-    color: #ffd24a;
+    font-size: clamp(28px, 5.2vw, 60px); font-weight: 900; color: #ffd24a;
     text-shadow: 0 3px 0 #b34700, 0 6px 18px rgba(255,80,0,0.5);
-    line-height: 1.15;
-    margin-bottom: 10px;
+    line-height: 1.15; margin-bottom: 10px;
   }
   .game-sub { font-size: clamp(13px, 2.2vw, 20px); color: #ffb27a; margin-bottom: 22px; }
   .howto {
-    background: rgba(255,255,255,0.08);
-    border: 2px solid rgba(255,200,120,0.35);
-    border-radius: 14px;
-    padding: 14px 18px;
-    font-size: clamp(12px, 2vw, 17px);
-    line-height: 1.7;
-    max-width: 560px;
-    margin-bottom: 24px;
+    background: rgba(255,255,255,0.08); border: 2px solid rgba(255,200,120,0.35);
+    border-radius: 14px; padding: 14px 18px;
+    font-size: clamp(12px, 2vw, 17px); line-height: 1.7;
+    max-width: 600px; margin-bottom: 24px;
   }
   .howto b { color: #ffd24a; }
+  .legend { display:flex; flex-wrap:wrap; gap:8px 16px; justify-content:center; margin-top:8px; font-size:clamp(11px,1.8vw,15px); }
   .btn {
-    cursor: pointer;
-    border: none;
-    border-radius: 999px;
-    padding: 14px 38px;
-    font-size: clamp(16px, 2.6vw, 24px);
-    font-weight: 800;
-    color: #5a2200;
-    background: linear-gradient(180deg, #ffe27a, #ffb12e);
+    cursor: pointer; border: none; border-radius: 999px;
+    padding: 14px 38px; font-size: clamp(16px, 2.6vw, 24px); font-weight: 800;
+    color: #5a2200; background: linear-gradient(180deg, #ffe27a, #ffb12e);
     box-shadow: 0 5px 0 #c87400, 0 8px 16px rgba(0,0,0,0.3);
     transition: transform .08s, box-shadow .08s;
   }
   .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #c87400; }
   .btn.green { color: #08340f; background: linear-gradient(180deg, #b6f06a, #5fc23a); box-shadow: 0 5px 0 #2f7a1f, 0 8px 16px rgba(0,0,0,0.3); }
 
-  /* Quiz modal */
-  #quizModal { background: rgba(10,6,4,0.78); backdrop-filter: blur(3px); }
+  #quizModal { background: rgba(10,6,4,0.78); }
   .quiz-card {
-    background: linear-gradient(180deg, #fffdf5, #fff2d8);
-    color: #3a2410;
-    border-radius: 20px;
-    padding: 22px 22px 18px;
-    width: min(92%, 560px);
-    box-shadow: 0 14px 40px rgba(0,0,0,0.5);
-    border: 4px solid #ffcf6b;
+    background: linear-gradient(180deg, #fffdf5, #fff2d8); color: #3a2410;
+    border-radius: 20px; padding: 22px 22px 18px; width: min(92%, 560px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5); border: 4px solid #ffcf6b;
   }
-  .quiz-topic {
-    display: inline-block;
-    background: #2f9e44; color: #fff;
-    font-size: clamp(11px, 1.8vw, 14px); font-weight: 800;
-    padding: 4px 14px; border-radius: 999px; margin-bottom: 12px;
-  }
-  .quiz-q { font-size: clamp(17px, 2.8vw, 24px); font-weight: 800; line-height: 1.45; margin-bottom: 16px; }
-  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-topic { display:inline-block; background:#2f9e44; color:#fff; font-size:clamp(11px,1.8vw,14px); font-weight:800; padding:4px 14px; border-radius:999px; margin-bottom:12px; }
+  .quiz-q { font-size:clamp(17px,2.8vw,24px); font-weight:800; line-height:1.45; margin-bottom:16px; }
+  .quiz-options { display:flex; flex-direction:column; gap:10px; }
   .quiz-opt {
-    cursor: pointer; text-align: left;
-    border: 3px solid #ffd98a; background: #fff;
-    border-radius: 14px; padding: 13px 16px;
-    font-size: clamp(15px, 2.4vw, 20px); font-weight: 700; color: #3a2410;
+    cursor:pointer; text-align:left; border:3px solid #ffd98a; background:#fff;
+    border-radius:14px; padding:13px 16px; font-size:clamp(15px,2.4vw,20px); font-weight:700; color:#3a2410;
     transition: transform .06s, background .1s, border-color .1s;
   }
   .quiz-opt:active { transform: scale(0.98); }
-  .quiz-opt.correct { background: #d3f9d8; border-color: #2f9e44; }
-  .quiz-opt.wrong { background: #ffe0e0; border-color: #e03131; }
-  .quiz-opt:disabled { cursor: default; }
-  .quiz-feedback {
-    margin-top: 14px; font-size: clamp(14px, 2.2vw, 18px); font-weight: 800;
-    min-height: 1.2em;
-  }
-  .quiz-explain { margin-top: 6px; font-size: clamp(12px, 2vw, 16px); font-weight: 600; color: #6b5030; line-height: 1.5; }
-  .quiz-next { margin-top: 14px; }
+  .quiz-opt.correct { background:#d3f9d8; border-color:#2f9e44; }
+  .quiz-opt.wrong { background:#ffe0e0; border-color:#e03131; }
+  .quiz-opt:disabled { cursor:default; }
+  .quiz-feedback { margin-top:14px; font-size:clamp(14px,2.2vw,18px); font-weight:800; min-height:1.2em; }
+  .quiz-explain { margin-top:6px; font-size:clamp(12px,2vw,16px); font-weight:600; color:#6b5030; line-height:1.5; }
+  .quiz-next { margin-top:14px; }
 
-  /* End screen */
   #endScreen { background: linear-gradient(160deg, rgba(8,40,16,0.93), rgba(6,20,10,0.97)); }
   #endScreen.lose { background: linear-gradient(160deg, rgba(60,16,8,0.93), rgba(20,6,6,0.97)); }
-  .end-title { font-size: clamp(26px, 4.6vw, 52px); font-weight: 900; margin-bottom: 6px; }
-  .end-score { font-size: clamp(18px, 3vw, 28px); font-weight: 800; color: #ffe27a; margin-bottom: 14px; }
-  .name-row { display: flex; gap: 8px; margin-bottom: 16px; }
-  .name-row input {
-    border: 3px solid #ffcf6b; border-radius: 12px; padding: 10px 14px;
-    font-size: clamp(14px, 2.2vw, 18px); width: 160px; text-align: center; font-weight: 700;
-    background:#fff;
-  }
-  .rank-box {
-    background: rgba(255,255,255,0.08);
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 14px; padding: 12px 16px; width: min(92%, 420px);
-    margin-bottom: 18px;
-  }
-  .rank-box h3 { font-size: clamp(14px, 2.2vw, 18px); color: #ffd24a; margin-bottom: 8px; }
-  .rank-list { list-style: none; font-size: clamp(13px, 2vw, 16px); }
-  .rank-list li { display: flex; justify-content: space-between; padding: 4px 2px; border-bottom: 1px dashed rgba(255,255,255,0.15); }
-  .rank-list li.me { color: #b6f06a; font-weight: 900; }
-  .rank-medal { width: 1.6em; display:inline-block; }
+  .end-title { font-size:clamp(26px,4.6vw,52px); font-weight:900; margin-bottom:6px; }
+  .end-score { font-size:clamp(18px,3vw,28px); font-weight:800; color:#ffe27a; margin-bottom:14px; }
+  .name-row { display:flex; gap:8px; margin-bottom:16px; }
+  .name-row input { border:3px solid #ffcf6b; border-radius:12px; padding:10px 14px; font-size:clamp(14px,2.2vw,18px); width:160px; text-align:center; font-weight:700; background:#fff; }
+  .rank-box { background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.2); border-radius:14px; padding:12px 16px; width:min(92%,420px); margin-bottom:18px; }
+  .rank-box h3 { font-size:clamp(14px,2.2vw,18px); color:#ffd24a; margin-bottom:8px; }
+  .rank-list { list-style:none; font-size:clamp(13px,2vw,16px); }
+  .rank-list li { display:flex; justify-content:space-between; padding:4px 2px; border-bottom:1px dashed rgba(255,255,255,0.15); }
+  .rank-list li.me { color:#b6f06a; font-weight:900; }
+  .rank-medal { width:1.6em; display:inline-block; }
 
-  /* Touch hop button */
-  #hopBtn {
-    position: absolute; right: 18px; bottom: 18px; z-index: 8;
-    width: clamp(72px, 13vw, 104px); height: clamp(72px, 13vw, 104px);
-    border-radius: 50%; border: none; cursor: pointer;
-    background: radial-gradient(circle at 35% 30%, #fff0b8, #ffb12e);
-    box-shadow: 0 5px 0 #c87400, 0 8px 16px rgba(0,0,0,0.35);
-    font-size: clamp(28px, 5vw, 44px); color: #6a3000; font-weight: 900;
+  /* 방향 버튼 */
+  #controls { position:absolute; left:0; right:0; bottom:14px; display:flex; justify-content:center; gap:14px; z-index:8; }
+  .ctrl-btn {
+    width: clamp(62px, 11vw, 92px); height: clamp(62px, 11vw, 92px);
+    border-radius: 18px; border:none; cursor:pointer;
+    background: rgba(255,180,60,0.82);
+    box-shadow: 0 5px 0 rgba(170,90,0,0.85), 0 6px 14px rgba(0,0,0,0.3);
+    font-size: clamp(26px, 5vw, 42px); color:#5a2a00; font-weight:900;
   }
-  #hopBtn:active { transform: translateY(4px); box-shadow: 0 1px 0 #c87400; }
+  .ctrl-btn.up { width: clamp(78px, 14vw, 120px); background: rgba(120,210,90,0.9); box-shadow: 0 5px 0 rgba(45,120,30,0.9), 0 6px 14px rgba(0,0,0,0.3); }
+  .ctrl-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(170,90,0,0.85); }
+
   .toast {
-    position: absolute; top: 12%; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.78); color: #fff; font-weight: 800;
-    padding: 10px 20px; border-radius: 999px; font-size: clamp(14px, 2.4vw, 20px);
-    z-index: 9; opacity: 0; transition: opacity .25s, top .25s; pointer-events: none;
-    border: 2px solid rgba(255,210,74,0.6);
+    position:absolute; top:11%; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,0.78); color:#fff; font-weight:800;
+    padding:10px 20px; border-radius:999px; font-size:clamp(14px,2.4vw,20px);
+    z-index:9; opacity:0; transition:opacity .25s, top .25s; pointer-events:none;
+    border:2px solid rgba(255,210,74,0.6);
   }
-  .toast.show { opacity: 1; top: 9%; }
+  .toast.show { opacity:1; top:8%; }
 </style>
 </head>
 <body>
@@ -168,21 +123,29 @@
   <div id="stage">
     <canvas id="game" width="960" height="600"></canvas>
 
-    <!-- Touch hop button -->
-    <button id="hopBtn" aria-label="건너뛰기">▶</button>
+    <div id="controls">
+      <button class="ctrl-btn" id="leftBtn" aria-label="왼쪽 위">◀</button>
+      <button class="ctrl-btn up" id="upBtn" aria-label="위로">▲</button>
+      <button class="ctrl-btn" id="rightBtn" aria-label="오른쪽 위">▶</button>
+    </div>
 
-    <!-- Toast -->
     <div id="toast" class="toast"></div>
 
     <!-- Title -->
     <div id="titleScreen" class="overlay">
       <div class="game-title">🌋 곶자왈 용암에서<br>살아남기 🌳</div>
-      <div class="game-sub">돌을 밟고 용암을 건너 아름다운 곶자왈로 가자!</div>
+      <div class="game-sub">돌을 밟고 위로 올라가 아름다운 곶자왈로 가자!</div>
       <div class="howto">
-        🕹️ <b>→ 방향키</b> 또는 <b>화면 터치 / ▶버튼</b>으로 다음 돌로 점프!<br>
-        ⏰ 돌은 곧 가라앉아요. 머뭇거리면 풍덩! <b>빨리빨리</b> 건너요.<br>
+        🕹️ <b>▲ 위 / ◀ 왼쪽 / ▶ 오른쪽</b> 버튼·방향키·화면 터치로 <b>위쪽 돌</b>로 점프!<br>
+        ⏰ 한 줄에 돌이 3~4개! 밟으면 <b>돌마다 다른 속도로 가라앉아요.</b> 빨리 다음 돌로!<br>
         ❓ <b>금빛 돌</b>에 닿으면 곶자왈 퀴즈! 맞히면 <b>점수·아이템·목숨</b>을 줘요.<br>
         🚩 마지막 문제를 풀면 용암이 <b>초록빛 곶자왈</b>로 변해요!
+        <div class="legend">
+          <span>🟢 천천히(2.2초)</span>
+          <span>⚪ 보통(1.2초)</span>
+          <span>🟠 빠름(0.5초)</span>
+          <span>⚫ 뒤집히는 돌 = 밟으면 안 돼요!</span>
+        </div>
       </div>
       <button id="startBtn" class="btn">게임 시작 🚀</button>
     </div>
@@ -201,7 +164,7 @@
       </div>
     </div>
 
-    <!-- End screen -->
+    <!-- End -->
     <div id="endScreen" class="overlay hidden">
       <div id="endTitle" class="end-title"></div>
       <div id="endScore" class="end-score"></div>
@@ -225,7 +188,6 @@
   const ctx = canvas.getContext("2d");
   const W = canvas.width, H = canvas.height;
 
-  // ---------- helpers ----------
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const rand = (a, b) => a + Math.random() * (b - a);
@@ -253,145 +215,224 @@
     win: () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, "triangle", 0.07), i * 150)); }
   };
 
-  // ---------- quiz bank ----------
-  // a[0] = 정답
+  // ---------- quiz bank ----------  a[0] = 정답
   const QUIZZES = [
-    // 1) 만들어지는 과정
     { topic: "곶자왈이 생긴 과정", q: "곶자왈은 무엇이 흘러내려 굳어서 만들어진 땅일까요?", a: ["뜨거운 용암", "바닷물", "눈과 얼음"], ex: "화산에서 흘러나온 뜨거운 용암이 식고 굳으면서 울퉁불퉁한 곶자왈이 만들어졌어요." },
-    { topic: "곶자왈이 생긴 과정", q: "곶자왈 바닥에 돌이 울퉁불퉁하고 구멍이 많은 까닭은?", a: ["용암이 식으며 굳어서", "사람이 일부러 파서", "비가 깎아서"], ex: "용암이 식을 때 가스가 빠져나가 구멍이 숭숭 생긴 돌(현무암)이 되었어요." },
+    { topic: "곶자왈이 생긴 과정", q: "곶자왈 바닥 돌이 울퉁불퉁하고 구멍이 많은 까닭은?", a: ["용암이 식으며 굳어서", "사람이 일부러 파서", "비가 깎아서"], ex: "용암이 식을 때 가스가 빠져나가 구멍이 숭숭 생긴 돌(현무암)이 되었어요." },
     { topic: "곶자왈이 생긴 과정", q: "곶자왈 땅에 구멍이 많아서 비가 오면 물은 어떻게 될까요?", a: ["땅속으로 쏙쏙 스며들어요", "그냥 다 말라버려요", "위로 솟구쳐요"], ex: "구멍 사이로 빗물이 땅속으로 잘 스며들어 깨끗한 지하수가 돼요." },
-    // 2) 소중한 이유
     { topic: "곶자왈이 소중한 이유", q: "곶자왈 숲이 우리에게 만들어 주는 고마운 것은?", a: ["맑은 공기와 깨끗한 물", "매연과 먼지", "시끄러운 소리"], ex: "곶자왈은 공기를 맑게 하고 깨끗한 물을 만들어 주는 제주의 보물 숲이에요." },
     { topic: "곶자왈이 소중한 이유", q: "곶자왈에는 다른 곳에서 보기 힘든 무엇이 많이 살까요?", a: ["귀한 동물과 식물", "자동차", "높은 빌딩"], ex: "곶자왈에는 희귀한 동물과 식물이 함께 사는 소중한 보금자리예요." },
     { topic: "곶자왈이 소중한 이유", q: "곶자왈은 빗물을 모아 무엇을 만들어 줄까요?", a: ["깨끗한 지하수", "쓰레기", "용암"], ex: "곶자왈로 스며든 빗물은 깨끗한 지하수가 되어 사람들이 마시는 물이 돼요." },
-    // 3) 파괴되는 이유
     { topic: "곶자왈이 사라지는 이유", q: "곶자왈이 점점 사라지는 가장 큰 까닭은?", a: ["건물·도로를 만들려고 나무를 베어서", "비가 너무 자주 와서", "동물이 많아져서"], ex: "사람들이 건물과 도로를 만들려고 숲을 밀어버리면 곶자왈이 사라져요." },
     { topic: "곶자왈이 사라지는 이유", q: "곶자왈에 쓰레기를 함부로 버리면 어떻게 될까요?", a: ["동물과 식물이 병들어요", "숲이 더 예뻐져요", "물이 깨끗해져요"], ex: "버려진 쓰레기는 흙과 물을 더럽혀 동물과 식물을 아프게 해요." },
     { topic: "곶자왈이 사라지는 이유", q: "곶자왈의 나무를 마구 베면 그 안에 살던 동물들은?", a: ["살 곳을 잃어요", "더 행복해져요", "도시로 놀러 가요"], ex: "나무가 사라지면 동물들은 집과 먹이를 잃고 살기 힘들어져요." },
-    // 4) 지키는 행동
     { topic: "곶자왈을 지키는 방법", q: "곶자왈을 지키려면 우리가 할 수 있는 일은?", a: ["쓰레기를 되가져오기", "꽃을 마구 꺾기", "큰 소리로 떠들기"], ex: "내가 가져간 쓰레기는 도로 가져와 숲을 깨끗하게 지켜요." },
     { topic: "곶자왈을 지키는 방법", q: "곶자왈 숲을 걸을 때 바른 행동은?", a: ["정해진 길로만 다니기", "아무 데나 막 들어가기", "나무에 낙서하기"], ex: "정해진 길(탐방로)로만 다녀야 풀과 동물의 집을 밟지 않아요." },
     { topic: "곶자왈을 지키는 방법", q: "곶자왈에서 예쁜 식물을 보면 어떻게 할까요?", a: ["꺾지 않고 눈으로만 보기", "집에 가져가기", "밟고 지나가기"], ex: "식물은 꺾지 않고 눈으로만 보아야 다음 친구들도 볼 수 있어요." },
     { topic: "곶자왈을 지키는 방법", q: "곶자왈을 오래오래 지키려면 나무를?", a: ["심고 아껴 주기", "다 베어 버리기", "불태우기"], ex: "나무를 심고 아끼면 곶자왈이 더 푸르고 건강해져요." }
   ];
 
-  // ---------- game config ----------
-  const TARGET_QUIZ = 5;          // 마지막 퀴즈까지 풀어야 하는 문제 수
-  const STONE_GAP = 145;          // 돌 사이 간격(월드 좌표)
-  const PLAYER_SCREEN_X = 300;    // 화면상 캐릭터 x 위치
-  const SINK_TIME = [4.6, 3.3, 2.3];   // 스테이지별 가라앉는 시간(초)
-  const SCORE_MUL = [1, 1.5, 2];
+  // ---------- config ----------
+  const COL_X = [210, 400, 590, 780];   // 4개 세로 라인의 x 위치
+  const ROW_GAP = 122;                  // 줄 간격(세로)
+  const ANCHOR = 442;                   // 캐릭터가 머무는 화면 y
+  const TARGET_QUIZ = 5;
+  const STAGE_MUL = [1, 0.78, 0.6];     // 스테이지별 가라앉기 속도 배수(작을수록 빠름)
+  const STYPE = {
+    SLOW:    { time: 2.2, body: "#5aa848", top: "#84d36a", tag: "🟢" },
+    MEDSLOW: { time: 1.2, body: "#8a7d70", top: "#a99b8b", tag: "⚪" },
+    FAST:    { time: 0.5, body: "#cf8a3a", top: "#ecc06a", tag: "🟠" },
+    FLIP:    { time: 0,   body: "#463f39", top: "#5e554d", tag: "⚫" },
+    QUIZ:    { body: "#e0a92e", top: "#ffd24a" },
+    GOAL:    { body: "#369e36", top: "#67c23a" }
+  };
 
   // ---------- state ----------
-  let state = "TITLE"; // TITLE, PLAYING, QUIZ, TRANSFORM, END
-  let stones = [], genN = 0, quizzesPlaced = 0, finalDone = false;
-  let goalIndex = null;
-  let forceFinalNext = false;
-  let player = null;
-  let cameraX = 0;
-  let particles = [];
-  let shake = 0;
-  let transformT = 0, greenness = 0;
-  let lastWon = false;
-  let elapsed = 0, bubbleTimer = 0;
-  let quizPool = [];
-  let currentQuizStone = null, currentQuiz = null, answered = false;
+  let state = "TITLE";
+  let rows = [], genRow = 0, quizzesPlaced = 0, finalDone = false, goalRow = null;
+  let player = null, cameraY = 0, particles = [], shake = 0;
+  let transformT = 0, greenness = 0, elapsed = 0, bubbleTimer = 0;
+  let quizPool = [], currentQuizRow = null, currentQuiz = null, answered = false;
 
-  function newGame() {
-    stones = []; genN = 0; quizzesPlaced = 0; finalDone = false;
-    goalIndex = null; forceFinalNext = false; particles = []; shake = 0;
-    transformT = 0; greenness = 0; elapsed = 0; bubbleTimer = 0;
-    cameraX = 0;
-    quizPool = shuffle(QUIZZES.slice());
-    player = {
-      idx: 0, lives: 3, score: 0, distance: 0,
-      px: 0, py: 0, hopping: false, hopT: 0, hopFrom: 0, hopTo: 0,
-      sinkT: 0, grace: 1.2, fallSave: false, bob: 0, facing: 1,
-      quizzesSolved: 0
-    };
-    ensureStones();
-    const s = stones[0];
-    player.px = s.worldX; player.py = s.worldY;
-    cameraX = player.px - PLAYER_SCREEN_X;
-    state = "PLAYING";
-  }
+  function rowBaseY(r) { return -r * ROW_GAP; }
+  function stageOf(r) { return r < 8 ? 0 : r < 16 ? 1 : 2; }
+  function stoneAt(r, col) { return rows[r] ? rows[r].cols.find(c => c.col === col) : null; }
 
   function shuffle(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
+    for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
     return arr;
   }
 
-  function stageOf(idx) { return idx < 8 ? 0 : idx < 16 ? 1 : 2; }
+  function makeRow(r) {
+    const baseY = rowBaseY(r);
+    if (goalRow !== null && r >= goalRow) {
+      return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 1.5, type: "GOAL", x: 480, baseY, sinkAnim: 0, safe: true }] };
+    }
+    if (r === 0) {
+      return { r, type: "normal", used: false, cols: [0, 1, 2, 3].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
+    }
+    if (r % 5 === 0 && !finalDone && quizzesPlaced < TARGET_QUIZ) {
+      quizzesPlaced++;
+      const isFinal = quizzesPlaced >= TARGET_QUIZ;
+      return { r, type: "quiz", used: false, isFinal, cols: [{ col: 1.5, type: "QUIZ", x: 480, baseY, sinkAnim: 0, safe: true }] };
+    }
+    const n = Math.random() < 0.45 ? 3 : 4;
+    const idx = shuffle([0, 1, 2, 3]).slice(0, n).sort((a, b) => a - b);
+    const pool = shuffle(["SLOW", "MEDSLOW", "FAST", "FLIP"]).slice(0, n);
+    const cols = idx.map((ci, i) => ({ col: ci, type: pool[i], x: COL_X[ci], baseY, sinkAnim: 0, safe: false }));
+    return { r, type: "normal", used: false, cols };
+  }
 
-  function ensureStones() {
-    const need = (player ? player.idx : 0) + 7;
-    while (genN <= need && (goalIndex === null || genN <= goalIndex)) {
-      const n = genN;
-      const worldX = 300 + n * STONE_GAP;
-      let worldY = 372 + Math.sin(n * 0.7) * 30;
-      worldY = clamp(worldY, 344, 410);
-      let type = "normal", isFinal = false;
-      if (finalDone && goalIndex !== null && n >= goalIndex) {
-        type = "goal";
-      } else if (forceFinalNext) {
-        type = "quiz"; isFinal = true; forceFinalNext = false;
-      } else if (n > 0 && n % 4 === 0 && !finalDone && quizzesPlaced < TARGET_QUIZ) {
-        type = "quiz"; quizzesPlaced++;
-        if (quizzesPlaced >= TARGET_QUIZ) isFinal = true;
-      }
-      stones[n] = { n, worldX, worldY, type, used: false, safe: false, isFinal, sinkAnim: 0 };
-      genN++;
+  function ensureRows(upto) {
+    while (genRow <= upto && (goalRow === null || genRow <= goalRow)) {
+      rows[genRow] = makeRow(genRow);
+      genRow++;
     }
   }
 
-  // ---------- input ----------
-  function hopForward() {
+  function newGame() {
+    rows = []; genRow = 0; quizzesPlaced = 0; finalDone = false; goalRow = null;
+    particles = []; shake = 0; transformT = 0; greenness = 0; elapsed = 0; bubbleTimer = 0;
+    quizPool = shuffle(QUIZZES.slice());
+    player = {
+      row: 0, col: 1, lives: 3, score: 0,
+      worldX: COL_X[1], worldY: rowBaseY(0),
+      hopping: false, hopT: 0, hx0: 0, hy0: 0, hx1: 0, hy1: 0,
+      sinkT: 0, grace: 1.4, bob: 0, facing: 1,
+      fallSave: false, safeRows: 0, curSafe: true, quizzesSolved: 0
+    };
+    ensureRows(7);
+    guaranteeSafeAbove();
+    cameraY = player.worldY - ANCHOR;
+    state = "PLAYING";
+  }
+
+  // ---------- movement ----------
+  function nearest(cols, c) {
+    return cols.reduce((a, b) => Math.abs(a.col - c) <= Math.abs(b.col - c) ? a : b);
+  }
+  // 바로 위(▲)로 가는 돌은 항상 안전하도록 보장 → 막히는 상황 방지(왼/오른쪽은 위험 선택지로 남김)
+  function guaranteeSafeAbove() {
+    const nr = player.row + 1;
+    ensureRows(nr + 6);
+    const row = rows[nr];
+    if (!row || row.type !== "normal") return;
+    const near = nearest(row.cols, player.col);
+    if (near.type === "FLIP") {
+      const alt = row.cols.find(c => c.type !== "FLIP");
+      if (alt) { const t = near.type; near.type = alt.type; alt.type = t; }
+    }
+  }
+  function ascend(dir) { // dir: -1 왼쪽 / 0 위 / +1 오른쪽
     if (state !== "PLAYING" || player.hopping) return;
-    ensureStones();
-    const to = player.idx + 1;
-    if (!stones[to]) return;
+    const nr = player.row + 1;
+    ensureRows(nr + 6);
+    const row = rows[nr];
+    if (!row) return;
+    let target;
+    if (row.type === "quiz" || row.type === "goal") {
+      target = row.cols[0];
+    } else {
+      const cs = row.cols, c = player.col;
+      if (dir < 0) { const L = cs.filter(s => s.col < c); target = L.length ? L[L.length - 1] : nearest(cs, c); }
+      else if (dir > 0) { const R = cs.filter(s => s.col > c); target = R.length ? R[0] : nearest(cs, c); }
+      else target = nearest(cs, c);
+    }
     player.hopping = true; player.hopT = 0;
-    player.hopFrom = player.idx; player.hopTo = to;
-    player.facing = 1;
+    player.hx0 = player.worldX; player.hy0 = player.worldY;
+    player.hx1 = target.x; player.hy1 = target.baseY;
+    player.facing = target.x >= player.worldX ? 1 : -1;
+    player._toRow = nr; player._toCol = target.col;
     sfx.hop();
   }
 
-  window.addEventListener("keydown", (e) => {
-    if (["ArrowRight", "ArrowUp", " ", "Spacebar", "d", "D"].includes(e.key)) {
-      e.preventDefault();
-      if (state === "TITLE") return;
-      hopForward();
-    } else if (e.key === "Enter") {
-      if (state === "TITLE") startGame();
+  function onLand() {
+    player.row = player._toRow; player.col = player._toCol;
+    player.worldX = COL_X[player.col] !== undefined ? (player.col === 1.5 ? 480 : COL_X[player.col]) : 480;
+    const row = rows[player.row];
+    const s = stoneAt(player.row, player.col) || row.cols[0];
+    player.worldY = s.baseY;
+    player.sinkT = 0; player.grace = 0.3;
+    player.score += 10;                              // 칸마다 +10점
+    ensureRows(player.row + 6);
+    guaranteeSafeAbove();
+
+    if (row.type === "goal") { startTransform(); return; }
+
+    // 보호막(돌다리/낙하산) 적용 여부 결정
+    player.curSafe = s.safe || false;
+    if (s.type === "FLIP") {
+      if (player.safeRows > 0) { player.safeRows--; player.curSafe = true; showToast("🪨 돌다리가 막아줬어요!"); }
+      else if (player.fallSave) { player.fallSave = false; player.curSafe = true; showToast("🪂 낙하산이 구해줬어요!"); }
+      else { flipDeath(s); return; }
+    } else if (!s.safe && player.safeRows > 0) {
+      player.safeRows--; player.curSafe = true;
     }
-  });
 
-  canvas.addEventListener("pointerdown", () => { if (state === "PLAYING") hopForward(); });
-  document.getElementById("hopBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); hopForward(); });
+    if (row.type === "quiz" && !row.used) { openQuiz(row); }
+  }
 
-  // ---------- quiz flow ----------
-  function openQuiz(stone) {
-    state = "QUIZ";
-    currentQuizStone = stone;
-    answered = false;
+  function startHop(dt) {
+    player.hopT += dt * 3.2;
+    const t = clamp(player.hopT, 0, 1);
+    player.worldX = lerp(player.hx0, player.hx1, t);
+    player.worldY = lerp(player.hy0, player.hy1, t) - Math.sin(Math.PI * t) * 95;
+    if (t >= 1) { player.hopping = false; onLand(); }
+  }
+
+  // ---------- death ----------
+  function flipDeath(s) {
+    if (s) { s.flip = 1; }
+    sfx.fall(); shake = 0.6; spawnSplash("#3a322c");
+    loseLife("⚫ 돌이 뒤집혔어요!");
+  }
+  function sinkDeath() {
+    if (player.fallSave) { player.fallSave = false; player.sinkT = 0; player.grace = 2.0; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); return; }
+    sfx.fall(); shake = 0.55; spawnSplash("#ff7a18");
+    loseLife("😵 돌이 가라앉았어요!");
+  }
+  function loseLife(msg) {
+    player.lives--;
+    if (player.lives <= 0) { endGame(false); return; }
+    respawnSafe();
+    showToast(msg + " 목숨 -1");
+  }
+  function respawnSafe() {
+    const row = rows[player.row];
+    const safe = row.cols.filter(c => c.type !== "FLIP");
+    let pick = safe[0] || row.cols[0];
+    for (const c of safe) { const ta = STYPE[c.type] ? (STYPE[c.type].time || 0) : 99; const tb = STYPE[pick.type] ? (STYPE[pick.type].time || 0) : 99; if (ta > tb) pick = c; }
+    pick.sinkAnim = 0; pick.flip = 0;
+    player.col = pick.col;
+    player.worldX = pick.col === 1.5 ? 480 : COL_X[pick.col];
+    player.worldY = pick.baseY;
+    player.sinkT = 0; player.grace = 2.2; player.curSafe = true;
+    guaranteeSafeAbove();
+  }
+
+  // ---------- toast ----------
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1700);
+  }
+
+  // ---------- quiz ----------
+  function openQuiz(row) {
+    state = "QUIZ"; currentQuizRow = row; answered = false;
     if (quizPool.length === 0) quizPool = shuffle(QUIZZES.slice());
     const base = quizPool.shift();
-    // 보기 섞기
     const opts = base.a.map((text, i) => ({ text, correct: i === 0 }));
     shuffle(opts);
-    currentQuiz = { topic: base.topic, q: base.q, ex: base.ex, opts };
-
-    document.getElementById("quizTopic").textContent = "❓ " + base.topic + (stone.isFinal ? " · 마지막 문제!" : "");
+    currentQuiz = { ex: base.ex, opts };
+    document.getElementById("quizTopic").textContent = "❓ " + base.topic + (row.isFinal ? " · 마지막 문제!" : "");
     document.getElementById("quizQ").textContent = base.q;
-    const ob = document.getElementById("quizOptions");
-    ob.innerHTML = "";
+    const ob = document.getElementById("quizOptions"); ob.innerHTML = "";
     opts.forEach((o, i) => {
       const b = document.createElement("button");
-      b.className = "quiz-opt";
-      b.textContent = o.text;
+      b.className = "quiz-opt"; b.textContent = o.text;
       b.onclick = () => answerQuiz(i, b);
       ob.appendChild(b);
     });
@@ -402,128 +443,62 @@
   }
 
   function answerQuiz(i, btn) {
-    if (answered) return;
-    answered = true;
+    if (answered) return; answered = true;
     const opt = currentQuiz.opts[i];
-    const buttons = [...document.querySelectorAll(".quiz-opt")];
-    buttons.forEach((b, j) => {
-      b.disabled = true;
-      if (currentQuiz.opts[j].correct) b.classList.add("correct");
-    });
+    [...document.querySelectorAll(".quiz-opt")].forEach((b, j) => { b.disabled = true; if (currentQuiz.opts[j].correct) b.classList.add("correct"); });
     const fb = document.getElementById("quizFeedback");
     document.getElementById("quizExplain").textContent = "💡 " + currentQuiz.ex;
-    const stone = currentQuizStone;
-    stone.used = true;
+    const row = currentQuizRow; row.used = true;
 
     if (opt.correct) {
-      sfx.correct();
-      player.quizzesSolved++;
-      fb.textContent = "⭕ 정답이에요! 멋져요!";
-      fb.style.color = "#2f9e44";
-      spawnSparkles();
-      if (stone.isFinal) {
-        finalDone = true;
-        goalIndex = player.idx + 2;
-        ensureStones();
-        if (stones[player.idx + 1]) stones[player.idx + 1].safe = true;
-        if (stones[goalIndex]) { stones[goalIndex].type = "goal"; stones[goalIndex].safe = true; }
+      sfx.correct(); player.quizzesSolved++; spawnSparkles();
+      player.score += 50;                                  // 퀴즈 정답 +50점
+      fb.textContent = "⭕ 정답이에요! (+50점)"; fb.style.color = "#2f9e44";
+      if (row.isFinal) {
+        finalDone = true; goalRow = player.row + 2;
+        ensureRows(goalRow);
+        rows[player.row + 1] = { r: player.row + 1, type: "normal", used: false, cols: [1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true })) };
+        rows[goalRow] = { r: goalRow, type: "goal", used: false, cols: [{ col: 1.5, type: "GOAL", x: 480, baseY: rowBaseY(goalRow), sinkAnim: 0, safe: true }] };
         fb.textContent = "🎉 마지막 문제 정답! 안전한 곳이 보여요!";
       } else {
         giveReward();
       }
     } else {
-      btn.classList.add("wrong");
-      sfx.wrong();
-      fb.textContent = "❌ 아쉬워요! 목숨 -1";
-      fb.style.color = "#e03131";
-      player.lives--;
-      shake = 0.4;
-      if (stone.isFinal && player.lives > 0) {
-        forceFinalNext = true; // 다음 돌에서 다시 마지막 문제 도전
+      btn.classList.add("wrong"); sfx.wrong();
+      fb.textContent = "❌ 아쉬워요! 목숨 -1"; fb.style.color = "#e03131";
+      player.lives--; shake = 0.4;
+      if (row.isFinal && player.lives > 0) {
+        rows[player.row + 1] = { r: player.row + 1, type: "quiz", used: false, isFinal: true, cols: [{ col: 1.5, type: "QUIZ", x: 480, baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true }] };
       }
     }
     document.getElementById("quizNextWrap").classList.remove("hidden");
   }
 
   function giveReward() {
-    const pick = Math.random();
-    let msg;
-    if (pick < 0.30) {
-      player.score += 300; msg = "💎 보너스 +300점!";
-    } else if (pick < 0.55) {
-      player.lives = Math.min(5, player.lives + 1); msg = "❤️ 목숨 +1!";
-    } else if (pick < 0.80) {
-      // 돌다리: 앞쪽 돌 3개가 안 가라앉음
-      ensureStones();
-      for (let k = 1; k <= 3; k++) if (stones[player.idx + k]) stones[player.idx + k].safe = true;
-      msg = "🪨 튼튼한 돌다리! 앞쪽 3칸 안전!";
-    } else {
-      player.fallSave = true; msg = "🪂 낙하산! 한 번 떨어져도 안전!";
-    }
-    sfx.reward();
-    showToast(msg);
+    const p = Math.random(); let msg;
+    if (p < 0.30) { player.score += 100; msg = "💎 보너스 +100점!"; }
+    else if (p < 0.55) { player.lives = Math.min(5, player.lives + 1); msg = "❤️ 목숨 +1!"; }
+    else if (p < 0.80) { player.safeRows += 2; msg = "🪨 튼튼한 돌다리! 다음 2칸 안전!"; }
+    else { player.fallSave = true; msg = "🪂 낙하산! 한 번 떨어져도 안전!"; }
+    sfx.reward(); showToast(msg);
   }
 
   document.getElementById("quizNextBtn").onclick = () => {
     document.getElementById("quizModal").classList.add("hidden");
     if (player.lives <= 0) { endGame(false); return; }
-    player.sinkT = 0; player.grace = 1.6;
-    state = "PLAYING";
+    player.sinkT = 0; player.grace = 1.6; state = "PLAYING";
   };
 
-  // ---------- fall / death ----------
-  function fall() {
-    if (player.fallSave) {
-      player.fallSave = false;
-      player.sinkT = 0; player.grace = 2.0;
-      showToast("🪂 낙하산이 구해줬어요!");
-      sfx.reward();
-      return;
-    }
-    player.lives--;
-    sfx.fall();
-    shake = 0.6;
-    spawnSplash();
-    if (player.lives <= 0) { endGame(false); return; }
-    player.sinkT = 0; player.grace = 2.4; // 잠깐 안전
-    showToast("😵 풍덩! 목숨 -1");
-  }
-
-  // ---------- toast ----------
-  let toastTimer = null;
-  function showToast(msg) {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => t.classList.remove("show"), 1700);
-  }
-
   // ---------- particles ----------
-  function spawnSparkles() {
-    for (let i = 0; i < 18; i++) {
-      particles.push({ type: "spark", x: PLAYER_SCREEN_X, y: 360, vx: rand(-3, 3), vy: rand(-5, -1), life: 1, col: ["#ffd24a", "#fff", "#b6f06a"][i % 3], r: rand(2, 5) });
-    }
-  }
-  function spawnSplash() {
-    const sx = PLAYER_SCREEN_X;
-    for (let i = 0; i < 24; i++) {
-      particles.push({ type: "splash", x: sx, y: 420, vx: rand(-4, 4), vy: rand(-8, -2), life: 1, col: ["#ff7a18", "#ffb12e", "#ff4500"][i % 3], r: rand(3, 7) });
-    }
-  }
-  function spawnConfetti() {
-    for (let i = 0; i < 60; i++) {
-      particles.push({ type: "confetti", x: rand(0, W), y: rand(-60, 0), vx: rand(-1, 1), vy: rand(2, 5), life: 1, col: ["#ffd24a", "#ff6b6b", "#6bd1ff", "#b6f06a", "#ff9ff3"][i % 5], r: rand(4, 8), rot: rand(0, TAU), vr: rand(-0.2, 0.2) });
-    }
-  }
+  function spawnSparkles() { for (let i = 0; i < 18; i++) particles.push({ type: "spark", x: player.worldX, y: player.worldY - cameraY - 40, vx: rand(-3, 3), vy: rand(-5, -1), life: 1, col: ["#ffd24a", "#fff", "#b6f06a"][i % 3], r: rand(2, 5) }); }
+  function spawnSplash(col) { for (let i = 0; i < 22; i++) particles.push({ type: "splash", x: player.worldX, y: player.worldY - cameraY, vx: rand(-4, 4), vy: rand(-8, -2), life: 1, col: col || "#ff7a18", r: rand(3, 7) }); }
+  function spawnConfetti() { for (let i = 0; i < 50; i++) particles.push({ type: "confetti", x: rand(0, W), y: rand(-60, 0), vx: rand(-1, 1), vy: rand(2, 5), life: 1, col: ["#ffd24a", "#ff6b6b", "#6bd1ff", "#b6f06a", "#ff9ff3"][i % 5], r: rand(4, 8), rot: rand(0, TAU), vr: rand(-0.2, 0.2) }); }
 
-  // ---------- update ----------
+  // ---------- loop ----------
   let last = performance.now();
   function loop(now) {
-    let dt = (now - last) / 1000; last = now;
-    dt = Math.min(dt, 0.05);
-    update(dt);
-    draw();
+    let dt = (now - last) / 1000; last = now; dt = Math.min(dt, 0.05);
+    update(dt); draw();
     requestAnimationFrame(loop);
   }
 
@@ -531,384 +506,253 @@
     elapsed += dt;
     if (shake > 0) shake = Math.max(0, shake - dt);
 
-    // particles
     for (const p of particles) {
       p.x += p.vx; p.y += p.vy;
-      if (p.type !== "confetti") p.vy += 0.35;
-      else { p.vy += 0.05; p.rot += p.vr; }
+      if (p.type !== "confetti") p.vy += 0.35; else { p.vy += 0.05; p.rot += p.vr; }
       p.life -= dt * (p.type === "confetti" ? 0.4 : 1.2);
     }
     particles = particles.filter(p => p.life > 0 && p.y < H + 40);
 
-    // lava bubbles (visual)
     bubbleTimer -= dt;
     if (bubbleTimer <= 0 && (state === "PLAYING" || state === "QUIZ")) {
-      bubbleTimer = rand(0.12, 0.32);
-      const lavaTop = lavaTopY();
-      particles.push({ type: "bubble", x: rand(0, W), y: lavaTop + rand(0, 60), vx: rand(-0.3, 0.3), vy: rand(-1.4, -0.6), life: rand(0.6, 1.2), col: "rgba(255,200,80,", r: rand(3, 9) });
+      bubbleTimer = rand(0.12, 0.3);
+      particles.push({ type: "bubble", x: rand(0, W), y: H - rand(0, 70), vx: rand(-0.3, 0.3), vy: rand(-1.4, -0.6), life: rand(0.6, 1.2), col: "rgba(255,200,80,", r: rand(3, 9) });
     }
 
     if (state === "PLAYING") {
-      // hop animation
-      if (player.hopping) {
-        player.hopT += dt * 3.4;
-        const t = clamp(player.hopT, 0, 1);
-        const a = stones[player.hopFrom], b = stones[player.hopTo];
-        player.px = lerp(a.worldX, b.worldX, t);
-        player.py = lerp(a.worldY, b.worldY, t) - Math.sin(Math.PI * t) * 70;
-        if (t >= 1) {
-          player.hopping = false;
-          player.idx = player.hopTo;
-          onLand();
-        }
-      } else {
+      if (player.hopping) { startHop(dt); }
+      else {
         player.bob += dt * 4;
-        const cur = stones[player.idx];
-        player.py = cur.worldY + Math.sin(player.bob) * 2;
-        // sinking
-        if (player.grace > 0) {
-          player.grace -= dt;
-        } else if (!cur.safe && cur.type !== "goal") {
+        const s = stoneAt(player.row, player.col);
+        if (player.grace > 0) { player.grace -= dt; if (s) s.sinkAnim = 0; }
+        else if (s && !player.curSafe && (s.type === "SLOW" || s.type === "MEDSLOW" || s.type === "FAST")) {
           player.sinkT += dt;
-          const thr = SINK_TIME[stageOf(player.idx)];
-          cur.sinkAnim = clamp(player.sinkT / thr, 0, 1);
-          player.py = cur.worldY + cur.sinkAnim * 30 + Math.sin(player.bob) * 2;
-          if (player.sinkT >= thr) { fall(); }
+          const thr = STYPE[s.type].time * STAGE_MUL[stageOf(player.row)];
+          s.sinkAnim = clamp(player.sinkT / thr, 0, 1);
+          if (player.sinkT >= thr) { sinkDeath(); }
         }
+        if (s) player.worldY = s.baseY + (s.sinkAnim || 0) * 46 + Math.sin(player.bob) * 2;
       }
-      // camera follow
-      cameraX = lerp(cameraX, player.px - PLAYER_SCREEN_X, 0.12);
+      cameraY = lerp(cameraY, player.worldY - ANCHOR, 0.12);
     }
 
     if (state === "TRANSFORM") {
-      transformT += dt;
-      greenness = clamp(transformT / 2.6, 0, 1);
+      transformT += dt; greenness = clamp(transformT / 2.6, 0, 1);
       player.bob += dt * 4;
       if (Math.random() < 0.4) spawnConfetti();
       if (transformT >= 2.8) endGame(true);
     }
   }
 
-  function onLand() {
-    const s = stones[player.idx];
-    player.distance++;
-    player.score += Math.round(12 * SCORE_MUL[stageOf(player.idx)]);
-    player.sinkT = 0; player.grace = 0.35;
-    ensureStones();
-    // cull far-behind stones to keep memory light (keep index integrity by not reindexing)
-    if (s.type === "goal") { startTransform(); return; }
-    if (s.type === "quiz" && !s.used) { openQuiz(s); }
-  }
-
-  function startTransform() {
-    state = "TRANSFORM";
-    transformT = 0;
-    player.score += 1000 + player.lives * 200;
-    sfx.win();
-    spawnConfetti();
-  }
-
-  // ---------- screen helpers ----------
-  function lavaTopY() { return 430; }
+  function startTransform() { state = "TRANSFORM"; transformT = 0; player.score += 500 + player.lives * 100; sfx.win(); spawnConfetti(); }
 
   // ---------- draw ----------
   function draw() {
     ctx.save();
-    if (shake > 0) {
-      ctx.translate(rand(-1, 1) * shake * 14, rand(-1, 1) * shake * 14);
-    }
+    if (shake > 0) ctx.translate(rand(-1, 1) * shake * 14, rand(-1, 1) * shake * 14);
     drawScene();
     ctx.restore();
   }
 
   function drawScene() {
     const g = greenness;
-    // sky
     const sky = ctx.createLinearGradient(0, 0, 0, H);
     sky.addColorStop(0, mixColor("#ff7b3a", "#7ec8ff", g));
-    sky.addColorStop(0.55, mixColor("#ffb45e", "#cfeeff", g));
-    sky.addColorStop(1, mixColor("#5a2410", "#bde6a0", g));
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, H);
+    sky.addColorStop(0.5, mixColor("#ffb45e", "#cfeeff", g));
+    sky.addColorStop(1, mixColor("#7a2e14", "#9fd987", g));
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
 
-    // sun / clouds
-    ctx.globalAlpha = 0.9;
-    ctx.fillStyle = mixColor("#ffe08a", "#fff7c8", g);
-    ctx.beginPath(); ctx.arc(W - 130, 110, 56, 0, TAU); ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 0.9; ctx.fillStyle = mixColor("#ffe08a", "#fff7c8", g);
+    ctx.beginPath(); ctx.arc(W - 120, 90, 50, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
 
-    // distant background hills
-    drawHills(g);
+    if (g > 0.2) drawForest(g);
 
-    // lava / river
-    drawLava(g);
-
-    // stones + player (camera space)
-    drawStones(g);
+    drawRows(g);
     if (player) drawPlayer(g);
 
-    // foreground particles
+    drawLavaPool(g);
     drawParticles();
 
-    // HUD
     if (state === "PLAYING" || state === "QUIZ" || state === "TRANSFORM") drawHUD();
   }
 
-  function drawHills(g) {
-    const baseY = 360;
-    ctx.fillStyle = mixColor("#7a2e14", "#5fae54", g);
-    ctx.beginPath();
-    ctx.moveTo(0, baseY);
-    for (let x = 0; x <= W; x += 40) {
-      ctx.lineTo(x, baseY - 60 * Math.abs(Math.sin(x * 0.01 + 1)));
-    }
-    ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
-    // 변신 후 나무들
-    if (g > 0.25) {
-      ctx.globalAlpha = clamp((g - 0.25) / 0.5, 0, 1);
-      for (let i = 0; i < 7; i++) {
-        const tx = 70 + i * 130, ty = baseY - 24;
-        ctx.fillStyle = "#5a3a1a";
-        ctx.fillRect(tx - 5, ty, 10, 34);
-        ctx.fillStyle = ["#3fae3f", "#2f9e44", "#67c23a"][i % 3];
-        ctx.beginPath(); ctx.arc(tx, ty - 6, 26, 0, TAU); ctx.fill();
-        ctx.beginPath(); ctx.arc(tx - 18, ty + 6, 18, 0, TAU); ctx.fill();
-        ctx.beginPath(); ctx.arc(tx + 18, ty + 6, 18, 0, TAU); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  function drawLava(g) {
-    const top = lavaTopY();
-    // 강(용암 -> 시냇물)
-    const lg = ctx.createLinearGradient(0, top, 0, H);
-    if (g < 0.5) {
-      lg.addColorStop(0, mixColor("#ffd84a", "#9fe0ff", g * 2));
-      lg.addColorStop(0.4, mixColor("#ff7a18", "#6fc6f5", g * 2));
-      lg.addColorStop(1, mixColor("#c81e00", "#2f86c9", g * 2));
-    } else {
-      lg.addColorStop(0, "#bfeaff");
-      lg.addColorStop(0.4, "#6fc6f5");
-      lg.addColorStop(1, "#2f86c9");
-    }
-    ctx.fillStyle = lg;
-    ctx.fillRect(0, top, W, H - top);
-
-    // surface glow lines
-    ctx.globalAlpha = 0.5;
-    ctx.strokeStyle = g < 0.5 ? mixColor("#fff1b0", "#ffffff", g * 2) : "#ffffff";
-    ctx.lineWidth = 3;
-    for (let i = 0; i < 4; i++) {
-      ctx.beginPath();
-      const yy = top + 18 + i * 26;
-      for (let x = 0; x <= W; x += 24) {
-        const off = Math.sin(x * 0.03 + elapsed * 2 + i) * 5;
-        if (x === 0) ctx.moveTo(x, yy + off); else ctx.lineTo(x, yy + off);
-      }
-      ctx.stroke();
+  function drawForest(g) {
+    ctx.globalAlpha = clamp((g - 0.2) / 0.5, 0, 1);
+    for (let i = 0; i < 8; i++) {
+      const tx = 50 + i * 125, ty = 130 + (i % 2) * 24;
+      ctx.fillStyle = "#5a3a1a"; ctx.fillRect(tx - 5, ty, 10, 40);
+      ctx.fillStyle = ["#3fae3f", "#2f9e44", "#67c23a"][i % 3];
+      ctx.beginPath(); ctx.arc(tx, ty - 6, 30, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(tx - 22, ty + 8, 20, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(tx + 22, ty + 8, 20, 0, TAU); ctx.fill();
     }
     ctx.globalAlpha = 1;
   }
 
-  function drawStones(g) {
-    for (let i = Math.max(0, (player ? player.idx : 0) - 2); i < stones.length; i++) {
-      const s = stones[i];
-      if (!s) continue;
-      const sx = s.worldX - cameraX;
-      if (sx < -100 || sx > W + 100) continue;
-      const sink = (player && player.idx === i && !player.hopping) ? s.sinkAnim || 0 : 0;
-      const sy = s.worldY + sink * 30 + 36;
-
-      if (s.type === "goal") {
-        // 초록 안전지대(곶자왈 땅)
-        ctx.fillStyle = "#3fae3f";
-        roundRect(sx - 70, sy - 10, 140, 46, 14); ctx.fill();
-        ctx.fillStyle = "#2f8b34";
-        roundRect(sx - 70, sy + 10, 140, 26, 12); ctx.fill();
-        ctx.font = "26px sans-serif"; ctx.textAlign = "center";
-        ctx.fillText("🚩", sx, sy - 16);
-        ctx.font = "bold 13px sans-serif"; ctx.fillStyle = "#fff";
-        ctx.fillText("안전한 곶자왈", sx, sy + 28);
-        continue;
-      }
-
-      // 돌 그림자(용암 위)
-      ctx.globalAlpha = 0.25 * (1 - sink);
-      ctx.fillStyle = "#000";
-      ctx.beginPath(); ctx.ellipse(sx, sy + 24, 46 * (1 - sink * 0.5), 10, 0, 0, TAU); ctx.fill();
-      ctx.globalAlpha = 1;
-
-      // 돌 몸체
-      let body = s.safe ? "#6bbf59" : "#7d7066";
-      let top = s.safe ? "#8fd97c" : "#9c8d80";
-      if (s.type === "quiz" && !s.used) { body = "#e0a92e"; top = "#ffd24a"; }
-      ctx.globalAlpha = clamp(1 - sink * 0.85, 0.15, 1);
-      ctx.fillStyle = body;
-      roundRect(sx - 46, sy - 6, 92, 34, 12); ctx.fill();
-      ctx.fillStyle = top;
-      ctx.beginPath(); ctx.ellipse(sx, sy - 4, 46, 14, 0, 0, TAU); ctx.fill();
-      // 이끼/질감
-      ctx.fillStyle = s.safe ? "#4f9e3f" : "rgba(0,0,0,0.12)";
-      ctx.beginPath(); ctx.ellipse(sx - 16, sy - 2, 9, 4, 0, 0, TAU); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(sx + 18, sy + 2, 7, 3, 0, 0, TAU); ctx.fill();
-
-      if (s.type === "quiz" && !s.used) {
-        ctx.font = "bold 26px sans-serif"; ctx.textAlign = "center";
-        ctx.fillStyle = "#fff";
-        const fl = Math.sin(elapsed * 4) * 4;
-        ctx.fillText("❓", sx, sy - 22 + fl);
-      }
-      ctx.globalAlpha = 1;
-    }
-    ctx.textAlign = "left";
+  function drawLavaPool(g) {
+    const top = H - 70;
+    const lg = ctx.createLinearGradient(0, top, 0, H);
+    if (g < 0.5) { lg.addColorStop(0, mixColor("#ffd84a", "#9fe0ff", g * 2)); lg.addColorStop(1, mixColor("#c81e00", "#2f86c9", g * 2)); }
+    else { lg.addColorStop(0, "#bfeaff"); lg.addColorStop(1, "#2f86c9"); }
+    ctx.fillStyle = lg; ctx.fillRect(0, top, W, 70);
+    ctx.globalAlpha = 0.5; ctx.strokeStyle = g < 0.5 ? "#fff1b0" : "#fff"; ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 24) { const yy = top + 16 + Math.sin(x * 0.04 + elapsed * 3) * 6; if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy); }
+    ctx.stroke(); ctx.globalAlpha = 1;
   }
 
-  function drawPlayer(g) {
-    const sx = player.px - cameraX;
-    const sy = player.py;
+  function drawRows(g) {
+    if (!player) return;
+    const from = Math.max(0, player.row - 2), to = player.row + 6;
+    for (let r = to; r >= from; r--) {       // 위쪽부터 그려서 아래 돌이 위에 겹치게
+      const row = rows[r]; if (!row) continue;
+      for (const s of row.cols) {
+        const isCur = (player.row === r && player.col === s.col && !player.hopping);
+        const sink = isCur ? (s.sinkAnim || 0) : 0;
+        const flip = s.flip || 0;
+        const sx = s.x, sy = s.baseY - cameraY + sink * 46;
+        if (sy < -80 || sy > H + 80) continue;
+        drawStone(s, sx, sy, sink, flip);
+      }
+    }
+  }
+
+  function drawStone(s, x, y, sink, flip) {
+    const def = STYPE[s.type];
+    if (s.type === "GOAL") {
+      ctx.fillStyle = "#2f8b34"; roundRect(x - 110, y + 6, 220, 40, 16); ctx.fill();
+      ctx.fillStyle = "#3fae3f"; roundRect(x - 110, y - 14, 220, 34, 16); ctx.fill();
+      ctx.font = "30px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🚩", x, y - 22);
+      ctx.font = "bold 15px sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("안전한 곶자왈 도착!", x, y + 4);
+      ctx.textAlign = "left"; return;
+    }
+    // 그림자(용암 위 반사)
+    ctx.globalAlpha = 0.22 * (1 - sink); ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.ellipse(x, y + 30, 58 * (1 - sink * 0.4), 11, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+
     ctx.save();
-    ctx.translate(sx, sy);
-    const tilt = player.hopping ? Math.sin(player.hopT * Math.PI) * 0.25 * player.facing : 0;
+    if (flip > 0) { ctx.translate(x, y); ctx.rotate(flip * 0.5); ctx.translate(-x, -y); }
+    ctx.globalAlpha = clamp(1 - sink * 0.8, 0.15, 1);
+    // 몸체
+    ctx.fillStyle = def.body; roundRect(x - 58, y - 4, 116, 36, 14); ctx.fill();
+    // 윗면
+    ctx.fillStyle = def.top; ctx.beginPath(); ctx.ellipse(x, y - 2, 58, 16, 0, 0, TAU); ctx.fill();
+
+    if (s.type === "SLOW") { // 이끼
+      ctx.fillStyle = "#3f8e34";
+      ctx.beginPath(); ctx.ellipse(x - 22, y - 2, 11, 5, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x + 20, y + 2, 9, 4, 0, 0, TAU); ctx.fill();
+    } else if (s.type === "FAST") { // 균열
+      ctx.strokeStyle = "rgba(90,40,0,0.5)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x - 20, y - 8); ctx.lineTo(x - 4, y); ctx.lineTo(x - 12, y + 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + 22, y - 6); ctx.lineTo(x + 8, y + 2); ctx.stroke();
+    } else if (s.type === "FLIP") { // 위험 표시
+      ctx.strokeStyle = "#ff5252"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x - 13, y - 9); ctx.lineTo(x + 13, y + 9); ctx.moveTo(x + 13, y - 9); ctx.lineTo(x - 13, y + 9); ctx.stroke();
+    }
+
+    if (s.type === "QUIZ") {
+      ctx.font = "bold 30px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff";
+      ctx.fillText("❓", x, y - 16 + Math.sin(elapsed * 4) * 4); ctx.textAlign = "left";
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+
+  // ---------- 돌하르방 캐릭터 ----------
+  function drawPlayer(g) {
+    const cx = player.worldX;
+    const feetY = player.worldY - cameraY;   // 발이 돌 윗면에 닿음
+    const bob = player.hopping ? 0 : Math.sin(player.bob) * 1.5;
+    ctx.save();
+    ctx.translate(cx, feetY + bob);
+    const tilt = player.hopping ? Math.sin(player.hopT * Math.PI) * 0.18 * player.facing : 0;
     ctx.rotate(tilt);
-    // 다리
-    ctx.fillStyle = "#3a4a8a";
-    ctx.fillRect(-9, -8, 6, 14);
-    ctx.fillRect(3, -8, 6, 14);
-    // 몸(티셔츠)
-    ctx.fillStyle = "#ff5a3c";
-    roundRect(-13, -28, 26, 24, 8); ctx.fill();
-    // 팔
-    ctx.fillStyle = "#ffcf9e";
-    ctx.fillRect(-17, -24, 5, 14);
-    ctx.fillRect(12, -24, 5, 14);
+
+    const GRAY = "#8d8f93", GRAY_D = "#6f7176", GRAY_L = "#a6a8ac";
+    // 발 (돌 위에 딱 붙음)
+    ctx.fillStyle = GRAY_D;
+    ctx.beginPath(); ctx.ellipse(-14, -2, 12, 7, 0, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(14, -2, 12, 7, 0, 0, TAU); ctx.fill();
+    // 몸통
+    ctx.fillStyle = GRAY; roundRect(-26, -46, 52, 46, 22); ctx.fill();
+    // 팔 (한쪽은 인사하듯 위로)
+    ctx.fillStyle = GRAY;
+    ctx.save(); ctx.translate(-26, -34); ctx.rotate(-0.5); roundRect(-7, -6, 16, 13, 6); ctx.fill(); ctx.restore();
+    ctx.save(); ctx.translate(26, -40); ctx.rotate(-0.9); roundRect(-7, -7, 16, 14, 6); ctx.fill(); ctx.restore();
     // 머리
-    ctx.fillStyle = "#ffd9b0";
-    ctx.beginPath(); ctx.arc(0, -38, 13, 0, TAU); ctx.fill();
-    // 머리카락
-    ctx.fillStyle = "#3a2418";
-    ctx.beginPath(); ctx.arc(0, -42, 13, Math.PI, TAU); ctx.fill();
-    ctx.fillRect(-13, -44, 26, 5);
+    ctx.fillStyle = GRAY; ctx.beginPath(); ctx.arc(0, -62, 30, 0, TAU); ctx.fill();
+    // 귀
+    ctx.fillStyle = GRAY_L; ctx.beginPath(); ctx.arc(-26, -74, 12, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(26, -74, 12, 0, TAU); ctx.fill();
+    ctx.fillStyle = GRAY; ctx.beginPath(); ctx.arc(-26, -74, 6, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(26, -74, 6, 0, TAU); ctx.fill();
     // 눈
-    ctx.fillStyle = "#222";
-    ctx.beginPath(); ctx.arc(-4, -37, 1.8, 0, TAU); ctx.fill();
-    ctx.beginPath(); ctx.arc(4, -37, 1.8, 0, TAU); ctx.fill();
-    // 입(웃음)
-    ctx.strokeStyle = "#c0392b"; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(0, -33, 4, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
-    // 가방
-    ctx.fillStyle = "#2f9e44";
-    roundRect(-16, -26, 6, 16, 3); ctx.fill();
+    ctx.fillStyle = "#2a2a2a"; ctx.beginPath(); ctx.ellipse(-10, -64, 4.5, 6, 0, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.ellipse(10, -64, 4.5, 6, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(-11.5, -66, 1.6, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(8.5, -66, 1.6, 0, TAU); ctx.fill();
+    // 볼 (발그레)
+    ctx.fillStyle = "rgba(255,120,120,0.75)"; ctx.beginPath(); ctx.arc(-17, -55, 6, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.arc(17, -55, 6, 0, TAU); ctx.fill();
+    // 입
+    ctx.fillStyle = "#c0392b"; ctx.beginPath(); ctx.ellipse(0, -54, 4, 3, 0, 0, TAU); ctx.fill();
+    // 초록 모자 (벙거지)
+    ctx.fillStyle = "#7ac043"; ctx.beginPath(); ctx.ellipse(0, -82, 36, 12, 0, 0, TAU); ctx.fill();   // 챙
+    ctx.fillStyle = "#5fae34"; roundRect(-24, -104, 48, 26, 13); ctx.fill();                            // 윗부분
+    ctx.fillStyle = "#6fbf3e"; ctx.beginPath(); ctx.ellipse(0, -104, 24, 8, 0, 0, TAU); ctx.fill();
     ctx.restore();
 
-    // 낙하산 표시
-    if (player.fallSave) {
-      ctx.font = "18px sans-serif"; ctx.textAlign = "center";
-      ctx.fillText("🪂", sx, sy - 58);
-      ctx.textAlign = "left";
-    }
+    if (player.fallSave) { ctx.font = "20px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🪂", cx, feetY - 130); ctx.textAlign = "left"; }
+    if (player.safeRows > 0) { ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText("🪨".repeat(player.safeRows), cx, feetY - 130); ctx.textAlign = "left"; }
   }
 
   function drawParticles() {
     for (const p of particles) {
-      if (p.type === "bubble") {
-        ctx.fillStyle = p.col + clamp(p.life, 0, 1).toFixed(2) + ")";
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
-      } else if (p.type === "confetti") {
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-        ctx.fillStyle = p.col; ctx.globalAlpha = clamp(p.life, 0, 1);
-        ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6);
-        ctx.restore(); ctx.globalAlpha = 1;
-      } else {
-        ctx.fillStyle = p.col; ctx.globalAlpha = clamp(p.life, 0, 1);
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
-        ctx.globalAlpha = 1;
-      }
+      if (p.type === "bubble") { ctx.fillStyle = p.col + clamp(p.life, 0, 1).toFixed(2) + ")"; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
+      else if (p.type === "confetti") { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.col; ctx.globalAlpha = clamp(p.life, 0, 1); ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6); ctx.restore(); ctx.globalAlpha = 1; }
+      else { ctx.fillStyle = p.col; ctx.globalAlpha = clamp(p.life, 0, 1); ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; }
     }
   }
 
   function drawHUD() {
-    // 점수
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    roundRect(14, 14, 230, 46, 12); ctx.fill();
-    ctx.fillStyle = "#ffd24a";
-    ctx.font = "bold 24px sans-serif"; ctx.textAlign = "left";
+    ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(14, 14, 220, 46, 12); ctx.fill();
+    ctx.fillStyle = "#ffd24a"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "left";
     ctx.fillText("⭐ " + player.score + "점", 28, 45);
 
-    // 목숨
-    ctx.font = "22px sans-serif";
-    let lifeStr = "";
-    for (let i = 0; i < player.lives; i++) lifeStr += "❤️";
-    ctx.textAlign = "right";
+    ctx.font = "22px sans-serif"; ctx.textAlign = "right";
+    let lifeStr = ""; for (let i = 0; i < player.lives; i++) lifeStr += "❤️";
     ctx.fillText(lifeStr || "💀", W - 18, 44);
 
-    // 스테이지
-    const st = stageOf(player.idx) + 1;
-    ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    roundRect(W / 2 - 95, 14, 190, 34, 10); ctx.fill();
+    const st = stageOf(player.row) + 1;
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(W / 2 - 100, 14, 200, 34, 10); ctx.fill();
     ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif";
-    const speedTxt = ["느림", "빠름", "매우 빠름"][st - 1];
-    ctx.fillText(`스테이지 ${st}/3 · ${speedTxt}`, W / 2, 38);
-
-    // 마지막 퀴즈 진행도
+    ctx.fillText(`스테이지 ${st}/3 · ${["느림", "빠름", "매우 빠름"][st - 1]}`, W / 2, 38);
     ctx.font = "14px sans-serif"; ctx.fillStyle = "#ffe9b0";
     ctx.fillText(`곶자왈 퀴즈 ${Math.min(player.quizzesSolved, TARGET_QUIZ)}/${TARGET_QUIZ}`, W / 2, 58);
-
     ctx.textAlign = "left";
   }
 
-  // ---------- drawing utils ----------
+  // ---------- utils ----------
   function roundRect(x, y, w, h, r) {
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
     ctx.closePath();
   }
   function mixColor(c1, c2, t) {
-    t = clamp(t, 0, 1);
-    const a = hex(c1), b = hex(c2);
-    const r = Math.round(lerp(a[0], b[0], t));
-    const g = Math.round(lerp(a[1], b[1], t));
-    const bl = Math.round(lerp(a[2], b[2], t));
-    return `rgb(${r},${g},${bl})`;
+    t = clamp(t, 0, 1); const a = hex(c1), b = hex(c2);
+    return `rgb(${Math.round(lerp(a[0], b[0], t))},${Math.round(lerp(a[1], b[1], t))},${Math.round(lerp(a[2], b[2], t))})`;
   }
-  function hex(c) {
-    const n = parseInt(c.slice(1), 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
+  function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
 
   // ---------- ranking ----------
-  const RANK_KEY = "gotjawal_ranking_v1";
-  function loadRanking() {
-    try { return JSON.parse(localStorage.getItem(RANK_KEY)) || []; } catch (e) { return []; }
-  }
-  function saveRanking(list) {
-    try { localStorage.setItem(RANK_KEY, JSON.stringify(list)); } catch (e) {}
-  }
-  function renderRanking(highlightIdx) {
-    const list = loadRanking();
-    const ol = document.getElementById("rankList");
-    ol.innerHTML = "";
+  const RANK_KEY = "gotjawal_ranking_v2";
+  function loadRanking() { try { return JSON.parse(localStorage.getItem(RANK_KEY)) || []; } catch (e) { return []; } }
+  function saveRanking(list) { try { localStorage.setItem(RANK_KEY, JSON.stringify(list)); } catch (e) {} }
+  function renderRanking(hi) {
+    const list = loadRanking(), ol = document.getElementById("rankList"); ol.innerHTML = "";
     const medals = ["🥇", "🥈", "🥉"];
-    if (list.length === 0) {
-      const li = document.createElement("li");
-      li.textContent = "아직 기록이 없어요. 첫 도전자가 되어 보세요!";
-      ol.appendChild(li);
-      return;
-    }
+    if (!list.length) { const li = document.createElement("li"); li.textContent = "아직 기록이 없어요. 첫 도전자가 되어 보세요!"; ol.appendChild(li); return; }
     list.slice(0, 8).forEach((r, i) => {
-      const li = document.createElement("li");
-      if (i === highlightIdx) li.className = "me";
-      const left = document.createElement("span");
-      left.innerHTML = `<span class="rank-medal">${medals[i] || (i + 1)}</span>${escapeHtml(r.name)} ${r.won ? "🌳" : ""}`;
-      const right = document.createElement("span");
-      right.textContent = r.score + "점";
-      li.appendChild(left); li.appendChild(right);
-      ol.appendChild(li);
+      const li = document.createElement("li"); if (i === hi) li.className = "me";
+      const left = document.createElement("span"); left.innerHTML = `<span class="rank-medal">${medals[i] || (i + 1)}</span>${escapeHtml(r.name)} ${r.won ? "🌳" : ""}`;
+      const right = document.createElement("span"); right.textContent = r.score + "점";
+      li.appendChild(left); li.appendChild(right); ol.appendChild(li);
     });
   }
   function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
@@ -916,22 +760,17 @@
   let pendingScore = null;
   document.getElementById("saveScoreBtn").onclick = () => {
     if (pendingScore == null) return;
-    let name = document.getElementById("nameInput").value.trim() || "꼬마탐험가";
-    name = name.slice(0, 6);
+    let name = (document.getElementById("nameInput").value.trim() || "꼬마탐험가").slice(0, 6);
     localStorage.setItem("gotjawal_lastname", name);
     const list = loadRanking();
     const entry = { name, score: pendingScore.score, won: pendingScore.won, date: Date.now() };
-    list.push(entry);
-    list.sort((a, b) => b.score - a.score);
-    const idx = list.indexOf(entry);
-    saveRanking(list);
-    pendingScore = null;
-    document.getElementById("nameInput").disabled = true;
-    document.getElementById("saveScoreBtn").disabled = true;
+    list.push(entry); list.sort((a, b) => b.score - a.score);
+    const idx = list.indexOf(entry); saveRanking(list); pendingScore = null;
+    document.getElementById("nameInput").disabled = true; document.getElementById("saveScoreBtn").disabled = true;
     renderRanking(idx);
   };
 
-  // ---------- screens ----------
+  // ---------- screens & input ----------
   function startGame() {
     document.getElementById("titleScreen").classList.add("hidden");
     document.getElementById("endScreen").classList.add("hidden");
@@ -943,13 +782,10 @@
 
   function endGame(won) {
     state = "END";
-    lastWon = won;
     const es = document.getElementById("endScreen");
-    es.classList.remove("hidden");
-    es.classList.toggle("lose", !won);
+    es.classList.remove("hidden"); es.classList.toggle("lose", !won);
     document.getElementById("endTitle").textContent = won ? "🌳 곶자왈에 도착! 🎉" : "🌋 앗, 용암에 빠졌어요!";
     document.getElementById("endScore").textContent = (won ? "용암을 모두 건넜어요! " : "") + "최종 점수: " + player.score + "점";
-    // ranking save UI
     pendingScore = { score: player.score, won };
     const ni = document.getElementById("nameInput");
     ni.disabled = false; ni.value = localStorage.getItem("gotjawal_lastname") || "";
@@ -957,7 +793,23 @@
     renderRanking(-1);
   }
 
-  // ---------- boot ----------
+  window.addEventListener("keydown", (e) => {
+    if (state === "TITLE") { if (e.key === "Enter") startGame(); return; }
+    if (e.key === "ArrowLeft") { e.preventDefault(); ascend(-1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); ascend(1); }
+    else if (e.key === "ArrowUp" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); ascend(0); }
+  });
+
+  document.getElementById("leftBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); ascend(-1); });
+  document.getElementById("upBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); ascend(0); });
+  document.getElementById("rightBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); ascend(1); });
+  canvas.addEventListener("pointerdown", (e) => {
+    if (state !== "PLAYING") return;
+    const rect = canvas.getBoundingClientRect();
+    const rx = (e.clientX - rect.left) / rect.width;
+    ascend(rx < 0.34 ? -1 : rx > 0.66 ? 1 : 0);
+  });
+
   renderRanking(-1);
   requestAnimationFrame(loop);
 })();
