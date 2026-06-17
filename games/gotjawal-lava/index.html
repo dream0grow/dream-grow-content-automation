@@ -254,7 +254,7 @@
   ];
 
   // ---------- config ----------
-  const COL_X = [240, 480, 720];        // 3개 세로 라인(왼·가운데·오른쪽)의 x 위치
+  const COL_X = [330, 480, 630];        // 좌·가운데·우 (양쪽은 항상, 가운데는 가끔)
   const ROW_GAP = 122;                  // 줄 간격(세로)
   const TOP_MARGIN = 165;               // 캐릭터가 화면 위로 올라가면 카메라가 따라옴
   const LAVA_Y = H - 56;                // 이 아래로 내려가면 용암에 빠짐
@@ -314,10 +314,9 @@
       const isFinal = quizzesPlaced >= TARGET_QUIZ;
       return { r, type: "quiz", used: false, isFinal, cols: [{ col: 1, type: "QUIZ", x: COL_X[1], baseY, sinkAnim: 0, safe: true }] };
     }
-    // 가운데(1번)는 항상 있고, 옆 칸이 붙어 인접 점프만 — 가운데엔 즉사 돌이 절대 안 옴
+    // 양쪽(좌·우)은 항상, 가운데는 가끔만 — 가운데엔 즉사 돌이 절대 안 옴
     const pickSafe = () => ["SLOW", "MEDSLOW", "FAST"][Math.floor(Math.random() * 3)];
-    const cfg = Math.random();
-    const lanes = cfg < 0.35 ? [0, 1] : cfg < 0.70 ? [1, 2] : [0, 1, 2];
+    const lanes = Math.random() < 0.45 ? [0, 1, 2] : [0, 2];
     const typeFor = {};
     const roll = Math.random();
     if (r >= 4 && roll < 0.18) {
