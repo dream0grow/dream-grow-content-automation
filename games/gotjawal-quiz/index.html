@@ -131,6 +131,9 @@
   .btnRow{display:flex; gap:12px; flex-wrap:wrap; justify-content:center;}
   .shareNote{font-size:clamp(11px,2.2vw,14px); opacity:.85;}
 
+  .nameMsg{min-height:18px; font-size:clamp(12px,2.6vw,15px); font-weight:800; color:var(--gold);}
+  input#name.warn{outline:3px solid var(--gold); animation:shake .5s;}
+
   /* 화면 흔들림 */
   @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
   #app.shake{animation:shake .5s;}
@@ -157,14 +160,27 @@
   <!-- 시작 화면 -->
   <div id="startScreen" class="screen">
     <h1>🌿 스피드 곶자왈 퀴즈 게임</h1>
-    <div class="sub">곶자왈 숲을 달려라! 돌이 굴러오면 <b>퀴즈</b>를 풀어서 던져 부숴요. 정답이면 안전, 틀리면 <b>생명 ❤️</b> 감소!</div>
-    <input id="name" maxlength="8" placeholder="이름 (예: 지호)" value="">
+    <div class="sub">
+      곶자왈 숲을 달려요! 🏃<br>
+      돌이 굴러오면<br>
+      퀴즈를 풀어 돌을 던져요.<br>
+      맞히면 안전,<br>
+      틀리면 생명 ❤️ 감소!
+    </div>
+    <input id="name" maxlength="8" placeholder="이름을 적어줘! (예: 지호)" value="">
+    <div id="nameMsg" class="nameMsg"></div>
     <div class="stagePick">
       <button class="btn stageBtn" data-stage="1"><span class="se">🌿</span>1단계<small>곶자왈 식물</small></button>
       <button class="btn stageBtn" data-stage="2"><span class="se">🦋</span>2단계<small>나비와 새</small></button>
       <button class="btn stageBtn" data-stage="3"><span class="se">🪲</span>3단계<small>곤충과 비밀</small></button>
     </div>
-    <div class="sub" style="opacity:.85"><b>1단계</b>부터 시작! 단계를 깨면 다음 단계가 <b>열려요 🔓</b>. 각 단계 <b>10문제</b>, 빨리 도착할수록 등수가 높아요 🏁</div>
+    <div class="sub" style="opacity:.85">
+      <b>1단계</b>부터 시작!<br>
+      단계를 깨면<br>
+      다음 단계가 열려요 🔓<br>
+      각 단계 10문제,<br>
+      빨리 도착할수록 1등! 🏁
+    </div>
   </div>
 
   <!-- 결과 화면 -->
@@ -283,6 +299,7 @@ let phaseTimer=0, scroll=0, runFrame=0;
 let rock=null, particles=[], answered=false;
 let resolveDelay=0, charHop=0, hitFlash=0;
 let proj=null, throwT=0;    // 정답 시 던지는 돌
+let correctCount=0, charKnock=0, hitT=0;   // 맞힌 수 / 피격 넉백 / 피격 타이머
 let last=performance.now();
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -296,6 +313,7 @@ function startGame(stg){
   totalQ=STAGES[stage].qs.length;
   playerName = ($("#name").value || "도전자").trim().slice(0,8) || "도전자";
   lives=3; qIndex=0; order=shuffle([...Array(totalQ).keys()]);
+  correctCount=0; charKnock=0; hitT=0;
   elapsed=0; particles=[]; rock=null; scroll=0; proj=null;
   runStart=performance.now();
   startScreen.classList.add("hidden");
@@ -319,7 +337,7 @@ function beginRunInterval(ms){
 
 function spawnRock(){
   state="quiz"; answered=false;
-  rock={x:W+120, y:GROUND-70, t:0, hit:false, broken:false, spin:0};
+  rock={x:W+120, y:GROUND-70, t:0, hit:false, broken:false, spin:0, scale:1};
   showQuestion();
 }
 
@@ -348,13 +366,14 @@ function chooseAnswer(btn, correct){
   const item=STAGES[stage].qs[order[qIndex]];
   if(correct){
     btn.classList.add("correct");
+    correctCount++;
     beep(660,0.08); beep(880,0.08,0.08);
     throwStone();           // state="throw" — 던지기→깨부수기 애니메이션
   }else{
     btn.classList.add("wrong");
     // 정답도 표시
     [...choicesEl.children].forEach(c=>{ if(c.textContent===item.a) c.classList.add("correct"); });
-    loseLife(); resolveDelay=1000; state="resolve";
+    startHit();             // 큰 돌이 캐릭터를 덮쳐 목숨을 잃는 애니메이션
   }
 }
 
@@ -363,7 +382,15 @@ function timeUp(){
   answered=true;
   const item=STAGES[stage].qs[order[qIndex]];
   [...choicesEl.children].forEach(c=>{ c.style.pointerEvents="none"; if(c.textContent===item.a) c.classList.add("correct"); });
-  loseLife(); resolveDelay=1000; state="resolve";
+  startHit();
+}
+
+// 오답/시간초과 → 큰 돌이 캐릭터로 돌진해 부딪히는 연출
+function startHit(){
+  state="hit"; hitT=0; quizBox.classList.add("hidden");
+  if(!rock) rock={x:W*0.55, y:GROUND-70, spin:0, scale:1};
+  rock.x0=rock.x; rock.broken=false; rock.impacted=false; rock.spin=0;
+  beep(150,0.1,0,"square");
 }
 
 function throwStone(){
@@ -428,51 +455,63 @@ function refreshStageButtons(){
 function endGame(cleared){
   hud.classList.add("hidden"); quizBox.classList.add("hidden");
   state = cleared ? "clear" : "over";
-  const stat=$("#resultStat"), title=$("#resultTitle"), board=$("#board");
-  const nextBtn=$("#nextBtn");
+  const stat=$("#resultStat"), title=$("#resultTitle"), board=$("#board"), nextBtn=$("#nextBtn");
+
+  // 점수·기록을 랭킹에 기록 (완주/미완주 모두)
+  const timeSec = elapsed/1000;
+  const scores=loadScores();
+  const entry={name:playerName, correct:correctCount, time:+timeSec.toFixed(1), cleared, date:Date.now()};
+  scores.push(entry);
+  scores.sort((a,b)=>{
+    if(a.cleared!==b.cleared) return a.cleared ? -1 : 1;     // 완주가 위
+    if(a.cleared) return a.time-b.time;                       // 완주끼리: 빠른 순
+    if(b.correct!==a.correct) return b.correct-a.correct;     // 미완주: 많이 맞힌 순
+    return a.time-b.time;
+  });
+  saveScores(scores);
+  const rank=scores.indexOf(entry)+1;
+  if(cleared) setUnlocked(stage+1);
+
+  const scoreLine = `점수 <b>${correctCount} / ${totalQ}</b>`;
 
   if(cleared){
-    const timeSec = elapsed/1000;
-    const scores=loadScores();
-    const entry={name:playerName, time:+timeSec.toFixed(1), date:Date.now()};
-    scores.push(entry); scores.sort((a,b)=>a.time-b.time); saveScores(scores);
-    const rank=scores.indexOf(entry)+1;
-    setUnlocked(stage+1);   // 다음 단계 해금
-
-    title.textContent=`🏁 ${stage}단계 클리어!`;
+    title.textContent="🎉 축하합니다!";
     const nextLine = stage<3
-      ? `<br>🎉 <b>${stage+1}단계 · ${STAGES[stage+1].name}</b>가 열렸어요!`
-      : `<br>🏆 모든 단계를 깼어요! 진정한 곶자왈 박사!`;
+      ? `<br>🔓 <b>${stage+1}단계 · ${STAGES[stage+1].name}</b>가 열렸어요!`
+      : `<br>🏆 모든 단계 완료! 진정한 곶자왈 박사!`;
     stat.innerHTML=`<span class="big">${rank}등</span>
       ${STAGES[stage].emoji} <b>${stage}단계 · ${STAGES[stage].name}</b><br>
-      <b>${playerName}</b> 선수, 기록 <b>${timeSec.toFixed(1)}초</b>!<br>
-      남은 생명 ${"❤️".repeat(Math.max(0,lives))||"없음"}${nextLine}`;
-    renderBoard(board, scores, entry);
-    board.classList.remove("hidden");
-    // 다음 단계 버튼: 클리어 + 다음 단계가 있을 때만
+      <b>${escapeHtml(playerName)}</b> 선수<br>
+      ${scoreLine} · 기록 <b>${timeSec.toFixed(1)}초</b>${nextLine}`;
     if(stage<3){ nextBtn.textContent=`▶️ ${stage+1}단계 도전`; nextBtn.classList.remove("hidden"); }
     else nextBtn.classList.add("hidden");
     if(rank===1) burst();
     beep(523,0.12);beep(659,0.12,0.12);beep(784,0.16,0.24);
   }else{
     title.textContent="💥 게임 오버";
-    stat.innerHTML=`돌을 너무 많이 맞았어요!<br><b>${qIndex+1}번 문제</b>에서 생명이 모두 사라졌어요.<br>다시 도전해볼까요?`;
-    board.classList.add("hidden");
+    stat.innerHTML=`<span class="big">${rank}등</span>
+      ${STAGES[stage].emoji} <b>${stage}단계 · ${STAGES[stage].name}</b><br>
+      <b>${escapeHtml(playerName)}</b> 선수<br>
+      ${scoreLine} · <b>${qIndex+1}번 문제</b>에서 끝<br>
+      <span style="opacity:.85">완주하면 더 높은 등수에 올라요!</span>`;
     nextBtn.classList.add("hidden");
     beep(200,0.2,0,"sawtooth");
   }
+  renderBoard(board, scores, entry);
+  board.classList.remove("hidden");
   resultScreen.classList.remove("hidden");
 }
 
 function renderBoard(board, scores, me){
-  let html=`<div class="row head"><span>순위</span><span class="nm">이름</span><span>기록</span><span></span></div>`;
+  let html=`<div class="row head"><span>순위</span><span class="nm">이름</span><span>성적</span><span></span></div>`;
   scores.slice(0,8).forEach((s,i)=>{
     const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
     const isMe = (s===me);
+    const result = s.cleared ? `🏁 ${s.time.toFixed(1)}초` : `${s.correct||0}개`;
     html+=`<div class="row${isMe?" me":""}">
       <span class="rank">${medal}</span>
       <span class="nm">${escapeHtml(s.name)}</span>
-      <span>${s.time.toFixed(1)}초</span>
+      <span>${result}</span>
       <span>${isMe?"⬅️":""}</span></div>`;
   });
   board.innerHTML=html;
@@ -570,6 +609,7 @@ function drawCharacter(){
 
   ctx.save();
   ctx.translate(x,y);
+  if(charKnock>0){ ctx.translate(-charKnock*30, -charKnock*8); ctx.rotate(-charKnock*0.3); } // 뒤로 튕김
   if(hitFlash>0){ ctx.globalAlpha=0.4+0.6*Math.abs(Math.sin(hitFlash*20)); }
 
   // 그림자
@@ -645,6 +685,7 @@ function drawRock(){
   if(!rock||rock.broken) return;
   ctx.save();
   ctx.translate(rock.x,rock.y);
+  ctx.scale(rock.scale||1, rock.scale||1);
   rock.spin += 0.04;
   ctx.rotate(rock.spin);
   // 돌
@@ -710,6 +751,7 @@ function loop(now){
 
   if(charHop>0) charHop=Math.max(0,charHop-dt*0.004);
   if(hitFlash>0) hitFlash=Math.max(0,hitFlash-dt*0.004);
+  if(charKnock>0) charKnock=Math.max(0,charKnock-dt*0.0028);
 
   const moving = (state==="run"||state==="quiz"||state==="throw");
   drawBackground(dt, moving);
@@ -739,6 +781,27 @@ function loop(now){
       state="resolve";
     }
   }
+  else if(state==="hit"){
+    hitT+=dt; const k=Math.min(1, hitT/520);
+    const targetX=W*0.26+58;
+    rock.x = rock.x0 + (targetX-rock.x0)*(k*k);   // 가속하며 돌진
+    rock.y = (GROUND-70) - Math.sin(k*Math.PI)*22; // 살짝 들썩
+    rock.scale = 1 + 0.9*k;                        // 가까워지며 커짐
+    rock.spin += dt*0.012;
+    if(!rock.impacted && k>=1){
+      rock.impacted=true;
+      loseLife();                                  // 여기서 목숨 감소
+      charKnock=1;                                 // 캐릭터 뒤로 튕김
+      for(let i=0;i<30;i++){                        // 충돌 파편 + 흙먼지
+        const dust=Math.random()<0.4;
+        particles.push({x:rock.x-20,y:rock.y,
+          vx:-Math.random()*7-1, vy:-Math.random()*9-1,
+          s:(dust?5:8)+Math.random()*8, life:1,
+          c:dust?"#caa56a":(Math.random()<0.5?"#8a8a92":"#6d6d75")});
+      }
+      rock.broken=true; resolveDelay=850; state="resolve";
+    }
+  }
   else if(state==="resolve"){
     if(!rock.broken){ rock.x += dt*0.02; } // 부딪힌 뒤 살짝
     resolveDelay-=dt;
@@ -746,7 +809,7 @@ function loop(now){
   }
 
   // 경과 시간 (플레이 중에만)
-  if(["run","quiz","throw","resolve"].includes(state)){
+  if(["run","quiz","throw","hit","resolve"].includes(state)){
     elapsed = now-runStart;
     timerEl.textContent=(elapsed/1000).toFixed(1)+"초";
   }
@@ -768,9 +831,21 @@ function loop(now){
 /* =========================================================
    이벤트
    ========================================================= */
+function nameOK(){
+  const nm=$("#name").value.trim();
+  if(nm) return true;
+  const inp=$("#name"), msg=$("#nameMsg");
+  msg.textContent="✏️ 이름을 먼저 적어줘!";
+  inp.classList.remove("warn"); void inp.offsetWidth; inp.classList.add("warn");
+  inp.focus(); beep(220,0.12,0,"square");
+  return false;
+}
+$("#name").addEventListener("input",()=>{ $("#nameMsg").textContent=""; $("#name").classList.remove("warn"); });
+
 document.querySelectorAll(".stageBtn").forEach(btn=>{
   btn.onclick=()=>{
     if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+    if(!nameOK()) return;     // 이름 없으면 시작 안 함
     startGame(+btn.dataset.stage);
   };
 });
