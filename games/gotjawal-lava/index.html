@@ -137,8 +137,9 @@
       <div class="game-sub">돌을 밟고 위로 올라가 아름다운 곶자왈로 가자!</div>
       <div class="howto">
         🕹️ <b>▲ 위 / ◀ 왼쪽 / ▶ 오른쪽</b> 버튼·방향키·화면 터치로 <b>위쪽 돌</b>로 점프!<br>
-        🌊 돌이 <b>위에서 아래로 계속 흘러내려요.</b> 멈추면 바닥 용암에 빠져요 — 계속 위로!<br>
-        ⏰ 한 줄에 <b>돌 2개!</b> 밟으면 <b>돌마다 가라앉는 속도가 달라요.</b> 빠른 돌은 얼른 떠나기!<br>
+        🌊 돌이 <b>위에서 아래로 계속 흘러내려요.</b> 두 줄(레인) 중 안전한 돌을 골라요!<br>
+        ⏰ 밟은 돌은 <b>가라앉아요.</b> 가라앉기 전에 못 떠나면 용암에 빠져요 — 빨리 위로!<br>
+        🪂 <b>낙하산은 위기 때 자동으로 사용돼요!</b> (왼쪽 위 슬롯에 모인 개수만큼)<br>
         ❓ <b>금빛 돌</b>에 닿으면 곶자왈 퀴즈! 맞히면 <b>점수·낙하산·목숨</b>을 줘요.<br>
         🚩 마지막 문제를 풀면 용암이 <b>초록빛 곶자왈</b>로 변해요!
         <div class="legend">
@@ -364,7 +365,7 @@
     const s = stoneAt(player.row, player.col) || row.cols[0];
     player.worldX = s.x;
     player.worldY = s.baseY;
-    player.sinkT = 0; player.grace = 0.3;
+    player.sinkT = 0; player.grace = 0.2;
     player.score += 10;                              // 칸마다 +10점
     ensureRows(player.row + 6);
 
@@ -398,34 +399,32 @@
     loseLife("⚫ 돌이 뒤집혔어요!");
   }
   function lavaDeath() {
-    if (player.parachutes > 0) { player.parachutes--; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); respawnLift(); return; }
+    if (player.parachutes > 0) { player.parachutes--; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); player.sinkT = 0; player.grace = 1.8; player.curSafe = true; return; }
     sfx.fall(); shake = 0.6; spawnSplash("#ff7a18");
     loseLife("😵 용암에 빠졌어요!");
+  }
+  function sinkDeath() {
+    if (player.parachutes > 0) { player.parachutes--; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); player.sinkT = 0; const s = stoneAt(player.row, player.col); if (s) s.sinkAnim = 0; player.grace = 1.8; return; }
+    sfx.fall(); shake = 0.6; spawnSplash("#ff7a18");
+    loseLife("😵 돌이 가라앉았어요!");
   }
   function loseLife(msg) {
     player.lives--;
     if (player.lives <= 0) { endGame(false); return; }
-    respawnLift();
+    respawnSame();
     showToast(msg + " 목숨 -1");
   }
-  // 죽으면 위쪽 안전한 돌로 끌어올려 다시 시작
-  function respawnLift() {
-    let tr = player.row + 2;
-    ensureRows(tr + 4);
-    while (rows[tr] && rows[tr].type !== "normal") tr++;
-    ensureRows(tr + 4);
-    const row = rows[tr];
+  // 죽었던 그 자리(같은 줄)에서 안전한 돌로 다시 살아남
+  function respawnSame() {
+    const row = rows[player.row];
     let safe = row.cols.filter(c => c.type !== "FLIP");
-    if (!safe.length) { row.cols[0].type = "SLOW"; safe = [row.cols[0]]; }
-    let pick = safe.reduce((a, b) => Math.abs(a.col - player.col) <= Math.abs(b.col - player.col) ? a : b);
+    if (!safe.length) { row.cols[0].type = "SLOW"; row.cols[0].sinkTime = undefined; safe = [row.cols[0]]; }
+    let pick = safe.find(c => c.col === player.col) || safe[0];   // 가능하면 같은 레인
     pick.sinkAnim = 0; pick.flip = 0;
-    player.row = tr; player.col = pick.col;
-    player.worldX = pick.x;
-    player.worldY = pick.baseY;
-    player.sinkT = 0; player.grace = 2.2; player.curSafe = true;
-    player.hopping = false;
+    player.col = pick.col; player.worldX = pick.x; player.worldY = pick.baseY;
+    player.sinkT = 0; player.grace = 2.2; player.curSafe = true; player.hopping = false;
     scrollPause = 1.5;
-    cameraY = player.worldY - 210;
+    cameraY = player.worldY - 360;   // 죽은 자리로 되살아나되 화면 중앙쯤 안전하게
   }
 
   // ---------- toast ----------
@@ -441,7 +440,7 @@
   function openQuiz(row) {
     state = "QUIZ"; currentQuizRow = row; answered = false;
     if (quizPool.length === 0) quizPool = shuffle(QUIZZES.slice());
-    const base = quizPool.shift();
+    const base = quizPool.splice(Math.floor(Math.random() * quizPool.length), 1)[0];  // 랜덤 출제(중복 없이)
     const opts = base.a.map((text, i) => ({ text, correct: i === 0 }));
     shuffle(opts);
     currentQuiz = { ex: base.ex, opts };
@@ -552,7 +551,8 @@
           if (stime != null) {
             player.sinkT += dt;
             const thr = stime * STAGE_MUL[stageOf(player.row)];
-            s.sinkAnim = clamp(player.sinkT / thr, 0, 1);   // 가라앉을수록 더 빨리 바닥으로
+            s.sinkAnim = clamp(player.sinkT / thr, 0, 1);
+            if (player.sinkT >= thr) { sinkDeath(); }       // 돌이 다 가라앉아 용암에 닿음 → 죽음
           }
         }
         if (s) player.worldY = s.baseY + (s.sinkAnim || 0) * SINK_DROP + Math.sin(player.bob) * 2;
@@ -657,15 +657,15 @@
     }
     // 그림자(용암 위 반사)
     ctx.globalAlpha = 0.22 * (1 - sink); ctx.fillStyle = "#000";
-    ctx.beginPath(); ctx.ellipse(x, y + 32, 66 * (1 - sink * 0.4), 12, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+    ctx.beginPath(); ctx.ellipse(x, y + 24, 46 * (1 - sink * 0.4), 9, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
 
     ctx.save();
     if (flip > 0) { ctx.translate(x, y); ctx.rotate(flip * 0.5); ctx.translate(-x, -y); }
     ctx.globalAlpha = clamp(1 - sink * 0.8, 0.15, 1);
     // 몸체
-    ctx.fillStyle = def.body; roundRect(x - 66, y - 4, 132, 38, 15); ctx.fill();
+    ctx.fillStyle = def.body; roundRect(x - 46, y - 3, 92, 30, 12); ctx.fill();
     // 윗면
-    ctx.fillStyle = def.top; ctx.beginPath(); ctx.ellipse(x, y - 2, 66, 17, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = def.top; ctx.beginPath(); ctx.ellipse(x, y - 1, 46, 13, 0, 0, TAU); ctx.fill();
 
     if (s.type === "SLOW") { // 이끼
       ctx.fillStyle = "#3f8e34";
@@ -699,6 +699,7 @@
     ctx.translate(cx, feetY + bob);
     const tilt = player.hopping ? Math.sin(player.hopT * Math.PI) * 0.16 * player.facing : 0;
     ctx.rotate(tilt);
+    ctx.scale(0.62, 0.62);   // 캐릭터 크기 축소(발 위치 기준)
 
     const BODY = "#9c9ea1", HAT = "#8a8c8f", BRIM = "#7c7e81", OUT = "#3b3b3d", DOT = "#74767a";
     const speckles = (arr) => { ctx.fillStyle = DOT; arr.forEach(d => { ctx.beginPath(); ctx.arc(d[0], d[1], d[2], 0, TAU); ctx.fill(); }); };
@@ -740,7 +741,7 @@
     speckles([[-8, -138, 2], [7, -132, 1.6], [15, -141, 1.5]]);
     ctx.restore();
 
-    if (player.safeRows > 0) { ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText("🪨".repeat(player.safeRows), cx, feetY - 168); ctx.textAlign = "left"; }
+    if (player.safeRows > 0) { ctx.font = "15px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText("🪨".repeat(player.safeRows), cx, feetY - 108); ctx.textAlign = "left"; }
   }
 
   // 낙하산 아이콘
