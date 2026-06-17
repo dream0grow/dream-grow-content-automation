@@ -168,7 +168,8 @@
    ========================================================= */
 
 const ASSET = "assets/";
-const EXTS  = [".jpg",".jpeg",".png",".JPG",".PNG"];
+const EXTS  = [".png",".jpg",".jpeg",".PNG",".JPG"];
+const BG_FILES = ["배경1.jpg","배경2.jpg","배경3.jpg","배경4.jpg","배경5.png"];
 
 /* 로컬 이미지 로더: 여러 확장자 시도 → 실패 시 이모지 폴백 */
 function loadImg(img, base, emoji, label){
@@ -196,8 +197,8 @@ const INSECTS = {
     quiz:{ q:"귀뚜라미는 어떻게 ‘귀뚤귀뚤’ 소리를 낼까?", a:["앞날개를 비벼서","입으로 노래해서","다리를 굴러서"], c:0 } },
   "애기뿔소똥구리":{ emoji:"🪲", file:"애기뿔소똥구리",
     quiz:{ q:"소똥구리가 똥을 동그랗게 굴리는 까닭은?", a:["먹이로 쓰고 알을 낳으려고","공놀이하려고","길을 막으려고"], c:0 } },
-  "메뚜기":        { emoji:"🦗", file:"메뚜기",
-    quiz:{ q:"메뚜기가 멀리 점프할 수 있는 비결은?", a:["크고 힘센 뒷다리","날개가 네 쌍","긴 더듬이"], c:0 } }
+  "청분홍귀뚜라미":  { emoji:"🦗", file:"청분홍귀뚜라미",
+    quiz:{ q:"메뚜기·귀뚜라미가 멀리 점프하는 비결은?", a:["크고 힘센 뒷다리","날개가 네 쌍","긴 더듬이"], c:0 } }
 };
 
 /* 스테이지 1에서 찾을 곤충 3종 */
@@ -221,11 +222,10 @@ function startGame(){
   state = { lives:3, score:0, found:0, caught:[], start:Date.now() };
   quizPick = 0;
   showScreen("game");
-  // 배경 사진
+  // 배경 사진 (배경1~5 중 랜덤 한 장)
   const bg = $("#bg"); bg.style.display="";
   bg.onerror = ()=>{ bg.style.display="none"; };
-  bg.src = ASSET + "배경.jpg";
-  bg.onerror = ()=>{ bg.src = ASSET+"배경.png"; bg.onerror=()=>{ bg.style.display="none"; }; };
+  bg.src = ASSET + BG_FILES[Math.random()*BG_FILES.length|0];
   buildTrees();
   buildGrid();
   updateHUD();
