@@ -77,9 +77,10 @@
 
   /* ---- 퀴즈 박스 ---- */
   #quizBox{
-    position:absolute; left:50%; bottom:4%; transform:translateX(-50%);
+    position:absolute; left:50%; top:52px; transform:translateX(-50%);
     width:min(94%,760px); z-index:7; display:flex; flex-direction:column; gap:10px;
   }
+  @media(max-width:560px){ #quizBox{top:46px;} }
   #qbar{height:10px; border-radius:999px; background:rgba(0,0,0,.15); overflow:hidden;}
   #qbarFill{height:100%; width:100%; background:linear-gradient(90deg,#ffd24a,#ff7a59); transition:width .1s linear;}
   #question{
@@ -216,15 +217,17 @@ const W=cv.width, H=cv.height, GROUND=H*0.78;
 /* =========================================================
    게임 상태
    ========================================================= */
-let state="start";          // start | run | quiz | resolve | over | clear
+let state="start";          // start | run | quiz | throw | resolve | over | clear
 let lives, qIndex, order, playerName;
 let runStart, elapsed=0;
 let phaseTimer=0, scroll=0, runFrame=0;
 let rock=null, particles=[], answered=false;
 let resolveDelay=0, charHop=0, hitFlash=0;
+let proj=null, throwT=0;    // 정답 시 던지는 돌
 let last=performance.now();
 
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+const lerp=(a,b,t)=>a+(b-a)*t;
 
 /* =========================================================
    시작 / 리셋
@@ -277,8 +280,7 @@ function chooseAnswer(btn, correct){
   if(correct){
     btn.classList.add("correct");
     beep(660,0.08); beep(880,0.08,0.08);
-    breakRock();
-    resolveDelay=650;
+    throwStone();
   }else{
     btn.classList.add("wrong");
     // 정답도 표시
@@ -294,6 +296,13 @@ function timeUp(){
   const item=QUESTIONS[order[qIndex]];
   [...choicesEl.children].forEach(c=>{ c.style.pointerEvents="none"; if(c.textContent===item.a) c.classList.add("correct"); });
   loseLife(); resolveDelay=1000; state="resolve";
+}
+
+function throwStone(){
+  state="throw"; throwT=0; charHop=0.5;
+  const cx=W*0.26;
+  proj={ t:-150, dur:340, x0:cx+30, y0:GROUND-118, tx:rock.x, ty:rock.y, x:cx+30, y:GROUND-118, spin:0 };
+  beep(420,0.06);
 }
 
 function breakRock(){
@@ -478,9 +487,15 @@ function drawCharacter(){
   ctx.strokeStyle="#2c6b3a"; ctx.lineWidth=12; ctx.lineCap="round";
   ctx.beginPath(); ctx.moveTo(-6,40); ctx.lineTo(-6+legSwing,72); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(8,40); ctx.lineTo(8-legSwing,72); ctx.stroke();
-  // 팔
+  // 뒷팔
   ctx.beginPath(); ctx.moveTo(0,5); ctx.lineTo(-legSwing-4,28); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(0,5); ctx.lineTo(legSwing+4,28); ctx.stroke();
+  // 앞팔 (던질 때 와인드업→던지기)
+  let armX=legSwing+4, armY=28;
+  if(state==="throw"){
+    if(throwT<0.45){ const u=throwT/0.45; armX=lerp(legSwing+4,-14,u); armY=lerp(28,-20,u); }
+    else { const u=(throwT-0.45)/0.55; armX=lerp(-14,32,u); armY=lerp(-20,2,u); }
+  }
+  ctx.beginPath(); ctx.moveTo(0,5); ctx.lineTo(armX,armY); ctx.stroke();
 
   // 몸 (새싹 친구)
   const grd=ctx.createLinearGradient(0,-30,0,45);
@@ -535,6 +550,22 @@ function drawRock(){
   ctx.restore();
 }
 
+function drawProjectile(){
+  if(!proj || proj.t<0) return;
+  ctx.save();
+  ctx.translate(proj.x, proj.y); ctx.rotate(proj.spin);
+  // 작은 돌
+  ctx.fillStyle="#8a8a92"; ctx.strokeStyle="#5a5a62"; ctx.lineWidth=2;
+  ctx.beginPath();
+  const p=[[-9,-3],[-3,-9],[7,-7],[9,3],[2,9],[-7,7]];
+  p.forEach((q,i)=> i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.restore();
+  // 꼬리 먼지
+  ctx.fillStyle="rgba(255,255,255,.4)";
+  ctx.beginPath(); ctx.arc(proj.x-12,proj.y+4,4,0,7); ctx.fill();
+}
+
 function drawParticles(dt){
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
@@ -559,7 +590,7 @@ function loop(now){
   if(charHop>0) charHop=Math.max(0,charHop-dt*0.004);
   if(hitFlash>0) hitFlash=Math.max(0,hitFlash-dt*0.004);
 
-  const moving = (state==="run"||state==="quiz");
+  const moving = (state==="run"||state==="quiz"||state==="throw");
   drawBackground(dt, moving);
 
   // 상태 처리
@@ -575,6 +606,18 @@ function loop(now){
     qBarFill.style.width=(100-k*100)+"%";
     if(k>=1) timeUp();
   }
+  else if(state==="throw"){
+    throwT=Math.min(1, throwT+dt*0.0034);
+    proj.t+=dt; const k=Math.max(0, Math.min(1, proj.t/proj.dur));
+    proj.x = proj.x0 + (proj.tx-proj.x0)*k;
+    proj.y = proj.y0 + (proj.ty-proj.y0)*k - Math.sin(k*Math.PI)*80; // 포물선
+    proj.spin += dt*0.03;
+    if(proj.t>=proj.dur){
+      breakRock(); proj=null; resolveDelay=600;
+      beep(880,0.08); beep(1100,0.08,0.06);
+      state="resolve";
+    }
+  }
   else if(state==="resolve"){
     if(!rock.broken){ rock.x += dt*0.02; } // 부딪힌 뒤 살짝
     resolveDelay-=dt;
@@ -582,13 +625,14 @@ function loop(now){
   }
 
   // 경과 시간 (플레이 중에만)
-  if(["run","quiz","resolve"].includes(state)){
+  if(["run","quiz","throw","resolve"].includes(state)){
     elapsed = now-runStart;
     timerEl.textContent=(elapsed/1000).toFixed(1)+"초";
   }
 
   drawRock();
   drawCharacter();
+  drawProjectile();
   drawParticles(dt);
 
   // 적중 시 붉은 비네트
