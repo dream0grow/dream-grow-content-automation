@@ -44,7 +44,7 @@
   #dex .slot.done{border-style:solid; border-color:var(--gold);}
 
   /* 무대 + 배경 사진 */
-  #stage{position:relative; flex:1; overflow:hidden;
+  #stage{position:relative; flex:1; overflow:hidden; display:flex; flex-direction:column;
     background:linear-gradient(180deg,#5d8f4a,#3e6b34 45%,#4a3a26);}
   #bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;}
   #stage::after{content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
@@ -52,7 +52,7 @@
 
   /* 나무 줄 */
   .trees{position:relative; z-index:3; display:flex; justify-content:space-around;
-    align-items:flex-end; padding:6px 12px 0; height:23%;}
+    align-items:flex-end; padding:6px 12px 0; height:18%; flex-shrink:0;}
   .tree{position:relative; width:78px; height:100%; cursor:pointer; transition:transform .12s; touch-action:manipulation;}
   .tree:active{transform:scale(.95);}
   .tree .canopy{position:absolute; left:50%; top:2%; transform:translateX(-50%); width:78px; height:62%;
@@ -67,19 +67,22 @@
     color:#fff; font-weight:900; font-size:1.4rem; text-shadow:0 1px 3px rgba(0,0,0,.6);}
 
   /* 돌 격자 */
-  #grid{position:relative; z-index:3; flex:1; display:grid; grid-template-columns:repeat(4,1fr);
-    gap:2.2%; padding:3% 6% 5%; align-content:center;}
-  .stone{position:relative; aspect-ratio:1/1; cursor:pointer; transition:transform .08s; touch-action:manipulation;
-    display:flex; align-items:center; justify-content:center;}
-  .stone:active{transform:scale(.94);}
-  .stone .rock{position:absolute; inset:0; border-radius:48% 48% 44% 44%/58% 58% 42% 42%;
+  #grid{position:relative; z-index:3; flex:1; min-height:0; display:grid;
+    grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(4,1fr);
+    gap:1.4%; padding:2.5% 4% 3.5%;}
+  .stone{position:relative; cursor:pointer; transition:transform .08s; touch-action:manipulation;
+    display:flex; align-items:center; justify-content:center; min-height:0;}
+  .stone:active{transform:scale(.93);}
+  .stone .rock{position:relative; height:82%; aspect-ratio:1/1; max-width:104px; max-height:104px;
+    border-radius:48% 48% 44% 44%/58% 58% 42% 42%;
     background:radial-gradient(circle at 36% 30%, #b3bcc1, #8d9aa0 55%, #5f6a70);
-    box-shadow:inset -5px -7px 11px rgba(0,0,0,.4), 0 5px 9px rgba(0,0,0,.35);}
-  .stone .moss{position:absolute; left:10%; bottom:0; width:80%; height:40%;
+    box-shadow:inset -5px -7px 11px rgba(0,0,0,.4), 0 5px 10px rgba(0,0,0,.45);}
+  .rock .moss{position:absolute; left:10%; bottom:0; width:80%; height:40%;
     background:radial-gradient(circle at 35% 50%, #7fae4d, transparent 62%); border-radius:0 0 44% 44%/0 0 100% 100%; opacity:.8;}
-  .stone .face{position:relative; z-index:2; font-weight:900; font-size:1.5rem; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.5);}
-  .stone img{position:relative; z-index:2; width:84%; height:84%; object-fit:cover; border-radius:12px; border:2px solid #fff;}
-  .stone.revealed .rock{filter:brightness(.92);}
+  .rock .face{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-weight:900; font-size:1.35rem; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6);}
+  .rock img{position:absolute; inset:8%; width:84%; height:84%; object-fit:cover; border-radius:11px; border:2px solid #fff;}
+  .stone.revealed .rock{filter:brightness(.93);}
   /* 숨골 */
   .stone.hole .rock{background:radial-gradient(circle at 50% 42%, #000 30%, #1a1a1a 60%, #333);}
   .stone.flag .rock{background:radial-gradient(circle at 50% 42%, #000 30%, #1a1a1a 60%, #333);}
@@ -222,10 +225,7 @@ function startGame(){
   state = { lives:3, score:0, found:0, caught:[], start:Date.now() };
   quizPick = 0;
   showScreen("game");
-  // 배경 사진 (배경1~5 중 랜덤 한 장)
-  const bg = $("#bg"); bg.style.display="";
-  bg.onerror = ()=>{ bg.style.display="none"; };
-  bg.src = ASSET + BG_FILES[Math.random()*BG_FILES.length|0];
+  setBackground();
   buildTrees();
   buildGrid();
   updateHUD();
@@ -234,6 +234,14 @@ function showScreen(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   $("#"+id).classList.add("active");
   $("#overlay").classList.remove("show");
+}
+
+/* 배경: 배경1~5 중 랜덤. 한 장이 실패하면 다음 장을 시도, 모두 실패면 그라데이션 */
+function setBackground(){
+  const bg=$("#bg"), list=shuffle(BG_FILES); let i=0;
+  bg.style.display="";
+  bg.onerror=()=>{ i++; if(i<list.length){ bg.src=ASSET+list[i]; } else { bg.style.display="none"; } };
+  bg.src=ASSET+list[0];
 }
 
 /* ---------- 나무 ---------- */
@@ -281,8 +289,8 @@ function useMagnify(){
   if(hidden.length){
     const c = hidden[Math.random()*hidden.length|0];
     c.flag=true; c.el.classList.add("flag","revealed");
-    c.el.querySelector(".face")?.remove();
-    const f=document.createElement("div"); f.className="face"; f.textContent="🚩"; c.el.appendChild(f);
+    const rock=c.el.querySelector(".rock"); rock.querySelector(".face")?.remove();
+    const f=document.createElement("div"); f.className="face"; f.textContent="🚩"; rock.appendChild(f);
     c.el.style.pointerEvents="none";
     toast("🔦 돋보기가 숨골 한 곳(🚩)을 찾았어요! 피해 가세요.");
   }else{
@@ -339,23 +347,25 @@ function tapStone(c){
     if(n>0) c.el.querySelector(".face").classList.add("num"+Math.min(n,6));
   }
   else if(c.type==="insect"){
-    // 사진 썸네일 표시 후 채집 퀴즈
-    const img=document.createElement("img"); c.el.querySelector(".face")?.remove(); c.el.appendChild(img);
+    // 돌 위에 사진 썸네일 표시 후 채집 퀴즈
+    const rock=c.el.querySelector(".rock"); rock.querySelector(".face")?.remove();
+    const img=document.createElement("img"); rock.appendChild(img);
     loadImg(img, INSECTS[c.key].file, INSECTS[c.key].emoji, "");
     c.el.style.pointerEvents="none";
     openCatchQuiz(c.key);
   }
 }
 function setFace(c, txt){
-  c.el.querySelector(".face")?.remove();
-  const f=document.createElement("div"); f.className="face"; f.textContent=txt; c.el.appendChild(f);
+  const rock=c.el.querySelector(".rock");
+  rock.querySelector(".face")?.remove();
+  const f=document.createElement("div"); f.className="face"; f.textContent=txt; rock.appendChild(f);
 }
 
 /* ---------- 곤충 채집 → 곤충 퀴즈 ---------- */
 function openCatchQuiz(key){
   const ins=INSECTS[key], quiz=ins.quiz;
   const m=$("#modal");
-  m.innerHTML = `<h3>${ins.emoji} ${key} 발견!</h3>
+  m.innerHTML = `<h3>🎉 ${key} 채집 성공!</h3>
     <img class="photo" id="catchphoto" alt="${key}">
     <p style="font-size:1.06rem;font-weight:700;margin:12px 4px">${quiz.q}</p>
     <div class="choices">${quiz.a.map((t,i)=>`<button class="choice" data-i="${i}">${t}</button>`).join("")}</div>`;
