@@ -232,7 +232,7 @@ const W=cv.width, H=cv.height;
    ========================================================= */
 let state="start";          // start | play | quiz | over | win
 let lives, score, birdsGot, quizPool, elapsed, playerName;
-let player, butterflies, birds, particles, fireflies, fern;
+let player=null, butterflies=[], birds=[], particles=[], fireflies=[], fern=null;
 let invuln=0;               // 피격 무적시간(ms)
 let bflyTimer=0, birdTimer=0;
 let pointer={x:W*0.5, y:H*0.72, active:false};
