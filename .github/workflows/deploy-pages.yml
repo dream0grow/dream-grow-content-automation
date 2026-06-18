@@ -1,0 +1,44 @@
+name: Deploy game to GitHub Pages
+
+# games/ 폴더(게임만)를 GitHub Pages로 배포합니다.
+# 최초 1회: 저장소 Settings → Pages → Build and deployment → Source 를 "GitHub Actions" 로 설정.
+# 이후 main 에 games/ 변경이 푸시되면 자동 배포되며, Actions 탭에서 수동 실행(Run workflow)도 가능합니다.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'games/**'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 동시 배포 1건만 진행
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload game folder
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: games
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
