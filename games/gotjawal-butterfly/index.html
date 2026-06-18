@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🦋 곶자왈 나비를 피해라 — 돌하르방 대모험</title>
+<style>
+  :root{
+    --forest:#0e2417; --forest-d:#07160e; --leaf:#3f7d36; --moss:#6fae4f;
+    --ink:#0c1c12; --gold:#ffcf3f; --stone:#8d949a; --stone-d:#5b6168;
+    --good:#36b06a; --bad:#e7553f; --fern:#7be38b;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+    background:radial-gradient(120% 120% at 50% 0%, #11301f 0%, #0a1d12 60%, #050d08 100%);
+    color:#eaf4ea; display:flex; align-items:center; justify-content:center;
+    min-height:100%; overflow:hidden; user-select:none;
+  }
+  #app{
+    position:relative; width:min(96vw,920px); aspect-ratio:16/9;
+    max-height:96vh; border-radius:22px; overflow:hidden;
+    box-shadow:0 18px 50px rgba(0,0,0,.6); background:#0c1c12;
+    touch-action:none;
+  }
+  canvas{display:block; width:100%; height:100%; cursor:none;}
+
+  /* ---- 공통 화면 레이어 ---- */
+  .screen{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:5% 6%; gap:14px; z-index:5;
+  }
+  .hidden{display:none !important;}
+
+  #startScreen, #resultScreen{
+    background:linear-gradient(180deg, rgba(10,30,18,.92), rgba(4,14,8,.96));
+    color:#fff;
+  }
+  #startScreen h1{font-size:clamp(22px,5vw,42px); margin:0; letter-spacing:-1px; text-shadow:0 3px 0 rgba(0,0,0,.4);}
+  .sub{font-size:clamp(13px,2.6vw,18px); opacity:.95; line-height:1.6; max-width:560px;}
+  .rules{
+    background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.20);
+    border-radius:14px; padding:12px 16px; font-size:clamp(12px,2.4vw,16px);
+    line-height:1.8; max-width:560px; text-align:left;
+  }
+  .rules b{color:var(--gold);}
+  input#name{
+    font-size:clamp(15px,3vw,18px); padding:10px 14px; border-radius:12px;
+    border:none; text-align:center; width:min(70%,260px); font-family:inherit;
+    outline:3px solid rgba(255,255,255,.3); color:#123;
+  }
+  .nameMsg{min-height:18px; font-size:clamp(12px,2.6vw,15px); font-weight:800; color:var(--gold);}
+  input#name.warn{outline:3px solid var(--gold); animation:shake .5s;}
+  .btn{
+    cursor:pointer; border:none; font-family:inherit; font-weight:800;
+    background:var(--gold); color:#5a3d00; font-size:clamp(16px,3.4vw,22px);
+    padding:14px 34px; border-radius:999px; box-shadow:0 6px 0 #cfa11f;
+    transition:transform .06s, box-shadow .06s;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #cfa11f;}
+  .btn.ghost{background:rgba(255,255,255,.92); color:#1f6b39; box-shadow:0 6px 0 #2f5a3a;}
+  .btn.ghost:active{box-shadow:0 2px 0 #2f5a3a;}
+
+  /* ---- HUD ---- */
+  #hud{
+    position:absolute; top:0; left:0; right:0; z-index:6;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; pointer-events:none; font-weight:800; gap:8px;
+  }
+  #lives{font-size:clamp(18px,4vw,26px); letter-spacing:2px; text-shadow:0 2px 4px rgba(0,0,0,.5);}
+  .pill{
+    background:rgba(255,255,255,.86); color:#1f6b39;
+    padding:6px 12px; border-radius:999px; font-size:clamp(12px,2.6vw,16px);
+    box-shadow:0 3px 8px rgba(0,0,0,.3); font-variant-numeric:tabular-nums;
+  }
+  #birds{background:rgba(255,207,63,.92); color:#6a4a00;}
+
+  /* ---- 퀴즈 박스 ---- */
+  #quizBox{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:min(94%,760px); z-index:8; display:flex; flex-direction:column; gap:12px;
+    background:rgba(8,24,14,.86); border:2px solid rgba(123,227,139,.5);
+    border-radius:18px; padding:18px 18px 20px; box-shadow:0 18px 50px rgba(0,0,0,.6);
+  }
+  #quizTitle{font-size:clamp(14px,3vw,20px); font-weight:800; color:var(--gold);}
+  #qbar{height:10px; border-radius:999px; background:rgba(255,255,255,.18); overflow:hidden;}
+  #qbarFill{height:100%; width:100%; background:linear-gradient(90deg,#ffd24a,#ff7a59); transition:width .1s linear;}
+  #question{
+    background:rgba(255,255,255,.96); border-radius:14px; padding:12px 16px; color:#123;
+    font-size:clamp(14px,3vw,20px); font-weight:800; line-height:1.45;
+    box-shadow:0 8px 22px rgba(0,0,0,.3);
+  }
+  #choices{display:grid; grid-template-columns:1fr; gap:8px;}
+  @media(min-width:560px){#choices{grid-template-columns:1fr 1fr 1fr;}}
+  .choice{
+    cursor:pointer; font-family:inherit; font-weight:700; color:#123;
+    background:linear-gradient(180deg,#fff,#eef7ef);
+    border:2px solid #cfe6d4; border-radius:12px; padding:13px 10px;
+    font-size:clamp(14px,2.8vw,18px); box-shadow:0 4px 0 #cfe6d4;
+    transition:transform .05s, box-shadow .05s; line-height:1.3;
+  }
+  .choice:active{transform:translateY(3px); box-shadow:0 1px 0 #cfe6d4;}
+  .choice.correct{background:var(--good); color:#fff; border-color:#2a9258; box-shadow:0 4px 0 #2a9258;}
+  .choice.wrong{background:var(--bad); color:#fff; border-color:#c33; box-shadow:0 4px 0 #c33;}
+
+  /* ---- 결과 화면 ---- */
+  #resultScreen h2{font-size:clamp(22px,5vw,38px); margin:0;}
+  #resultStat{font-size:clamp(14px,3vw,20px); line-height:1.7;}
+  #resultStat .big{font-size:clamp(34px,9vw,64px); font-weight:900; color:var(--gold); display:block; line-height:1;}
+  #board{
+    width:min(94%,440px); background:rgba(255,255,255,.08); border-radius:14px;
+    border:1px solid rgba(255,255,255,.18); overflow:hidden; font-size:clamp(12px,2.6vw,16px);
+  }
+  #board .row{display:grid; grid-template-columns:46px 1fr auto auto; gap:8px; padding:9px 12px; align-items:center;}
+  #board .row+.row{border-top:1px solid rgba(255,255,255,.12);}
+  #board .row.head{background:rgba(0,0,0,.25); font-weight:800; color:var(--gold);}
+  #board .row.me{background:rgba(255,207,63,.22); font-weight:800;}
+  #board .nm{text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .btnRow{display:flex; gap:12px; flex-wrap:wrap; justify-content:center;}
+  .shareNote{font-size:clamp(11px,2.2vw,14px); opacity:.85;}
+
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+  #app.shake{animation:shake .45s;}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="cv" width="1280" height="720"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="lives">❤️❤️❤️</div>
+    <div class="pill" id="birds">🐦 0 / 5</div>
+    <div class="pill" id="score">0점</div>
+  </div>
+
+  <!-- 퀴즈 -->
+  <div id="quizBox" class="hidden">
+    <div id="quizTitle">🐦 새를 잡았어요! 퀴즈를 맞히면 내 친구가 돼요</div>
+    <div id="qbar"><div id="qbarFill"></div></div>
+    <div id="question">문제</div>
+    <div id="choices"></div>
+  </div>
+
+  <!-- 시작 화면 -->
+  <div id="startScreen" class="screen">
+    <h1>🦋 곶자왈 나비를 피해라</h1>
+    <div class="sub">어두운 곶자왈 숲, <b>돌하르방</b>이 되어 날아오는 나비를 요리조리 피해요!</div>
+    <input id="name" maxlength="8" placeholder="이름을 적어줘! (예: 지호)" value="">
+    <div id="nameMsg" class="nameMsg"></div>
+    <div class="rules">
+      🪨 손가락(또는 마우스)을 <b>끌어서</b> 돌하르방을 움직여요. (키보드 방향키도 OK)<br>
+      🦋 <b>나비에 닿으면</b> 생명 ❤️ 가 줄어요. 나비는 점점 많아져요!<br>
+      🐦 <b>새</b>를 만나면 퀴즈! 맞히면 새가 친구가 되고 <b>보너스 점수</b> ⭐<br>
+      🌿 새 친구 <b>5마리</b>를 모으면 귀한 <b>제주고사리삼</b>이 나타나요.<br>
+      🏆 제주고사리삼에 닿으면 <b>대성공!</b> 큰 점수를 얻고 끝나요.
+    </div>
+    <button class="btn" id="startBtn">▶️ 시작하기</button>
+  </div>
+
+  <!-- 결과 화면 -->
+  <div id="resultScreen" class="screen hidden">
+    <h2 id="resultTitle">결과</h2>
+    <div id="resultStat"></div>
+    <div id="board"></div>
+    <div class="btnRow">
+      <button class="btn" id="retryBtn">🔁 다시 도전</button>
+      <button class="btn ghost" id="shareBtn">🔗 친구에게 공유</button>
+    </div>
+    <div class="shareNote">랭킹은 이 기기에 저장돼요. 친구와 같은 기기·링크로 겨뤄보세요!</div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* =========================================================
+   곶자왈 2단계 · 나비와 새 퀴즈 (QUIZ.md 2단계와 동일)
+   각 문제: { q:질문, a:정답, w:[오답2개] }
+   ========================================================= */
+const QUIZ = [
+  { q:"노란 바탕에 검은 줄무늬가 호랑이처럼 화려한, 우리나라 대표 큰 나비는?",
+    a:"호랑나비", w:["배추흰나비","청띠제비나비"] },
+  { q:"텃밭의 배추·무 둘레에서 흔히 보이는, 하얀 날개의 친근한 나비는?",
+    a:"배추흰나비", w:["호랑나비","남방남색부전나비"] },
+  { q:"검은 날개 가운데를 하늘빛(청록) 띠가 가로지르는 멋진 나비는?",
+    a:"청띠제비나비", w:["호랑나비","배추흰나비"] },
+  { q:"남쪽 따뜻한 곳에 살며 날개가 보랏빛·남색으로 반짝이는 작은 부전나비는?",
+    a:"남방남색부전나비", w:["배추흰나비","호랑나비"] },
+  { q:"여덟 가지 고운 빛깔을 지녀 '숲속 보석'이라 불리는, 곶자왈에 찾아오는 여름철새는?",
+    a:"팔색조", w:["직박구리","박새"] },
+  { q:"나무를 '따다닥' 두드려 구멍을 내고 벌레를 잡아먹는, 곶자왈의 큰 딱따구리는?",
+    a:"큰오색딱따구리", w:["박새","직박구리"] },
+  { q:"가슴 한가운데에 검은 넥타이 같은 줄무늬가 있는, 작고 흔한 텃새는?",
+    a:"박새", w:["팔색조","큰유리새"] },
+  { q:"'삐익 삐익' 시끄럽게 울며 무리지어 다니는, 숲에서 흔한 회갈색 새는?",
+    a:"직박구리", w:["박새","팔색조"] },
+  { q:"수컷의 등이 보석처럼 파랗고(유리빛), 여름에 찾아오는 아름다운 새는?",
+    a:"큰유리새", w:["동박새","직박구리"] },
+  { q:"동백꽃 꿀을 좋아하고 눈 둘레가 하얀 테로 둘린, 제주 숲의 연두빛 작은 새는?",
+    a:"동박새", w:["박새","팔색조"] },
+];
+
+const TARGET_BIRDS = 5;          // 새 친구 N마리 모으면 제주고사리삼 등장
+const QUIZ_TIME = 12000;         // 퀴즈 제한시간(ms)
+const LS_KEY = "gotjawal_butterfly_scores_v1";
+
+/* 나비 색 팔레트 (곶자왈 나비 느낌) */
+const FLUTTER = [
+  {name:"호랑나비",       a:"#ffd23f", b:"#1c1c1c"},
+  {name:"배추흰나비",     a:"#fbfbf5", b:"#cfd6c6"},
+  {name:"청띠제비나비",   a:"#1c1c22", b:"#3fd6e0"},
+  {name:"남방남색부전나비",a:"#7b5cff", b:"#2a1c6b"},
+];
+
+/* =========================================================
+   DOM / 캔버스
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const app=$("#app"), cv=$("#cv"), ctx=cv.getContext("2d");
+const startScreen=$("#startScreen"), resultScreen=$("#resultScreen");
+const hud=$("#hud"), quizBox=$("#quizBox");
+const livesEl=$("#lives"), birdsEl=$("#birds"), scoreEl=$("#score");
+const qBarFill=$("#qbarFill"), questionEl=$("#question"), choicesEl=$("#choices");
+const W=cv.width, H=cv.height;
+
+/* =========================================================
+   게임 상태
+   ========================================================= */
+let state="start";          // start | play | quiz | over | win
+let lives, score, birdsGot, quizPool, elapsed, playerName;
+let player, butterflies, birds, particles, fireflies, fern;
+let invuln=0;               // 피격 무적시간(ms)
+let bflyTimer=0, birdTimer=0;
+let pointer={x:W*0.5, y:H*0.72, active:false};
+let keys={};
+let curBird=null, qAnswered=false, qTimeLeft=0;
+let runStart=0, last=performance.now();
+let shakeT=0, hitFlash=0;
+
+function rand(a,b){return a+Math.random()*(b-a);}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+
+/* =========================================================
+   시작 / 리셋
+   ========================================================= */
+function startGame(){
+  playerName = ($("#name").value || "돌하르방").trim().slice(0,8) || "돌하르방";
+  lives=3; score=0; birdsGot=0; elapsed=0;
+  quizPool=shuffle([...Array(QUIZ.length).keys()]);
+  player={x:W*0.5, y:H*0.72, r:30};
+  pointer={x:W*0.5, y:H*0.72, active:false};
+  butterflies=[]; birds=[]; particles=[]; fern=null;
+  fireflies=Array.from({length:18},()=>({x:rand(0,W),y:rand(0,H),ph:rand(0,7),sp:rand(.3,1)}));
+  invuln=1200; bflyTimer=600; birdTimer=2600; curBird=null;
+  runStart=performance.now();
+  startScreen.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+  quizBox.classList.add("hidden");
+  hud.classList.remove("hidden");
+  updateHud();
+  state="play";
+}
+
+function updateHud(){
+  livesEl.textContent = "❤️".repeat(Math.max(0,lives)) + "🤍".repeat(Math.max(0,3-lives));
+  birdsEl.textContent = `🐦 ${birdsGot} / ${TARGET_BIRDS}`;
+  scoreEl.textContent = `${score|0}점`;
+}
+
+/* =========================================================
+   스폰
+   ========================================================= */
+// 화면 가장자리에서 안쪽을 향해 날아오는 나비 (게임2의 탄막처럼 사방에서)
+function spawnButterfly(speedMul){
+  const edge=(Math.random()*4)|0;     // 0 위 1 오른 2 아래 3 왼
+  let x,y;
+  if(edge===0){x=rand(0,W); y=-40;}
+  else if(edge===1){x=W+40; y=rand(0,H);}
+  else if(edge===2){x=rand(0,W); y=H+40;}
+  else {x=-40; y=rand(0,H);}
+  // 화면 안쪽의 한 지점을 향하게 → 가로질러 날아감
+  const tx=rand(W*0.2,W*0.8), ty=rand(H*0.2,H*0.85);
+  const ang=Math.atan2(ty-y, tx-x)+rand(-0.5,0.5);
+  const sp=rand(2.0,3.2)*speedMul;
+  const kind=FLUTTER[(Math.random()*FLUTTER.length)|0];
+  butterflies.push({
+    x,y, vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp,
+    r:15, ph:rand(0,7), wob:rand(0.02,0.05), wamp:rand(8,22),
+    a:kind.a, b:kind.b, t:0
+  });
+}
+
+function spawnBird(){
+  const fromLeft=Math.random()<0.5;
+  const y=rand(H*0.18,H*0.8);
+  const sp=rand(1.6,2.4);
+  const colors=["#5fa8d3","#6fae4f","#d39a5f","#9b7bd3","#e0c14a"];
+  birds.push({
+    x:fromLeft?-50:W+50, y, vx:fromLeft?sp:-sp, vy:rand(-.3,.3),
+    r:24, ph:rand(0,7), baseY:y, c:colors[(Math.random()*colors.length)|0], t:0
+  });
+}
+
+function spawnFern(){
+  fern={x:rand(W*0.3,W*0.7), y:rand(H*0.3,H*0.6), r:34, ph:0, vx:rand(-.6,.6), vy:rand(-.4,.4)};
+}
+
+/* =========================================================
+   퀴즈 (새를 잡으면)
+   ========================================================= */
+function openQuiz(bird){
+  state="quiz"; curBird=bird; qAnswered=false; qTimeLeft=QUIZ_TIME;
+  const idx = quizPool.length ? quizPool.shift() : (Math.random()*QUIZ.length)|0;
+  const item=QUIZ[idx]; curBird.q=item;
+  const opts=shuffle([item.a,...item.w]);
+  questionEl.textContent=item.q;
+  choicesEl.innerHTML="";
+  opts.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="choice"; b.textContent=opt;
+    b.onclick=()=>answerQuiz(b, opt===item.a);
+    choicesEl.appendChild(b);
+  });
+  qBarFill.style.width="100%";
+  quizBox.classList.remove("hidden");
+}
+
+function answerQuiz(btn, correct){
+  if(qAnswered) return;
+  qAnswered=true;
+  [...choicesEl.children].forEach(c=>c.style.pointerEvents="none");
+  if(correct){
+    btn.classList.add("correct");
+    birdsGot++; score+=500;
+    beep(660,0.08); beep(880,0.08,0.08); beep(1040,0.10,0.16);
+    burstAt(curBird.x,curBird.y,"#ffe07a",18);
+    setTimeout(()=>{ closeQuiz(); if(birdsGot>=TARGET_BIRDS && !fern) spawnFern(); }, 650);
+  }else{
+    btn.classList.add("wrong");
+    [...choicesEl.children].forEach(c=>{ if(c.textContent===curBird.q.a) c.classList.add("correct"); });
+    beep(180,0.18,0,"square");
+    setTimeout(closeQuiz, 1100);
+  }
+}
+
+function quizTimeUp(){
+  if(qAnswered) return;
+  qAnswered=true;
+  [...choicesEl.children].forEach(c=>{ c.style.pointerEvents="none"; if(c.textContent===curBird.q.a) c.classList.add("correct"); });
+  beep(180,0.18,0,"square");
+  setTimeout(closeQuiz, 1100);
+}
+
+function closeQuiz(){
+  quizBox.classList.add("hidden");
+  curBird=null;
+  invuln=Math.max(invuln,800);   // 퀴즈 직후 잠깐 무적
+  updateHud();
+  if(state==="quiz") state="play";
+}
+
+/* =========================================================
+   피격 / 종료
+   ========================================================= */
+function hitPlayer(){
+  if(invuln>0) return;
+  lives--; invuln=1500; hitFlash=1; shakeT=450;
+  app.classList.add("shake"); setTimeout(()=>app.classList.remove("shake"),450);
+  beep(160,0.2,0,"square");
+  burstAt(player.x,player.y,"#e7553f",16);
+  updateHud();
+  if(lives<=0) endGame(false);
+}
+
+function reachFern(){
+  score+=2000 + lives*300;
+  beep(523,0.12);beep(659,0.12,0.12);beep(784,0.16,0.24);beep(1047,0.2,0.4);
+  burstAt(fern.x,fern.y,"#7be38b",40);
+  endGame(true);
+}
+
+function scoreKey(){ return LS_KEY; }
+function loadScores(){ try{return JSON.parse(localStorage.getItem(scoreKey()))||[];}catch(e){return [];} }
+function saveScores(a){ try{localStorage.setItem(scoreKey(),JSON.stringify(a));}catch(e){} }
+
+function endGame(won){
+  state = won ? "win" : "over";
+  hud.classList.add("hidden"); quizBox.classList.add("hidden");
+  const stat=$("#resultStat"), title=$("#resultTitle"), board=$("#board");
+  const timeSec=elapsed/1000;
+
+  const scores=loadScores();
+  const entry={name:playerName, score:score|0, birds:birdsGot, won, time:+timeSec.toFixed(1), date:Date.now()};
+  scores.push(entry);
+  scores.sort((a,b)=> b.score-a.score || (b.birds-a.birds));
+  saveScores(scores);
+  const rank=scores.indexOf(entry)+1;
+
+  if(won){
+    title.textContent="🏆 대성공! 제주고사리삼을 지켰어요!";
+    stat.innerHTML=`<span class="big">${score|0}점</span>
+      <b>${escapeHtml(playerName)}</b> 돌하르방<br>
+      🐦 새 친구 <b>${birdsGot}마리</b> · ❤️ 남은 생명 <b>${lives}</b><br>
+      버틴 시간 <b>${timeSec.toFixed(1)}초</b> · 순위 <b>${rank}등</b>`;
+    if(rank===1) confetti();
+  }else{
+    title.textContent="🦋 나비에 둘러싸였어요!";
+    stat.innerHTML=`<span class="big">${score|0}점</span>
+      <b>${escapeHtml(playerName)}</b> 돌하르방<br>
+      🐦 새 친구 <b>${birdsGot} / ${TARGET_BIRDS}</b> 마리<br>
+      버틴 시간 <b>${timeSec.toFixed(1)}초</b> · 순위 <b>${rank}등</b><br>
+      <span style="opacity:.85">새 친구 5마리를 모으면 제주고사리삼이 나타나요!</span>`;
+    beep(200,0.25,0,"sawtooth");
+  }
+  renderBoard(board, scores, entry);
+  resultScreen.classList.remove("hidden");
+}
+
+function renderBoard(board, scores, me){
+  let html=`<div class="row head"><span>순위</span><span class="nm">이름</span><span>점수</span><span></span></div>`;
+  scores.slice(0,8).forEach((s,i)=>{
+    const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+    const isMe=(s===me);
+    html+=`<div class="row${isMe?" me":""}">
+      <span>${medal}</span>
+      <span class="nm">${escapeHtml(s.name)}${s.won?" 🏆":""}</span>
+      <span>${s.score}점</span>
+      <span>${isMe?"⬅️":""}</span></div>`;
+  });
+  board.innerHTML=html;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* =========================================================
+   사운드 (WebAudio)
+   ========================================================= */
+let actx=null;
+function beep(freq,dur=0.1,delay=0,type="sine"){
+  try{
+    if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+    const t=actx.currentTime+delay;
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.16,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+dur+0.02);
+  }catch(e){}
+}
+
+function burstAt(x,y,c,n){
+  for(let i=0;i<n;i++){
+    particles.push({x,y,vx:(Math.random()-0.5)*9,vy:-Math.random()*8-1,
+      s:5+Math.random()*7,life:1,c});
+  }
+}
+function confetti(){
+  for(let i=0;i<60;i++){
+    particles.push({x:W/2+(Math.random()-0.5)*220,y:H*0.3,vx:(Math.random()-0.5)*12,
+      vy:-Math.random()*10-4,s:6+Math.random()*8,life:1.8,
+      c:["#ffcf3f","#7be38b","#ff7a59","#5fa8d3","#ff6fae"][(Math.random()*5)|0],confetti:true});
+  }
+}
+
+/* =========================================================
+   그리기 — 어두운 곶자왈 숲
+   ========================================================= */
+function drawBackground(dt){
+  // 깊은 숲 그라데이션
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,"#13321f"); sky.addColorStop(0.5,"#0c2114"); sky.addColorStop(1,"#06140c");
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+
+  // 빛줄기 (숲 사이로 스며드는 빛)
+  ctx.save(); ctx.globalAlpha=0.06; ctx.fillStyle="#cfe8a0";
+  for(let i=0;i<4;i++){ const x=W*0.15+i*W*0.22;
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x+70,0); ctx.lineTo(x+170,H); ctx.lineTo(x+60,H); ctx.closePath(); ctx.fill(); }
+  ctx.restore();
+
+  // 뒤쪽 나무 실루엣 (먼 층)
+  drawTreeRow(0.36, 150, H*0.52, "#0a1d11");
+  drawTreeRow(0.5, 210, H*0.62, "#0d2515");
+  // 바닥(이끼 낀 돌밭)
+  const g=ctx.createLinearGradient(0,H*0.8,0,H);
+  g.addColorStop(0,"#16341d"); g.addColorStop(1,"#0a1c10");
+  ctx.fillStyle=g; ctx.fillRect(0,H*0.8,W,H*0.2);
+
+  // 반딧불이
+  for(const f of fireflies){
+    f.ph+=dt*0.004*f.sp; f.x+=Math.sin(f.ph)*0.3; f.y+=Math.cos(f.ph*0.7)*0.2;
+    const a=0.3+0.5*Math.abs(Math.sin(f.ph));
+    ctx.fillStyle=`rgba(200,255,150,${a*0.5})`;
+    ctx.beginPath(); ctx.arc(f.x,f.y,3,0,7); ctx.fill();
+    ctx.fillStyle=`rgba(255,255,200,${a})`;
+    ctx.beginPath(); ctx.arc(f.x,f.y,1.4,0,7); ctx.fill();
+  }
+}
+function drawTreeRow(alpha, size, base, color){
+  ctx.save(); ctx.globalAlpha=1; ctx.fillStyle=color;
+  const gap=size*1.4;
+  for(let x=-size; x<W+size; x+=gap){
+    ctx.fillRect(x-size*0.08, base-size*1.1, size*0.16, size*1.1);   // 줄기
+    ctx.beginPath(); ctx.arc(x, base-size*1.05, size*0.5,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x-size*0.32, base-size*0.85, size*0.36,0,7); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+size*0.32, base-size*0.85, size*0.36,0,7); ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* 돌하르방 (제주 현무암 할아버지) */
+function drawPlayer(){
+  const {x,y}=player;
+  ctx.save();
+  ctx.translate(x,y);
+  if(invuln>0 && state==="play"){ ctx.globalAlpha=0.45+0.55*Math.abs(Math.sin(invuln*0.02)); }
+
+  // 그림자
+  ctx.globalAlpha*=1; ctx.fillStyle="rgba(0,0,0,.35)";
+  ctx.beginPath(); ctx.ellipse(0,44,34,11,0,0,7); ctx.fill();
+
+  // 몸통(현무암)
+  const grd=ctx.createLinearGradient(0,-46,0,46);
+  grd.addColorStop(0,"#9aa1a7"); grd.addColorStop(1,"#5b6168");
+  ctx.fillStyle=grd; ctx.strokeStyle="#3f444a"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(-26,44);
+  ctx.lineTo(-30,-6); ctx.quadraticCurveTo(-30,-30,-16,-34);
+  ctx.lineTo(16,-34); ctx.quadraticCurveTo(30,-30,30,-6);
+  ctx.lineTo(26,44); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  // 벙거지 모자(버섯형)
+  ctx.fillStyle="#6c727a"; ctx.strokeStyle="#3f444a"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(-30,-30);
+  ctx.quadraticCurveTo(0,-66,30,-30);
+  ctx.quadraticCurveTo(0,-44,-30,-30); ctx.closePath(); ctx.fill(); ctx.stroke();
+
+  // 현무암 구멍(기공)
+  ctx.fillStyle="rgba(0,0,0,.22)";
+  [[-14,-2,3],[10,6,2.5],[-6,22,2],[16,-12,2],[-20,12,2]].forEach(p=>{
+    ctx.beginPath(); ctx.arc(p[0],p[1],p[2],0,7); ctx.fill();
+  });
+
+  // 눈(부리부리)
+  ctx.fillStyle="#2a2e33";
+  ctx.beginPath(); ctx.arc(-11,-8,6,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(11,-8,6,0,7); ctx.fill();
+  ctx.fillStyle="#e9edf0";
+  ctx.beginPath(); ctx.arc(-13,-10,2,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(9,-10,2,0,7); ctx.fill();
+
+  // 큰 코
+  ctx.fillStyle="#7d838a"; ctx.strokeStyle="#3f444a"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0,-4); ctx.quadraticCurveTo(-7,12,0,14);
+  ctx.quadraticCurveTo(7,12,0,-4); ctx.fill(); ctx.stroke();
+
+  // 입
+  ctx.strokeStyle="#3f444a"; ctx.lineWidth=2.5; ctx.lineCap="round";
+  ctx.beginPath(); ctx.arc(0,20,8,0.12*Math.PI,0.88*Math.PI); ctx.stroke();
+
+  // 손(배 위에 올린 양손)
+  ctx.fillStyle="#828990"; ctx.strokeStyle="#3f444a"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.ellipse(-15,34,7,5,0.3,0,7); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(15,34,7,5,-0.3,0,7); ctx.fill(); ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawButterfly(b){
+  ctx.save();
+  ctx.translate(b.x,b.y);
+  ctx.rotate(Math.atan2(b.vy,b.vx));
+  const flap=Math.abs(Math.sin(b.ph))*0.8+0.2;   // 날갯짓
+  // 몸통
+  ctx.fillStyle="#2a2a2a";
+  ctx.beginPath(); ctx.ellipse(0,0,3,11,0,0,7); ctx.fill();
+  // 날개 (양쪽)
+  for(const s of [-1,1]){
+    ctx.save(); ctx.scale(1, s);
+    ctx.fillStyle=b.a; ctx.strokeStyle=b.b; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.ellipse(2, -8*flap-6, 9, 13*flap+3, -0.5, 0,7); ctx.fill(); ctx.stroke();   // 윗날개
+    ctx.beginPath();
+    ctx.ellipse(-2, -6*flap-2, 7, 9*flap+2, 0.4, 0,7); ctx.fill(); ctx.stroke();    // 아랫날개
+    // 무늬 점
+    ctx.fillStyle=b.b;
+    ctx.beginPath(); ctx.arc(3,-10*flap-6,2.4,0,7); ctx.fill();
+    ctx.restore();
+  }
+  // 더듬이
+  ctx.strokeStyle="#2a2a2a"; ctx.lineWidth=1.2; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(0,-10); ctx.lineTo(-4,-16); ctx.moveTo(0,-10); ctx.lineTo(4,-16); ctx.stroke();
+  ctx.restore();
+}
+
+function drawBird(bd){
+  ctx.save();
+  ctx.translate(bd.x,bd.y);
+  const dir=bd.vx<0?-1:1; ctx.scale(dir,1);
+  const flap=Math.sin(bd.ph)*0.6;
+  // 몸통
+  ctx.fillStyle=bd.c; ctx.strokeStyle="rgba(0,0,0,.25)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.ellipse(0,0,20,13,0,0,7); ctx.fill(); ctx.stroke();
+  // 머리
+  ctx.beginPath(); ctx.arc(16,-6,9,0,7); ctx.fill(); ctx.stroke();
+  // 부리
+  ctx.fillStyle="#ffb13f";
+  ctx.beginPath(); ctx.moveTo(24,-6); ctx.lineTo(34,-3); ctx.lineTo(24,-1); ctx.closePath(); ctx.fill();
+  // 눈
+  ctx.fillStyle="#1c1c1c"; ctx.beginPath(); ctx.arc(18,-8,2,0,7); ctx.fill();
+  // 날개(펄럭)
+  ctx.fillStyle="rgba(255,255,255,.4)";
+  ctx.beginPath(); ctx.ellipse(-2,-2+flap*6,14,7,flap,0,7); ctx.fill();
+  // 꼬리
+  ctx.fillStyle=bd.c;
+  ctx.beginPath(); ctx.moveTo(-18,-2); ctx.lineTo(-30,-8); ctx.lineTo(-28,2); ctx.lineTo(-18,4); ctx.closePath(); ctx.fill();
+  // "잡아줘!" 반짝임
+  ctx.restore();
+  ctx.save(); ctx.translate(bd.x,bd.y-26);
+  const tw=0.5+0.5*Math.abs(Math.sin(bd.ph*1.5));
+  ctx.globalAlpha=tw; ctx.fillStyle="#ffe07a"; ctx.font="bold 16px system-ui";
+  ctx.textAlign="center"; ctx.fillText("✦",0,0);
+  ctx.restore();
+}
+
+function drawFern(){
+  if(!fern) return;
+  fern.ph+=0.05;
+  const pulse=1+Math.sin(fern.ph)*0.08;
+  ctx.save(); ctx.translate(fern.x,fern.y); ctx.scale(pulse,pulse);
+  // 후광
+  const halo=ctx.createRadialGradient(0,0,4,0,0,50);
+  halo.addColorStop(0,"rgba(123,227,139,.55)"); halo.addColorStop(1,"rgba(123,227,139,0)");
+  ctx.fillStyle=halo; ctx.beginPath(); ctx.arc(0,0,50,0,7); ctx.fill();
+  // 고사리 잎(여러 갈래)
+  ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=3; ctx.lineCap="round";
+  for(let k=0;k<5;k++){
+    const ang=-Math.PI/2 + (k-2)*0.5;
+    ctx.save(); ctx.rotate(ang);
+    ctx.beginPath(); ctx.moveTo(0,6); ctx.quadraticCurveTo(2,-16,0,-32); ctx.stroke();
+    ctx.fillStyle="#5fd17a";
+    for(let i=0;i<6;i++){ const yy=-4-i*5;
+      ctx.beginPath(); ctx.ellipse(-4,yy,4,2.4,0.6,0,7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(4,yy,4,2.4,-0.6,0,7); ctx.fill(); }
+    ctx.restore();
+  }
+  // 새순(돌돌 말린 끝)
+  ctx.strokeStyle="#7be38b"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(0,-30,5,0,5); ctx.stroke();
+  // 반짝이
+  for(let i=0;i<3;i++){ const a=fern.ph+i*2.1;
+    ctx.fillStyle="rgba(255,255,200,.9)";
+    ctx.beginPath(); ctx.arc(Math.cos(a)*30,Math.sin(a*1.3)*22,2,0,7); ctx.fill(); }
+  ctx.restore();
+  // 안내 글
+  ctx.fillStyle="rgba(255,255,255,.9)"; ctx.font="bold 18px system-ui"; ctx.textAlign="center";
+  ctx.fillText("🌿 제주고사리삼! 닿으면 대성공!", fern.x, fern.y+58);
+}
+
+function drawParticles(dt){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx*dt*0.06; p.y+=p.vy*dt*0.06; p.vy+=0.5*dt*0.06; p.life-=dt*0.0016;
+    if(p.confetti){
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.x*0.05);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+    }else{
+      ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.c;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.s*Math.max(0,p.life),0,7); ctx.fill(); ctx.globalAlpha=1;
+    }
+    if(p.life<=0) particles.splice(i,1);
+  }
+}
+
+/* =========================================================
+   업데이트
+   ========================================================= */
+function updatePlayer(dt){
+  // 키보드 이동
+  const k=0.5*dt;
+  if(keys.ArrowLeft||keys.a) player.x-=k;
+  if(keys.ArrowRight||keys.d) player.x+=k;
+  if(keys.ArrowUp||keys.w) player.y-=k;
+  if(keys.ArrowDown||keys.s) player.y+=k;
+  // 포인터 추적(부드럽게)
+  if(pointer.active){
+    player.x += (pointer.x-player.x)*Math.min(1,dt*0.018);
+    player.y += (pointer.y-player.y)*Math.min(1,dt*0.018);
+  }
+  player.x=clamp(player.x,30,W-30);
+  player.y=clamp(player.y,40,H-30);
+}
+
+function updateEntities(dt){
+  const t=elapsed/1000;
+  const speedMul=1+Math.min(1.1, t*0.012);   // 시간이 지날수록 빨라짐
+
+  // 나비 스폰: 점점 잦아짐
+  bflyTimer-=dt;
+  if(bflyTimer<=0){
+    const interval=Math.max(360, 1500 - t*16);
+    bflyTimer=interval;
+    spawnButterfly(speedMul);
+    if(t>25 && Math.random()<0.4) spawnButterfly(speedMul);   // 후반엔 한 번에 둘
+  }
+  // 새 스폰
+  birdTimer-=dt;
+  if(birdTimer<=0 && birds.length<2 && !fern){
+    birdTimer=rand(4200,6500);
+    spawnBird();
+  }
+
+  // 나비 이동 + 충돌
+  for(let i=butterflies.length-1;i>=0;i--){
+    const b=butterflies[i];
+    b.ph+=b.wob*dt; b.t+=dt;
+    // 좌우로 살랑이는 비행
+    const perpx=-b.vy, perpy=b.vx; const pl=Math.hypot(perpx,perpy)||1;
+    const sway=Math.cos(b.ph)*b.wamp*0.02;
+    b.x += (b.vx + perpx/pl*sway)*dt*0.06;
+    b.y += (b.vy + perpy/pl*sway)*dt*0.06;
+    if(b.x<-80||b.x>W+80||b.y<-80||b.y>H+80){ butterflies.splice(i,1); continue; }
+    const d=Math.hypot(b.x-player.x,b.y-player.y);
+    if(d < b.r+player.r*0.7){ hitPlayer(); butterflies.splice(i,1); }
+  }
+
+  // 새 이동 + 충돌(→ 퀴즈)
+  for(let i=birds.length-1;i>=0;i--){
+    const bd=birds[i];
+    bd.ph+=0.12; bd.t+=dt;
+    bd.x+=bd.vx*dt*0.06;
+    bd.y=bd.baseY+Math.sin(bd.ph)*14;
+    if(bd.x<-80||bd.x>W+80){ birds.splice(i,1); continue; }
+    const d=Math.hypot(bd.x-player.x,bd.y-player.y);
+    if(d < bd.r+player.r*0.7){
+      birds.splice(i,1);
+      openQuiz(bd);
+      return;
+    }
+  }
+
+  // 제주고사리삼: 천천히 떠다니다 닿으면 승리
+  if(fern){
+    fern.x+=fern.vx*dt*0.05; fern.y+=fern.vy*dt*0.05;
+    if(fern.x<60||fern.x>W-60) fern.vx*=-1;
+    if(fern.y<80||fern.y>H-90) fern.vy*=-1;
+    const d=Math.hypot(fern.x-player.x,fern.y-player.y);
+    if(d < fern.r+player.r*0.7){ reachFern(); }
+  }
+}
+
+/* =========================================================
+   메인 루프
+   ========================================================= */
+function loop(now){
+  const dt=Math.min(50, now-last); last=now;
+  if(invuln>0) invuln=Math.max(0,invuln-dt);
+  if(hitFlash>0) hitFlash=Math.max(0,hitFlash-dt*0.004);
+
+  drawBackground(dt);
+
+  if(state==="play"){
+    elapsed=now-runStart;
+    updatePlayer(dt);
+    updateEntities(dt);
+  } else if(state==="quiz"){
+    // 퀴즈 중엔 멈춤 + 제한시간 진행
+    qTimeLeft-=dt;
+    qBarFill.style.width=Math.max(0,(qTimeLeft/QUIZ_TIME)*100)+"%";
+    if(qTimeLeft<=0) quizTimeUp();
+  }
+
+  // 그리기 (멈춤 상태에서도 정지화면 유지)
+  for(const b of butterflies) drawButterfly(b);
+  for(const bd of birds) drawBird(bd);
+  drawFern();
+  if(state!=="over" && state!=="win" && state!=="start") drawPlayer();
+  drawParticles(dt);
+
+  if(hitFlash>0){
+    ctx.fillStyle=`rgba(231,85,63,${0.35*hitFlash})`;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* =========================================================
+   입력 처리
+   ========================================================= */
+function canvasPos(e){
+  const r=cv.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+  const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+  return { x:cx/r.width*W, y:cy/r.height*H };
+}
+function onMove(e){
+  if(state!=="play") return;
+  const p=canvasPos(e); pointer.x=p.x; pointer.y=p.y; pointer.active=true;
+  e.preventDefault();
+}
+function onDown(e){
+  if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(_){}}
+  if(state!=="play") return;
+  const p=canvasPos(e); pointer.x=p.x; pointer.y=p.y; pointer.active=true;
+  e.preventDefault();
+}
+cv.addEventListener("mousemove",onMove);
+cv.addEventListener("mousedown",onDown);
+cv.addEventListener("touchstart",onDown,{passive:false});
+cv.addEventListener("touchmove",onMove,{passive:false});
+window.addEventListener("keydown",e=>{ keys[e.key]=true; });
+window.addEventListener("keyup",e=>{ keys[e.key]=false; });
+
+/* 시작화면 이름 검증 */
+function nameOK(){
+  const nm=$("#name").value.trim();
+  if(nm) return true;
+  const inp=$("#name"), msg=$("#nameMsg");
+  msg.textContent="✏️ 이름을 먼저 적어줘!";
+  inp.classList.remove("warn"); void inp.offsetWidth; inp.classList.add("warn");
+  inp.focus(); beep(220,0.12,0,"square");
+  return false;
+}
+$("#name").addEventListener("input",()=>{ $("#nameMsg").textContent=""; $("#name").classList.remove("warn"); });
+
+$("#startBtn").onclick=()=>{
+  if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(_){}}
+  if(!nameOK()) return;
+  startGame();
+};
+$("#retryBtn").onclick=()=>startGame();
+$("#shareBtn").onclick=async ()=>{
+  const url=location.href;
+  const text=`🦋 곶자왈 나비를 피해라! 돌하르방으로 나비를 피하고 제주고사리삼을 지켜봐 — 내 점수에 도전! ${url}`;
+  try{
+    if(navigator.share){ await navigator.share({title:"곶자왈 나비를 피해라", text, url}); }
+    else { await navigator.clipboard.writeText(text); alert("공유 링크를 복사했어요! 친구에게 붙여넣어 보내세요 📨"); }
+  }catch(e){}
+};
+
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
