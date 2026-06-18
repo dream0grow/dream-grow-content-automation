@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🌿 스피드 곶자왈 퀴즈 게임 — 식물·나비·곤충 달리기</title>
+<style>
+  :root{
+    --green:#2f8f4e; --green-d:#1f6b39; --leaf:#8fd694;
+    --sky:#bdeac9; --ink:#1d3a26; --gold:#ffcf3f; --rock:#7c7c84;
+    --good:#36b06a; --bad:#e7553f;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+    background:radial-gradient(120% 120% at 50% 0%, #d9f6e0 0%, #aee3bd 55%, #7fc993 100%);
+    color:var(--ink); display:flex; align-items:center; justify-content:center;
+    min-height:100%; overflow:hidden; user-select:none;
+  }
+  #app{
+    position:relative; width:min(96vw,920px); aspect-ratio:16/9;
+    max-height:96vh; border-radius:22px; overflow:hidden;
+    box-shadow:0 18px 50px rgba(20,60,30,.35); background:#cfeede;
+  }
+  canvas{display:block; width:100%; height:100%;}
+
+  /* ---- 공통 화면 레이어 ---- */
+  .screen{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:5% 6%; gap:14px; z-index:5;
+  }
+  .hidden{display:none !important;}
+
+  /* ---- 시작 화면 ---- */
+  #startScreen{
+    background:linear-gradient(180deg, rgba(38,120,68,.92), rgba(20,80,45,.95));
+    color:#fff;
+  }
+  #startScreen h1{font-size:clamp(22px,5vw,42px); margin:0; letter-spacing:-1px; text-shadow:0 3px 0 rgba(0,0,0,.18);}
+  #startScreen .sub{font-size:clamp(13px,2.6vw,18px); opacity:.95; line-height:1.6; max-width:560px;}
+  .rules{
+    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.25);
+    border-radius:14px; padding:12px 16px; font-size:clamp(12px,2.4vw,16px);
+    line-height:1.7; max-width:560px;
+  }
+  .rules b{color:var(--gold);}
+  input#name{
+    font-size:clamp(15px,3vw,18px); padding:10px 14px; border-radius:12px;
+    border:none; text-align:center; width:min(70%,260px); font-family:inherit;
+    outline:3px solid rgba(255,255,255,.4);
+  }
+  .btn{
+    cursor:pointer; border:none; font-family:inherit; font-weight:800;
+    background:var(--gold); color:#5a3d00; font-size:clamp(16px,3.4vw,22px);
+    padding:14px 34px; border-radius:999px; box-shadow:0 6px 0 #cfa11f;
+    transition:transform .06s, box-shadow .06s;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #cfa11f;}
+  .btn.ghost{background:rgba(255,255,255,.92); color:var(--green-d); box-shadow:0 6px 0 #9fc7ab;}
+  .btn.ghost:active{box-shadow:0 2px 0 #9fc7ab;}
+  .stagePick{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+  .stageBtn{display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:12px 18px; background:#fff; color:var(--green-d); box-shadow:0 6px 0 #9fc7ab; line-height:1.1;}
+  .stageBtn:active{box-shadow:0 2px 0 #9fc7ab;}
+  .stageBtn .se{font-size:clamp(22px,5vw,30px);}
+  .stageBtn small{font-weight:700; font-size:clamp(10px,2.2vw,13px); opacity:.8;}
+  .stageBtn[data-stage="2"]{box-shadow:0 6px 0 #b39bdf;}
+  .stageBtn[data-stage="2"]:active{box-shadow:0 2px 0 #b39bdf;}
+  .stageBtn[data-stage="3"]{box-shadow:0 6px 0 #d6a96b;}
+  .stageBtn[data-stage="3"]:active{box-shadow:0 2px 0 #d6a96b;}
+  .stageBtn.locked{opacity:.5; filter:grayscale(.6); cursor:not-allowed;}
+  .stageBtn.locked:active{transform:none;}
+
+  /* ---- HUD ---- */
+  #hud{
+    position:absolute; top:0; left:0; right:0; z-index:6;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px; pointer-events:none; font-weight:800;
+  }
+  #lives{font-size:clamp(18px,4vw,26px); letter-spacing:2px;}
+  #progress, #timer{
+    background:rgba(255,255,255,.82); color:var(--green-d);
+    padding:6px 12px; border-radius:999px; font-size:clamp(12px,2.6vw,16px);
+    box-shadow:0 3px 8px rgba(0,0,0,.12);
+  }
+  #timer{font-variant-numeric:tabular-nums;}
+
+  /* ---- 퀴즈 박스 ---- */
+  #quizBox{
+    position:absolute; left:50%; top:52px; transform:translateX(-50%);
+    width:min(94%,760px); z-index:7; display:flex; flex-direction:column; gap:10px;
+  }
+  @media(max-width:560px){ #quizBox{top:46px;} }
+  #qbar{height:10px; border-radius:999px; background:rgba(0,0,0,.15); overflow:hidden;}
+  #qbarFill{height:100%; width:100%; background:linear-gradient(90deg,#ffd24a,#ff7a59); transition:width .1s linear;}
+  #question{
+    background:rgba(255,255,255,.96); border-radius:14px; padding:12px 16px;
+    font-size:clamp(14px,3vw,20px); font-weight:800; line-height:1.45;
+    box-shadow:0 8px 22px rgba(0,0,0,.18);
+  }
+  #choices{display:grid; grid-template-columns:1fr; gap:8px;}
+  @media(min-width:560px){#choices{grid-template-columns:1fr 1fr 1fr;}}
+  .choice{
+    cursor:pointer; border:none; font-family:inherit; font-weight:700;
+    background:linear-gradient(180deg,#fff,#eef7ef); color:var(--ink);
+    border:2px solid #cfe6d4; border-radius:12px; padding:13px 10px;
+    font-size:clamp(14px,2.8vw,18px); box-shadow:0 4px 0 #cfe6d4;
+    transition:transform .05s, box-shadow .05s; line-height:1.3;
+  }
+  .choice:active{transform:translateY(3px); box-shadow:0 1px 0 #cfe6d4;}
+  .choice.correct{background:var(--good); color:#fff; border-color:#2a9258; box-shadow:0 4px 0 #2a9258;}
+  .choice.wrong{background:var(--bad); color:#fff; border-color:#c33; box-shadow:0 4px 0 #c33;}
+
+  /* ---- 결과 화면 ---- */
+  #resultScreen{background:linear-gradient(180deg, rgba(30,110,62,.95), rgba(15,70,40,.97)); color:#fff;}
+  #resultScreen h2{font-size:clamp(22px,5vw,38px); margin:0;}
+  #resultStat{font-size:clamp(14px,3vw,20px); line-height:1.7;}
+  #resultStat .big{font-size:clamp(34px,9vw,64px); font-weight:900; color:var(--gold); display:block; line-height:1;}
+  #board{
+    width:min(94%,440px); background:rgba(255,255,255,.1); border-radius:14px;
+    border:1px solid rgba(255,255,255,.22); overflow:hidden; font-size:clamp(12px,2.6vw,16px);
+  }
+  #board .row{display:grid; grid-template-columns:46px 1fr auto auto; gap:8px; padding:9px 12px; align-items:center;}
+  #board .row+.row{border-top:1px solid rgba(255,255,255,.12);}
+  #board .row.head{background:rgba(0,0,0,.18); font-weight:800; color:var(--gold);}
+  #board .row.me{background:rgba(255,207,63,.22); font-weight:800;}
+  #board .rank{font-weight:800;}
+  #board .nm{text-align:left; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .btnRow{display:flex; gap:12px; flex-wrap:wrap; justify-content:center;}
+  .shareNote{font-size:clamp(11px,2.2vw,14px); opacity:.85;}
+
+  .nameMsg{min-height:18px; font-size:clamp(12px,2.6vw,15px); font-weight:800; color:var(--gold);}
+  input#name.warn{outline:3px solid var(--gold); animation:shake .5s;}
+
+  /* 화면 흔들림 */
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-7px)}40%,60%{transform:translateX(7px)}}
+  #app.shake{animation:shake .5s;}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="cv" width="1280" height="720"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="lives">❤️❤️❤️</div>
+    <div id="progress">문제 1 / 10</div>
+    <div id="timer">0.0초</div>
+  </div>
+
+  <!-- 퀴즈 -->
+  <div id="quizBox" class="hidden">
+    <div id="qbar"><div id="qbarFill"></div></div>
+    <div id="question">문제</div>
+    <div id="choices"></div>
+  </div>
+
+  <!-- 시작 화면 -->
+  <div id="startScreen" class="screen">
+    <h1>🌿 스피드 곶자왈 퀴즈 게임</h1>
+    <div class="sub">
+      곶자왈 숲을 달려요! 🏃<br>
+      돌이 굴러오면<br>
+      퀴즈를 풀어 돌을 던져요.<br>
+      맞히면 안전,<br>
+      틀리면 생명 ❤️ 감소!
+    </div>
+    <input id="name" maxlength="8" placeholder="이름을 적어줘! (예: 지호)" value="">
+    <div id="nameMsg" class="nameMsg"></div>
+    <div class="stagePick">
+      <button class="btn stageBtn" data-stage="1"><span class="se">🌿</span>1단계<small>곶자왈 식물</small></button>
+      <button class="btn stageBtn" data-stage="2"><span class="se">🦋</span>2단계<small>나비와 새</small></button>
+      <button class="btn stageBtn" data-stage="3"><span class="se">🪲</span>3단계<small>곤충과 비밀</small></button>
+    </div>
+    <div class="sub" style="opacity:.85">
+      <b>1단계</b>부터 시작!<br>
+      단계를 깨면<br>
+      다음 단계가 열려요 🔓<br>
+      각 단계 10문제,<br>
+      빨리 도착할수록 1등! 🏁
+    </div>
+  </div>
+
+  <!-- 결과 화면 -->
+  <div id="resultScreen" class="screen hidden">
+    <h2 id="resultTitle">🏁 도착!</h2>
+    <div id="resultStat"></div>
+    <div id="board"></div>
+    <div class="btnRow">
+      <button class="btn hidden" id="nextBtn">▶️ 다음 단계</button>
+      <button class="btn ghost" id="retryBtn">🔁 다시 도전</button>
+      <button class="btn ghost" id="backBtn">🧭 단계 선택</button>
+      <button class="btn ghost" id="shareBtn">🔗 친구에게 공유</button>
+    </div>
+    <div class="shareNote">랭킹은 이 기기에 저장돼요. 친구와 같은 기기·링크로 겨뤄보세요!</div>
+  </div>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* =========================================================
+   곶자왈 퀴즈 3단계 (총 30문제) — 단계가 오를수록 어려워짐
+   각 문제: { q:질문, a:정답, w:[오답2개] }
+   ========================================================= */
+const STAGES = {
+  1: { name:"곶자왈 식물", emoji:"🌿", qs:[
+    { q:"곶자왈을 대표하는 늘푸른나무로, 작은 도토리 같은 열매가 열리는 것은?",
+      a:"구실잣밤나무", w:["으름덩굴","다래"] },
+    { q:"열매가 바나나처럼 생겨 '한국의 바나나'라고도 불리는 덩굴식물은?",
+      a:"으름덩굴", w:["종가시나무","개가시나무"] },
+    { q:"제주에서만 자라는 아주 귀한 고사리로, 곶자왈 습지에 사는 멸종위기 식물은?",
+      a:"제주고사리삼", w:["다래","구실잣밤나무"] },
+    { q:"키위(참다래)와 친척으로, 작고 달콤한 초록 열매가 열리는 덩굴은?",
+      a:"다래", w:["개가시나무","으름덩굴"] },
+    { q:"참나무 종류로 사철 잎이 푸르고, 곶자왈에서 흔히 보이는 가시나무는?",
+      a:"종가시나무", w:["제주고사리삼","으름덩굴"] },
+    { q:"잎 뒷면이 황금빛을 띠고, 수가 적어 보호받는 멸종위기 참나무는?",
+      a:"개가시나무", w:["다래","구실잣밤나무"] },
+    { q:"'곶자왈'은 무엇을 뜻하는 제주말일까요?",
+      a:"나무와 덩굴이 우거진 숲", w:["넓은 모래밭","깊은 바닷속"] },
+    { q:"으름덩굴·다래처럼 다른 나무를 타고 올라가며 자라는 식물을?",
+      a:"덩굴식물", w:["바닷말","버섯"] },
+    { q:"구실잣밤나무·종가시나무처럼 겨울에도 잎이 푸른 나무를?",
+      a:"늘푸른나무(상록수)", w:["잎지는나무","풀"] },
+    { q:"제주고사리삼·개가시나무처럼 수가 매우 적어 지켜야 할 식물을?",
+      a:"멸종위기 식물", w:["잡초","외래식물"] },
+  ]},
+  2: { name:"곶자왈 나비와 새", emoji:"🦋", qs:[
+    { q:"노란 바탕에 검은 줄무늬가 호랑이처럼 화려한, 우리나라 대표 큰 나비는?",
+      a:"호랑나비", w:["배추흰나비","청띠제비나비"] },
+    { q:"텃밭의 배추·무 둘레에서 흔히 보이는, 하얀 날개의 친근한 나비는?",
+      a:"배추흰나비", w:["호랑나비","남방남색부전나비"] },
+    { q:"검은 날개 가운데를 하늘빛(청록) 띠가 가로지르는 멋진 나비는?",
+      a:"청띠제비나비", w:["호랑나비","배추흰나비"] },
+    { q:"남쪽 따뜻한 곳에 살며 날개가 보랏빛·남색으로 반짝이는 작은 부전나비는?",
+      a:"남방남색부전나비", w:["배추흰나비","호랑나비"] },
+    { q:"여덟 가지 고운 빛깔을 지녀 '숲속 보석'이라 불리는, 곶자왈에 찾아오는 여름철새는?",
+      a:"팔색조", w:["직박구리","박새"] },
+    { q:"나무를 '따다닥' 두드려 구멍을 내고 벌레를 잡아먹는, 곶자왈의 큰 딱따구리는?",
+      a:"큰오색딱따구리", w:["박새","직박구리"] },
+    { q:"가슴 한가운데에 검은 넥타이 같은 줄무늬가 있는, 작고 흔한 텃새는?",
+      a:"박새", w:["팔색조","큰유리새"] },
+    { q:"'삐익 삐익' 시끄럽게 울며 무리지어 다니는, 숲에서 흔한 회갈색 새는?",
+      a:"직박구리", w:["박새","팔색조"] },
+    { q:"수컷의 등이 보석처럼 파랗고(유리빛), 여름에 찾아오는 아름다운 새는?",
+      a:"큰유리새", w:["동박새","직박구리"] },
+    { q:"동백꽃 꿀을 좋아하고 눈 둘레가 하얀 테로 둘린, 제주 숲의 연두빛 작은 새는?",
+      a:"동박새", w:["박새","팔색조"] },
+  ]},
+  3: { name:"곶자왈 곤충과 비밀", emoji:"🪲", qs:[
+    { q:"등에 점 두 개가 또렷한, 곶자왈에 사는 멸종위기 사슴벌레는?",
+      a:"두점박이사슴벌레", w:["반딧불이","물장군"] },
+    { q:"여름밤 꽁무니에서 노란 빛을 깜빡여 '개똥벌레'라고도 불리는 곤충은?",
+      a:"반딧불이", w:["물장군","비단벌레"] },
+    { q:"맑은 물속에 사는, 우리나라에서 가장 큰 물속 곤충(멸종위기)은?",
+      a:"물장군", w:["반딧불이","두점박이사슴벌레"] },
+    { q:"날개가 초록·빨강 금속처럼 비단빛으로 반짝여 옛 장신구에도 쓰인 멸종위기 곤충은?",
+      a:"비단벌레", w:["물장군","반딧불이"] },
+    { q:"동물의 똥을 굴려 경단을 만들고 땅을 깨끗하게 해 주는 멸종위기 소똥구리는?",
+      a:"애기뿔소똥구리", w:["두점박이사슴벌레","물장군"] },
+    { q:"곶자왈은 옛날 화산이 터질 때 흘러나온 무엇이 굳어서 생긴 숲일까요?",
+      a:"용암(이 굳은 돌)", w:["바닷물","모래"] },
+    { q:"곶자왈에 많은, 구멍이 송송 뚫린 검은색 화산암의 이름은?",
+      a:"현무암", w:["대리석","갯벌 진흙"] },
+    { q:"현무암의 구멍으로 빗물이 잘 스며들어, 곶자왈이 길러 주는 깨끗한 물은?",
+      a:"지하수", w:["바닷물","흙탕물"] },
+    { q:"곶자왈이 특히 소중한 가장 큰 까닭은?",
+      a:"다양한 동식물이 살고 깨끗한 물을 만들어서", w:["건물 짓기 좋아서","주차장으로 좋아서"] },
+    { q:"곶자왈이 점점 사라지는 가장 큰 까닭은?",
+      a:"골프장·도로·건물을 지으려고 숲을 밀어서", w:["나무가 스스로 사라져서","비가 너무 많이 와서"] },
+  ]},
+};
+
+const ROCK_TIME = 8000;   // 돌이 캐릭터까지 오는 시간(ms) = 제한시간
+const LS_KEY = "gotjawal_quiz_scores_v1";   // + 단계번호
+
+/* =========================================================
+   DOM
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const app=$("#app"), cv=$("#cv"), ctx=cv.getContext("2d");
+const startScreen=$("#startScreen"), resultScreen=$("#resultScreen");
+const hud=$("#hud"), quizBox=$("#quizBox");
+const livesEl=$("#lives"), progEl=$("#progress"), timerEl=$("#timer");
+const qBarFill=$("#qbarFill"), questionEl=$("#question"), choicesEl=$("#choices");
+const W=cv.width, H=cv.height, GROUND=H*0.78;
+
+/* =========================================================
+   게임 상태
+   ========================================================= */
+let state="start";          // start | run | quiz | throw | resolve | over | clear
+let lives, qIndex, order, playerName, stage=1, totalQ=10;
+let runStart, elapsed=0;
+let phaseTimer=0, scroll=0, runFrame=0;
+let rock=null, particles=[], answered=false;
+let resolveDelay=0, charHop=0, hitFlash=0;
+let proj=null, throwT=0;    // 정답 시 던지는 돌
+let correctCount=0, charKnock=0, hitT=0;   // 맞힌 수 / 피격 넉백 / 피격 타이머
+let last=performance.now();
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+const lerp=(a,b,t)=>a+(b-a)*t;
+
+/* =========================================================
+   시작 / 리셋
+   ========================================================= */
+function startGame(stg){
+  if(stg) stage=stg;
+  totalQ=STAGES[stage].qs.length;
+  playerName = ($("#name").value || "도전자").trim().slice(0,8) || "도전자";
+  lives=3; qIndex=0; order=shuffle([...Array(totalQ).keys()]);
+  correctCount=0; charKnock=0; hitT=0;
+  elapsed=0; particles=[]; rock=null; scroll=0; proj=null;
+  runStart=performance.now();
+  startScreen.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+  hud.classList.remove("hidden");
+  updateHud();
+  beginRunInterval(700);   // 짧게 달리다 첫 돌 등장
+}
+
+function showStart(){
+  state="start"; rock=null; proj=null;
+  hud.classList.add("hidden"); quizBox.classList.add("hidden");
+  resultScreen.classList.add("hidden");
+  startScreen.classList.remove("hidden");
+  refreshStageButtons();
+}
+
+function beginRunInterval(ms){
+  state="run"; phaseTimer=ms; quizBox.classList.add("hidden");
+}
+
+function spawnRock(){
+  state="quiz"; answered=false;
+  rock={x:W+120, y:GROUND-70, t:0, hit:false, broken:false, spin:0, scale:1};
+  showQuestion();
+}
+
+/* =========================================================
+   퀴즈 표시 / 채점
+   ========================================================= */
+function showQuestion(){
+  const item=STAGES[stage].qs[order[qIndex]];
+  const opts=shuffle([item.a, ...item.w]);
+  questionEl.textContent=item.q;
+  choicesEl.innerHTML="";
+  opts.forEach(opt=>{
+    const b=document.createElement("button");
+    b.className="choice"; b.textContent=opt;
+    b.onclick=()=>chooseAnswer(b, opt===item.a);
+    choicesEl.appendChild(b);
+  });
+  quizBox.classList.remove("hidden");
+  qBarFill.style.width="100%";
+}
+
+function chooseAnswer(btn, correct){
+  if(answered) return;
+  answered=true;
+  [...choicesEl.children].forEach(c=>c.style.pointerEvents="none");
+  const item=STAGES[stage].qs[order[qIndex]];
+  if(correct){
+    btn.classList.add("correct");
+    correctCount++;
+    beep(660,0.08); beep(880,0.08,0.08);
+    throwStone();           // state="throw" — 던지기→깨부수기 애니메이션
+  }else{
+    btn.classList.add("wrong");
+    // 정답도 표시
+    [...choicesEl.children].forEach(c=>{ if(c.textContent===item.a) c.classList.add("correct"); });
+    startHit();             // 큰 돌이 캐릭터를 덮쳐 목숨을 잃는 애니메이션
+  }
+}
+
+function timeUp(){
+  if(answered) return;
+  answered=true;
+  const item=STAGES[stage].qs[order[qIndex]];
+  [...choicesEl.children].forEach(c=>{ c.style.pointerEvents="none"; if(c.textContent===item.a) c.classList.add("correct"); });
+  startHit();
+}
+
+// 오답/시간초과 → 큰 돌이 캐릭터로 돌진해 부딪히는 연출
+function startHit(){
+  state="hit"; hitT=0; quizBox.classList.add("hidden");
+  if(!rock) rock={x:W*0.55, y:GROUND-70, spin:0, scale:1};
+  rock.x0=rock.x; rock.broken=false; rock.impacted=false; rock.spin=0;
+  beep(150,0.1,0,"square");
+}
+
+function throwStone(){
+  state="throw"; throwT=0; charHop=0.5;
+  const cx=W*0.26;
+  proj={ t:-250, dur:380, x0:cx-8, y0:GROUND-100, tx:rock.x, ty:rock.y-4, x:cx-8, y:GROUND-100, spin:0, trail:[] };
+  beep(420,0.06);
+}
+
+function breakRock(){
+  rock.broken=true; charHop=1;
+  for(let i=0;i<22;i++){
+    particles.push({x:rock.x,y:rock.y,vx:(Math.random()-0.5)*9,vy:-Math.random()*9-2,
+      s:6+Math.random()*10,life:1, c:Math.random()<0.5?"#8a8a92":"#6d6d75"});
+  }
+}
+function loseLife(){
+  lives--; rock.hit=true; hitFlash=1; app.classList.add("shake");
+  setTimeout(()=>app.classList.remove("shake"),500);
+  beep(180,0.18,0,"square"); updateHud();
+}
+
+function advance(){
+  quizBox.classList.add("hidden");
+  if(lives<=0){ endGame(false); return; }
+  qIndex++;
+  if(qIndex>=totalQ){ endGame(true); return; }
+  updateHud();
+  beginRunInterval(550);
+}
+
+/* =========================================================
+   HUD
+   ========================================================= */
+function updateHud(){
+  livesEl.textContent = "❤️".repeat(Math.max(0,lives)) + "🤍".repeat(Math.max(0,3-lives));
+  progEl.textContent = `${STAGES[stage].emoji} ${stage}단계  ${Math.min(qIndex+1,totalQ)}/${totalQ}`;
+}
+
+/* =========================================================
+   종료 / 랭킹
+   ========================================================= */
+function scoreKey(){ return LS_KEY+"_s"+stage; }
+function loadScores(){ try{return JSON.parse(localStorage.getItem(scoreKey()))||[];}catch(e){return [];} }
+function saveScores(a){ try{localStorage.setItem(scoreKey(),JSON.stringify(a));}catch(e){} }
+
+// 단계 해금: 1단계 클리어해야 2단계, 2단계 클리어해야 3단계
+const UNLOCK_KEY="gotjawal_unlocked";
+function getUnlocked(){ try{return Math.min(3,Math.max(1,+(localStorage.getItem(UNLOCK_KEY)||1)));}catch(e){return 1;} }
+function setUnlocked(n){ try{ if(n>getUnlocked()) localStorage.setItem(UNLOCK_KEY,String(Math.min(3,n))); }catch(e){} }
+function refreshStageButtons(){
+  const unlocked=getUnlocked();
+  document.querySelectorAll(".stageBtn").forEach(btn=>{
+    const s=+btn.dataset.stage, locked=s>unlocked;
+    btn.classList.toggle("locked", locked);
+    btn.disabled=locked;
+    btn.querySelector(".se").textContent = locked ? "🔒" : STAGES[s].emoji;
+    btn.title = locked ? `${s-1}단계를 깨면 열려요!` : "";
+  });
+}
+
+function endGame(cleared){
+  hud.classList.add("hidden"); quizBox.classList.add("hidden");
+  state = cleared ? "clear" : "over";
+  const stat=$("#resultStat"), title=$("#resultTitle"), board=$("#board"), nextBtn=$("#nextBtn");
+
+  // 점수·기록을 랭킹에 기록 (완주/미완주 모두)
+  const timeSec = elapsed/1000;
+  const scores=loadScores();
+  const entry={name:playerName, correct:correctCount, time:+timeSec.toFixed(1), cleared, date:Date.now()};
+  scores.push(entry);
+  scores.sort((a,b)=>{
+    if(a.cleared!==b.cleared) return a.cleared ? -1 : 1;     // 완주가 위
+    if(a.cleared) return a.time-b.time;                       // 완주끼리: 빠른 순
+    if(b.correct!==a.correct) return b.correct-a.correct;     // 미완주: 많이 맞힌 순
+    return a.time-b.time;
+  });
+  saveScores(scores);
+  const rank=scores.indexOf(entry)+1;
+  if(cleared) setUnlocked(stage+1);
+
+  const scoreLine = `점수 <b>${correctCount} / ${totalQ}</b>`;
+
+  if(cleared){
+    title.textContent="🎉 축하합니다!";
+    const nextLine = stage<3
+      ? `<br>🔓 <b>${stage+1}단계 · ${STAGES[stage+1].name}</b>가 열렸어요!`
+      : `<br>🏆 모든 단계 완료! 진정한 곶자왈 박사!`;
+    stat.innerHTML=`<span class="big">${rank}등</span>
+      ${STAGES[stage].emoji} <b>${stage}단계 · ${STAGES[stage].name}</b><br>
+      <b>${escapeHtml(playerName)}</b> 선수<br>
+      ${scoreLine} · 기록 <b>${timeSec.toFixed(1)}초</b>${nextLine}`;
+    if(stage<3){ nextBtn.textContent=`▶️ ${stage+1}단계 도전`; nextBtn.classList.remove("hidden"); }
+    else nextBtn.classList.add("hidden");
+    if(rank===1) burst();
+    beep(523,0.12);beep(659,0.12,0.12);beep(784,0.16,0.24);
+  }else{
+    title.textContent="💥 게임 오버";
+    stat.innerHTML=`<span class="big">${rank}등</span>
+      ${STAGES[stage].emoji} <b>${stage}단계 · ${STAGES[stage].name}</b><br>
+      <b>${escapeHtml(playerName)}</b> 선수<br>
+      ${scoreLine} · <b>${qIndex+1}번 문제</b>에서 끝<br>
+      <span style="opacity:.85">완주하면 더 높은 등수에 올라요!</span>`;
+    nextBtn.classList.add("hidden");
+    beep(200,0.2,0,"sawtooth");
+  }
+  renderBoard(board, scores, entry);
+  board.classList.remove("hidden");
+  resultScreen.classList.remove("hidden");
+}
+
+function renderBoard(board, scores, me){
+  let html=`<div class="row head"><span>순위</span><span class="nm">이름</span><span>성적</span><span></span></div>`;
+  scores.slice(0,8).forEach((s,i)=>{
+    const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+    const isMe = (s===me);
+    const result = s.cleared ? `🏁 ${s.time.toFixed(1)}초` : `${s.correct||0}개`;
+    html+=`<div class="row${isMe?" me":""}">
+      <span class="rank">${medal}</span>
+      <span class="nm">${escapeHtml(s.name)}</span>
+      <span>${result}</span>
+      <span>${isMe?"⬅️":""}</span></div>`;
+  });
+  board.innerHTML=html;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+/* =========================================================
+   사운드 (WebAudio)
+   ========================================================= */
+let actx=null;
+function beep(freq,dur=0.1,delay=0,type="sine"){
+  try{
+    if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+    const t=actx.currentTime+delay;
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(0.18,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+dur+0.02);
+  }catch(e){}
+}
+
+/* =========================================================
+   1등 축하 색종이
+   ========================================================= */
+function burst(){
+  for(let i=0;i<60;i++){
+    particles.push({x:W/2+(Math.random()-0.5)*200,y:H*0.3,vx:(Math.random()-0.5)*12,
+      vy:-Math.random()*10-4,s:6+Math.random()*8,life:1.6,
+      c:["#ffcf3f","#36b06a","#ff7a59","#4fa3ff","#ff6fae"][(Math.random()*5)|0],confetti:true});
+  }
+}
+
+/* =========================================================
+   그리기
+   ========================================================= */
+function drawBackground(dt, moving){
+  // 하늘
+  const sky=ctx.createLinearGradient(0,0,0,GROUND);
+  sky.addColorStop(0,"#d4f4dc"); sky.addColorStop(1,"#a7e0b6");
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,GROUND);
+  // 해
+  ctx.fillStyle="#fff3b0"; ctx.beginPath(); ctx.arc(W*0.84,H*0.18,46,0,7); ctx.fill();
+
+  if(moving) scroll=(scroll+dt*0.35)%1e9;
+  // 먼 언덕
+  drawHills(scroll*0.25, GROUND, "#7fc98e", 120, 260);
+  drawHills(scroll*0.5, GROUND, "#5fb574", 90, 170);
+  // 나무 층
+  drawTrees(scroll*0.7, 90, 0.7);
+  drawTrees(scroll*1.0, 130, 1.0);
+
+  // 땅
+  const g=ctx.createLinearGradient(0,GROUND,0,H);
+  g.addColorStop(0,"#5a8a3f"); g.addColorStop(1,"#3f6a2c");
+  ctx.fillStyle=g; ctx.fillRect(0,GROUND,W,H-GROUND);
+  // 길 줄무늬
+  ctx.fillStyle="rgba(255,255,255,.12)";
+  for(let i=-1;i<14;i++){ const x=(i*140 - (scroll*1.2)%140); ctx.fillRect(x,GROUND+40,70,10); }
+  // 풀
+  ctx.fillStyle="#3a5f28";
+  for(let i=-1;i<26;i++){ const x=(i*70 - (scroll*1.0)%70); blade(x,GROUND+6); }
+}
+function blade(x,y){ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+4,y-18,x+10,y);ctx.fill();}
+function drawHills(off, base, color, h, w){
+  ctx.fillStyle=color; ctx.beginPath(); ctx.moveTo(0,base);
+  for(let x=-w;x<=W+w;x+=w){ const cx=x-(off%w); ctx.quadraticCurveTo(cx+w/2,base-h,cx+w,base);}
+  ctx.lineTo(W,base); ctx.lineTo(0,base); ctx.fill();
+}
+function drawTrees(off, size, alpha){
+  ctx.globalAlpha=alpha;
+  const gap=210;
+  for(let i=-1;i<8;i++){
+    const x=i*gap - (off%gap); const y=GROUND;
+    // 줄기
+    ctx.fillStyle="#6b4a2b"; ctx.fillRect(x-7,y-size*0.7,14,size*0.7);
+    // 잎 덩어리
+    ctx.fillStyle="#2f8f4e";
+    blob(x,y-size*0.7,size*0.55);
+    ctx.fillStyle="#3aa85e";
+    blob(x-size*0.3,y-size*0.55,size*0.4);
+    blob(x+size*0.3,y-size*0.55,size*0.4);
+  }
+  ctx.globalAlpha=1;
+}
+function blob(x,y,r){ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();}
+
+function drawCharacter(){
+  const x=W*0.26;
+  const hop = charHop>0 ? Math.sin((1-charHop)*Math.PI)*60 : 0;
+  const y=GROUND-70-hop;
+  runFrame+=0.25;
+  const legSwing=Math.sin(runFrame)*14;
+
+  ctx.save();
+  ctx.translate(x,y);
+  if(charKnock>0){ ctx.translate(-charKnock*30, -charKnock*8); ctx.rotate(-charKnock*0.3); } // 뒤로 튕김
+  if(hitFlash>0){ ctx.globalAlpha=0.4+0.6*Math.abs(Math.sin(hitFlash*20)); }
+
+  // 그림자
+  ctx.globalAlpha*=1;
+  ctx.fillStyle="rgba(0,0,0,.18)";
+  ctx.beginPath(); ctx.ellipse(0,72+hop,40,12,0,0,7); ctx.fill();
+
+  // 다리
+  ctx.strokeStyle="#2c6b3a"; ctx.lineWidth=12; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(-6,40); ctx.lineTo(-6+legSwing,72); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(8,40); ctx.lineTo(8-legSwing,72); ctx.stroke();
+
+  // 뒷팔 + 손 (몸통보다 먼저 → 뒤쪽). 어깨는 몸통 옆구리(y≈16)에서 시작
+  ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=10; ctx.lineCap="round";
+  const bhx=-30-legSwing*0.5, bhy=38+legSwing*0.25;
+  ctx.beginPath(); ctx.moveTo(-16,16); ctx.quadraticCurveTo(-28,28,bhx,bhy); ctx.stroke();
+  ctx.fillStyle="#8fd694"; ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(bhx,bhy,7,0,7); ctx.fill(); ctx.stroke();
+
+  // 몸 (새싹 친구)
+  const grd=ctx.createLinearGradient(0,-30,0,45);
+  grd.addColorStop(0,"#8fd694"); grd.addColorStop(1,"#3aa85e");
+  ctx.fillStyle=grd;
+  ctx.beginPath(); ctx.ellipse(0,15,30,34,0,0,7); ctx.fill();
+
+  // 머리 잎
+  ctx.fillStyle="#2f8f4e";
+  ctx.save(); ctx.translate(0,-26); ctx.rotate(-0.3);
+  ctx.beginPath(); ctx.ellipse(-6,-6,8,16,0,0,7); ctx.fill(); ctx.restore();
+  ctx.save(); ctx.translate(0,-26); ctx.rotate(0.3);
+  ctx.beginPath(); ctx.ellipse(6,-6,8,16,0,0,7); ctx.fill(); ctx.restore();
+
+  // 얼굴
+  ctx.fillStyle="#1d3a26";
+  ctx.beginPath(); ctx.arc(-9,8,4,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(9,8,4,0,7); ctx.fill();
+  ctx.strokeStyle="#1d3a26"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.arc(0,16,9,0.15*Math.PI,0.85*Math.PI); ctx.stroke();
+  // 볼터치
+  ctx.fillStyle="rgba(255,120,120,.5)";
+  ctx.beginPath(); ctx.arc(-16,16,5,0,7); ctx.fill();
+  ctx.beginPath(); ctx.arc(16,16,5,0,7); ctx.fill();
+
+  // 앞팔 + 손 (몸통 앞 → 잘 보임). 어깨는 옆구리(y≈16). 던질 때: 와인드업(뒤로 위)→던지기(앞으로)
+  let hx=30+legSwing*0.5, hy=38-legSwing*0.25;   // 평소 달릴 때 스윙
+  if(state==="throw"){
+    if(throwT<0.45){ const u=throwT/0.45; hx=lerp(30,-14,u); hy=lerp(38,-30,u); }       // 와인드업(머리 뒤 위로)
+    else { const u=(throwT-0.45)/0.55; hx=lerp(-14,48,u); hy=lerp(-30,12,u); }           // 던지기(앞으로)
+  }
+  // 팔(어깨→손, 팔꿈치 굽힘)
+  const ex=(16+hx)/2 + (state==="throw"&&throwT<0.45?-8:6), ey=(16+hy)/2-6;
+  ctx.strokeStyle="#3aa85e"; ctx.lineWidth=10; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(16,16); ctx.quadraticCurveTo(ex,ey,hx,hy); ctx.stroke();
+  // 손
+  ctx.fillStyle="#a6e3aa"; ctx.beginPath(); ctx.arc(hx,hy,8,0,7); ctx.fill();
+  ctx.strokeStyle="#2f8f4e"; ctx.lineWidth=2; ctx.stroke();
+  // 던지기 직전 손에 쥔 돌
+  if(state==="throw" && proj && proj.t<0){
+    ctx.fillStyle="#8a8a92"; ctx.strokeStyle="#5a5a62"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(hx+2,hy-3,7,0,7); ctx.fill(); ctx.stroke();
+  }
+
+  ctx.restore();
+
+  // 달릴 때 먼지
+  if(state==="run"||state==="quiz"||state==="throw"){
+    ctx.fillStyle="rgba(255,255,255,.5)";
+    for(let i=0;i<3;i++){ const px=x-40-i*18-(runFrame*4%20); ctx.beginPath(); ctx.arc(px,GROUND-10,5-i,0,7); ctx.fill();}
+  }
+}
+
+function drawRock(){
+  if(!rock||rock.broken) return;
+  ctx.save();
+  ctx.translate(rock.x,rock.y);
+  ctx.scale(rock.scale||1, rock.scale||1);
+  rock.spin += 0.04;
+  ctx.rotate(rock.spin);
+  // 돌
+  const grd=ctx.createLinearGradient(-40,-40,40,40);
+  grd.addColorStop(0,"#9a9aa2"); grd.addColorStop(1,"#5e5e66");
+  ctx.fillStyle=grd; ctx.strokeStyle="#46464d"; ctx.lineWidth=4;
+  ctx.beginPath();
+  const pts=[[-34,-10],[-22,-30],[6,-36],[30,-20],[36,8],[20,32],[-10,34],[-32,16]];
+  pts.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  // 무늬
+  ctx.strokeStyle="rgba(0,0,0,.18)"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(-10,-20); ctx.lineTo(2,0); ctx.lineTo(-6,18); ctx.stroke();
+  ctx.restore();
+}
+
+function drawProjectile(){
+  if(!proj || proj.t<0) return;
+  // 꼬리(자취)
+  proj.trail.push({x:proj.x,y:proj.y});
+  if(proj.trail.length>8) proj.trail.shift();
+  proj.trail.forEach((t,i)=>{
+    ctx.globalAlpha=(i+1)/proj.trail.length*0.5;
+    ctx.fillStyle="rgba(180,180,190,1)";
+    ctx.beginPath(); ctx.arc(t.x,t.y,3+i*0.6,0,7); ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  // 날아가는 돌
+  ctx.save();
+  ctx.translate(proj.x, proj.y); ctx.rotate(proj.spin);
+  const grd=ctx.createLinearGradient(-14,-14,14,14);
+  grd.addColorStop(0,"#a6a6ae"); grd.addColorStop(1,"#5e5e66");
+  ctx.fillStyle=grd; ctx.strokeStyle="#46464d"; ctx.lineWidth=3;
+  ctx.beginPath();
+  const p=[[-13,-4],[-5,-13],[10,-10],[13,4],[3,13],[-10,10]];
+  p.forEach((q,i)=> i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle="rgba(0,0,0,.2)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(-4,-6); ctx.lineTo(2,2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawParticles(dt){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx*dt*0.06; p.y+=p.vy*dt*0.06; p.vy+=0.5*dt*0.06; p.life-=dt*0.0016;
+    if(p.confetti){
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.x*0.05);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+    }else{
+      ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.c;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.s*Math.max(0,p.life),0,7); ctx.fill(); ctx.globalAlpha=1;
+    }
+    if(p.life<=0) particles.splice(i,1);
+  }
+}
+
+/* =========================================================
+   메인 루프
+   ========================================================= */
+function loop(now){
+  const dt=Math.min(50, now-last); last=now;
+
+  if(charHop>0) charHop=Math.max(0,charHop-dt*0.004);
+  if(hitFlash>0) hitFlash=Math.max(0,hitFlash-dt*0.004);
+  if(charKnock>0) charKnock=Math.max(0,charKnock-dt*0.0028);
+
+  const moving = (state==="run"||state==="quiz"||state==="throw");
+  drawBackground(dt, moving);
+
+  // 상태 처리
+  if(state==="run"){
+    phaseTimer-=dt;
+    if(phaseTimer<=0) spawnRock();
+  }
+  else if(state==="quiz"){
+    rock.t+=dt;
+    const k=Math.min(1, rock.t/ROCK_TIME);
+    const targetX=W*0.26+50;
+    rock.x = (W+120) + (targetX-(W+120))*k;
+    qBarFill.style.width=(100-k*100)+"%";
+    if(k>=1) timeUp();
+  }
+  else if(state==="throw"){
+    throwT=Math.min(1, throwT+dt*0.002);
+    proj.t+=dt; const k=Math.max(0, Math.min(1, proj.t/proj.dur));
+    proj.x = proj.x0 + (proj.tx-proj.x0)*k;
+    proj.y = proj.y0 + (proj.ty-proj.y0)*k - Math.sin(k*Math.PI)*80; // 포물선
+    proj.spin += dt*0.03;
+    if(proj.t>=proj.dur){
+      breakRock(); proj=null; resolveDelay=600;
+      beep(880,0.08); beep(1100,0.08,0.06);
+      state="resolve";
+    }
+  }
+  else if(state==="hit"){
+    hitT+=dt; const k=Math.min(1, hitT/520);
+    const targetX=W*0.26+58;
+    rock.x = rock.x0 + (targetX-rock.x0)*(k*k);   // 가속하며 돌진
+    rock.y = (GROUND-70) - Math.sin(k*Math.PI)*22; // 살짝 들썩
+    rock.scale = 1 + 0.9*k;                        // 가까워지며 커짐
+    rock.spin += dt*0.012;
+    if(!rock.impacted && k>=1){
+      rock.impacted=true;
+      loseLife();                                  // 여기서 목숨 감소
+      charKnock=1;                                 // 캐릭터 뒤로 튕김
+      for(let i=0;i<30;i++){                        // 충돌 파편 + 흙먼지
+        const dust=Math.random()<0.4;
+        particles.push({x:rock.x-20,y:rock.y,
+          vx:-Math.random()*7-1, vy:-Math.random()*9-1,
+          s:(dust?5:8)+Math.random()*8, life:1,
+          c:dust?"#caa56a":(Math.random()<0.5?"#8a8a92":"#6d6d75")});
+      }
+      rock.broken=true; resolveDelay=850; state="resolve";
+    }
+  }
+  else if(state==="resolve"){
+    if(!rock.broken){ rock.x += dt*0.02; } // 부딪힌 뒤 살짝
+    resolveDelay-=dt;
+    if(resolveDelay<=0) advance();
+  }
+
+  // 경과 시간 (플레이 중에만)
+  if(["run","quiz","throw","hit","resolve"].includes(state)){
+    elapsed = now-runStart;
+    timerEl.textContent=(elapsed/1000).toFixed(1)+"초";
+  }
+
+  drawRock();
+  drawCharacter();
+  drawProjectile();
+  drawParticles(dt);
+
+  // 적중 시 붉은 비네트
+  if(hitFlash>0){
+    ctx.fillStyle=`rgba(231,85,63,${0.35*hitFlash})`;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* =========================================================
+   이벤트
+   ========================================================= */
+function nameOK(){
+  const nm=$("#name").value.trim();
+  if(nm) return true;
+  const inp=$("#name"), msg=$("#nameMsg");
+  msg.textContent="✏️ 이름을 먼저 적어줘!";
+  inp.classList.remove("warn"); void inp.offsetWidth; inp.classList.add("warn");
+  inp.focus(); beep(220,0.12,0,"square");
+  return false;
+}
+$("#name").addEventListener("input",()=>{ $("#nameMsg").textContent=""; $("#name").classList.remove("warn"); });
+
+document.querySelectorAll(".stageBtn").forEach(btn=>{
+  btn.onclick=()=>{
+    if(!actx){try{actx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}
+    if(!nameOK()) return;     // 이름 없으면 시작 안 함
+    startGame(+btn.dataset.stage);
+  };
+});
+$("#nextBtn").onclick=()=>{ if(stage<3) startGame(stage+1); };  // 다음 단계로
+$("#retryBtn").onclick=()=>startGame();   // 같은 단계 다시
+$("#backBtn").onclick=showStart;          // 단계 선택으로
+$("#shareBtn").onclick=async ()=>{
+  const url=location.href;
+  const text=`🌿 스피드 곶자왈 퀴즈 게임! 곶자왈 박사에 도전해봐 — 내 기록을 깨보시지! ${url}`;
+  try{
+    if(navigator.share){ await navigator.share({title:"스피드 곶자왈 퀴즈 게임", text, url}); }
+    else { await navigator.clipboard.writeText(text); alert("공유 링크를 복사했어요! 친구에게 붙여넣어 보내세요 📨"); }
+  }catch(e){}
+};
+
+refreshStageButtons();   // 시작 화면 잠금 상태 반영
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

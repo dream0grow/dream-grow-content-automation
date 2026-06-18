@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>곶자왈 용암에서 살아남기</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    background: #1a1010;
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+  #wrap {
+    position: relative; width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #3a1810, #120808);
+  }
+  #stage {
+    position: relative;
+    width: min(100vw, 177.7vh);
+    aspect-ratio: 16 / 10;
+    max-height: 100vh;
+    box-shadow: 0 0 60px rgba(255,90,20,0.25);
+    border-radius: 12px; overflow: hidden; background: #000;
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  .overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 4%; color: #fff; z-index: 10;
+  }
+  .hidden { display: none !important; }
+
+  #titleScreen { background: linear-gradient(160deg, rgba(60,20,8,0.92), rgba(20,8,6,0.96)); }
+  .game-title {
+    font-size: clamp(28px, 5.2vw, 60px); font-weight: 900; color: #ffd24a;
+    text-shadow: 0 3px 0 #b34700, 0 6px 18px rgba(255,80,0,0.5);
+    line-height: 1.15; margin-bottom: 10px;
+  }
+  .game-sub { font-size: clamp(13px, 2.2vw, 20px); color: #ffb27a; margin-bottom: 22px; }
+  .howto {
+    background: rgba(255,255,255,0.08); border: 2px solid rgba(255,200,120,0.35);
+    border-radius: 14px; padding: 14px 18px;
+    font-size: clamp(12px, 2vw, 17px); line-height: 1.7;
+    max-width: 600px; margin-bottom: 24px;
+  }
+  .howto b { color: #ffd24a; }
+  .legend { display:flex; flex-wrap:wrap; gap:8px 16px; justify-content:center; margin-top:8px; font-size:clamp(11px,1.8vw,15px); }
+  .btn {
+    cursor: pointer; border: none; border-radius: 999px;
+    padding: 14px 38px; font-size: clamp(16px, 2.6vw, 24px); font-weight: 800;
+    color: #5a2200; background: linear-gradient(180deg, #ffe27a, #ffb12e);
+    box-shadow: 0 5px 0 #c87400, 0 8px 16px rgba(0,0,0,0.3);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #c87400; }
+  .btn.green { color: #08340f; background: linear-gradient(180deg, #b6f06a, #5fc23a); box-shadow: 0 5px 0 #2f7a1f, 0 8px 16px rgba(0,0,0,0.3); }
+
+  #quizModal { background: rgba(10,6,4,0.78); }
+  .quiz-card {
+    background: linear-gradient(180deg, #fffdf5, #fff2d8); color: #3a2410;
+    border-radius: 20px; padding: 22px 22px 18px; width: min(92%, 560px);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.5); border: 4px solid #ffcf6b;
+  }
+  .quiz-topic { display:inline-block; background:#2f9e44; color:#fff; font-size:clamp(11px,1.8vw,14px); font-weight:800; padding:4px 14px; border-radius:999px; margin-bottom:12px; }
+  .quiz-q { font-size:clamp(17px,2.8vw,24px); font-weight:800; line-height:1.45; margin-bottom:16px; }
+  .quiz-options { display:flex; flex-direction:column; gap:10px; }
+  .quiz-opt {
+    cursor:pointer; text-align:left; border:3px solid #ffd98a; background:#fff;
+    border-radius:14px; padding:13px 16px; font-size:clamp(15px,2.4vw,20px); font-weight:700; color:#3a2410;
+    transition: transform .06s, background .1s, border-color .1s;
+  }
+  .quiz-opt:active { transform: scale(0.98); }
+  .quiz-opt.correct { background:#d3f9d8; border-color:#2f9e44; }
+  .quiz-opt.wrong { background:#ffe0e0; border-color:#e03131; }
+  .quiz-opt:disabled { cursor:default; }
+  .quiz-feedback { margin-top:14px; font-size:clamp(14px,2.2vw,18px); font-weight:800; min-height:1.2em; }
+  .quiz-explain { margin-top:6px; font-size:clamp(12px,2vw,16px); font-weight:600; color:#6b5030; line-height:1.5; }
+  .quiz-next { margin-top:14px; }
+
+  #endScreen { background: linear-gradient(160deg, rgba(8,40,16,0.93), rgba(6,20,10,0.97)); }
+  #endScreen.lose { background: linear-gradient(160deg, rgba(60,16,8,0.93), rgba(20,6,6,0.97)); }
+  .end-title { font-size:clamp(26px,4.6vw,52px); font-weight:900; margin-bottom:6px; }
+  .end-score { font-size:clamp(18px,3vw,28px); font-weight:800; color:#ffe27a; margin-bottom:14px; }
+  .name-row { display:flex; gap:8px; margin-bottom:16px; }
+  .name-row input { border:3px solid #ffcf6b; border-radius:12px; padding:10px 14px; font-size:clamp(14px,2.2vw,18px); width:160px; text-align:center; font-weight:700; background:#fff; }
+  .rank-box { background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.2); border-radius:14px; padding:12px 16px; width:min(92%,420px); margin-bottom:18px; }
+  .rank-box h3 { font-size:clamp(14px,2.2vw,18px); color:#ffd24a; margin-bottom:8px; }
+  .rank-list { list-style:none; font-size:clamp(13px,2vw,16px); }
+  .rank-list li { display:flex; justify-content:space-between; padding:4px 2px; border-bottom:1px dashed rgba(255,255,255,0.15); }
+  .rank-list li.me { color:#b6f06a; font-weight:900; }
+  .rank-medal { width:1.6em; display:inline-block; }
+
+  /* 방향 버튼 */
+  #controls { position:absolute; left:0; right:0; bottom:14px; display:flex; justify-content:center; gap:14px; z-index:8; }
+  .ctrl-btn {
+    width: clamp(62px, 11vw, 92px); height: clamp(62px, 11vw, 92px);
+    border-radius: 18px; border:none; cursor:pointer;
+    background: rgba(255,180,60,0.82);
+    box-shadow: 0 5px 0 rgba(170,90,0,0.85), 0 6px 14px rgba(0,0,0,0.3);
+    font-size: clamp(26px, 5vw, 42px); color:#5a2a00; font-weight:900;
+  }
+  .ctrl-btn.up { width: clamp(78px, 14vw, 120px); background: rgba(120,210,90,0.9); box-shadow: 0 5px 0 rgba(45,120,30,0.9), 0 6px 14px rgba(0,0,0,0.3); }
+  .ctrl-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(170,90,0,0.85); }
+
+  .toast {
+    position:absolute; top:11%; left:50%; transform:translateX(-50%);
+    background:rgba(0,0,0,0.78); color:#fff; font-weight:800;
+    padding:10px 20px; border-radius:999px; font-size:clamp(14px,2.4vw,20px);
+    z-index:9; opacity:0; transition:opacity .25s, top .25s; pointer-events:none;
+    border:2px solid rgba(255,210,74,0.6);
+  }
+  .toast.show { opacity:1; top:8%; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="stage">
+    <canvas id="game" width="960" height="600"></canvas>
+
+    <div id="controls">
+      <button class="ctrl-btn" id="leftBtn" aria-label="왼쪽 위">◀</button>
+      <button class="ctrl-btn up" id="upBtn" aria-label="위로">▲</button>
+      <button class="ctrl-btn" id="rightBtn" aria-label="오른쪽 위">▶</button>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- Title -->
+    <div id="titleScreen" class="overlay">
+      <div class="game-title">🌋 곶자왈 용암에서<br>살아남기 🌳</div>
+      <div class="game-sub">돌을 밟고 위로 올라가 아름다운 곶자왈로 가자!</div>
+      <div class="howto">
+        🕹️ <b>▲ 위 / ◀ 왼쪽 / ▶ 오른쪽</b> 버튼·방향키·화면 터치로 <b>위쪽 돌</b>로 점프!<br>
+        🌊 돌이 <b>위에서 아래로 계속 흘러내려요.</b> 두 줄(레인) 중 안전한 돌을 골라요!<br>
+        ⏰ 밟은 돌은 <b>가라앉아요.</b> 가라앉기 전에 못 떠나면 용암에 빠져요 — 빨리 위로!<br>
+        🪂 <b>낙하산은 위기 때 자동으로 사용돼요!</b> (왼쪽 위 슬롯에 모인 개수만큼)<br>
+        ❓ <b>금빛 돌</b>에 닿으면 곶자왈 퀴즈! 맞히면 <b>점수·낙하산·목숨</b>을 줘요.<br>
+        🚩 마지막 문제를 풀면 용암이 <b>초록빛 곶자왈</b>로 변해요!
+        <div class="legend">
+          <span>🟢 천천히 · ⚪ 보통 · 🟠 빠름</span>
+          <span>⚫ 검정 = 빠를지 느릴지 몰라요!</span>
+          <span>❌ 빨간 X 돌 = 밟으면 끝!</span>
+        </div>
+      </div>
+      <div style="font-size:clamp(13px,2vw,17px); color:#ffe9b0; margin-bottom:10px;">난이도를 골라 시작하세요</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center;">
+        <button id="startEasy" class="btn green">🌱 초급 시작<br><span style="font-size:12px;font-weight:600;">천천히 · 1~2학년 퀴즈</span></button>
+        <button id="startHard" class="btn">🔥 고급 시작<br><span style="font-size:12px;font-weight:600;">빠르게 · 고학년 퀴즈</span></button>
+      </div>
+    </div>
+
+    <!-- Quiz modal -->
+    <div id="quizModal" class="overlay hidden">
+      <div class="quiz-card">
+        <span id="quizTopic" class="quiz-topic">곶자왈 퀴즈</span>
+        <div id="quizQ" class="quiz-q"></div>
+        <div id="quizOptions" class="quiz-options"></div>
+        <div id="quizFeedback" class="quiz-feedback"></div>
+        <div id="quizExplain" class="quiz-explain"></div>
+        <div class="quiz-next hidden" id="quizNextWrap">
+          <button id="quizNextBtn" class="btn">계속하기 👣</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- End -->
+    <div id="endScreen" class="overlay hidden">
+      <div id="endTitle" class="end-title"></div>
+      <div id="endScore" class="end-score"></div>
+      <div class="name-row">
+        <input id="nameInput" maxlength="6" placeholder="이름" />
+        <button id="saveScoreBtn" class="btn" style="padding:10px 20px;font-size:16px;">기록 저장</button>
+      </div>
+      <div class="rank-box">
+        <h3>🏆 명예의 전당 (랭킹)</h3>
+        <ol id="rankList" class="rank-list"></ol>
+      </div>
+      <button id="restartBtn" class="btn green">다시 도전 🔁</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const TAU = Math.PI * 2;
+
+  // ---------- sound ----------
+  let actx = null;
+  function tone(freq, dur, type = "square", vol = 0.05) {
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = freq;
+      o.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(vol, actx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+      o.start(); o.stop(actx.currentTime + dur);
+    } catch (e) {}
+  }
+  const sfx = {
+    hop: () => tone(520, 0.10, "triangle", 0.06),
+    correct: () => { tone(660, 0.12, "triangle", 0.07); setTimeout(() => tone(880, 0.16, "triangle", 0.07), 110); },
+    wrong: () => tone(130, 0.30, "sawtooth", 0.06),
+    reward: () => { tone(784, 0.1, "square", 0.05); setTimeout(() => tone(1047, 0.16, "square", 0.05), 90); },
+    fall: () => tone(90, 0.45, "sawtooth", 0.07),
+    win: () => { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => tone(f, 0.22, "triangle", 0.07), i * 150)); }
+  };
+
+  // ---------- quiz bank ----------  a[0] = 정답
+  const QUIZZES = [
+    { topic: "곶자왈이 생긴 과정", q: "곶자왈은 무엇이 흘러내려 굳어서 만들어진 땅일까요?", a: ["뜨거운 용암", "바닷물", "눈과 얼음"], ex: "화산에서 흘러나온 뜨거운 용암이 식고 굳으면서 울퉁불퉁한 곶자왈이 만들어졌어요." },
+    { topic: "곶자왈이 생긴 과정", q: "곶자왈 바닥 돌이 울퉁불퉁하고 구멍이 많은 까닭은?", a: ["용암이 식으며 굳어서", "사람이 일부러 파서", "비가 깎아서"], ex: "용암이 식을 때 가스가 빠져나가 구멍이 숭숭 생긴 돌(현무암)이 되었어요." },
+    { topic: "곶자왈이 생긴 과정", q: "곶자왈 땅에 구멍이 많아서 비가 오면 물은 어떻게 될까요?", a: ["땅속으로 쏙쏙 스며들어요", "그냥 다 말라버려요", "위로 솟구쳐요"], ex: "구멍 사이로 빗물이 땅속으로 잘 스며들어 깨끗한 지하수가 돼요." },
+    { topic: "곶자왈이 소중한 이유", q: "곶자왈 숲이 우리에게 만들어 주는 고마운 것은?", a: ["맑은 공기와 깨끗한 물", "매연과 먼지", "시끄러운 소리"], ex: "곶자왈은 공기를 맑게 하고 깨끗한 물을 만들어 주는 제주의 보물 숲이에요." },
+    { topic: "곶자왈이 소중한 이유", q: "곶자왈에는 다른 곳에서 보기 힘든 무엇이 많이 살까요?", a: ["귀한 동물과 식물", "자동차", "높은 빌딩"], ex: "곶자왈에는 희귀한 동물과 식물이 함께 사는 소중한 보금자리예요." },
+    { topic: "곶자왈이 소중한 이유", q: "곶자왈은 빗물을 모아 무엇을 만들어 줄까요?", a: ["깨끗한 지하수", "쓰레기", "용암"], ex: "곶자왈로 스며든 빗물은 깨끗한 지하수가 되어 사람들이 마시는 물이 돼요." },
+    { topic: "곶자왈이 사라지는 이유", q: "곶자왈이 점점 사라지는 가장 큰 까닭은?", a: ["건물·도로를 만들려고 나무를 베어서", "비가 너무 자주 와서", "동물이 많아져서"], ex: "사람들이 건물과 도로를 만들려고 숲을 밀어버리면 곶자왈이 사라져요." },
+    { topic: "곶자왈이 사라지는 이유", q: "곶자왈에 쓰레기를 함부로 버리면 어떻게 될까요?", a: ["동물과 식물이 병들어요", "숲이 더 예뻐져요", "물이 깨끗해져요"], ex: "버려진 쓰레기는 흙과 물을 더럽혀 동물과 식물을 아프게 해요." },
+    { topic: "곶자왈이 사라지는 이유", q: "곶자왈의 나무를 마구 베면 그 안에 살던 동물들은?", a: ["살 곳을 잃어요", "더 행복해져요", "도시로 놀러 가요"], ex: "나무가 사라지면 동물들은 집과 먹이를 잃고 살기 힘들어져요." },
+    { topic: "곶자왈을 지키는 방법", q: "곶자왈을 지키려면 우리가 할 수 있는 일은?", a: ["쓰레기를 되가져오기", "꽃을 마구 꺾기", "큰 소리로 떠들기"], ex: "내가 가져간 쓰레기는 도로 가져와 숲을 깨끗하게 지켜요." },
+    { topic: "곶자왈을 지키는 방법", q: "곶자왈 숲을 걸을 때 바른 행동은?", a: ["정해진 길로만 다니기", "아무 데나 막 들어가기", "나무에 낙서하기"], ex: "정해진 길(탐방로)로만 다녀야 풀과 동물의 집을 밟지 않아요." },
+    { topic: "곶자왈을 지키는 방법", q: "곶자왈에서 예쁜 식물을 보면 어떻게 할까요?", a: ["꺾지 않고 눈으로만 보기", "집에 가져가기", "밟고 지나가기"], ex: "식물은 꺾지 않고 눈으로만 보아야 다음 친구들도 볼 수 있어요." },
+    { topic: "곶자왈을 지키는 방법", q: "곶자왈을 오래오래 지키려면 나무를?", a: ["심고 아껴 주기", "다 베어 버리기", "불태우기"], ex: "나무를 심고 아끼면 곶자왈이 더 푸르고 건강해져요." }
+  ];
+
+  // 고급(고학년)용 어려운 퀴즈  a[0] = 정답
+  const QUIZZES_HARD = [
+    { topic: "곶자왈의 뜻", q: "'곶자왈'에서 '곶'은 숲을 뜻해요. 그렇다면 '자왈'은 무엇을 뜻할까요?", a: ["나무·덩굴과 돌이 엉킨 덤불", "모래밭", "바닷가 절벽"], ex: "곶자왈은 '숲(곶)'과 '돌·가시덤불(자왈)'을 합친 제주말로, 용암 위에 우거진 숲을 뜻해요." },
+    { topic: "곶자왈의 땅", q: "곶자왈 바닥을 이루는, 용암이 굳어 생긴 구멍 많은 검은 돌의 이름은?", a: ["현무암", "화강암", "대리석"], ex: "곶자왈은 화산이 분출한 용암이 식어 굳은 '현무암'으로 덮여 있어요." },
+    { topic: "곶자왈의 역할", q: "곶자왈이 '제주의 생명수 창고'라 불리는 가장 큰 까닭은?", a: ["빗물을 땅속으로 스며들게 해 지하수를 채워서", "농사를 많이 지어서", "관광객이 많아서"], ex: "구멍 많은 곶자왈 땅은 빗물을 지하로 보내 제주 사람들이 쓰는 지하수를 만들어요." },
+    { topic: "곶자왈의 생태", q: "곶자왈에는 따뜻한 지방 식물과 추운 지방 식물이 함께 자라요. 그 까닭으로 알맞은 것은?", a: ["돌 틈 덕분에 겨울엔 따뜻하고 여름엔 시원해 온도가 일정해서", "비가 전혀 안 와서", "햇빛이 아주 강해서"], ex: "곶자왈은 돌 틈으로 공기가 드나들어 온도 변화가 적어, 남방·북방 식물이 함께 살 수 있어요." },
+    { topic: "곶자왈의 가치", q: "여러 동식물이 어우러져 사는 곶자왈을 부르는 말로 알맞은 것은?", a: ["생태계의 보고(보물창고)", "사막", "황무지"], ex: "생물다양성이 풍부한 곶자왈은 '생태계의 보고'라고 불려요." },
+    { topic: "곶자왈의 위협", q: "곶자왈을 파괴하는 개발이 아닌 것은?", a: ["나무 심기", "골프장 건설", "도로·택지 개발"], ex: "골프장·도로·건물 개발은 곶자왈을 없애지만, 나무 심기는 숲을 되살리는 일이에요." },
+    { topic: "곶자왈의 위협", q: "곶자왈의 돌과 숲이 사라지면 가장 먼저 나빠지는 것은?", a: ["깨끗한 지하수가 줄어듦", "자동차가 늘어남", "비가 멈춤"], ex: "빗물을 걸러 주던 곶자왈이 사라지면 깨끗한 지하수가 줄고 더러워져요." },
+    { topic: "곶자왈 보전", q: "곶자왈 같은 소중한 자연을 지키려고 나라가 하는 일로 알맞은 것은?", a: ["보호지역으로 정해 함부로 개발하지 못하게 함", "모두 농경지로 바꿈", "나무를 베어 주차장을 만듦"], ex: "곶자왈을 보전지역으로 지정해 개발을 막고 지켜요." },
+    { topic: "곶자왈 보전", q: "곶자왈을 오래 지키는 '지속가능한' 탐방 행동으로 알맞은 것은?", a: ["정해진 탐방로로만 다니고 흔적을 남기지 않기", "희귀 식물 캐 오기", "큰 소리로 음악 틀기"], ex: "정해진 길로만 다니고 쓰레기를 남기지 않아야 곶자왈을 오래 지킬 수 있어요." },
+    { topic: "곶자왈의 지형", q: "곶자왈의 '숨골'은 어떤 곳일까요?", a: ["땅속과 바깥 공기가 드나들어 온도를 조절하는 구멍", "물을 끓이는 곳", "동물이 겨울잠 자는 굴"], ex: "숨골은 땅속 공기가 드나드는 구멍으로, 주변 온도를 일정하게 만들어 줘요." },
+    { topic: "곶자왈의 가치", q: "용암 동굴·숨골이 있는 곶자왈이 학술적으로 중요한 까닭은?", a: ["화산 활동의 흔적을 연구할 수 있어서", "금이 나와서", "온천이 솟아서"], ex: "곶자왈의 용암 지형은 화산이 어떻게 활동했는지 보여 주는 귀중한 자연 기록이에요." },
+    { topic: "곶자왈 실천", q: "곶자왈을 지키기 위해 생활 속에서 실천할 수 있는 일로 가장 알맞은 것은?", a: ["물·전기를 아끼고 자연을 아끼는 습관 기르기", "일회용품 많이 쓰기", "숲에 새 길을 마구 내기"], ex: "자원을 아끼고 자연을 소중히 여기는 작은 습관이 곶자왈을 지키는 큰 힘이 돼요." }
+  ];
+
+  // ---------- config ----------
+  const COL_X = [330, 480, 630];        // 좌·가운데·우 (양쪽은 항상, 가운데는 가끔)
+  const ROW_GAP = 122;                  // 줄 간격(세로)
+  const TOP_MARGIN = 165;               // 캐릭터가 화면 위로 올라가면 카메라가 따라옴
+  const LAVA_Y = H - 56;                // 이 아래로 내려가면 용암에 빠짐
+  const SINK_DROP = 92;                 // 돌이 가라앉을 때 내려가는 정도(px)
+  const SCROLL_SPEED = [70, 98, 128];   // 스테이지별 자동 스크롤 속도(px/초) — 점점 빨라짐
+  const TARGET_QUIZ = 5;
+  const STAGE_MUL = [1, 0.78, 0.6];     // 스테이지별 가라앉기 속도 배수(작을수록 빠름)
+  const MYSTERY_TIMES = [0.2, 0.5, 1.0];// 검정 돌이 숨기는 가라앉기 시간 후보
+  const STYPE = {
+    SLOW:    { time: 1.0, body: "#5aa848", top: "#84d36a", tag: "🟢" },
+    MEDSLOW: { time: 0.5, body: "#8a7d70", top: "#a99b8b", tag: "⚪" },
+    FAST:    { time: 0.2, body: "#cf8a3a", top: "#ecc06a", tag: "🟠" },
+    FLIP:    { time: 0,   body: "#6b2b2b", top: "#8a3a3a", tag: "❌" },
+    MYSTERY: { time: 0,   body: "#26262b", top: "#3b3b42", tag: "⚫" },
+    QUIZ:    { body: "#e0a92e", top: "#ffd24a" },
+    GOAL:    { body: "#369e36", top: "#67c23a" }
+  };
+  // 난이도: 초급=느리게+쉬운 퀴즈 / 고급=원래 속도+어려운 퀴즈
+  const DIFF = {
+    easy: { label: "초급", scrollMul: 0.6, sinkMul: 1.6, quizzes: QUIZZES },
+    hard: { label: "고급", scrollMul: 1.0, sinkMul: 1.0, quizzes: QUIZZES_HARD }
+  };
+
+  // ---------- state ----------
+  let state = "TITLE";
+  let diffKey = "easy", diff = DIFF.easy;
+  let rows = [], genRow = 0, quizzesPlaced = 0, finalDone = false, goalRow = null;
+  let player = null, cameraY = 0, particles = [], shake = 0, scrollPause = 0;
+  let transformT = 0, greenness = 0, elapsed = 0, bubbleTimer = 0;
+  let quizPool = [], currentQuizRow = null, currentQuiz = null, answered = false;
+
+  function rowBaseY(r) { return -r * ROW_GAP; }
+  function stageOf(r) { return r < 8 ? 0 : r < 16 ? 1 : 2; }
+  function stoneAt(r, col) { return rows[r] ? rows[r].cols.find(c => c.col === col) : null; }
+  // 가라앉는 데 걸리는 시간(검정 미스터리 돌은 각자 숨겨진 시간). 안 가라앉는 돌은 null
+  function sinkTimeOf(s) {
+    if (s.type === "MYSTERY") return s.sinkTime;
+    if (s.type === "SLOW" || s.type === "MEDSLOW" || s.type === "FAST") return STYPE[s.type].time;
+    return null;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr;
+  }
+
+  function makeRow(r) {
+    const baseY = rowBaseY(r);
+    if (goalRow !== null && r >= goalRow) {
+      return { r, type: "goal", used: false, isFinal: false, cols: [{ col: 1, type: "GOAL", x: COL_X[1], baseY, sinkAnim: 0, safe: true }] };
+    }
+    if (r === 0) {
+      return { r, type: "normal", used: false, cols: [0, 1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY, sinkAnim: 0, safe: true })) };
+    }
+    if (r % 5 === 0 && !finalDone && quizzesPlaced < TARGET_QUIZ) {
+      quizzesPlaced++;
+      const isFinal = quizzesPlaced >= TARGET_QUIZ;
+      return { r, type: "quiz", used: false, isFinal, cols: [{ col: 1, type: "QUIZ", x: COL_X[1], baseY, sinkAnim: 0, safe: true }] };
+    }
+    // 양쪽(좌·우)은 항상, 가운데는 가끔만 — 가운데엔 즉사 돌이 절대 안 옴
+    const pickSafe = () => ["SLOW", "MEDSLOW", "FAST"][Math.floor(Math.random() * 3)];
+    const lanes = Math.random() < 0.45 ? [0, 1, 2] : [0, 2];
+    const typeFor = {};
+    const roll = Math.random();
+    if (r >= 4 && roll < 0.18) {
+      lanes.forEach(c => typeFor[c] = "MYSTERY");           // 미스터리 줄: 모두 검정(동시 등장)
+    } else if (roll < 0.46) {
+      const sides = lanes.filter(c => c !== 1);
+      const flipLane = sides[Math.floor(Math.random() * sides.length)];   // 즉사 돌은 옆 칸에만
+      lanes.forEach(c => typeFor[c] = (c === flipLane) ? "FLIP" : pickSafe());
+    } else {
+      lanes.forEach(c => typeFor[c] = pickSafe());
+    }
+    const cols = lanes.map(ci => {
+      const st = { col: ci, type: typeFor[ci], x: COL_X[ci], baseY, sinkAnim: 0, safe: false };
+      if (st.type === "MYSTERY") st.sinkTime = MYSTERY_TIMES[Math.floor(Math.random() * MYSTERY_TIMES.length)];
+      return st;
+    });
+    return { r, type: "normal", used: false, cols };
+  }
+
+  function ensureRows(upto) {
+    while (genRow <= upto && (goalRow === null || genRow <= goalRow)) {
+      rows[genRow] = makeRow(genRow);
+      genRow++;
+    }
+  }
+
+  function newGame() {
+    rows = []; genRow = 0; quizzesPlaced = 0; finalDone = false; goalRow = null;
+    particles = []; shake = 0; transformT = 0; greenness = 0; elapsed = 0; bubbleTimer = 0;
+    quizPool = shuffle(diff.quizzes.slice());
+    player = {
+      row: 0, col: 1, lives: 3, score: 0,
+      worldX: COL_X[1], worldY: rowBaseY(0),
+      hopping: false, hopT: 0, hx0: 0, hy0: 0, hx1: 0, hy1: 0,
+      sinkT: 0, grace: 1.6, bob: 0, facing: 1,
+      parachutes: 0, safeRows: 0, curSafe: true, quizzesSolved: 0
+    };
+    ensureRows(7);
+    cameraY = player.worldY - 300;
+    scrollPause = 1.4;
+    state = "PLAYING";
+  }
+
+  // ---------- movement ----------
+  function nearest(cols, c) {
+    return cols.reduce((a, b) => Math.abs(a.col - c) <= Math.abs(b.col - c) ? a : b);
+  }
+  function ascend(dir) { // dir: -1 왼쪽 / 0 위 / +1 오른쪽
+    if (state !== "PLAYING" || player.hopping) return;
+    const nr = player.row + 1;
+    ensureRows(nr + 6);
+    const row = rows[nr];
+    if (!row) return;
+    let target;
+    if (row.type === "quiz" || row.type === "goal") {
+      target = row.cols[0];
+    } else {
+      const cs = row.cols, c = player.col;
+      if (dir < 0) { const L = cs.filter(s => s.col < c); target = L.length ? L[L.length - 1] : nearest(cs, c); }
+      else if (dir > 0) { const R = cs.filter(s => s.col > c); target = R.length ? R[0] : nearest(cs, c); }
+      else target = nearest(cs, c);
+    }
+    player.hopping = true; player.hopT = 0;
+    player.hx0 = player.worldX; player.hy0 = player.worldY;
+    player.hx1 = target.x; player.hy1 = target.baseY;
+    player.facing = target.x >= player.worldX ? 1 : -1;
+    player._toRow = nr; player._toCol = target.col;
+    sfx.hop();
+  }
+
+  function onLand() {
+    player.row = player._toRow; player.col = player._toCol;
+    const row = rows[player.row];
+    const s = stoneAt(player.row, player.col) || row.cols[0];
+    player.worldX = s.x;
+    player.worldY = s.baseY;
+    player.sinkT = 0; player.grace = 0.2;
+    player.score += 10;                              // 칸마다 +10점
+    ensureRows(player.row + 6);
+
+    if (row.type === "goal") { startTransform(); return; }
+
+    // 보호막(돌다리/낙하산) 적용 여부 결정
+    player.curSafe = s.safe || false;
+    if (s.type === "FLIP") {
+      if (player.safeRows > 0) { player.safeRows--; player.curSafe = true; showToast("🪨 돌다리가 막아줬어요!"); }
+      else if (player.parachutes > 0) { player.parachutes--; player.curSafe = true; showToast("🪂 낙하산이 구해줬어요!"); }
+      else { flipDeath(s); return; }
+    } else if (!s.safe && player.safeRows > 0) {
+      player.safeRows--; player.curSafe = true;
+    }
+
+    if (row.type === "quiz" && !row.used) { openQuiz(row); }
+  }
+
+  function startHop(dt) {
+    player.hopT += dt * 3.8;
+    const t = clamp(player.hopT, 0, 1);
+    player.worldX = lerp(player.hx0, player.hx1, t);
+    player.worldY = lerp(player.hy0, player.hy1, t) - Math.sin(Math.PI * t) * 95;
+    if (t >= 1) { player.hopping = false; onLand(); }
+  }
+
+  // ---------- death ----------
+  function flipDeath(s) {
+    if (s) { s.flip = 1; }
+    sfx.fall(); shake = 0.6; spawnSplash("#3a322c");
+    loseLife("⚫ 돌이 뒤집혔어요!");
+  }
+  function lavaDeath() {
+    if (player.parachutes > 0) { player.parachutes--; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); player.sinkT = 0; player.grace = 1.8; player.curSafe = true; return; }
+    sfx.fall(); shake = 0.6; spawnSplash("#ff7a18");
+    loseLife("😵 용암에 빠졌어요!");
+  }
+  function sinkDeath() {
+    if (player.parachutes > 0) { player.parachutes--; showToast("🪂 낙하산이 구해줬어요!"); sfx.reward(); player.sinkT = 0; const s = stoneAt(player.row, player.col); if (s) s.sinkAnim = 0; player.grace = 1.8; return; }
+    sfx.fall(); shake = 0.6; spawnSplash("#ff7a18");
+    loseLife("😵 돌이 가라앉았어요!");
+  }
+  function loseLife(msg) {
+    player.lives--;
+    if (player.lives <= 0) { endGame(false); return; }
+    respawnSame();
+    showToast(msg + " 목숨 -1");
+  }
+  // 죽었던 그 자리(같은 줄)에서 안전한 돌로 다시 살아남
+  function respawnSame() {
+    const row = rows[player.row];
+    let safe = row.cols.filter(c => c.type !== "FLIP");
+    if (!safe.length) { row.cols[0].type = "SLOW"; row.cols[0].sinkTime = undefined; safe = [row.cols[0]]; }
+    let pick = safe.find(c => c.col === player.col) || safe[0];   // 가능하면 같은 레인
+    pick.sinkAnim = 0; pick.flip = 0;
+    player.col = pick.col; player.worldX = pick.x; player.worldY = pick.baseY;
+    player.sinkT = 0; player.grace = 2.2; player.curSafe = true; player.hopping = false;
+    scrollPause = 1.5;
+    cameraY = player.worldY - 360;   // 죽은 자리로 되살아나되 화면 중앙쯤 안전하게
+  }
+
+  // ---------- toast ----------
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 1700);
+  }
+
+  // ---------- quiz ----------
+  function openQuiz(row) {
+    state = "QUIZ"; currentQuizRow = row; answered = false;
+    if (quizPool.length === 0) quizPool = shuffle(diff.quizzes.slice());
+    const base = quizPool.splice(Math.floor(Math.random() * quizPool.length), 1)[0];  // 랜덤 출제(중복 없이)
+    const opts = base.a.map((text, i) => ({ text, correct: i === 0 }));
+    shuffle(opts);
+    currentQuiz = { ex: base.ex, opts };
+    document.getElementById("quizTopic").textContent = "❓ " + base.topic + (row.isFinal ? " · 마지막 문제!" : "");
+    document.getElementById("quizQ").textContent = base.q;
+    const ob = document.getElementById("quizOptions"); ob.innerHTML = "";
+    opts.forEach((o, i) => {
+      const b = document.createElement("button");
+      b.className = "quiz-opt"; b.textContent = o.text;
+      b.onclick = () => answerQuiz(i, b);
+      ob.appendChild(b);
+    });
+    document.getElementById("quizFeedback").textContent = "";
+    document.getElementById("quizExplain").textContent = "";
+    document.getElementById("quizNextWrap").classList.add("hidden");
+    document.getElementById("quizModal").classList.remove("hidden");
+  }
+
+  function answerQuiz(i, btn) {
+    if (answered) return; answered = true;
+    const opt = currentQuiz.opts[i];
+    [...document.querySelectorAll(".quiz-opt")].forEach((b, j) => { b.disabled = true; if (currentQuiz.opts[j].correct) b.classList.add("correct"); });
+    const fb = document.getElementById("quizFeedback");
+    document.getElementById("quizExplain").textContent = "💡 " + currentQuiz.ex;
+    const row = currentQuizRow; row.used = true;
+
+    if (opt.correct) {
+      sfx.correct(); player.quizzesSolved++; spawnSparkles();
+      player.score += 50;                                  // 퀴즈 정답 +50점
+      fb.textContent = "⭕ 정답이에요! (+50점)"; fb.style.color = "#2f9e44";
+      if (row.isFinal) {
+        finalDone = true; goalRow = player.row + 2;
+        ensureRows(goalRow);
+        rows[player.row + 1] = { r: player.row + 1, type: "normal", used: false, cols: [0, 1, 2].map(ci => ({ col: ci, type: "SLOW", x: COL_X[ci], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true })) };
+        rows[goalRow] = { r: goalRow, type: "goal", used: false, cols: [{ col: 1, type: "GOAL", x: COL_X[1], baseY: rowBaseY(goalRow), sinkAnim: 0, safe: true }] };
+        fb.textContent = "🎉 마지막 문제 정답! 안전한 곳이 보여요!";
+      } else {
+        giveReward();
+      }
+    } else {
+      btn.classList.add("wrong"); sfx.wrong();
+      fb.textContent = "❌ 아쉬워요! 목숨 -1"; fb.style.color = "#e03131";
+      player.lives--; shake = 0.4;
+      if (row.isFinal && player.lives > 0) {
+        rows[player.row + 1] = { r: player.row + 1, type: "quiz", used: false, isFinal: true, cols: [{ col: 1, type: "QUIZ", x: COL_X[1], baseY: rowBaseY(player.row + 1), sinkAnim: 0, safe: true }] };
+      }
+    }
+    document.getElementById("quizNextWrap").classList.remove("hidden");
+  }
+
+  function giveReward() {
+    const p = Math.random(); let msg;
+    if (p < 0.30) { player.score += 100; msg = "💎 보너스 +100점!"; }
+    else if (p < 0.55) { player.lives = Math.min(5, player.lives + 1); msg = "❤️ 목숨 +1!"; }
+    else if (p < 0.80) { player.safeRows += 2; msg = "🪨 튼튼한 돌다리! 다음 2칸 안전!"; }
+    else { player.parachutes++; msg = "🪂 낙하산 +1! 슬롯에 담겼어요!"; }
+    sfx.reward(); showToast(msg);
+  }
+
+  document.getElementById("quizNextBtn").onclick = () => {
+    document.getElementById("quizModal").classList.add("hidden");
+    if (player.lives <= 0) { endGame(false); return; }
+    player.sinkT = 0; player.grace = 1.6; state = "PLAYING";
+  };
+
+  // ---------- particles ----------
+  function spawnSparkles() { for (let i = 0; i < 18; i++) particles.push({ type: "spark", x: player.worldX, y: player.worldY - cameraY - 40, vx: rand(-3, 3), vy: rand(-5, -1), life: 1, col: ["#ffd24a", "#fff", "#b6f06a"][i % 3], r: rand(2, 5) }); }
+  function spawnSplash(col) { for (let i = 0; i < 22; i++) particles.push({ type: "splash", x: player.worldX, y: player.worldY - cameraY, vx: rand(-4, 4), vy: rand(-8, -2), life: 1, col: col || "#ff7a18", r: rand(3, 7) }); }
+  function spawnConfetti() { for (let i = 0; i < 50; i++) particles.push({ type: "confetti", x: rand(0, W), y: rand(-60, 0), vx: rand(-1, 1), vy: rand(2, 5), life: 1, col: ["#ffd24a", "#ff6b6b", "#6bd1ff", "#b6f06a", "#ff9ff3"][i % 5], r: rand(4, 8), rot: rand(0, TAU), vr: rand(-0.2, 0.2) }); }
+
+  // ---------- loop ----------
+  let last = performance.now();
+  function loop(now) {
+    let dt = (now - last) / 1000; last = now; dt = Math.min(dt, 0.05);
+    update(dt); draw();
+    requestAnimationFrame(loop);
+  }
+
+  function update(dt) {
+    elapsed += dt;
+    if (shake > 0) shake = Math.max(0, shake - dt);
+
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.type !== "confetti") p.vy += 0.35; else { p.vy += 0.05; p.rot += p.vr; }
+      p.life -= dt * (p.type === "confetti" ? 0.4 : 1.2);
+    }
+    particles = particles.filter(p => p.life > 0 && p.y < H + 40);
+
+    bubbleTimer -= dt;
+    if (bubbleTimer <= 0 && (state === "PLAYING" || state === "QUIZ")) {
+      bubbleTimer = rand(0.12, 0.3);
+      particles.push({ type: "bubble", x: rand(0, W), y: H - rand(0, 70), vx: rand(-0.3, 0.3), vy: rand(-1.4, -0.6), life: rand(0.6, 1.2), col: "rgba(255,200,80,", r: rand(3, 9) });
+    }
+
+    if (state === "PLAYING") {
+      // 자동 스크롤: 돌이 위에서 아래로 계속 흘러내림(카메라가 위로 이동)
+      if (scrollPause > 0) scrollPause -= dt;
+      else if (!finalDone) cameraY -= SCROLL_SPEED[stageOf(player.row)] * diff.scrollMul * dt;
+
+      if (player.hopping) { startHop(dt); }
+      else {
+        player.bob += dt * 4;
+        const s = stoneAt(player.row, player.col);
+        if (player.grace > 0) { player.grace -= dt; if (s) s.sinkAnim = 0; }
+        else if (s && !player.curSafe) {
+          const stime = sinkTimeOf(s);
+          if (stime != null) {
+            player.sinkT += dt;
+            const thr = stime * STAGE_MUL[stageOf(player.row)] * diff.sinkMul;
+            s.sinkAnim = clamp(player.sinkT / thr, 0, 1);
+            if (player.sinkT >= thr) { sinkDeath(); }       // 돌이 다 가라앉아 용암에 닿음 → 죽음
+          }
+        }
+        if (s) player.worldY = s.baseY + (s.sinkAnim || 0) * SINK_DROP + Math.sin(player.bob) * 2;
+
+        const psy = player.worldY - cameraY;             // 캐릭터의 화면상 y
+        if (psy < TOP_MARGIN) cameraY = lerp(cameraY, player.worldY - TOP_MARGIN, 0.25); // 너무 높으면 따라 올라감
+        if (player.grace <= 0 && psy > LAVA_Y) { lavaDeath(); }                          // 바닥 용암에 빠짐
+      }
+      // 스크롤로 드러나는 위쪽 줄까지 미리 생성
+      ensureRows(Math.max(player.row + 6, Math.ceil(-cameraY / ROW_GAP) + 3));
+    }
+
+    if (state === "TRANSFORM") {
+      transformT += dt; greenness = clamp(transformT / 2.6, 0, 1);
+      player.bob += dt * 4;
+      if (Math.random() < 0.4) spawnConfetti();
+      if (transformT >= 2.8) endGame(true);
+    }
+  }
+
+  function startTransform() { state = "TRANSFORM"; transformT = 0; player.score += 500 + player.lives * 100; sfx.win(); spawnConfetti(); }
+
+  // ---------- draw ----------
+  function draw() {
+    ctx.save();
+    if (shake > 0) ctx.translate(rand(-1, 1) * shake * 14, rand(-1, 1) * shake * 14);
+    drawScene();
+    ctx.restore();
+  }
+
+  function drawScene() {
+    const g = greenness;
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, mixColor("#ff7b3a", "#7ec8ff", g));
+    sky.addColorStop(0.5, mixColor("#ffb45e", "#cfeeff", g));
+    sky.addColorStop(1, mixColor("#7a2e14", "#9fd987", g));
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    ctx.globalAlpha = 0.9; ctx.fillStyle = mixColor("#ffe08a", "#fff7c8", g);
+    ctx.beginPath(); ctx.arc(W - 120, 90, 50, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+
+    if (g > 0.2) drawForest(g);
+
+    drawRows(g);
+    if (player) drawPlayer(g);
+
+    drawLavaPool(g);
+    drawParticles();
+
+    if (state === "PLAYING" || state === "QUIZ" || state === "TRANSFORM") drawHUD();
+  }
+
+  function drawForest(g) {
+    ctx.globalAlpha = clamp((g - 0.2) / 0.5, 0, 1);
+    for (let i = 0; i < 8; i++) {
+      const tx = 50 + i * 125, ty = 130 + (i % 2) * 24;
+      ctx.fillStyle = "#5a3a1a"; ctx.fillRect(tx - 5, ty, 10, 40);
+      ctx.fillStyle = ["#3fae3f", "#2f9e44", "#67c23a"][i % 3];
+      ctx.beginPath(); ctx.arc(tx, ty - 6, 30, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(tx - 22, ty + 8, 20, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(tx + 22, ty + 8, 20, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawLavaPool(g) {
+    const top = H - 70;
+    const lg = ctx.createLinearGradient(0, top, 0, H);
+    if (g < 0.5) { lg.addColorStop(0, mixColor("#ffd84a", "#9fe0ff", g * 2)); lg.addColorStop(1, mixColor("#c81e00", "#2f86c9", g * 2)); }
+    else { lg.addColorStop(0, "#bfeaff"); lg.addColorStop(1, "#2f86c9"); }
+    ctx.fillStyle = lg; ctx.fillRect(0, top, W, 70);
+    ctx.globalAlpha = 0.5; ctx.strokeStyle = g < 0.5 ? "#fff1b0" : "#fff"; ctx.lineWidth = 3;
+    ctx.beginPath();
+    for (let x = 0; x <= W; x += 24) { const yy = top + 16 + Math.sin(x * 0.04 + elapsed * 3) * 6; if (x === 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy); }
+    ctx.stroke(); ctx.globalAlpha = 1;
+  }
+
+  function drawRows(g) {
+    if (!player) return;
+    const from = Math.max(0, player.row - 6), to = player.row + 7;
+    for (let r = to; r >= from; r--) {       // 위쪽부터 그려서 아래 돌이 위에 겹치게
+      const row = rows[r]; if (!row) continue;
+      for (const s of row.cols) {
+        const isCur = (player.row === r && player.col === s.col && !player.hopping);
+        const sink = isCur ? (s.sinkAnim || 0) : 0;
+        const flip = s.flip || 0;
+        const sx = s.x, sy = s.baseY - cameraY + sink * 46;
+        if (sy < -80 || sy > H + 80) continue;
+        drawStone(s, sx, sy, sink, flip);
+      }
+    }
+  }
+
+  function drawStone(s, x, y, sink, flip) {
+    const def = STYPE[s.type];
+    if (s.type === "GOAL") {
+      ctx.fillStyle = "#2f8b34"; roundRect(x - 110, y + 6, 220, 40, 16); ctx.fill();
+      ctx.fillStyle = "#3fae3f"; roundRect(x - 110, y - 14, 220, 34, 16); ctx.fill();
+      ctx.font = "30px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🚩", x, y - 22);
+      ctx.font = "bold 15px sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("안전한 곶자왈 도착!", x, y + 4);
+      ctx.textAlign = "left"; return;
+    }
+    // 그림자(용암 위 반사)
+    ctx.globalAlpha = 0.22 * (1 - sink); ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.ellipse(x, y + 24, 46 * (1 - sink * 0.4), 9, 0, 0, TAU); ctx.fill(); ctx.globalAlpha = 1;
+
+    ctx.save();
+    if (flip > 0) { ctx.translate(x, y); ctx.rotate(flip * 0.5); ctx.translate(-x, -y); }
+    ctx.globalAlpha = clamp(1 - sink * 0.8, 0.15, 1);
+    // 몸체
+    ctx.fillStyle = def.body; roundRect(x - 46, y - 3, 92, 30, 12); ctx.fill();
+    // 윗면
+    ctx.fillStyle = def.top; ctx.beginPath(); ctx.ellipse(x, y - 1, 46, 13, 0, 0, TAU); ctx.fill();
+
+    if (s.type === "SLOW") { // 이끼
+      ctx.fillStyle = "#3f8e34";
+      ctx.beginPath(); ctx.ellipse(x - 22, y - 2, 11, 5, 0, 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x + 20, y + 2, 9, 4, 0, 0, TAU); ctx.fill();
+    } else if (s.type === "FAST") { // 균열
+      ctx.strokeStyle = "rgba(90,40,0,0.5)"; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x - 20, y - 8); ctx.lineTo(x - 4, y); ctx.lineTo(x - 12, y + 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x + 22, y - 6); ctx.lineTo(x + 8, y + 2); ctx.stroke();
+    } else if (s.type === "FLIP") { // 즉사: 빨간 X
+      ctx.strokeStyle = "#ff5252"; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(x - 13, y - 9); ctx.lineTo(x + 13, y + 9); ctx.moveTo(x + 13, y - 9); ctx.lineTo(x - 13, y + 9); ctx.stroke();
+    } else if (s.type === "MYSTERY") { // 미스터리: 흰 물음표
+      ctx.fillStyle = "#fff"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "center";
+      ctx.fillText("?", x, y + 8); ctx.textAlign = "left";
+    }
+
+    if (s.type === "QUIZ") {
+      ctx.font = "bold 30px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff";
+      ctx.fillText("❓", x, y - 16 + Math.sin(elapsed * 4) * 4); ctx.textAlign = "left";
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+
+  // ---------- 돌하르방 캐릭터 ----------
+  function drawPlayer(g) {
+    const cx = player.worldX;
+    const feetY = player.worldY - cameraY;   // 발이 돌 윗면에 닿음
+    const bob = player.hopping ? 0 : Math.sin(player.bob) * 1.5;
+    ctx.save();
+    ctx.translate(cx, feetY + bob);
+    const tilt = player.hopping ? Math.sin(player.hopT * Math.PI) * 0.16 * player.facing : 0;
+    ctx.rotate(tilt);
+    ctx.scale(0.62, 0.62);   // 캐릭터 크기 축소(발 위치 기준)
+
+    const BODY = "#9c9ea1", HAT = "#8a8c8f", BRIM = "#7c7e81", OUT = "#3b3b3d", DOT = "#74767a";
+    const speckles = (arr) => { ctx.fillStyle = DOT; arr.forEach(d => { ctx.beginPath(); ctx.arc(d[0], d[1], d[2], 0, TAU); ctx.fill(); }); };
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = OUT; ctx.lineWidth = 3;
+
+    // 팔(양옆으로 활짝) — 몸 뒤
+    ctx.fillStyle = BODY;
+    ctx.save(); ctx.translate(-30, -28); ctx.rotate(0.6); roundRect(-9, -8, 18, 30, 9); ctx.fill(); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.translate(30, -28); ctx.rotate(-0.6); roundRect(-9, -8, 18, 30, 9); ctx.fill(); ctx.stroke(); ctx.restore();
+    // 발
+    ctx.beginPath(); ctx.ellipse(-12, -4, 11, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(12, -4, 11, 7, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    // 몸통
+    roundRect(-30, -60, 60, 58, 26); ctx.fill(); ctx.stroke();
+    speckles([[-9, -16, 2], [-2, -10, 1.6], [7, -20, 1.8], [2, -27, 1.4]]);
+    // 머리
+    ctx.fillStyle = BODY; ctx.beginPath(); ctx.arc(0, -88, 35, 0, TAU); ctx.fill(); ctx.stroke();
+    speckles([[-18, -104, 2], [-9, -110, 1.5], [15, -106, 2], [21, -95, 1.6], [-23, -92, 1.6]]);
+    // 눈
+    ctx.fillStyle = "#2c2c2e";
+    ctx.beginPath(); ctx.ellipse(-13, -88, 5, 7, 0, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(13, -88, 5, 7, 0, 0, TAU); ctx.fill();
+    ctx.fillStyle = "#fff";
+    ctx.beginPath(); ctx.arc(-14.5, -90.5, 1.8, 0, TAU); ctx.fill();
+    ctx.beginPath(); ctx.arc(11.5, -90.5, 1.8, 0, TAU); ctx.fill();
+    // 볼 주근깨
+    speckles([[-23, -80, 1.5], [-26, -76, 1.5], [-20, -75, 1.5], [23, -80, 1.5], [26, -76, 1.5], [20, -75, 1.5]]);
+    // 입(작은 미소)
+    ctx.strokeStyle = OUT; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.arc(0, -80, 5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.stroke();
+    // 모자 — 챙
+    ctx.strokeStyle = OUT; ctx.lineWidth = 3; ctx.fillStyle = BRIM;
+    ctx.beginPath(); ctx.ellipse(0, -112, 44, 11, 0, 0, TAU); ctx.fill(); ctx.stroke();
+    // 모자 — 크라운
+    ctx.fillStyle = HAT;
+    ctx.beginPath(); ctx.moveTo(-26, -113); ctx.quadraticCurveTo(-30, -150, 0, -150); ctx.quadraticCurveTo(30, -150, 26, -113); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    speckles([[-8, -138, 2], [7, -132, 1.6], [15, -141, 1.5]]);
+    ctx.restore();
+
+    if (player.safeRows > 0) { ctx.font = "15px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = "#fff"; ctx.fillText("🪨".repeat(player.safeRows), cx, feetY - 108); ctx.textAlign = "left"; }
+  }
+
+  // 낙하산 아이콘
+  function drawParachute(cx, cy, s) {
+    for (let i = 0; i < 5; i++) {
+      const a0 = Math.PI + i * (Math.PI / 5), a1 = Math.PI + (i + 1) * (Math.PI / 5);
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, s, a0, a1); ctx.closePath();
+      ctx.fillStyle = i % 2 ? "#fff3e0" : "#e8463f"; ctx.fill();
+    }
+    ctx.strokeStyle = "#b8362f"; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, s, Math.PI, 0); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx - s, cy); ctx.lineTo(cx + s, cy); ctx.stroke();
+    ctx.strokeStyle = "#d8b478"; ctx.lineWidth = 1.4; ctx.beginPath();
+    [-0.85, -0.3, 0.3, 0.85].forEach(f => { ctx.moveTo(cx + f * s, cy); ctx.lineTo(cx, cy + s * 1.15); });
+    ctx.stroke();
+    ctx.fillStyle = "#8a5a2b"; roundRect(cx - 5, cy + s * 1.05, 10, 8, 2); ctx.fill();
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      if (p.type === "bubble") { ctx.fillStyle = p.col + clamp(p.life, 0, 1).toFixed(2) + ")"; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); }
+      else if (p.type === "confetti") { ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.col; ctx.globalAlpha = clamp(p.life, 0, 1); ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6); ctx.restore(); ctx.globalAlpha = 1; }
+      else { ctx.fillStyle = p.col; ctx.globalAlpha = clamp(p.life, 0, 1); ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; }
+    }
+  }
+
+  function drawHUD() {
+    ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(14, 14, 220, 46, 12); ctx.fill();
+    ctx.fillStyle = "#ffd24a"; ctx.font = "bold 24px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("⭐ " + player.score + "점", 28, 45);
+
+    ctx.font = "22px sans-serif"; ctx.textAlign = "right";
+    let lifeStr = ""; for (let i = 0; i < player.lives; i++) lifeStr += "❤️";
+    ctx.fillText(lifeStr || "💀", W - 18, 44);
+
+    const st = stageOf(player.row) + 1;
+    ctx.textAlign = "center"; ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(W / 2 - 100, 14, 200, 34, 10); ctx.fill();
+    ctx.fillStyle = "#fff"; ctx.font = "bold 18px sans-serif";
+    ctx.fillText(`${diff.label} · 스테이지 ${st}/3`, W / 2, 38);
+    ctx.font = "14px sans-serif"; ctx.fillStyle = "#ffe9b0";
+    ctx.fillText(`곶자왈 퀴즈 ${Math.min(player.quizzesSolved, TARGET_QUIZ)}/${TARGET_QUIZ}`, W / 2, 58);
+    ctx.textAlign = "left";
+
+    // 낙하산 아이템 슬롯
+    const bx = 14, by = 66, bw = 116, bh = 52;
+    ctx.fillStyle = "rgba(0,0,0,0.45)"; roundRect(bx, by, bw, bh, 12); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.25)"; ctx.lineWidth = 2; roundRect(bx + 6, by + 6, 40, 40, 8); ctx.stroke();
+    const have = player.parachutes > 0;
+    ctx.globalAlpha = have ? 1 : 0.3;
+    drawParachute(bx + 26, by + 23, 14);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#ffd24a"; ctx.font = "11px sans-serif"; ctx.textAlign = "left";
+    ctx.fillText("낙하산", bx + 54, by + 22);
+    ctx.fillStyle = have ? "#fff" : "#888"; ctx.font = "bold 22px sans-serif";
+    ctx.fillText("×" + player.parachutes, bx + 54, by + 44);
+  }
+
+  // ---------- utils ----------
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function mixColor(c1, c2, t) {
+    t = clamp(t, 0, 1); const a = hex(c1), b = hex(c2);
+    return `rgb(${Math.round(lerp(a[0], b[0], t))},${Math.round(lerp(a[1], b[1], t))},${Math.round(lerp(a[2], b[2], t))})`;
+  }
+  function hex(c) { const n = parseInt(c.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+
+  // ---------- ranking ----------
+  const RANK_KEY = "gotjawal_ranking_v2";
+  function loadRanking() { try { return JSON.parse(localStorage.getItem(RANK_KEY)) || []; } catch (e) { return []; } }
+  function saveRanking(list) { try { localStorage.setItem(RANK_KEY, JSON.stringify(list)); } catch (e) {} }
+  function renderRanking(hi) {
+    const list = loadRanking(), ol = document.getElementById("rankList"); ol.innerHTML = "";
+    const medals = ["🥇", "🥈", "🥉"];
+    if (!list.length) { const li = document.createElement("li"); li.textContent = "아직 기록이 없어요. 첫 도전자가 되어 보세요!"; ol.appendChild(li); return; }
+    list.slice(0, 8).forEach((r, i) => {
+      const li = document.createElement("li"); if (i === hi) li.className = "me";
+      const left = document.createElement("span"); left.innerHTML = `<span class="rank-medal">${medals[i] || (i + 1)}</span>${escapeHtml(r.name)} ${r.won ? "🌳" : ""}`;
+      const right = document.createElement("span"); right.textContent = r.score + "점";
+      li.appendChild(left); li.appendChild(right); ol.appendChild(li);
+    });
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m])); }
+
+  let pendingScore = null;
+  document.getElementById("saveScoreBtn").onclick = () => {
+    if (pendingScore == null) return;
+    let name = (document.getElementById("nameInput").value.trim() || "꼬마탐험가").slice(0, 6);
+    localStorage.setItem("gotjawal_lastname", name);
+    const list = loadRanking();
+    const entry = { name, score: pendingScore.score, won: pendingScore.won, date: Date.now() };
+    list.push(entry); list.sort((a, b) => b.score - a.score);
+    const idx = list.indexOf(entry); saveRanking(list); pendingScore = null;
+    document.getElementById("nameInput").disabled = true; document.getElementById("saveScoreBtn").disabled = true;
+    renderRanking(idx);
+  };
+
+  // ---------- screens & input ----------
+  function startGame(key) {
+    diffKey = (key === "hard") ? "hard" : "easy";
+    diff = DIFF[diffKey];
+    document.getElementById("titleScreen").classList.add("hidden");
+    document.getElementById("endScreen").classList.add("hidden");
+    document.getElementById("quizModal").classList.add("hidden");
+    newGame();
+  }
+  document.getElementById("startEasy").onclick = () => startGame("easy");
+  document.getElementById("startHard").onclick = () => startGame("hard");
+  document.getElementById("restartBtn").onclick = () => startGame(diffKey);
+
+  function endGame(won) {
+    state = "END";
+    const es = document.getElementById("endScreen");
+    es.classList.remove("hidden"); es.classList.toggle("lose", !won);
+    document.getElementById("endTitle").textContent = won ? "🌳 곶자왈에 도착! 🎉" : "🌋 앗, 용암에 빠졌어요!";
+    document.getElementById("endScore").textContent = (won ? "용암을 모두 건넜어요! " : "") + "최종 점수: " + player.score + "점";
+    pendingScore = { score: player.score, won };
+    const ni = document.getElementById("nameInput");
+    ni.disabled = false; ni.value = localStorage.getItem("gotjawal_lastname") || "";
+    document.getElementById("saveScoreBtn").disabled = false;
+    renderRanking(-1);
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (state === "TITLE") { if (e.key === "Enter") startGame("easy"); return; }
+    if (e.key === "ArrowLeft") { e.preventDefault(); ascend(-1); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); ascend(1); }
+    else if (e.key === "ArrowUp" || e.key === " " || e.key === "Spacebar") { e.preventDefault(); ascend(0); }
+  });
+
+  document.getElementById("leftBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); ascend(-1); });
+  document.getElementById("upBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); ascend(0); });
+  document.getElementById("rightBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); ascend(1); });
+  canvas.addEventListener("pointerdown", (e) => {
+    if (state !== "PLAYING") return;
+    const rect = canvas.getBoundingClientRect();
+    const rx = (e.clientX - rect.left) / rect.width;
+    ascend(rx < 0.34 ? -1 : rx > 0.66 ? 1 : 0);
+  });
+
+  renderRanking(-1);
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

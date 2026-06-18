@@ -1,0 +1,38 @@
+name: Deploy game to GitHub Pages
+
+# games/ 폴더(단일 HTML 게임들)를 GitHub Pages로 배포한다.
+# main에 games/가 바뀌면 자동 배포 + 수동 실행(workflow_dispatch) 가능.
+# ※ 최초 1회: 저장소 Settings → Pages → Source 를 "GitHub Actions"로 설정해야 함.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'games/**'
+      - '.github/workflows/deploy-game.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          # games/ 를 사이트 루트로 올린다 → 게임 주소: /gotjawal-quiz/
+          path: games
+      - id: deployment
+        uses: actions/deploy-pages@v4
