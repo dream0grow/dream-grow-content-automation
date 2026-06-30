@@ -29,3 +29,6 @@ artifacts/
 scheduled/logs/
 *_tmp.txt
 honcho_reels_ctx_tmp.txt
+
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json
