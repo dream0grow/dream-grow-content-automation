@@ -278,7 +278,11 @@ def main():
         draft = df.read_text(encoding="utf-8") if df.exists() else ""
         topic, core = brief.get("brief_title", ""), brief.get("core_message", "")
     else:
-        topic = args.topic.strip() or "초등 아이 훈육 고민"
+        topic = args.topic.strip()
+        if not topic:
+            from orchestrator.preview import pick_topic
+            topic = pick_topic(args.audience)
+            log(f"오늘의 주제 자동 발제: {topic}")
         brief = llm.call_json(
             prompts.BRIEF.format(keyword=topic, topic=topic, audience=args.audience, context=""),
             system=prompts.get_system())
