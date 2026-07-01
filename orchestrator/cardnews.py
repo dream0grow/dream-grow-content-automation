@@ -173,9 +173,12 @@ html,body { width:1080px; height:1080px; }
 .step { margin-top:30px; font-size:26px; font-weight:700; letter-spacing:5px; opacity:.9; }
 .rule { width:62px; height:4px; background:#fff; opacity:.85; border-radius:3px; margin:16px 0 20px; }
 .title { font-family:'Pretendard'; font-weight:800; letter-spacing:-2px;
-  line-height:1.26; text-shadow:0 3px 26px rgba(0,0,0,.55); }
+  line-height:1.26; text-shadow:0 3px 26px rgba(0,0,0,.55);
+  word-break:keep-all; overflow-wrap:break-word; }
 .body { margin-top:26px; font-weight:500; line-height:1.6; letter-spacing:-.5px;
-  opacity:.94; text-shadow:0 2px 18px rgba(0,0,0,.6); }
+  opacity:.94; text-shadow:0 2px 18px rgba(0,0,0,.6);
+  word-break:keep-all; overflow-wrap:break-word; }
+.hl { color:#ffd21e; }
 .cover .title { font-size:88px; font-weight:800; }
 .cover .body  { font-size:40px; font-weight:600; }
 .content .title { font-size:74px; }
@@ -187,11 +190,19 @@ html,body { width:1080px; height:1080px; }
 """
 
 
+def _rich(text: str) -> str:
+    """카드 카피 마크업: ==단어== → 강조색, 줄바꿈 → <br>, 잔여 ** 제거."""
+    import re as _re
+    escaped = _html.escape((text or "").strip()).replace("**", "")
+    escaped = _re.sub(r"==(.+?)==", r'<span class="hl">\1</span>', escaped)
+    return escaped.replace("\n", "<br>")
+
+
 def slide_html(slide: dict, i: int, total: int, bg: str, step_no: int) -> str:
     kind = slide.get("kind", "content")
     label = _html.escape((slide.get("label") or "드림그로우").strip())
-    title = _html.escape((slide.get("title") or "").strip()).replace("\n", "<br>")
-    body = _html.escape((slide.get("body") or "").strip()).replace("\n", "<br>")
+    title = _rich(slide.get("title"))
+    body = _rich(slide.get("body"))
     photo_div = f'<div class="photo" style="background-image:{bg}"></div>' if bg else '<div class="nophoto"></div>'
 
     if kind == "cover":
