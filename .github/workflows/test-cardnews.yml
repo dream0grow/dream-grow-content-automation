@@ -1,0 +1,61 @@
+# 카드뉴스 실제 생성 테스트 (수동 실행)
+# 주제를 입력하면 초안→카드뉴스(한국인 중심 AI 배경사진)까지 만들어 PNG를 아티팩트로 올린다.
+# 이미지 생성 키(OPENAI_API_KEY 또는 GOOGLE_API_KEY)가 없으면 배경은 그라데이션 폴백.
+name: test-cardnews
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "카드뉴스 주제 (비우면 오늘의 주제 자동 발제)"
+        required: false
+      body_count:
+        description: "본문 카드 수 (기본 5)"
+        required: false
+        default: "5"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      DG_IMAGE_PROVIDER: ${{ secrets.DG_IMAGE_PROVIDER }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      DG_STOCK_PROVIDER: ${{ secrets.DG_STOCK_PROVIDER }}
+      DG_PHOTO_ORDER: ${{ secrets.DG_PHOTO_ORDER }}
+      DG_CARDNEWS_HANDLE: ${{ secrets.DG_CARDNEWS_HANDLE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          pip install requests python-dotenv honcho-ai playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Generate cardnews
+        env:
+          DG_CHROME_PATH: ""
+        run: |
+          python3 -m orchestrator.cardnews \
+            --topic "${{ github.event.inputs.topic }}" \
+            --body-count "${{ github.event.inputs.body_count || '5' }}" \
+            --out cardnews_out
+
+      - name: Upload cards
+        uses: actions/upload-artifact@v4
+        with:
+          name: cardnews
+          path: cardnews_out/*.png
