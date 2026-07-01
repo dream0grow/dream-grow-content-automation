@@ -1,0 +1,48 @@
+# 드림그로우 매일 콘텐츠 발제
+# 하루 1회 새 주제를 자동 발제해 intake 카드를 만든다.
+# 이후는 orchestrator(30분 cron)가 리서치→키워드(자동승인)→초안→검수까지 진행하고,
+# 초안이 완성되면 노션 멘션으로 알린다. 사람은 마지막 발행 승인만 한다.
+name: daily-intake
+
+on:
+  schedule:
+    # 매일 22:10 UTC = 익일 07:10 KST (아침에 새 주제가 올라와 하루 중 초안까지 준비됨)
+    - cron: "10 22 * * *"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "이번에 만들 주제 수 (비우면 기본값)"
+        required: false
+
+concurrency:
+  group: daily-intake
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      DG_DAILY_TOPIC_COUNT: ${{ github.event.inputs.count || secrets.DG_DAILY_TOPIC_COUNT }}
+      DG_DEFAULT_AUDIENCE: ${{ secrets.DG_DEFAULT_AUDIENCE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai
+
+      # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Generate daily topics
+        run: python3 -m orchestrator.daily_intake

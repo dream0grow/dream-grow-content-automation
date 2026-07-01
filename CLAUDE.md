@@ -34,17 +34,30 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 | `stibee.py` | 스티비 3단계 발행: POST /emails → POST /emails/{id}/content(text/html) → /send |
 | `style_learn.py` | AI 원본 vs 사람 수정본 diff → Honcho 문체 학습 |
 | `self_improve.py` | 주간 회고 → 프롬프트 개선 큐시트(사람 승인 후 반영) |
+| `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
 | `config.py` | 환경변수 한 곳 관리 |
 
 데이터: `data/benchmark_posts.md`(스레드 7구조·12훅·변주, CSV 분석), `data/hook_patterns.md`(후킹 패턴).
-워크플로우: `.github/workflows/orchestrator.yml`(30분 cron), `self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트).
+워크플로우: `.github/workflows/orchestrator.yml`(30분 cron), `daily-intake.yml`(매일 07:10 KST 새 주제 발제),
+`self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트).
+
+## 사람 병목 최소화 (2026-07-01)
+
+사람은 **마지막 발행 승인만** 하도록 설계. 그 앞 단계는 전부 자동:
+- **키워드 자동승인 기본 ON** (`config.AUTO_APPROVE_KEYWORD`): 최고점 키워드 자동 채택 → 브리프·초안까지 자동.
+  끄려면 `DG_AUTO_APPROVE_KEYWORD=false`.
+- **초안 완성 시 노션 멘션 알림**: `handle_keyword_approved`가 발행 승인 게이트에서 `notify()` 호출.
+  `NOTION_MENTION_USER_ID` 미설정 시 C-Box 기본 사용자로 폴백해 알림이 항상 뜬다.
+- **매일 자동 발제**: `daily-intake.yml`이 하루 1회 `daily_intake.py` 실행 → 새 주제 카드 생성.
+  개수는 `DG_DAILY_TOPIC_COUNT`(기본 1), 대상은 `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모").
 
 ## 환경변수 / GitHub Secrets
 
 필수: `NOTION_API_KEY`, `NOTION_PIPELINE_DB_ID`, (`ANTHROPIC_API_KEY` 또는 `CLAUDE_CODE_OAUTH_TOKEN`)
 선택: `MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
-`NOTION_MENTION_USER_ID`, `DG_AUTO_APPROVE_KEYWORD`
+`NOTION_MENTION_USER_ID`(미설정 시 C-Box로 폴백), `DG_AUTO_APPROVE_KEYWORD`(기본 ON),
+`DG_DAILY_TOPIC_COUNT`(기본 1), `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모")
 
 ## 운영 — 자주 하는 작업
 

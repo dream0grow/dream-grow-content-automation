@@ -11,8 +11,12 @@ load_dotenv(PROJECT_ROOT / ".env")
 NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
 NOTION_PIPELINE_DB_ID = os.getenv("NOTION_PIPELINE_DB_ID", "")
 NOTION_VERSION = "2022-06-28"
-# 승인 대기 시 멘션할 노션 사용자 ID (비우면 멘션 없이 댓글만). 노션 알림 발송용.
-NOTION_MENTION_USER_ID = os.getenv("NOTION_MENTION_USER_ID", "")
+# 승인 대기 시 멘션할 노션 사용자 ID. 이게 있어야 노션 푸시 알림이 뜬다.
+# Secret 미설정(빈 문자열)이면 C-Box 기본 사용자로 폴백해 알림이 꺼지지 않게 한다.
+NOTION_MENTION_USER_ID = (
+    os.getenv("NOTION_MENTION_USER_ID", "").strip()
+    or "595b4d12-18aa-43a7-9aee-5ee84f3dc7ac"
+)
 
 # Manus (선택 - 외부 리서치 전담, 없으면 Claude 리서치로 폴백)
 MANUS_API_KEY = os.getenv("MANUS_API_KEY", "")
@@ -28,9 +32,13 @@ DIALOGUE_MAX_ROUNDS = int(os.getenv("DG_DIALOGUE_MAX_ROUNDS", "2"))
 # 한 번의 cron 실행에서 처리할 최대 카드 수 (rate limit 보호)
 MAX_CARDS_PER_RUN = int(os.getenv("DG_MAX_CARDS_PER_RUN", "5"))
 
-# 키워드 자동 승인: true면 최고점 키워드를 사람 승인 없이 자동 채택 (대량 검토용 초안 생성).
-# 발행 승인 게이트는 그대로 사람이 통과시킨다.
-AUTO_APPROVE_KEYWORD = os.getenv("DG_AUTO_APPROVE_KEYWORD", "").lower() in ("1", "true", "yes", "on")
+# 키워드 자동 승인: 최고점 키워드를 사람 승인 없이 자동 채택 → 초안까지 자동 진행.
+# 사람 병목을 줄이기 위해 기본 ON. 발행 승인 게이트만 사람이 통과시킨다.
+# 끄려면 DG_AUTO_APPROVE_KEYWORD=false (또는 0/no/off). 빈 값/미설정은 ON으로 본다.
+AUTO_APPROVE_KEYWORD = (
+    os.getenv("DG_AUTO_APPROVE_KEYWORD", "").strip().lower()
+    not in ("0", "false", "no", "off")
+)
 
 
 def require_notion():
