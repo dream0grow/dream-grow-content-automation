@@ -24,6 +24,10 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       DG_IMAGE_PROVIDER: ${{ secrets.DG_IMAGE_PROVIDER }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      DG_STOCK_PROVIDER: ${{ secrets.DG_STOCK_PROVIDER }}
+      DG_PHOTO_ORDER: ${{ secrets.DG_PHOTO_ORDER }}
       DG_CARDNEWS_HANDLE: ${{ secrets.DG_CARDNEWS_HANDLE }}
     steps:
       - uses: actions/checkout@v4

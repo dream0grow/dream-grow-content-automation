@@ -28,7 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from orchestrator import agent_dialogue, image_gen, llm, prompts
+from orchestrator import agent_dialogue, image_gen, llm, prompts, stock
 
 CARD = 1080
 HANDLE = os.getenv("DG_CARDNEWS_HANDLE", "@dream_grow")
@@ -96,15 +96,22 @@ def _file_to_bg(path: str) -> str:
 def resolve_photo(slide: dict, local_imgs: list[str], idx: int, cache_dir: str) -> str:
     """배경 사진의 CSS background-image 값을 만든다.
 
-    우선순위: 1) 브랜드 소유 로컬 사진  2) AI 생성(한국인 중심)  3) 그라데이션 폴백.
+    우선순위: 1) 브랜드 소유 사진  2) 실물 스톡(Pexels/Unsplash)  3) AI 생성(한국인 중심)
+             4) 그라데이션 폴백. (DG_PHOTO_ORDER 로 순서 조정 가능)
     """
-    if local_imgs:
-        return _file_to_bg(local_imgs[idx % len(local_imgs)])
-    prompt = (slide.get("photo_prompt") or "").strip()
-    if prompt:
-        gen = image_gen.generate(prompt, cache_dir)
-        if gen:
-            return _file_to_bg(gen)
+    order = os.getenv("DG_PHOTO_ORDER", "owned,stock,generate").split(",")
+    for src in (s.strip() for s in order):
+        if src == "owned" and local_imgs:
+            return _file_to_bg(local_imgs[idx % len(local_imgs)])
+        if src == "stock":
+            hit = stock.fetch((slide.get("photo_query") or "").strip(), cache_dir)
+            if hit:
+                return _file_to_bg(hit)
+        if src == "generate":
+            gp = (slide.get("photo_prompt") or "").strip()
+            gen = image_gen.generate(gp, cache_dir) if gp else None
+            if gen:
+                return _file_to_bg(gen)
     return ""  # 폴백: 그라데이션
 
 

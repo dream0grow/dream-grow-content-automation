@@ -35,11 +35,25 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 | `style_learn.py` | AI 원본 vs 사람 수정본 diff → Honcho 문체 학습 |
 | `self_improve.py` | 주간 회고 → 프롬프트 개선 큐시트(사람 승인 후 반영) |
 | `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
+| `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
+| `cardnews.py` | 초안 → 실사진 오버레이 카드뉴스 PNG (Pretendard, Playwright/Chromium) |
+| `stock.py` | 실물 스톡 사진 검색 (Pexels/Unsplash, 상업 라이선스) |
+| `image_gen.py` | AI 배경 이미지 생성 (OpenAI gpt-image-1 / Google Imagen, 한국인 중심) |
 | `config.py` | 환경변수 한 곳 관리 |
 
 데이터: `data/benchmark_posts.md`(스레드 7구조·12훅·변주, CSV 분석), `data/hook_patterns.md`(후킹 패턴).
 워크플로우: `.github/workflows/orchestrator.yml`(30분 cron), `daily-intake.yml`(매일 07:10 KST 새 주제 발제),
-`self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트).
+`self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트), `test-cardnews.yml`(카드뉴스 실제 생성 테스트).
+
+## 카드뉴스 / 발행 미리보기 (2026-07-01)
+
+- **미리보기(`preview.py`)**: `--topic`으로 초안 생성 후 스레드 분할/뉴스레터 HTML을 파일로 렌더. 발행·시크릿 불필요.
+- **카드뉴스(`cardnews.py`)**: 초안 → 슬라이드(표지·본문·마무리) → 실사진 풀블리드 + Pretendard 볼드 오버레이 PNG(1080²).
+  - 배경 사진 우선순위(`DG_PHOTO_ORDER`, 기본 `owned,stock,generate`): ①`--photos-dir` 소유 사진
+    ②실물 스톡(`stock.py`: `PEXELS_API_KEY`/`UNSPLASH_ACCESS_KEY`) ③AI 생성(`image_gen.py`: `GOOGLE_API_KEY` Imagen
+    또는 `OPENAI_API_KEY` gpt-image-1, 한국인 중심) ④그라데이션 폴백.
+  - Pretendard는 `ensure_fonts()`가 GitHub에서 받아 설치. Chromium은 로컬 `/opt/pw-browsers` 또는 Actions `playwright install`.
+  - 실행/검증: `test-cardnews.yml`(수동, 주제 입력 → PNG 아티팩트). 사진 API는 인터넷 개방된 Actions에서 동작.
 
 ## 사람 병목 최소화 (2026-07-01)
 
