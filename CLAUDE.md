@@ -143,3 +143,8 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 
 스킬·에이전트는 이 저장소 `.claude/skills/`·`.claude/agents/`에 동봉되어 있다.
 출처: https://github.com/epoko77-ai/im-not-ai · https://github.com/itssosunny/im-not-strange-ai
+
+**자동 파이프라인에도 적용 (2026-07-01)**: GitHub Actions에서 도는 orchestrator는 Claude Code 스킬을
+직접 못 쓰므로, 같은 룰북을 `prompts.py`의 `HUMANIZE_RULES` 상수로 요약해 작가(WRITER)·카드뉴스(CARDNEWS)
+프롬프트에 주입했고, 비평가(CRITIC)에 "AI 티" 평가 기준(5번)을 추가해 토론 루프에서 탐지→재작성이 돌게 했다.
+스레드·뉴스레터·카드뉴스 자동 초안 전부에 적용된다.
