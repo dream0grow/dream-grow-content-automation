@@ -1,6 +1,6 @@
-# 카드뉴스 실제 생성 테스트 (수동 실행)
-# 주제를 입력하면 초안→카드뉴스(한국인 중심 AI 배경사진)까지 만들어 PNG를 아티팩트로 올린다.
-# 이미지 생성 키(OPENAI_API_KEY 또는 GOOGLE_API_KEY)가 없으면 배경은 그라데이션 폴백.
+# 카드뉴스 실제 생성 (수동 실행)
+# 주제 입력 → 초안 → 카드뉴스(한국인 배경, 표지 영상/사진 판단) → PNG 아티팩트.
+# notion_page 입력 시: 카피+완성 카드를 그 노션 페이지에 자동 저장하고 앱 푸시 알림.
 name: test-cardnews
 
 on:
@@ -13,6 +13,12 @@ on:
         description: "본문 카드 수 (기본 5)"
         required: false
         default: "5"
+      notion_page:
+        description: "저장할 노션 페이지 ID (입력 시 자동 저장 + 앱 푸시)"
+        required: false
+      video_url:
+        description: "표지 영상 URL(힉스필드 등) — 노션에 함께 저장"
+        required: false
 
 jobs:
   run:
@@ -29,6 +35,9 @@ jobs:
       DG_STOCK_PROVIDER: ${{ secrets.DG_STOCK_PROVIDER }}
       DG_PHOTO_ORDER: ${{ secrets.DG_PHOTO_ORDER }}
       DG_CARDNEWS_HANDLE: ${{ secrets.DG_CARDNEWS_HANDLE }}
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
+      NOTION_MENTION_USER_ID: ${{ secrets.NOTION_MENTION_USER_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -52,6 +61,8 @@ jobs:
           python3 -m orchestrator.cardnews \
             --topic "${{ github.event.inputs.topic }}" \
             --body-count "${{ github.event.inputs.body_count || '5' }}" \
+            --notion-page "${{ github.event.inputs.notion_page }}" \
+            --video-url "${{ github.event.inputs.video_url }}" \
             --out cardnews_out
 
       - name: Upload cards

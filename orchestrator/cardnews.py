@@ -28,7 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from orchestrator import agent_dialogue, image_gen, llm, prompts, stock
+from orchestrator import agent_dialogue, image_gen, llm, photo_judge, prompts, stock
 
 CARD = 1080
 HANDLE = os.getenv("DG_CARDNEWS_HANDLE", "@dream_grow")
@@ -77,7 +77,12 @@ def ensure_fonts():
 
 # ---------- 슬라이드 텍스트 ----------
 
-def make_slides(topic: str, core: str, draft: str, body_count: int = 5) -> list[dict]:
+def make_slides(topic: str, core: str, draft: str, body_count: int = 5) -> dict:
+    """카드뉴스 계획을 생성한다.
+
+    반환: {"cover_media": "video|photo", "cover_reason": str,
+           "video_motion": str, "slides": [...]}
+    """
     from orchestrator import cardnews_benchmark
     benchmark = cardnews_benchmark.load() or "(최근 벤치마킹 자료 없음 — 기본 원칙으로 작성)"
     data = llm.call_json(
@@ -86,7 +91,7 @@ def make_slides(topic: str, core: str, draft: str, body_count: int = 5) -> list[
             body_count=body_count, benchmark=benchmark[:4000]),
         system=prompts.get_system(),
     )
-    return data.get("slides", [])
+    return data
 
 
 # ---------- 사진 소스 ----------
@@ -117,6 +122,32 @@ def resolve_photo(slide: dict, local_imgs: list[str], idx: int, cache_dir: str) 
             if gen:
                 return _file_to_bg(gen)
     return ""  # 폴백: 그라데이션
+
+
+def resolve_cover_photo(slide: dict, local_imgs: list[str], cache_dir: str) -> str:
+    """표지 배경: 소유 사진 → 실물 스톡(후킹·공감·어울림 심사) → 통과 못 하면 AI 생성.
+
+    표지는 후킹이 생명이라, 스톡이 '딱 맞고 후킹되는' 사진일 때만 쓰고
+    애매하면(또는 심사 불가하면) 새로 생성한다.
+    """
+    if local_imgs:
+        return _file_to_bg(local_imgs[0])
+    ctx = f"{slide.get('title','')} / {slide.get('body','')}"
+    cand = stock.fetch((slide.get("photo_query") or "").strip(), cache_dir)
+    if cand:
+        verdict = photo_judge.judge(cand, ctx)
+        if verdict is not None and verdict.get("ok"):
+            log(f"표지 사진=스톡 채택 (심사 {verdict['score']}: {verdict.get('reason','')})")
+            return _file_to_bg(cand)
+        log(f"표지 사진=스톡 부적합/심사불가 → 생성 "
+            f"({verdict['score'] if verdict else 'n/a'})")
+    gp = (slide.get("photo_prompt") or "").strip()
+    gen = image_gen.generate(gp, cache_dir) if gp else None
+    if gen:
+        return _file_to_bg(gen)
+    if cand:  # 생성까지 실패하면 스톡이라도
+        return _file_to_bg(cand)
+    return ""
 
 
 # ---------- 렌더 ----------
@@ -198,7 +229,10 @@ def render(slides: list[dict], local_imgs: list[str], out: Path) -> list[Path]:
         for i, s in enumerate(slides, 1):
             if s.get("kind") == "content":
                 step += 1
-            bg = resolve_photo(s, local_imgs, i - 1, cache_dir)
+            if s.get("kind") == "cover":
+                bg = resolve_cover_photo(s, local_imgs, cache_dir)
+            else:
+                bg = resolve_photo(s, local_imgs, i - 1, cache_dir)
             page.set_content(slide_html(s, i, total, bg, step))
             page.wait_for_timeout(150)  # 원격 이미지 로드 여유
             fp = out / f"card_{i:02d}_{s.get('kind','content')}.png"
@@ -231,6 +265,8 @@ def main():
     ap.add_argument("--photos-dir", default="")
     ap.add_argument("--body-count", type=int, default=5)
     ap.add_argument("--out", default="cardnews_out")
+    ap.add_argument("--notion-page", default="", help="이 노션 페이지에 카피+카드를 자동 저장하고 앱 푸시")
+    ap.add_argument("--video-url", default="", help="표지 영상 URL(힉스필드 등) — 노션에 함께 저장")
     args = ap.parse_args()
     out = Path(args.out)
     ensure_fonts()
@@ -258,15 +294,33 @@ def main():
         log(f"로컬 사진 {len(local_imgs)}장 사용")
 
     log(f"카드뉴스 슬라이드 구성: {topic}")
-    slides = make_slides(topic, core, draft, args.body_count)
+    plan = make_slides(topic, core, draft, args.body_count)
+    slides = plan.get("slides", [])
     if not slides:
         log("슬라이드 생성 실패")
         return
+    cover_media = (plan.get("cover_media") or "photo").strip().lower()
+    log(f"표지 미디어 판단: {cover_media.upper()} — {plan.get('cover_reason', '')}")
+    if cover_media == "video":
+        log(f"  (영상 움직임: {plan.get('video_motion', '')[:120]})")
+        log("  ※ 영상은 힉스필드 세션에서 온디맨드 생성. 여기선 정지 표지 이미지로 렌더.")
     out.mkdir(parents=True, exist_ok=True)
     paths = render(slides, local_imgs, out)
-    (out / "slides.json").write_text(json.dumps(slides, ensure_ascii=False, indent=2), encoding="utf-8")
+    (out / "cardnews_plan.json").write_text(
+        json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
     sheet = contact_sheet(paths, out)
     log(f"완료: {len(paths)}장 → {out.resolve()} ({sheet.name})")
+
+    if args.notion_page:
+        from orchestrator import notion_media
+        try:
+            notion_media.save_cardnews(
+                args.notion_page, plan,
+                image_paths=[str(p) for p in paths],
+                video_url=args.video_url)
+            log(f"노션 저장 + 앱 푸시 완료 → page {args.notion_page}")
+        except Exception as e:
+            log(f"노션 저장 실패: {e}")
 
 
 if __name__ == "__main__":
