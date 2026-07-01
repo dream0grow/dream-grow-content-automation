@@ -23,13 +23,12 @@ import mimetypes
 import os
 import subprocess
 import sys
-import urllib.parse
 import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from orchestrator import agent_dialogue, llm, prompts
+from orchestrator import agent_dialogue, image_gen, llm, prompts
 
 CARD = 1080
 HANDLE = os.getenv("DG_CARDNEWS_HANDLE", "@dream_grow")
@@ -87,35 +86,24 @@ def make_slides(topic: str, core: str, draft: str, body_count: int = 5) -> list[
 
 # ---------- 사진 소스 ----------
 
-def _pexels(query: str) -> str:
-    key = os.getenv("PEXELS_API_KEY", "").strip()
-    if not key or not query:
-        return ""
-    try:
-        url = ("https://api.pexels.com/v1/search?per_page=1&orientation=square&query="
-               + urllib.parse.quote(query))
-        req = urllib.request.Request(url, headers={"Authorization": key})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            data = json.loads(r.read())
-        photos = data.get("photos", [])
-        if photos:
-            src = photos[0].get("src", {})
-            return src.get("large") or src.get("original") or ""
-    except Exception as e:
-        log(f"Pexels 조회 실패({query}): {e}")
-    return ""
+def _file_to_bg(path: str) -> str:
+    mime = mimetypes.guess_type(path)[0] or "image/png"
+    b64 = base64.b64encode(Path(path).read_bytes()).decode()
+    return f"url('data:{mime};base64,{b64}')"
 
 
-def resolve_photo(slide: dict, local_imgs: list[str], idx: int) -> str:
-    """배경 사진의 CSS background-image 값을 만든다 (data URI 또는 url)."""
+def resolve_photo(slide: dict, local_imgs: list[str], idx: int, cache_dir: str) -> str:
+    """배경 사진의 CSS background-image 값을 만든다.
+
+    우선순위: 1) 브랜드 소유 로컬 사진  2) AI 생성(한국인 중심)  3) 그라데이션 폴백.
+    """
     if local_imgs:
-        p = local_imgs[idx % len(local_imgs)]
-        mime = mimetypes.guess_type(p)[0] or "image/jpeg"
-        b64 = base64.b64encode(Path(p).read_bytes()).decode()
-        return f"url('data:{mime};base64,{b64}')"
-    remote = _pexels(slide.get("photo_query", ""))
-    if remote:
-        return f"url('{remote}')"
+        return _file_to_bg(local_imgs[idx % len(local_imgs)])
+    prompt = (slide.get("photo_prompt") or "").strip()
+    if prompt:
+        gen = image_gen.generate(prompt, cache_dir)
+        if gen:
+            return _file_to_bg(gen)
     return ""  # 폴백: 그라데이션
 
 
@@ -189,11 +177,12 @@ def render(slides: list[dict], local_imgs: list[str], out: Path) -> list[Path]:
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=chrome_path(), args=["--no-sandbox"])
         page = browser.new_page(viewport={"width": CARD, "height": CARD}, device_scale_factor=2)
+        cache_dir = str(out / ".imgcache")
         step = 0
         for i, s in enumerate(slides, 1):
             if s.get("kind") == "content":
                 step += 1
-            bg = resolve_photo(s, local_imgs, i - 1)
+            bg = resolve_photo(s, local_imgs, i - 1, cache_dir)
             page.set_content(slide_html(s, i, total, bg, step))
             page.wait_for_timeout(150)  # 원격 이미지 로드 여유
             fp = out / f"card_{i:02d}_{s.get('kind','content')}.png"
