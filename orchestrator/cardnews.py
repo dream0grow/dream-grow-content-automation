@@ -265,6 +265,8 @@ def main():
     ap.add_argument("--photos-dir", default="")
     ap.add_argument("--body-count", type=int, default=5)
     ap.add_argument("--out", default="cardnews_out")
+    ap.add_argument("--notion-page", default="", help="이 노션 페이지에 카피+카드를 자동 저장하고 앱 푸시")
+    ap.add_argument("--video-url", default="", help="표지 영상 URL(힉스필드 등) — 노션에 함께 저장")
     args = ap.parse_args()
     out = Path(args.out)
     ensure_fonts()
@@ -308,6 +310,17 @@ def main():
         json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
     sheet = contact_sheet(paths, out)
     log(f"완료: {len(paths)}장 → {out.resolve()} ({sheet.name})")
+
+    if args.notion_page:
+        from orchestrator import notion_media
+        try:
+            notion_media.save_cardnews(
+                args.notion_page, plan,
+                image_paths=[str(p) for p in paths],
+                video_url=args.video_url)
+            log(f"노션 저장 + 앱 푸시 완료 → page {args.notion_page}")
+        except Exception as e:
+            log(f"노션 저장 실패: {e}")
 
 
 if __name__ == "__main__":
