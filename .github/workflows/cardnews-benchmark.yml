@@ -1,0 +1,49 @@
+# 카드뉴스 벤치마킹 주간 갱신
+# 최근 뜬 카드뉴스를 리서치(Manus, 없으면 Claude)해 data/cardnews_benchmark.md 를 갱신·커밋한다.
+# 이후 카드뉴스 생성이 이 파일을 읽어 프롬프트에 반영한다.
+name: cardnews-benchmark
+
+on:
+  schedule:
+    - cron: "20 21 * * 1"   # 매주 월 21:20 UTC = 화 06:20 KST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai
+
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Refresh benchmark
+        run: python3 -m orchestrator.cardnews_benchmark
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/cardnews_benchmark.md data/cardnews_benchmark.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "chore(cardnews): 벤치마킹 자료 주간 갱신"
+            git push
+          fi

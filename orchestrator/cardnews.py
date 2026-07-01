@@ -78,8 +78,12 @@ def ensure_fonts():
 # ---------- 슬라이드 텍스트 ----------
 
 def make_slides(topic: str, core: str, draft: str, body_count: int = 5) -> list[dict]:
+    from orchestrator import cardnews_benchmark
+    benchmark = cardnews_benchmark.load() or "(최근 벤치마킹 자료 없음 — 기본 원칙으로 작성)"
     data = llm.call_json(
-        prompts.CARDNEWS.format(topic=topic, core=core, draft=draft[:6000], body_count=body_count),
+        prompts.CARDNEWS.format(
+            topic=topic, core=core, draft=draft[:6000],
+            body_count=body_count, benchmark=benchmark[:4000]),
         system=prompts.get_system(),
     )
     return data.get("slides", [])
