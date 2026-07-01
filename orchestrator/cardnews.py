@@ -42,6 +42,7 @@ def log(msg: str):
 
 
 def chrome_path() -> str:
+    """사전 설치된 Chromium 경로를 찾는다. 못 찾으면 ''를 반환해 Playwright 자동 탐지에 맡긴다."""
     override = os.getenv("DG_CHROME_PATH", "").strip()
     if override and Path(override).exists():
         return override
@@ -50,7 +51,7 @@ def chrome_path() -> str:
         hits = sorted(glob.glob(pat))
         if hits:
             return hits[-1]
-    raise RuntimeError(f"Chromium 실행 파일을 찾지 못함 (PLAYWRIGHT_BROWSERS_PATH={root})")
+    return ""  # Actions 등: playwright install한 기본 위치를 자동 사용
 
 
 def ensure_fonts():
@@ -175,7 +176,11 @@ def render(slides: list[dict], local_imgs: list[str], out: Path) -> list[Path]:
     total = len(slides)
     paths: list[Path] = []
     with sync_playwright() as p:
-        browser = p.chromium.launch(executable_path=chrome_path(), args=["--no-sandbox"])
+        cpath = chrome_path()
+        launch_kw = {"args": ["--no-sandbox"]}
+        if cpath:
+            launch_kw["executable_path"] = cpath
+        browser = p.chromium.launch(**launch_kw)
         page = browser.new_page(viewport={"width": CARD, "height": CARD}, device_scale_factor=2)
         cache_dir = str(out / ".imgcache")
         step = 0
