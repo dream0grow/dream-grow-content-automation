@@ -311,14 +311,23 @@ def main():
     sheet = contact_sheet(paths, out)
     log(f"완료: {len(paths)}장 → {out.resolve()} ({sheet.name})")
 
-    if args.notion_page:
-        from orchestrator import notion_media
+    # 노션 저장: 페이지 ID를 주면 그 페이지에, 비우면 파이프라인 DB에 새 카드를 자동 생성.
+    # (NOTION_API_KEY 없으면 조용히 건너뜀 — 로컬 드라이런 지원)
+    from orchestrator.config import NOTION_API_KEY
+    if NOTION_API_KEY:
+        from orchestrator import notion_media, notion_state
         try:
+            page_id = args.notion_page.strip()
+            if not page_id:
+                # stage=published/status=done: 오케스트레이터 디스패치에 안 걸리는 안전한 상태
+                page_id = notion_state.create_card(
+                    f"🖼️ 카드뉴스: {topic[:80]}", stage="published", status="done")
+                log(f"노션 카드 자동 생성: {page_id}")
             notion_media.save_cardnews(
-                args.notion_page, plan,
+                page_id, plan,
                 image_paths=[str(p) for p in paths],
                 video_url=args.video_url)
-            log(f"노션 저장 + 앱 푸시 완료 → page {args.notion_page}")
+            log(f"노션 저장 + 앱 푸시 완료 → https://notion.so/{page_id.replace('-', '')}")
         except Exception as e:
             log(f"노션 저장 실패: {e}")
 
