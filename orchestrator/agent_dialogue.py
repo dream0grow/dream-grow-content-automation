@@ -2,16 +2,18 @@
 
 작가 → 비평가 → (수정) 작가 → 교육윤리 검수가 제한된 라운드 안에서
 서로의 산출물에 피드백을 주고받으며 초안을 업그레이드한다.
+검수가 revise를 내면 그 피드백을 작가에게 되먹여 다시 재작성·재검수한다.
 
 원칙:
-- 라운드 제한(DIALOGUE_MAX_ROUNDS, 기본 2)으로 끝없는 대화 방지
+- 라운드 제한(DIALOGUE_MAX_ROUNDS, 기본 2)으로 비평가 토론의 끝없는 대화 방지
+- 검수 되먹임도 라운드 제한(ETHICS_MAX_ROUNDS, 기본 2)으로 무한 재작성 방지
 - 모든 발언은 transcript로 반환되어 노션 카드 본문에 기록된다
 """
 import json
 from pathlib import Path
 
 from orchestrator import llm, prompts
-from orchestrator.config import DIALOGUE_MAX_ROUNDS
+from orchestrator.config import DIALOGUE_MAX_ROUNDS, ETHICS_MAX_ROUNDS
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
@@ -96,6 +98,44 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
         f"[교육윤리 검수] {review.get('review_status')} / risk={review.get('risk_level')}\n"
         + json.dumps(review, ensure_ascii=False, indent=2)
     )
+
+    # 교육윤리 검수 되먹임 재작성 루프.
+    # 검수가 revise면 검수 피드백(issues/revision_suggestions)을 작가에게 되먹여
+    # 재작성 후 재검수한다. 이렇게 해야 revise 카드가 사람 손을 안 거치고도
+    # approved로 넘어가 발행 승인 게이트까지 자동으로 도달한다.
+    # hold/risk(더 심각)는 재작성하지 않고 사람에게 넘긴다. approved면 즉시 종료.
+    for ethics_round in range(1, ETHICS_MAX_ROUNDS + 1):
+        if review.get("review_status") != "revise":
+            break
+        ethics_feedback = "\n".join(
+            review.get("issues", []) + review.get("revision_suggestions", [])
+        ).strip()
+        if not ethics_feedback:
+            break  # 되먹일 구체적 피드백이 없으면 재작성 불가 → 사람에게
+        draft = llm.call_writing(
+            prompts.WRITER.format(
+                format=fmt, brief=brief_text, style_context=style_block,
+                hook_examples=hook_block,
+                feedback_block=(
+                    "[교육윤리 검수 피드백 - 반드시 반영. 부모 죄책감/공포 유발, "
+                    "아이 낙인 표현, 효과 과장·미검증 통계를 제거하되 "
+                    "브리프의 핵심 메시지와 후킹은 유지]\n"
+                    f"{ethics_feedback}\n\n[직전 초안]\n{draft}"
+                ),
+            ),
+            system=prompts.get_system(),
+            max_tokens=write_tokens,
+        )
+        transcript.append(f"[작가 - 윤리수정 v{ethics_round}]\n{draft}")
+        review = llm.call_json(
+            prompts.ETHICS_REVIEW.format(draft=draft),
+            system=prompts.get_system(),
+        )
+        transcript.append(
+            f"[교육윤리 재검수 r{ethics_round}] {review.get('review_status')} / "
+            f"risk={review.get('risk_level')}\n"
+            + json.dumps(review, ensure_ascii=False, indent=2)
+        )
 
     return {
         "draft": draft,

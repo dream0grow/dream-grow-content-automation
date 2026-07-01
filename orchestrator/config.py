@@ -29,6 +29,10 @@ MODEL_WRITING = os.getenv("DG_MODEL_WRITING", "claude-opus-4-8")
 # 에이전트 토론 라운드 제한 (끝없는 대화 방지)
 DIALOGUE_MAX_ROUNDS = int(os.getenv("DG_DIALOGUE_MAX_ROUNDS", "2"))
 
+# 교육윤리 검수가 revise를 내면 검수 피드백을 작가에게 되먹여 재작성하는 최대 라운드.
+# 0이면 재작성 없이 기존처럼 사람에게 넘긴다(검수 revise → approval/needs_human).
+ETHICS_MAX_ROUNDS = int(os.getenv("DG_ETHICS_MAX_ROUNDS", "2"))
+
 # 한 번의 cron 실행에서 처리할 최대 카드 수 (rate limit 보호)
 MAX_CARDS_PER_RUN = int(os.getenv("DG_MAX_CARDS_PER_RUN", "5"))
 

@@ -1,7 +1,7 @@
 # 드림그로우 콘텐츠 자동화 — 프로젝트 컨텍스트
 
 > 이 파일은 새 세션이 자동으로 읽는다. 작업을 이어가려면 `/dreamgrow-resume` 스킬을 호출하라.
-> 마지막 갱신: 2026-06-13
+> 마지막 갱신: 2026-07-01
 
 ## 무엇을 만들고 있나
 
@@ -90,6 +90,24 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 교육윤리 검수 되먹임 재작성 루프 (2026-07-01) — ⬅️ 이번 세션 작업
+- **구조적 갭 발견·해결**: 교육윤리 검수(ETHICS_REVIEW)가 초안 맨 끝에 딱 한 번 돌고 그 피드백이
+  작가에게 되먹여지지 않아, `review_status=revise` 카드는 재작성 경로 없이 `approval/needs_human`에
+  **영구히 막혀 있었다**(당시 approval 대기 13장 중 6장이 이 데드엔드). run.py의 DISPATCH에는
+  `approval+approved`용 `handle_final_approved`만 있고 그마저 `review_status!=approved`면 "게이트 차단"만 함.
+- **수정 (브랜치 `claude/automation-task-continuation-n5kpqy`, HEAD `8eddf84`, 푸시 완료 · PR 미생성)**:
+  `agent_dialogue.run_draft_dialogue`에 윤리 검수 되먹임 루프 추가. 검수가 revise면 `issues +
+  revision_suggestions`를 작가에게 되먹여 재작성→재검수, approved 되면 종료. hold/risk는 재작성 안 하고
+  사람에게(무regression), 피드백이 비면 종료. `config.ETHICS_MAX_ROUNDS`(`DG_ETHICS_MAX_ROUNDS`, 기본 2)로
+  무한 재작성 방지. mock 단위테스트 4종(revise→approved / 라운드제한 / hold미재작성 / 빈피드백) 통과.
+  **주의**: 이 코드는 앞으로 생성되는 초안에만 적용됨. 이미 approval에 막힌 기존 6장을 풀려면
+  각 카드를 재초안(예: stage=keyword_approval + approval_status=approved로 되돌려 재생성)해야 하는데,
+  본문 토글이 중복 append되니 사용자와 상의 후 진행.
+- **429 실패 카드 2장 리셋 완료**: DG-2026-0010(책읽기)·0013(화내고후회) → stage=intake, status=queued,
+  idempotency_key·last_error·manus_task_ids 비움. 다음 orchestrator 실행에 research 재시도(429 백오프는 이미 main).
+- **남은 사용자 액션**: ① 이 브랜치 PR 생성·머지 여부 결정 ② orchestrator Run workflow(리셋 카드 재시도 +
+  머지 시 새 루프 반영) ③ approval 대기 approved 7장(0001·0003·0005·0006·0007·0011·0012)의 최종 발행 승인.
 
 - 시스템 완성: 리서치~키워드~브리프~토론초안~검수~발행(Threads/스티비) 전부 작동. **스티비 실제 발송 성공 확인**.
 - 핸드오프 시스템 가동: CLAUDE.md + `/dreamgrow-resume` 스킬 (PR #18 머지됨).
