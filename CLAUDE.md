@@ -146,6 +146,20 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 - **[사용자 액션] test-stibee로 실발송 검증**: GitHub Actions → `test-stibee` → Run workflow
   (테스트 주소록에 실제 1통 발송, `STIBEE_AUTO_SEND=true` 강제). Claude는 직접 실행 불가.
 
+### 평가표 내장 + 2차안 자동화 (2026-06-16, 브랜치 `claude/vigilant-shannon-mcrpao`)
+
+- **평가표**: `data/thread_rubric.md`(사용자 글 CSV=benchmark_posts.md 기준, 100점=문체40/구조30/논리성30).
+  핵심 약점은 **줄 길이**(스레드는 한 줄 의미 단위 15~18자, `<br>`/Enter).
+- **파이프라인 내장(구현 완료)**:
+  - `prompts.py`: WRITER(thread)에 줄바꿈 규칙 주입 + `LINE_BREAK_RULE` + `RUBRIC_REVIEW` 프롬프트.
+  - `rubric_review.py`(신규): 초안 채점 → `📐 평가표 점검` + `✍️ 2차안 (fmt)` 토글 기록(idempotent).
+  - `run.py`: 초안 단계에서 자동 생성 + `--stage rubric_backfill`(기존 카드 소급).
+  - `.github/workflows/backfill-2cha.yml`: 수동 실행으로 기존 모든 카드 일괄 2차안.
+- **남은 사용자 액션**: ① 이 브랜치 main 머지(라이브 파이프라인=main에서 동작) ② `backfill-2cha`
+  Run workflow로 기존 카드에 2차안 일괄 생성(Claude는 Actions 실행 불가, 403).
+- **왜 노션에 글이 자동으로 안 쌓이나(진단)**: ① cron이 GitHub에 의해 대폭 누락(설정 15분, 실제 수 시간 간격).
+  ② 기존 카드는 전부 `status=needs_human`(발행 승인 대기)에서 멈춤 — 자동화는 끝났고 사람 승인 대기.
+  ③ 새 카드는 사람만 생성 → 새 글 자체가 안 늘어남. 결론: 막힌 게 아니라 승인 게이트에 모여 있음.
 
 ## 한국어 윤문 스킬 — 제3자 노출 문구는 무조건 적용 (필수)
 
