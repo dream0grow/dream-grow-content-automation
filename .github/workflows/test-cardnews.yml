@@ -65,8 +65,11 @@ jobs:
             --video-url "${{ github.event.inputs.video_url }}" \
             --out cardnews_out
 
-      - name: Upload cards
+      - name: Upload cards + editor
         uses: actions/upload-artifact@v4
         with:
           name: cardnews
-          path: cardnews_out/*.png
+          path: |
+            cardnews_out/*.png
+            cardnews_out/editor.html
+            cardnews_out/cardnews_plan.json
