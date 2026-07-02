@@ -53,21 +53,46 @@ def _openai(prompt: str, size: str) -> bytes:
 
 
 def _google(prompt: str, size: str) -> bytes:
-    model = os.getenv("DG_IMAGE_MODEL", "imagen-3.0-generate-002")
-    url = (f"https://generativelanguage.googleapis.com/v1beta/models/{model}:predict"
-           f"?key={GOOGLE_KEY}")
+    """Google 이미지 생성.
+
+    기본: gemini-2.5-flash-image(:generateContent) — 무료 AI Studio 키에서도 동작.
+    DG_IMAGE_MODEL을 imagen-* 으로 지정하면 Imagen(:predict, 유료 빌링 필요) 사용.
+    """
+    model = os.getenv("DG_IMAGE_MODEL", "gemini-2.5-flash-image")
+    base = "https://generativelanguage.googleapis.com/v1beta/models"
+
+    if model.startswith("imagen"):
+        body = json.dumps({
+            "instances": [{"prompt": prompt}],
+            "parameters": {"sampleCount": 1, "aspectRatio": "1:1"},
+        }).encode()
+        req = urllib.request.Request(
+            f"{base}/{model}:predict?key={GOOGLE_KEY}",
+            data=body, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=120) as r:
+            data = json.loads(r.read())
+        preds = data.get("predictions", [])
+        if not preds:
+            raise RuntimeError(f"Imagen 응답에 이미지 없음: {str(data)[:200]}")
+        b64 = preds[0].get("bytesBase64Encoded") or preds[0].get("image", {}).get("imageBytes")
+        return base64.b64decode(b64)
+
+    # Gemini 이미지 생성 (nano banana): generateContent 응답의 inlineData에서 이미지 추출
     body = json.dumps({
-        "instances": [{"prompt": prompt}],
-        "parameters": {"sampleCount": 1, "aspectRatio": "1:1"},
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseModalities": ["IMAGE"]},
     }).encode()
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": "application/json"})
+    req = urllib.request.Request(
+        f"{base}/{model}:generateContent?key={GOOGLE_KEY}",
+        data=body, headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=120) as r:
         data = json.loads(r.read())
-    preds = data.get("predictions", [])
-    if not preds:
-        raise RuntimeError(f"Imagen 응답에 이미지 없음: {str(data)[:200]}")
-    b64 = preds[0].get("bytesBase64Encoded") or preds[0].get("image", {}).get("imageBytes")
-    return base64.b64decode(b64)
+    for cand in data.get("candidates", []):
+        for part in (cand.get("content") or {}).get("parts", []):
+            inline = part.get("inlineData") or part.get("inline_data") or {}
+            if inline.get("data"):
+                return base64.b64decode(inline["data"])
+    raise RuntimeError(f"Gemini 이미지 응답에 inlineData 없음: {str(data)[:200]}")
 
 
 def generate(prompt: str, cache_dir: str, size: str = "1024x1024") -> str | None:
