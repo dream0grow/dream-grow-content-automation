@@ -178,7 +178,7 @@ html,body { width:1080px; height:1080px; }
 .body { margin-top:26px; font-weight:500; line-height:1.6; letter-spacing:-.5px;
   opacity:.94; text-shadow:0 2px 18px rgba(0,0,0,.6);
   word-break:keep-all; overflow-wrap:break-word; }
-.hl { color:#ffd21e; }
+.hl { color:#ffd21e; white-space:nowrap; }
 .cover .title { font-size:88px; font-weight:800; }
 .cover .body  { font-size:40px; font-weight:600; }
 .content .title { font-size:74px; }
@@ -237,6 +237,7 @@ def render(slides: list[dict], local_imgs: list[str], out: Path) -> list[Path]:
         page = browser.new_page(viewport={"width": CARD, "height": CARD}, device_scale_factor=2)
         cache_dir = str(out / ".imgcache")
         step = 0
+        bgs: list[str] = []
         for i, s in enumerate(slides, 1):
             if s.get("kind") == "content":
                 step += 1
@@ -244,6 +245,7 @@ def render(slides: list[dict], local_imgs: list[str], out: Path) -> list[Path]:
                 bg = resolve_cover_photo(s, local_imgs, cache_dir)
             else:
                 bg = resolve_photo(s, local_imgs, i - 1, cache_dir)
+            bgs.append(bg)
             page.set_content(slide_html(s, i, total, bg, step))
             page.wait_for_timeout(150)  # 원격 이미지 로드 여유
             fp = out / f"card_{i:02d}_{s.get('kind','content')}.png"
@@ -251,6 +253,8 @@ def render(slides: list[dict], local_imgs: list[str], out: Path) -> list[Path]:
             paths.append(fp)
             log(f"슬라이드 {i}/{total} ({s.get('kind')}): {s.get('title','')[:22]} → {fp.name}")
         browser.close()
+    # 수동 편집 에디터(editor.html)가 배경을 재사용할 수 있게 저장
+    (out / "bgs.json").write_text(json.dumps(bgs), encoding="utf-8")
     return paths
 
 
@@ -324,6 +328,12 @@ def main():
     (out / "cardnews_plan.json").write_text(
         json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
     sheet = contact_sheet(paths, out)
+    try:
+        from orchestrator import card_editor
+        card_editor.build(str(out))
+        log("수동 편집 에디터 생성 → editor.html (브라우저에서 열어 폰트/크기/위치/배경 수정)")
+    except Exception as e:
+        log(f"에디터 생성 실패(카드는 정상): {e}")
     log(f"완료: {len(paths)}장 → {out.resolve()} ({sheet.name})")
 
     # 노션 저장: 페이지 ID를 주면 그 페이지에, 비우면 파이프라인 DB에 새 카드를 자동 생성.
