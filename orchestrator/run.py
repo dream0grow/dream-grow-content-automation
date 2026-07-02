@@ -301,6 +301,14 @@ def handle_keyword_approved(card: dict):
         except Exception as e:
             log(f"{card['content_id']} 글 평가 실패 ({fmt}): {e}")
 
+        # 평가표(사용자 글 기준) AI 검토 + 2차안(줄바꿈 교정) 토글 추가
+        try:
+            from orchestrator import rubric_review
+            if rubric_review.run_for_card(page_id, fmt, skip_if_exists=True):
+                log(f"{card['content_id']} 2차안 추가 ({fmt})")
+        except Exception as e:
+            log(f"{card['content_id']} 평가표 검토/2차안 실패 ({fmt}): {e}")
+
     notion_state.append_section(
         page_id, "⏸️ 발행 승인 요청",
         "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
@@ -339,6 +347,34 @@ def handle_publish(card: dict):
     from orchestrator import publish
     publish.handle_publish(card)
     log(f"{card['content_id']} 발행 처리 완료")
+
+
+def handle_rubric_backfill():
+    """기존 모든 카드(초안 보유)에 평가표 검토 + 2차안 토글을 소급 적용한다.
+
+    초안 단계 이후의 카드는 자동으로 다시 흐르지 않으므로, workflow_dispatch로 1회 실행한다:
+      python3 -m orchestrator.run --stage rubric_backfill
+    이미 '✍️ 2차안'이 있는 카드/포맷은 건너뛴다(idempotent).
+    """
+    from orchestrator import rubric_review
+    seen, count = set(), 0
+    for stage in ("draft", "approval", "publish_ready", "published"):
+        for card in notion_state.query_cards(stage=stage, page_size=50):
+            page_id = card["page_id"]
+            if page_id in seen:
+                continue
+            seen.add(page_id)
+            formats = [f.strip() for f in card["format"].split(",") if f.strip()] or ["thread"]
+            for fmt in formats:
+                if fmt not in ("thread", "newsletter"):
+                    continue
+                try:
+                    if rubric_review.run_for_card(page_id, fmt, skip_if_exists=True):
+                        count += 1
+                        log(f"{card.get('content_id')} 2차안 추가 ({fmt})")
+                except Exception as e:
+                    log(f"{card.get('content_id')} 2차안 실패 ({fmt}): {e}")
+    log(f"평가표 백필 완료: {len(seen)}개 카드 점검, 2차안 {count}건 추가")
 
 
 # ---------- 디스패처 ----------
@@ -384,4 +420,8 @@ if __name__ == "__main__":
     stage_arg = None
     if "--stage" in sys.argv:
         stage_arg = sys.argv[sys.argv.index("--stage") + 1]
-    run(stage_arg)
+    if stage_arg == "rubric_backfill":
+        require_notion()
+        handle_rubric_backfill()
+    else:
+        run(stage_arg)

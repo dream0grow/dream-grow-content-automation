@@ -1,0 +1,34 @@
+# 평가표 2차안 소급 생성 (수동 실행 전용)
+# 기존 모든 카드의 '✍️ 초안'을 평가표로 검토하고 '✍️ 2차안' 토글을 추가한다.
+# 이미 2차안이 있는 카드/포맷은 건너뛴다(idempotent). 발행에는 영향 없음.
+name: backfill-2cha
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: orchestrator
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Backfill 2차안
+        run: python3 -m orchestrator.run --stage rubric_backfill

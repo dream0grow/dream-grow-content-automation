@@ -34,6 +34,20 @@ SAMPLE = """# 우리 집 스마트폰, 싸우지 않고 시작하는 법
 — 드림그로우 드림
 """
 
+# data/newsletter_sample.md가 있으면 그 본문을 우선 사용한다(실제 뉴스레터 품질 점검용).
+# 없으면 위 SAMPLE을 폴백으로 쓴다.
+def _load_sample() -> str:
+    path = Path(__file__).resolve().parent.parent / "data" / "newsletter_sample.md"
+    try:
+        text = path.read_text(encoding="utf-8").strip()
+        if text:
+            print(f"본문 소스: {path.name} ({len(text)}자)")
+            return text
+    except FileNotFoundError:
+        pass
+    print("본문 소스: 내장 SAMPLE (폴백)")
+    return SAMPLE
+
 
 def main():
     print(f"스티비 설정됨: {stibee.available()}  /  자동발송(AUTO_SEND): {stibee.AUTO_SEND}")
@@ -43,10 +57,10 @@ def main():
         sys.exit(1)
     if not stibee.SENDER_EMAIL:
         print("[경고] STIBEE_SENDER_EMAIL이 비어 있습니다. 스티비에 인증된 발신 이메일을 Secret으로 넣으세요.")
+    draft = _load_sample()
     try:
-        result = stibee.create_and_send(
-            SAMPLE, subject="[테스트] 드림그로우 뉴스레터 발송 점검",
-        )
+        # 제목은 본문 첫 줄에서 자동 추출(extract_subject)해 실제 발행과 동일하게 점검한다.
+        result = stibee.create_and_send(draft)
         print("결과:", result)
         if result.get("sent"):
             print("✅ 발송 성공 — test 구독자 메일함을 확인하세요.")
