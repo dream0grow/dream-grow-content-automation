@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "plaud": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@plaud-ai/mcp@latest"],
+      "env": {}
+    }
+  }
+}

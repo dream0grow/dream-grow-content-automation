@@ -91,7 +91,19 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 
 ## 현재 상태 (세션마다 갱신)
 
-### 교육윤리 검수 되먹임 재작성 루프 (2026-07-01) — ⬅️ 이번 세션 작업
+### 플라우드(Plaud) MCP 연동 + 제텔카스텐 확장 (2026-07-05, 브랜치 `claude/plaud-mcp-setup-6j07l1`) — ⬅️ 이번 세션 작업
+- **설치 완료(저장소 영구화)**: `.mcp.json`(프로젝트 스코프, `npx -y @plaud-ai/mcp@latest` stdio) +
+  공식 스킬 7종(`.claude/skills/plaud-*`) + 자체 프로세스 스킬 **`/plaud-zettel`** 동봉.
+- **`/plaud-zettel` 프로세스**: 플라우드 녹음 → 제텔카스텐 원자 노트(노션 DB, 임시/문헌/영구) →
+  콘텐츠 씨앗은 파이프라인 intake 카드로 승격 → 기존 오케스트레이터가 초안까지 자동.
+  중복 방지는 노션 노트의 `출처`(`plaud:<file_id>`) 필드가 겸한다. 상세: `docs/PLAUD_INTEGRATION.md`.
+- **인증 주의**: OAuth 브라우저 콜백 방식이라 원격(웹) 세션의 stdio 서버로는 로그인 불가.
+  ① 로컬 Claude Code에서 1회 로그인(`~/.plaud/tokens-mcp.json`) 또는
+  ② **claude.ai 설정 → 커넥터에 `https://mcp.plaud.ai/mcp` 추가**(웹 세션 권장, 노션처럼 동작).
+- **남은 사용자 액션**: ① claude.ai 커넥터 등록(위 ②) ② 이 브랜치 PR 머지 ③ `/plaud-zettel` 첫 실행 후
+  생성된 제텔카스텐 DB ID를 이 파일 "핵심 ID"에 추가.
+
+### 교육윤리 검수 되먹임 재작성 루프 (2026-07-01)
 - **구조적 갭 발견·해결**: 교육윤리 검수(ETHICS_REVIEW)가 초안 맨 끝에 딱 한 번 돌고 그 피드백이
   작가에게 되먹여지지 않아, `review_status=revise` 카드는 재작성 경로 없이 `approval/needs_human`에
   **영구히 막혀 있었다**(당시 approval 대기 13장 중 6장이 이 데드엔드). run.py의 DISPATCH에는
