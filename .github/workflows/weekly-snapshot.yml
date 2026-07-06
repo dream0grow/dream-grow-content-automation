@@ -1,0 +1,22 @@
+# 주간 스냅샷 태그 — "언제든 지난주로 되돌리기" 북마크
+# git 히스토리는 이미 전부 남지만, 태그가 있으면 복구 지점을 찾기 쉽다.
+name: weekly-snapshot
+
+on:
+  schedule:
+    - cron: "18 21 * * 0"   # 일요일 KST 06:18
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 스냅샷 태그 생성
+        run: |
+          TAG="snapshot-$(date +%Y%m%d)"
+          git tag "$TAG" || exit 0
+          git push origin "$TAG" || echo "이미 존재 — 생략"

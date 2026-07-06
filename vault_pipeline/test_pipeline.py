@@ -85,9 +85,9 @@ def _run_once():
     for rec in recs:
         if rec.id in done:
             continue
-        artifacts = pipeline_run.process_recording(rec, dry_run=False)
-        vault_io.mark_processed(rec.id, rec.name, artifacts)
-        created.extend(artifacts)
+        result = pipeline_run.process_recording(rec, dry_run=False)
+        vault_io.mark_processed(rec.id, rec.name, result["artifacts"])
+        created.extend(result["artifacts"])
     return created
 
 

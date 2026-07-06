@@ -46,6 +46,13 @@ git clone https://github.com/dream0grow/dream-grow-content-automation.git
 |---|---|---|
 | `ANTHROPIC_API_KEY` | (기존 등록됨) | LLM 가공 |
 | `PLAUD_TOKENS_JSON` | 로컬 `~/.plaud/tokens-mcp.json` 파일 내용 전체 | 선택 — 아래 참고 |
+| `TELEGRAM_BOT_TOKEN` | @BotFather가 준 봇 토큰 | 선택 — 결과 폰 알림 |
+| `TELEGRAM_CHAT_ID` | 아래 "chat id 얻기" | 선택 — 결과 폰 알림 |
+
+**텔레그램 chat id 얻기**: ① 텔레그램에서 내 봇을 검색해 `/start` 전송 →
+② 브라우저에서 `https://api.telegram.org/bot<봇토큰>/getUpdates` 열기 →
+③ 응답 JSON의 `"chat":{"id": 123456789...}` 숫자가 chat id.
+두 Secret을 넣으면 파이프라인이 끝날 때마다 "초안 N건·노랑 결재 N건" 요약이 폰으로 온다.
 
 **PLAUD_TOKENS_JSON 만드는 법**: 로컬 Claude Code(또는 Claude Desktop)에서 플라우드
 MCP에 1회 로그인(`npx -y @plaud-ai/mcp@latest` 첫 호출 시 브라우저 로그인)하면
