@@ -1,0 +1,78 @@
+# 플라우드 녹음 → 옵시디언 볼트(vault/) 파이프라인
+#
+# 매일 밤 KST 22시 무렵 최근 녹음을 가져와 ①사례은행 ②제텔카스텐(메모→키워드→의견)
+# ③교사 대상 블로그·페이스북 초안을 vault/에 생성하고 커밋한다.
+#
+# 필요 Secrets:
+#   ANTHROPIC_API_KEY   (필수 — LLM 가공)
+#   PLAUD_TOKENS_JSON   (선택 — 로컬 1회 로그인 후 ~/.plaud/tokens-mcp.json 내용.
+#                        없으면 vault/수집함/plaud/ 인박스 파일만 처리)
+name: plaud-pipeline
+
+on:
+  schedule:
+    - cron: "8 13 * * *"   # KST 22:08 (정시 슬롯은 누락이 잦아 피함)
+  workflow_dispatch:
+    inputs:
+      since_days:
+        description: "조회 기간(일)"
+        default: "7"
+      max_recordings:
+        description: "최대 처리 녹음 수"
+        default: "3"
+      dry_run:
+        description: "dry-run (true면 쓰지 않음)"
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: plaud-pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 의존성 설치
+        run: pip install -r requirements.txt
+
+      - name: 파이프라인 실행
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PLAUD_TOKENS_JSON: ${{ secrets.PLAUD_TOKENS_JSON }}
+        run: |
+          ARGS="--since-days ${{ github.event.inputs.since_days || '7' }} --max ${{ github.event.inputs.max_recordings || '3' }}"
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python3 -m vault_pipeline.run $ARGS
+
+      - name: 비밀값 스캔 (커밋 게이트)
+        run: python3 tools/vault_secret_scan.py vault/ --quiet
+
+      - name: 볼트 변경 커밋
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "plaud-pipeline[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then
+            echo "변경 없음 — 커밋 생략"
+            exit 0
+          fi
+          git commit -m "플라우드 파이프라인: $(date +%Y-%m-%d) 볼트 갱신"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}

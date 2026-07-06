@@ -32,3 +32,13 @@ honcho_reels_ctx_tmp.txt
 
 # Claude Code local settings (personal, not shared)
 .claude/settings.local.json
+
+# 볼트 안 개인 영역·비밀값 (커밋 금지 — tools/vault_secret_scan.py로 이중 확인)
+vault/제텔카스텐/1. 개인/
+vault/.obsidian/workspace*
+vault/.obsidian/cache/
+.plaud/
+tokens-mcp.json
+
+# pytest
+.pytest_cache/
