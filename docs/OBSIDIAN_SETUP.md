@@ -50,7 +50,13 @@ git clone https://github.com/dream0grow/dream-grow-content-automation.git
 **PLAUD_TOKENS_JSON 만드는 법**: 로컬 Claude Code(또는 Claude Desktop)에서 플라우드
 MCP에 1회 로그인(`npx -y @plaud-ai/mcp@latest` 첫 호출 시 브라우저 로그인)하면
 `~/.plaud/tokens-mcp.json`이 생긴다. 이 파일 내용을 그대로 Secret에 붙여넣는다.
-토큰이 만료되면 파이프라인 로그에 "토큰 만료" 경고가 남는다 → 로컬에서 재로그인 후 Secret 갱신.
+
+**토큰 수명과 자동 갱신**: 플라우드 access 토큰은 하루, refresh 토큰은 약 1주로 짧다.
+워크플로우가 실행 중 갱신된 토큰을 **Actions 캐시로 다음 실행에 이어받으므로**,
+파이프라인이 주기적으로(최소 주 1회) 도는 한 Secret을 다시 등록할 필요가 없다.
+파이프라인이 1주 이상 멈춰 refresh 토큰까지 만료되면 로그에 "토큰 만료" 경고가 남는다
+→ 로컬에서 재로그인 후 Secret 갱신(캐시는 자동으로 새 토큰으로 대체된다).
+GitHub Actions 캐시는 7일 미사용 시 삭제되므로 매일 도는 기본 스케줄이면 충분하다.
 
 **Secret이 없어도 동작한다**: `vault/수집함/plaud/`에 전사 md 파일을 넣으면
 (클로드 세션에서 "플라우드 전사 내보내줘" 또는 수동 붙여넣기) 다음 실행 때 처리된다.

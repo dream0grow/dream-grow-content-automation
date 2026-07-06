@@ -208,7 +208,7 @@ def _item_date(item: dict) -> str:
     return now_kst().strftime("%Y-%m-%d")
 
 
-def fetch_mcp(since_days: int, limit: int) -> list[Recording]:
+def fetch_mcp(since_days: int, limit: int, _retry: bool = True) -> list[Recording]:
     """최근 since_days일의 녹음과 전사를 가져온다. 미인증이면 PlaudUnavailable."""
     if not _bootstrap_tokens():
         raise PlaudUnavailable(
@@ -219,7 +219,15 @@ def fetch_mcp(since_days: int, limit: int) -> list[Recording]:
         date_from = (now_kst() - timedelta(days=since_days)).strftime("%Y-%m-%d")
         raw = session.call_tool("list_files", {"date_from": date_from})
         if "Not authenticated" in raw or '"401"' in raw:
-            raise PlaudUnavailable("플라우드 토큰 만료 — Secret을 갱신하세요.")
+            # 캐시로 복원된 옛 토큰이 만료됐고 Secret은 갱신됐을 수 있다:
+            # 토큰 파일을 지우고 Secret 시드로 딱 1회 재시도
+            token_path = Path.home() / ".plaud" / "tokens-mcp.json"
+            if _retry and os.getenv("PLAUD_TOKENS_JSON", "").strip():
+                session.close()
+                token_path.unlink(missing_ok=True)
+                return fetch_mcp(since_days, limit, _retry=False)
+            raise PlaudUnavailable(
+                "플라우드 토큰 만료 — 로컬 재로그인 후 Secret을 갱신하세요.")
         recs = []
         for item in _extract_items(raw)[:limit]:
             file_id = str(item.get("id") or item.get("file_id") or "").strip()

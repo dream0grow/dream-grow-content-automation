@@ -49,6 +49,18 @@ jobs:
       - name: 의존성 설치
         run: pip install -r requirements.txt
 
+      # 플라우드 토큰은 실행 중 자동 갱신(refresh)되며 만료 주기가 짧다(~1주).
+      # 갱신된 토큰을 Actions 캐시로 다음 실행에 넘겨, 파이프라인이 주기적으로
+      # 도는 한 Secret을 다시 등록할 필요가 없게 한다. 캐시가 없을 때만
+      # Secret(PLAUD_TOKENS_JSON)이 초기 시드로 쓰인다.
+      - name: 플라우드 토큰 캐시 복원
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.plaud/tokens-mcp.json
+          key: plaud-tokens-${{ github.run_id }}
+          restore-keys: |
+            plaud-tokens-
+
       - name: 파이프라인 실행
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -59,6 +71,18 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
           python3 -m vault_pipeline.run $ARGS
+
+      - name: 플라우드 토큰 파일 확인
+        id: plaud_token
+        if: always()
+        run: echo "exists=$([ -f ~/.plaud/tokens-mcp.json ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: 플라우드 토큰 캐시 저장 (갱신분 이어받기)
+        if: always() && steps.plaud_token.outputs.exists == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.plaud/tokens-mcp.json
+          key: plaud-tokens-${{ github.run_id }}
 
       - name: 비밀값 스캔 (커밋 게이트)
         run: python3 tools/vault_secret_scan.py vault/ --quiet
