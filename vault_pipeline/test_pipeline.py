@@ -132,8 +132,8 @@ def test_full_pipeline(vault):
     assert "author: 이한결(구술)" in ops[0].read_text(encoding="utf-8")
 
     # ③ 교사그룹 대상 초안: 블로그+페이스북, 상태는 리뷰대기 (발행은 사람)
-    blog = list((vault / "발행/블로그_교사").glob("*.md"))
-    fb = list((vault / "발행/페이스북_교사").glob("*.md"))
+    blog = list((vault / "프로젝트/교육운동/블로그_초안").glob("*.md"))
+    fb = list((vault / "프로젝트/교육운동/페이스북_초안").glob("*.md"))
     assert len(blog) == 1 and len(fb) == 1
     blog_text = blog[0].read_text(encoding="utf-8")
     assert "상태: 리뷰대기" in blog_text

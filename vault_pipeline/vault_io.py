@@ -108,7 +108,7 @@ def processed_ids() -> set[str]:
     ids = set(load_ledger().keys())
     # 장부가 유실돼도 볼트 노트의 `출처: plaud:<id>` 필드로 복원 가능
     pat = re.compile(r"plaud:([A-Za-z0-9_\-]+)")
-    for sub in ("제텔카스텐", "발행"):
+    for sub in ("제텔카스텐", "프로젝트"):
         root = vault_root() / sub
         if not root.exists():
             continue
