@@ -46,8 +46,9 @@ def process_recording(rec: Recording, dry_run: bool) -> list[str]:
     artifacts += writers.write_keywords(rec, triage.get("키워드") or [],
                                         memo_stems, dry_run)
     artifacts += writers.write_opinions(rec, triage.get("의견") or [], dry_run)
-    artifacts += writers.write_teacher_posts(rec, triage.get("교사_글감") or {},
-                                             dry_run)
+    seed = triage.get("교사_글감") or {}
+    artifacts += writers.write_activity_record(rec, seed, dry_run)
+    artifacts += writers.write_teacher_posts(rec, seed, dry_run)
     return artifacts
 
 

@@ -147,14 +147,41 @@ def write_opinions(rec: Recording, opinions: list[dict], dry_run: bool) -> list[
     return artifacts
 
 
-# ------------------------------------------------- 3) 교사 대상 블로그·페북 초안
+# ---------------------------- 3) 교육운동 활동기록 + 교사그룹 대상 블로그·페북 초안
+
+MOVEMENT_GROUPS = ("꿈들", "새넷", "전교조")
+
+
+def write_activity_record(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
+    """꿈들·새넷·전교조 활동 녹음이면 프로젝트/교육운동/활동기록에 요약을 남긴다."""
+    group = str(seed.get("활동", "")).strip()
+    summary = str(seed.get("활동_요약", "")).strip()
+    if group not in MOVEMENT_GROUPS or not summary:
+        return []
+    meta = {
+        "title": f"{group} 활동 — {rec.name}",
+        "author": "AI",
+        "프로젝트": "교육운동",
+        "활동": group,
+        **_meta_base(rec),
+    }
+    body = summary + "\n\n> AI 요약 — 사실관계는 녹음 전사가 원본이다.\n"
+    path = write_note("프로젝트/교육운동/활동기록",
+                      f"{rec.recorded} {group} - {rec.name}", meta, body,
+                      dry_run=dry_run)
+    return [path.name]
+
 
 def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
-    """교사 대상 글감이 적합 판정이면 블로그+페이스북 초안 생성. 발행은 사람."""
+    """교사그룹 대상 글감이 적합 판정이면 블로그+페이스북 초안 생성. 발행은 사람.
+
+    타겟 독자는 교사그룹 — 드림그로우(학부모)와 다른 채널이므로 frontmatter에 명시한다.
+    """
     if not seed or not seed.get("적합"):
         return []
     topic = str(seed.get("주제", "")).strip()
     core = str(seed.get("핵심", "")).strip()
+    group = str(seed.get("활동", "")).strip() or "일반"
     quotes = "\n".join(f"- \"{q}\"" for q in seed.get("근거_발화", []) if q)
     if not topic or not quotes:
         return []
@@ -173,7 +200,9 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
         "title": blog_title,
         "채널": "블로그(교사)",
         "상태": "리뷰대기",          # 발행완료는 사람만 바꾼다
-        "대상": "교사",
+        "타겟": "교사그룹",          # 학부모(드림그로우) 채널과 절대 혼용 금지
+        "프로젝트": "교육운동",
+        "활동": group,
         **_meta_base(rec),
     }
     path = write_note("발행/블로그_교사", f"{today()} {blog_title}", meta,

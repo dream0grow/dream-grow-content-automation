@@ -44,6 +44,9 @@ TRIAGE_FIXTURE = {
     "교사_글감": {
         "적합": True, "주제": "오답이 환영받는 교실 만들기",
         "핵심": "평가를 피드백으로 되돌리자",
+        "활동": "새넷",
+        "활동_요약": "새넷 수업 나눔 모임에서 오답 공유 활동 사례를 발표하고 "
+                   "다음 모임에서 평가 피드백 사례를 모으기로 했다.",
         "근거_발화": ["오답을 같이 보는 순간 아이들 표정이 풀린다."],
     },
 }
@@ -128,12 +131,20 @@ def test_full_pipeline(vault):
     assert len(ops) == 1
     assert "author: 이한결(구술)" in ops[0].read_text(encoding="utf-8")
 
-    # ③ 교사 대상 초안: 블로그+페이스북, 상태는 리뷰대기 (발행은 사람)
+    # ③ 교사그룹 대상 초안: 블로그+페이스북, 상태는 리뷰대기 (발행은 사람)
     blog = list((vault / "발행/블로그_교사").glob("*.md"))
     fb = list((vault / "발행/페이스북_교사").glob("*.md"))
     assert len(blog) == 1 and len(fb) == 1
-    assert "상태: 리뷰대기" in blog[0].read_text(encoding="utf-8")
-    assert "대상: 교사" in fb[0].read_text(encoding="utf-8")
+    blog_text = blog[0].read_text(encoding="utf-8")
+    assert "상태: 리뷰대기" in blog_text
+    assert "타겟: 교사그룹" in blog_text            # 학부모 채널과 혼용 금지 명시
+    assert "타겟: 교사그룹" in fb[0].read_text(encoding="utf-8")
+
+    # 교육운동 활동기록 (꿈들/새넷/전교조 녹음일 때)
+    records = list((vault / "프로젝트/교육운동/활동기록").glob("*.md"))
+    assert len(records) == 1
+    rec_text = records[0].read_text(encoding="utf-8")
+    assert "활동: 새넷" in rec_text and "프로젝트: 교육운동" in rec_text
 
 
 def test_dedup_second_run(vault):
