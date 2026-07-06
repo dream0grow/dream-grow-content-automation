@@ -111,9 +111,16 @@ git add vault/ && git commit -m "볼트: 기존 초생산 이관" && git push
 
 ## 매일 운영
 
-1. **자동**: 매일 밤 KST 22:08 `plaud-pipeline` 워크플로우가 최근 녹음을 가공해 커밋.
-2. **아침 (5분)**: 옵시디언에서 pull → `_system/review_queue.md` 결재(노랑 사례 승인/반려)
-   → `프로젝트/교육운동/블로그_초안/`·`페이스북_초안/` 확인, 마음에 들면 복사해 발행하고
-   frontmatter `상태: 발행완료`로 변경.
-3. **수동 실행**: GitHub Actions 탭 → plaud-pipeline → Run workflow
+1. **자동**: 매일 밤 KST 22:08 `plaud-pipeline` 워크플로우가 최근 녹음을 가공해 커밋 →
+   텔레그램으로 "초안 N건·노랑 결재 N건" 알림.
+2. **아침 (5분)**: 옵시디언(또는 `dashboard/index.html`)에서 초안 확인 →
+   **마음껏 고친 뒤** 복사해 발행하고 frontmatter `상태: 발행완료`로 변경.
+   `_system/review_queue.md`에서 노랑 사례 결재.
+3. **되먹임(자동)**: `상태: 발행완료`가 된 글은 다음 실행 때
+   ① AI 원본과 비교해 **당신의 수정 패턴을 학습**(`_system/style_lessons.md`에 누적,
+   이후 모든 초안에 자동 적용 — 고칠수록 초안이 당신 문체에 수렴)
+   ② **원자 메모로 분해**되어 `제텔카스텐/1. 메모`에 입고(author: 이한결,
+   own_content — 글 하나가 지식 벽돌로 환류).
+   잘못 배운 규칙은 `style_lessons.md`에서 그냥 지우면 된다.
+4. **수동 실행**: GitHub Actions 탭 → plaud-pipeline → Run workflow
    (Claude는 권한상 직접 실행 불가, 사용자가 클릭).

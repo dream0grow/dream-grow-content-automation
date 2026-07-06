@@ -151,6 +151,17 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 - 노션 잔여 카드는 **전부 옵시디언으로 이관**(M2에서 종료 아닌 이전).
 - 주간 스냅샷 태그 워크플로우 추가(`weekly-snapshot.yml`, 일 KST 06:18).
 
+**최우선 요구 2건 구현 완료 (2026-07-06 저녁)**:
+- **문체 학습 루프**(`vault_pipeline/feedback.py`): 초안 생성 시 AI 원본을
+  `_system/ai_originals/`에 몰래 저장 → 사용자가 고쳐 `상태: 발행완료`로 바꾸면
+  diff에서 일반화된 편집 규칙을 추출해 `_system/style_lessons.md`에 채널별 누적 →
+  `writers.load_style_lessons`가 이후 모든 초안 프롬프트에 주입. 고칠수록 문체 수렴.
+  잘못 배운 규칙은 사람이 md에서 지우면 됨. Honcho 불필요(볼트 안에서 투명하게).
+- **원소스 멀티유즈 환류**: 발행완료 글을 원자 메모(1~5개, 발췌 그대로)로 분해해
+  `제텔카스텐/1. 메모` 입고 (author: 이한결, source_type: own_content, 원출처_추적: 필요).
+  중복 방지: `_system/logs/feedback_ledger.json`. 워크플로우에 되먹임 단계 추가.
+  테스트 9종 통과(test_pipeline 6 + test_feedback 3).
+
 - **남은 사용자 액션**: ① `TELEGRAM_BOT_TOKEN`·`TELEGRAM_CHAT_ID` Secrets 등록
   ② Obsidian Git 연동+이관(`docs/OBSIDIAN_SETUP.md`) ③ 맥에서 `tools/naver_blog_scrape.py` 실행
   ④ 정답 스레드 글을 `raw/스레드_정답글`에 투입 ⑤ 다음 세션: 노션 이관 M0~M1 + 음성 수정 루프

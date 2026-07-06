@@ -39,6 +39,46 @@ def load_style_samples(rel_dir: str, limit: int = 3,
     )
 
 
+def load_style_lessons(channel: str, max_chars: int = 2000) -> str:
+    """_system/style_lessons.md에서 해당 채널의 학습된 편집 규칙을 읽는다.
+
+    사용자가 초안을 고쳐 발행할 때마다 feedback.py가 규칙을 누적하므로,
+    글을 쓸수록 초안이 사용자 문체에 수렴한다 (시스템의 핵심 요구 1번).
+    """
+    path = vault_root() / "_system" / "style_lessons.md"
+    if not path.exists():
+        return ""
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    # "## 채널명" 섹션만 추출
+    import re
+    m = re.search(rf"^## {re.escape(channel)}\n(.*?)(?=^## |\Z)", text,
+                  re.MULTILINE | re.DOTALL)
+    if not m:
+        return ""
+    section = m.group(1).strip()
+    if not section:
+        return ""
+    if len(section) > max_chars:      # 최근 교훈 우선 (뒤쪽이 최신)
+        section = section[-max_chars:]
+    return (
+        "\n\n[문체 학습 — 이 채널에서 사용자가 초안을 직접 고친 패턴에서 배운 "
+        "규칙이다. 반드시 전부 적용하라]\n" + section
+    )
+
+
+def save_ai_original(draft_path, body: str, dry_run: bool = False) -> None:
+    """초안의 AI 원본 사본을 저장한다 — 사용자 수정본과의 diff 학습 재료.
+
+    경로: _system/ai_originals/<초안 폴더명>/<초안 파일명>
+    """
+    if dry_run:
+        return
+    dest = (vault_root() / "_system" / "ai_originals"
+            / draft_path.parent.name / draft_path.name)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(body.rstrip() + "\n", encoding="utf-8")
+
+
 def _meta_base(rec: Recording) -> dict:
     return {
         "출처": f"plaud:{rec.id}",
@@ -217,7 +257,8 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
 
     blog = llm.call_writing(
         prompts.TEACHER_BLOG.format(topic=topic, core=core, quotes=quotes),
-        system=prompts.TEACHER_VOICE + load_style_samples("raw/블로그글"),
+        system=prompts.TEACHER_VOICE + load_style_samples("raw/블로그글")
+               + load_style_lessons("블로그(교사)"),
     ).strip()
     blog_title = topic
     if blog.startswith("# "):
@@ -235,14 +276,17 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
     }
     path = write_note("프로젝트/교육운동/블로그_초안", f"{today()} {blog_title}", meta,
                       f"# {blog_title}\n\n{blog}", dry_run=dry_run)
+    save_ai_original(path, f"# {blog_title}\n\n{blog}", dry_run=dry_run)
     artifacts.append(path.name)
 
     fb = llm.call_writing(
         prompts.TEACHER_FACEBOOK.format(topic=topic, core=core, quotes=quotes),
-        system=prompts.TEACHER_VOICE + load_style_samples("raw/페이스북글"),
+        system=prompts.TEACHER_VOICE + load_style_samples("raw/페이스북글")
+               + load_style_lessons("페이스북(교사)"),
     ).strip()
     meta_fb = dict(meta, 채널="페이스북(교사)", title=topic)
     path_fb = write_note("프로젝트/교육운동/페이스북_초안", f"{today()} {topic}",
                          meta_fb, fb, dry_run=dry_run)
+    save_ai_original(path_fb, fb, dry_run=dry_run)
     artifacts.append(path_fb.name)
     return artifacts
