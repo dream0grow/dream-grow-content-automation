@@ -172,6 +172,25 @@ def test_safe_filename():
     assert len(safe_filename("가" * 200)) <= 80
 
 
+def test_style_samples_injected(vault, monkeypatch):
+    """raw/블로그글의 본인 글이 교사 초안 system 프롬프트에 벤치마크로 들어간다."""
+    bench = vault / "raw/블로그글"
+    bench.mkdir(parents=True)
+    (bench / "대표작.md").write_text("교실은 늘 나를 가르친다.", encoding="utf-8")
+    (bench / "README.md").write_text("설명 파일 — 벤치마크 아님", encoding="utf-8")
+
+    captured = []
+
+    def fake_writing(prompt, system="", **k):
+        captured.append(system)
+        return "# 제목\n\n본문"
+    monkeypatch.setattr(llm, "call_writing", fake_writing)
+    _run_once()
+    blog_system = captured[0]
+    assert "교실은 늘 나를 가르친다" in blog_system   # 본인 글 주입
+    assert "벤치마크 아님" not in blog_system          # README 제외
+
+
 def test_no_files_on_llm_failure(vault, monkeypatch):
     """LLM 실패 시 파일을 만들지 않는다 (_검토필요 오염 재발 방지)."""
     def boom(*a, **k):

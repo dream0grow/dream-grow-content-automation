@@ -9,10 +9,34 @@
 from vault_pipeline import prompts
 from vault_pipeline.plaud_client import Recording
 from vault_pipeline.vault_io import (
-    append_review_queue, log_line, today, write_note,
+    append_review_queue, log_line, parse_frontmatter, today, vault_root,
+    write_note,
 )
 
 from orchestrator import llm
+
+
+def load_style_samples(rel_dir: str, limit: int = 3,
+                       chars_per_sample: int = 1800) -> str:
+    """raw/블로그글·페이스북글의 본인 글을 문체 벤치마크로 읽는다 (최신 우선)."""
+    directory = vault_root() / rel_dir
+    if not directory.exists():
+        return ""
+    files = [p for p in directory.glob("*.md") if p.stem.lower() != "readme"]
+    files.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    samples = []
+    for p in files[:limit]:
+        _, body = parse_frontmatter(p.read_text(encoding="utf-8", errors="ignore"))
+        body = body.strip()
+        if body:
+            samples.append(body[:chars_per_sample])
+    if not samples:
+        return ""
+    joined = "\n\n---\n\n".join(samples)
+    return (
+        "\n\n[문체 벤치마크 — 아래는 이한결이 직접 쓴 글이다. 이 목소리·리듬·"
+        "어휘를 따르라. 내용을 베끼지는 말 것]\n\n" + joined
+    )
 
 
 def _meta_base(rec: Recording) -> dict:
@@ -189,7 +213,7 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
 
     blog = llm.call_writing(
         prompts.TEACHER_BLOG.format(topic=topic, core=core, quotes=quotes),
-        system=prompts.TEACHER_VOICE,
+        system=prompts.TEACHER_VOICE + load_style_samples("raw/블로그글"),
     ).strip()
     blog_title = topic
     if blog.startswith("# "):
@@ -211,7 +235,7 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
 
     fb = llm.call_writing(
         prompts.TEACHER_FACEBOOK.format(topic=topic, core=core, quotes=quotes),
-        system=prompts.TEACHER_VOICE,
+        system=prompts.TEACHER_VOICE + load_style_samples("raw/페이스북글"),
     ).strip()
     meta_fb = dict(meta, 채널="페이스북(교사)", title=topic)
     path_fb = write_note("프로젝트/교육운동/페이스북_초안", f"{today()} {topic}",
