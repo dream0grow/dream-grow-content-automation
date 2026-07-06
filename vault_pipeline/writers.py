@@ -205,7 +205,7 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
         "활동": group,
         **_meta_base(rec),
     }
-    path = write_note("발행/블로그_교사", f"{today()} {blog_title}", meta,
+    path = write_note("프로젝트/교육운동/블로그_초안", f"{today()} {blog_title}", meta,
                       f"# {blog_title}\n\n{blog}", dry_run=dry_run)
     artifacts.append(path.name)
 
@@ -214,7 +214,7 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
         system=prompts.TEACHER_VOICE,
     ).strip()
     meta_fb = dict(meta, 채널="페이스북(교사)", title=topic)
-    path_fb = write_note("발행/페이스북_교사", f"{today()} {topic}", meta_fb, fb,
-                         dry_run=dry_run)
+    path_fb = write_note("프로젝트/교육운동/페이스북_초안", f"{today()} {topic}",
+                         meta_fb, fb, dry_run=dry_run)
     artifacts.append(path_fb.name)
     return artifacts
