@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>드림그로우 발행 대시보드</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1d2733; --sub:#6b7684; --line:#e5e8ec;
+          --accent:#2f6fed; --ok:#1a9c6b; --warn:#d97706; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#12161c; --card:#1b2129; --ink:#e8ecf1; --sub:#93a0af; --line:#2a323d; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,'Apple SD Gothic Neo','Pretendard',sans-serif;
+         background:var(--bg); color:var(--ink); }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); background:var(--card);
+           display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  header h1 { font-size:17px; margin:0; }
+  header .sub { color:var(--sub); font-size:12px; }
+  main { display:grid; grid-template-columns:340px 1fr; gap:0; min-height:calc(100vh - 57px); }
+  @media (max-width: 860px) { main { grid-template-columns:1fr; } }
+  #list { border-right:1px solid var(--line); overflow-y:auto; max-height:calc(100vh - 57px); }
+  .folder { padding:10px 16px 4px; font-size:12px; color:var(--sub); font-weight:600; }
+  .item { padding:10px 16px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .item:hover { background:rgba(47,111,237,.06); }
+  .item.active { background:rgba(47,111,237,.12); }
+  .item .t { font-size:14px; line-height:1.35; }
+  .item .m { font-size:11px; color:var(--sub); margin-top:3px; }
+  .badge { display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px;
+           border:1px solid var(--line); margin-right:6px; }
+  .badge.rv { color:var(--warn); border-color:var(--warn); }
+  .badge.done { color:var(--ok); border-color:var(--ok); }
+  #editor { padding:20px; display:flex; flex-direction:column; gap:12px; }
+  #editor .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  label { font-size:12px; color:var(--sub); }
+  input, select, textarea, button {
+    font:inherit; color:var(--ink); background:var(--card);
+    border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  textarea { width:100%; min-height:52vh; line-height:1.7; resize:vertical; }
+  button { cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.ghost { background:transparent; }
+  #status { font-size:13px; color:var(--sub); min-height:18px; }
+  #login { max-width:520px; margin:60px auto; background:var(--card); padding:28px;
+           border:1px solid var(--line); border-radius:14px; }
+  #login h2 { margin-top:0; }
+  #login p { font-size:13px; color:var(--sub); line-height:1.7; }
+  #login input { width:100%; }
+  .hidden { display:none !important; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>드림그로우 발행 대시보드</h1>
+  <span class="sub">초안은 옵시디언 볼트(GitHub)에 있고, 여기서 수정·발행 확정합니다</span>
+  <span style="flex:1"></span>
+  <button class="ghost" id="btn-refresh" title="목록 새로고침">↻ 새로고침</button>
+  <button class="ghost" id="btn-logout">토큰 삭제</button>
+</header>
+
+<div id="login">
+  <h2>GitHub 토큰 연결</h2>
+  <p>이 페이지는 서버 없이 브라우저에서 GitHub 저장소
+     (<code>dream0grow/dream-grow-content-automation</code>)의 <code>vault/</code>를 직접 읽고 씁니다.
+     토큰은 <b>이 브라우저에만</b> 저장됩니다.</p>
+  <p><b>토큰 만들기</b>: GitHub → Settings → Developer settings →
+     <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">Fine-grained tokens</a>
+     → Repository access: <code>dream-grow-content-automation</code>만 선택 →
+     Permissions: <b>Contents = Read and write</b> → Generate.</p>
+  <div class="row" style="display:flex; gap:8px;">
+    <input id="token-input" type="password" placeholder="github_pat_...">
+    <button class="primary" id="btn-login">연결</button>
+  </div>
+</div>
+
+<main id="app" class="hidden">
+  <div id="list"></div>
+  <div id="editor">
+    <div id="empty" style="color:var(--sub)">← 왼쪽에서 초안을 선택하세요</div>
+    <div id="form" class="hidden">
+      <div class="row">
+        <b id="f-name" style="font-size:15px"></b>
+      </div>
+      <div class="row">
+        <label>상태
+          <select id="f-status">
+            <option value="리뷰대기">리뷰대기</option>
+            <option value="수정중">수정중</option>
+            <option value="발행완료">발행완료</option>
+            <option value="보류">보류</option>
+          </select>
+        </label>
+        <label>발행 예정
+          <input id="f-time" type="datetime-local">
+        </label>
+        <span style="flex:1"></span>
+        <button class="ghost" id="btn-copy">본문 복사</button>
+        <button class="primary" id="btn-save">저장 (커밋)</button>
+      </div>
+      <textarea id="f-body" spellcheck="false"></textarea>
+      <div id="status"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const OWNER = "dream0grow", REPO = "dream-grow-content-automation", BRANCH = "main";
+// 대시보드가 보여주는 초안 폴더들 — 노션 이관(M1) 후 vault/파이프라인/활성 이 추가된다
+const DRAFT_DIRS = [
+  "vault/프로젝트/교육운동/블로그_초안",
+  "vault/프로젝트/교육운동/페이스북_초안",
+];
+const API = "https://api.github.com";
+let current = null; // {path, sha, fm, body}
+
+const $ = (id) => document.getElementById(id);
+const token = () => localStorage.getItem("dg_token") || "";
+const headers = () => ({ "Authorization": "Bearer " + token(),
+                         "Accept": "application/vnd.github+json" });
+
+// ---------- UTF-8 안전 base64 ----------
+const b64decode = (s) => new TextDecoder().decode(
+  Uint8Array.from(atob(s.replace(/\n/g, "")), c => c.charCodeAt(0)));
+const b64encode = (s) => { const b = new TextEncoder().encode(s);
+  let bin = ""; b.forEach(c => bin += String.fromCharCode(c)); return btoa(bin); };
+
+// ---------- frontmatter ----------
+function splitFm(text) {
+  const m = text.match(/^---\n([\s\S]*?)\n---\n?/);
+  if (!m) return { fmRaw: "", body: text };
+  return { fmRaw: m[1], body: text.slice(m[0].length) };
+}
+function fmGet(fmRaw, key) {
+  const m = fmRaw.match(new RegExp("^" + key + ":\\s*(.*)$", "m"));
+  return m ? m[1].trim().replace(/^['\"]|['\"]$/g, "") : "";
+}
+function fmSet(fmRaw, key, value) {
+  const line = key + ": " + value;
+  if (new RegExp("^" + key + ":", "m").test(fmRaw))
+    return fmRaw.replace(new RegExp("^" + key + ":.*$", "m"), line);
+  return fmRaw + "\n" + line;
+}
+
+// ---------- API ----------
+async function listDir(path) {
+  const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path).replaceAll("%2F","/")}?ref=${BRANCH}`,
+                        { headers: headers() });
+  if (r.status === 404) return [];
+  if (!r.ok) throw new Error(`목록 실패 ${r.status}`);
+  return (await r.json()).filter(f => f.type === "file" && f.name.endsWith(".md"));
+}
+async function loadFile(path) {
+  const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path).replaceAll("%2F","/")}?ref=${BRANCH}`,
+                        { headers: headers() });
+  if (!r.ok) throw new Error(`읽기 실패 ${r.status}`);
+  const j = await r.json();
+  return { path, sha: j.sha, text: b64decode(j.content) };
+}
+async function saveFile(path, sha, text, message) {
+  const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(path).replaceAll("%2F","/")}`, {
+    method: "PUT", headers: { ...headers(), "Content-Type": "application/json" },
+    body: JSON.stringify({ message, content: b64encode(text), sha, branch: BRANCH }),
+  });
+  if (!r.ok) throw new Error(`저장 실패 ${r.status} — 새로고침 후 다시 시도하세요`);
+  return (await r.json()).content.sha;
+}
+
+// ---------- UI ----------
+async function refreshList() {
+  const list = $("list"); list.innerHTML = "<div class='folder'>불러오는 중…</div>";
+  try {
+    let html = "";
+    for (const dir of DRAFT_DIRS) {
+      const files = (await listDir(dir)).filter(f => f.name !== "README.md" && f.name !== ".gitkeep");
+      html += `<div class="folder">${dir.split("/").slice(-1)[0]} (${files.length})</div>`;
+      // 최신(파일명이 날짜로 시작) 우선
+      files.sort((a, b) => b.name.localeCompare(a.name));
+      for (const f of files) {
+        html += `<div class="item" data-path="${dir}/${f.name}">
+                   <div class="t">${f.name.replace(/\.md$/, "")}</div>
+                   <div class="m" id="m-${btoa(encodeURIComponent(f.name)).slice(0,12)}"></div>
+                 </div>`;
+      }
+    }
+    list.innerHTML = html || "<div class='folder'>초안 없음</div>";
+    list.querySelectorAll(".item").forEach(el =>
+      el.addEventListener("click", () => openFile(el.dataset.path, el)));
+  } catch (e) { list.innerHTML = `<div class='folder'>오류: ${e.message}</div>`; }
+}
+
+async function openFile(path, el) {
+  document.querySelectorAll(".item").forEach(i => i.classList.remove("active"));
+  if (el) el.classList.add("active");
+  $("status").textContent = "불러오는 중…";
+  $("empty").classList.add("hidden"); $("form").classList.remove("hidden");
+  try {
+    const f = await loadFile(path);
+    const { fmRaw, body } = splitFm(f.text);
+    current = { path, sha: f.sha, fmRaw, body };
+    $("f-name").textContent = path.split("/").pop().replace(/\.md$/, "");
+    $("f-status").value = fmGet(fmRaw, "상태") || "리뷰대기";
+    $("f-time").value = (fmGet(fmRaw, "발행시간") || "").slice(0, 16);
+    $("f-body").value = body.trim();
+    $("status").textContent = `채널: ${fmGet(fmRaw, "채널")} · 타겟: ${fmGet(fmRaw, "타겟")} · 출처: ${fmGet(fmRaw, "출처")}`;
+  } catch (e) { $("status").textContent = "오류: " + e.message; }
+}
+
+async function save() {
+  if (!current) return;
+  $("status").textContent = "저장 중…";
+  let fm = current.fmRaw;
+  fm = fmSet(fm, "상태", $("f-status").value);
+  if ($("f-time").value) fm = fmSet(fm, "발행시간", $("f-time").value);
+  fm = fmSet(fm, "updated", new Date().toISOString().slice(0, 16));
+  const text = "---\n" + fm.trim() + "\n---\n\n" + $("f-body").value.trim() + "\n";
+  try {
+    const newSha = await saveFile(current.path, current.sha, text,
+      `대시보드: ${$("f-name").textContent} (${$("f-status").value})`);
+    current.sha = newSha; current.fmRaw = fm;
+    $("status").textContent = "✅ 저장(커밋) 완료 — 옵시디언에는 다음 pull 때 반영";
+  } catch (e) { $("status").textContent = "❌ " + e.message; }
+}
+
+function init() {
+  if (token()) { $("login").classList.add("hidden"); $("app").classList.remove("hidden"); refreshList(); }
+  $("btn-login").onclick = () => {
+    const t = $("token-input").value.trim();
+    if (!t) return;
+    localStorage.setItem("dg_token", t); init();
+  };
+  $("btn-logout").onclick = () => { localStorage.removeItem("dg_token"); location.reload(); };
+  $("btn-refresh").onclick = refreshList;
+  $("btn-save").onclick = save;
+  $("btn-copy").onclick = async () => {
+    await navigator.clipboard.writeText($("f-body").value);
+    $("status").textContent = "본문 복사됨 — 블로그/페이스북에 붙여넣고, 발행 후 상태를 '발행완료'로 바꾸세요";
+  };
+}
+init();
+</script>
+</body>
+</html>

@@ -16,7 +16,7 @@ import argparse
 import sys
 import traceback
 
-from vault_pipeline import prompts, writers
+from vault_pipeline import prompts, telegram_notify, writers
 from vault_pipeline.plaud_client import (
     Recording, archive_inbox_file, fetch_recordings,
 )
@@ -30,8 +30,12 @@ MIN_TRANSCRIPT_CHARS = 80
 MAX_TRANSCRIPT_CHARS = 60_000
 
 
-def process_recording(rec: Recording, dry_run: bool) -> list[str]:
-    """녹음 1건을 3종 시스템으로 가공한다. 생성 파일명 목록 반환."""
+def process_recording(rec: Recording, dry_run: bool) -> dict:
+    """녹음 1건을 3종 시스템으로 가공한다.
+
+    반환: {"artifacts": [파일명들], "drafts": [교사 초안명], "green": n,
+          "yellow": n, "memos": n}
+    """
     transcript = rec.transcript[:MAX_TRANSCRIPT_CHARS]
     triage = llm.call_json(
         prompts.TRIAGE.format(transcript=transcript, name=rec.name,
@@ -39,8 +43,8 @@ def process_recording(rec: Recording, dry_run: bool) -> list[str]:
         system=prompts.TRIAGE_SYSTEM,
         max_tokens=8000,
     )
-    artifacts: list[str] = []
-    artifacts += writers.write_cases(rec, triage.get("사례") or [], dry_run)
+    case_result = writers.write_cases(rec, triage.get("사례") or [], dry_run)
+    artifacts: list[str] = list(case_result["artifacts"])
     memo_stems = writers.write_memos(rec, triage.get("메모") or [], dry_run)
     artifacts += list(memo_stems.values())
     artifacts += writers.write_keywords(rec, triage.get("키워드") or [],
@@ -48,8 +52,11 @@ def process_recording(rec: Recording, dry_run: bool) -> list[str]:
     artifacts += writers.write_opinions(rec, triage.get("의견") or [], dry_run)
     seed = triage.get("교사_글감") or {}
     artifacts += writers.write_activity_record(rec, seed, dry_run)
-    artifacts += writers.write_teacher_posts(rec, seed, dry_run)
-    return artifacts
+    drafts = writers.write_teacher_posts(rec, seed, dry_run)
+    artifacts += drafts
+    return {"artifacts": artifacts, "drafts": drafts,
+            "green": case_result["green"], "yellow": case_result["yellow"],
+            "memos": len(memo_stems)}
 
 
 def main() -> None:
@@ -80,6 +87,7 @@ def main() -> None:
         return
 
     failures = 0
+    total = {"drafts": [], "green": 0, "yellow": 0, "memos": 0}
     for rec in todo:
         if len(rec.transcript) < MIN_TRANSCRIPT_CHARS:
             log_line(f"생략(전사 {len(rec.transcript)}자로 너무 짧음): {rec.name}")
@@ -87,14 +95,25 @@ def main() -> None:
             archive_inbox_file(rec)
             continue
         try:
-            artifacts = process_recording(rec, dry_run=False)
-            mark_processed(rec.id, rec.name, artifacts)
+            result = process_recording(rec, dry_run=False)
+            mark_processed(rec.id, rec.name, result["artifacts"])
             archive_inbox_file(rec)
-            log_line(f"완료: {rec.name} → 산출물 {len(artifacts)}건")
+            log_line(f"완료: {rec.name} → 산출물 {len(result['artifacts'])}건")
+            total["drafts"] += result["drafts"]
+            for k in ("green", "yellow", "memos"):
+                total[k] += result[k]
         except Exception as e:  # noqa: BLE001 — 한 건 실패가 전체를 죽이면 안 됨
             failures += 1
             log_line(f"실패({rec.id} {rec.name}): {e}")
             traceback.print_exc()
+
+    # 폰 알림 (TELEGRAM_* Secrets 있을 때만) — 확인할 것이 있거나 실패 시
+    if todo or failures:
+        sent = telegram_notify.send(telegram_notify.briefing(
+            total["drafts"], total["yellow"], total["green"], total["memos"],
+            failures))
+        if sent:
+            log_line("텔레그램 알림 발송 완료")
 
     if failures:
         sys.exit(1)

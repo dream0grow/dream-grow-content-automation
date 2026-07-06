@@ -50,8 +50,10 @@ def _meta_base(rec: Recording) -> dict:
 
 # -------------------------------------------------------------- 1) 사례은행
 
-def write_cases(rec: Recording, cases: list[dict], dry_run: bool) -> list[str]:
+def write_cases(rec: Recording, cases: list[dict], dry_run: bool) -> dict:
+    """반환: {"artifacts": [...], "green": n, "yellow": n} (빨강은 로그만)."""
     artifacts: list[str] = []
+    green = yellow = 0
     queue_lines: list[str] = []
     red_reasons: list[str] = []
     for case in cases:
@@ -76,9 +78,11 @@ def write_cases(rec: Recording, cases: list[dict], dry_run: bool) -> list[str]:
             f"**판정**: {light} — {str(case.get('판정사유', '')).strip()}\n"
         )
         if light == "초록":
+            green += 1
             path = write_note("제텔카스텐/6. 사례은행", f"사례 - {title}", meta, body,
                               dry_run=dry_run)
         else:  # 노랑 (그 외 값도 안전하게 노랑으로)
+            yellow += 1
             meta["status"] = "결재대기"
             path = write_note("제텔카스텐/6. 사례은행/_노랑대기", f"사례 - {title}",
                               meta, body, dry_run=dry_run)
@@ -91,7 +95,7 @@ def write_cases(rec: Recording, cases: list[dict], dry_run: bool) -> list[str]:
         # 빨강은 내용을 어디에도 저장하지 않는다 — 건수와 사유만 로그
         log_line(f"빨강 차단 {len(red_reasons)}건 ({rec.id}): "
                  + " / ".join(red_reasons), dry_run=dry_run)
-    return artifacts
+    return {"artifacts": artifacts, "green": green, "yellow": yellow}
 
 
 # -------------------------------------------------- 2) 제텔카스텐 1→2→3단계

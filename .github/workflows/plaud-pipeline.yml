@@ -65,6 +65,8 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           PLAUD_TOKENS_JSON: ${{ secrets.PLAUD_TOKENS_JSON }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           ARGS="--since-days ${{ github.event.inputs.since_days || '7' }} --max ${{ github.event.inputs.max_recordings || '3' }}"
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then

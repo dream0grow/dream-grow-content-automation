@@ -132,10 +132,29 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 - 인프라: GitHub Actions 중심 유지, 텔레그램 알림은 서버리스(sendMessage)로, 버튼·음성
   결재가 필요해지면 그때 옛 노트북에 봇만 systemd로 (하이브리드).
 
-- **남은 사용자 액션**: ① 유출 키 재발급(완료, claude setup-token은 유출 목록에 없어 필수 아님)
-  ② Obsidian Git 연동+이관(`docs/OBSIDIAN_SETUP.md` 절차) ③ `PLAUD_TOKENS_JSON` Secret 등록
-  ④ 본인 글을 `vault/raw/블로그글`·`페이스북글`에 투입 ⑤ 다음 세션: 이관설계 M0~M1 구현
-  + 텔레그램 알림·음성 수정·문체 학습 루프.
+**2차 문답 확정 (2026-07-06)**:
+- 텔레그램 봇 토큰 발급 완료 → **알림은 서버리스 구현 완료**(`vault_pipeline/telegram_notify.py`,
+  Secrets `TELEGRAM_BOT_TOKEN`+`TELEGRAM_CHAT_ID` 필요). 음성 수정은 ①플라우드 경유 ②텔레그램 보이스
+  둘 다 구축 예정(①이 선행, 서버 불필요).
+- 최종본 비교 학습 코드 확인: `diff_learner.py`(AI 초안 사본 vs `05 리뷰/완료` → Honcho corrections).
+  단 맥 로컬 경로 하드코딩 → 볼트 이관 후 `vault/` 경로·Actions 실행으로 전환 필요.
+- **발행 관리 웹 대시보드**: `dashboard/index.html` — 서버 없이 GitHub API로 볼트 초안을
+  목록·수정·상태/발행시간 변경·커밋. fine-grained PAT(Contents RW)로 로그인.
+- 문체 원천 확정: 스레드=`vault/raw/스레드_아카이브/`(CSV 2,068편+TOP30.md), 블로그=네이버
+  l0126j(`tools/naver_blog_scrape.py`로 로컬 스크랩→`raw/블로그글`), 정답글=`raw/스레드_정답글/`.
+  채널별 문체 분리 원칙(SNS마다 다르게). 뉴스레터 문체·values.md 재작성은 본인 글 분석 후(차기).
+- 콘텐츠 규칙 반영: **사례는 재료 없으면 넣지 않기(자리 표시도 금지)** + 논리 개연성 자체 점검
+  (교사 프롬프트+학부모 WRITER 모두).
+- 릴스·유튜브는 **대본까지만** 자동(본인이 읽고 촬영). 대본 문체 원본 = `raw/Roam.../유튜브 만들기`.
+- 리서치는 주 1회가 아니라 **2일 1회 Manus 자동**(Phase H 변형 — 차기 구현).
+- 스레드 성과: **2주 데이터 수집 → 조회수 상위를 카드뉴스로**(차기 구현, threads_insights 활용).
+- 노션 잔여 카드는 **전부 옵시디언으로 이관**(M2에서 종료 아닌 이전).
+- 주간 스냅샷 태그 워크플로우 추가(`weekly-snapshot.yml`, 일 KST 06:18).
+
+- **남은 사용자 액션**: ① `TELEGRAM_BOT_TOKEN`·`TELEGRAM_CHAT_ID` Secrets 등록
+  ② Obsidian Git 연동+이관(`docs/OBSIDIAN_SETUP.md`) ③ 맥에서 `tools/naver_blog_scrape.py` 실행
+  ④ 정답 스레드 글을 `raw/스레드_정답글`에 투입 ⑤ 다음 세션: 노션 이관 M0~M1 + 음성 수정 루프
+  + 문체 학습 루프 + 본인 글 분석으로 values·채널별 문체 가이드 생성.
 
 ### 플라우드(Plaud) MCP 연동 + 제텔카스텐 확장 (2026-07-05, 브랜치 `claude/plaud-mcp-setup-6j07l1`)
 - **설치 완료(저장소 영구화)**: `.mcp.json`(프로젝트 스코프, `npx -y @plaud-ai/mcp@latest` stdio) +
