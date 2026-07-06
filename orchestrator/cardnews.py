@@ -338,9 +338,12 @@ def main():
 
     # 노션 저장: 페이지 ID를 주면 그 페이지에, 비우면 파이프라인 DB에 새 카드를 자동 생성.
     # (NOTION_API_KEY 없으면 조용히 건너뜀 — 로컬 드라이런 지원)
+    # 옵시디언 백엔드에서는 노션 업로드 자체가 없으므로 건너뛴다 (PNG는 로컬/아티팩트로 남음)
     from orchestrator.config import NOTION_API_KEY
-    if NOTION_API_KEY:
-        from orchestrator import notion_media, notion_state
+    from orchestrator.state import BACKEND
+    if NOTION_API_KEY and BACKEND != "obsidian":
+        from orchestrator import notion_media
+        from orchestrator import state as notion_state
         try:
             page_id = args.notion_page.strip()
             if not page_id:

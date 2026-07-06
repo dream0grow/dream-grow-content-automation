@@ -40,6 +40,12 @@ jobs:
       STIBEE_SENDER_EMAIL: ${{ secrets.STIBEE_SENDER_EMAIL }}
       STIBEE_SENDER_NAME: ${{ secrets.STIBEE_SENDER_NAME }}
       STIBEE_AUTO_SEND: ${{ secrets.STIBEE_AUTO_SEND }}
+      # 카드 저장소 백엔드: notion(기본) | obsidian — Variables에서 전환 (이관설계 M1)
+      DG_STATE_BACKEND: ${{ vars.DG_STATE_BACKEND }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -48,7 +54,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install requests python-dotenv honcho-ai
+        run: pip install requests python-dotenv honcho-ai pyyaml
 
       # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
       - name: Install Claude Code CLI (Max 구독 인증용)
@@ -62,3 +68,16 @@ jobs:
           else
             python3 -m orchestrator.run
           fi
+
+      # 옵시디언 백엔드일 때: 카드 변경분을 볼트에 커밋 (노션 모드에선 변경이 없어 생략됨)
+      - name: 볼트 카드 커밋
+        if: ${{ env.DG_STATE_BACKEND == 'obsidian' }}
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "orchestrator[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "오케스트레이터: 카드 갱신 $(date +%Y-%m-%dT%H:%M)"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}

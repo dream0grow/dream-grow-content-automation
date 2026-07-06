@@ -7,7 +7,8 @@
   4. 기존 diff_learner와 같은 Honcho 세션({channel}-corrections)에 저장
      → 다음 초안부터 작가 에이전트 프롬프트에 자동 반영된다
 """
-from orchestrator import llm, notion_state, prompts
+from orchestrator import llm, prompts
+from orchestrator import state as notion_state
 
 
 def get_corrections_context(channel: str) -> str:

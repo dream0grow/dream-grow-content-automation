@@ -1,0 +1,42 @@
+# 볼트 상주 에이전트 잡 — 현재: socrates 새벽 질문 (KST 05:08)
+# 사용자 승인 가능 시간(06:00~06:20) 직전에 질문이 도착하도록 한다.
+name: vault-agents
+
+on:
+  schedule:
+    - cron: "8 20 * * *"   # KST 05:08
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: vault-agents
+  cancel-in-progress: false
+
+jobs:
+  socrates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: 의존성 설치
+        run: pip install requests python-dotenv pyyaml
+      - name: socrates 새벽 질문
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python3 -m vault_pipeline.socrates
+      - name: 볼트 커밋
+        run: |
+          git config user.name "vault-agents[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "socrates: $(date +%Y-%m-%d) 새벽 질문"
+          git pull --rebase origin ${{ github.ref_name }}
+          git push origin HEAD:${{ github.ref_name }}

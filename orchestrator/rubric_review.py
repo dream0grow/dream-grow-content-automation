@@ -4,7 +4,8 @@
 카드의 '✍️ 초안'을 채점하고, 약점을 고친 '✍️ 2차안'을 새 토글로 카드에 기록한다.
 실패해도 파이프라인을 멈추지 않도록 호출부에서 try/except로 감싼다.
 """
-from orchestrator import llm, notion_state, prompts
+from orchestrator import llm, prompts
+from orchestrator import state as notion_state
 
 
 def _fmt_eval(r: dict) -> str:

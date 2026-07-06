@@ -20,9 +20,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, notion_state, prompts,
+    agent_dialogue, llm, manus_research, naver_keywords, prompts,
 )
-from orchestrator.config import AUTO_APPROVE_KEYWORD, MAX_CARDS_PER_RUN, require_notion
+from orchestrator import state as notion_state
+from orchestrator.config import AUTO_APPROVE_KEYWORD, MAX_CARDS_PER_RUN
 
 
 def log(msg: str):
@@ -391,7 +392,7 @@ DISPATCH = [
 
 
 def run(only_stage: str | None = None):
-    require_notion()
+    notion_state.require_backend()
     processed = 0
     for stage, status, approval, handler in DISPATCH:
         if only_stage and stage != only_stage:
@@ -421,7 +422,7 @@ if __name__ == "__main__":
     if "--stage" in sys.argv:
         stage_arg = sys.argv[sys.argv.index("--stage") + 1]
     if stage_arg == "rubric_backfill":
-        require_notion()
+        notion_state.require_backend()
         handle_rubric_backfill()
     else:
         run(stage_arg)

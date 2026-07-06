@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 import requests
 
-from orchestrator import notion_state
+from orchestrator import state as notion_state
 
 THREADS_API_BASE = "https://graph.threads.net/v1.0"
 THREADS_ACCESS_TOKEN = os.getenv("THREADS_ACCESS_TOKEN", "")

@@ -15,8 +15,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from orchestrator import llm, notion_state, prompts
-from orchestrator.config import require_notion
+from orchestrator import llm, prompts
+from orchestrator import state as notion_state
 
 # 하루에 만들 주제 수 (기본 1개 = 매일 글 1편)
 DAILY_TOPIC_COUNT = int(os.getenv("DG_DAILY_TOPIC_COUNT", "1"))
@@ -38,7 +38,7 @@ def _existing_topics() -> list[str]:
 
 
 def run():
-    require_notion()
+    notion_state.require_backend()
     existing = _existing_topics()
     existing_block = "\n".join(f"- {t}" for t in existing[:120]) or "(없음)"
 
