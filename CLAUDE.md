@@ -91,7 +91,32 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 
 ## 현재 상태 (세션마다 갱신)
 
-### 플라우드(Plaud) MCP 연동 + 제텔카스텐 확장 (2026-07-05, 브랜치 `claude/plaud-mcp-setup-6j07l1`) — ⬅️ 이번 세션 작업
+### 옵시디언 중심 재구축 + 플라우드 3종 시스템 (2026-07-06, 브랜치 `claude/content-automation-obsidian-mtsmj6`) — ⬅️ 이번 세션 작업
+
+**방향 전환 확정 (사용자 결정)**: ① 볼트(초생산)를 GitHub 저장소로 동기화(이 저장소 `vault/`)
+② 시스템을 노션 → 옵시디언 중심으로 전면 재구축(이번 세션은 그 토대+플라우드 3종)
+③ 교사 대상 블로그·페이스북은 초안까지 자동, 발행은 사람. 기획 기준 문서는 `docs/기획/통합기획_v2.1.md`(최신).
+
+- **볼트 골격**: `vault/` — 제텔카스텐 새 번호 체계(0.시스템~6.사례은행, v2.1 PART 4),
+  `발행/블로그_교사`·`발행/페이스북_교사`, `_system/`(review_queue·lessons·logs),
+  볼트 헌법 `vault/CLAUDE.md`(쓰기 권한 매트릭스, `_ai` 딱지, 사례 신호등).
+- **플라우드 파이프라인**: `vault_pipeline/` — 녹음 전사 1건당 triage(LLM) 후
+  ①사례은행(초록 자동입고/노랑 `_노랑대기`+결재함/빨강 저장금지·로그만)
+  ②제텔카스텐 1.메모(구술 verbatim)→2.키워드(`K_ai`)→3.의견(`O - `, 화자가 표명한 것만)
+  ③교사 대상 블로그+페이스북 초안(`상태: 리뷰대기`). 중복 방지: `출처: plaud:<id>`+장부.
+  실행: `python3 -m vault_pipeline.run` / 워크플로우 `plaud-pipeline.yml`(매일 KST 22:08).
+  인증: `PLAUD_TOKENS_JSON` Secret(로컬 1회 로그인 토큰) 또는 무인증 인박스(`vault/수집함/plaud/`).
+  단위테스트 5종 통과(`vault_pipeline/test_pipeline.py`, LLM mock).
+- **보안(Phase 0)**: `tools/vault_secret_scan.py`(커밋 게이트, 워크플로우에 내장).
+  ⚠️ 업로드된 기존 볼트에서 실 API 키 발견(Anthropic·OpenAI·GitHub 토큰, Roam 일간노트) —
+  **키 전부 재발급 필요**, 위치는 `docs/OBSIDIAN_SETUP.md` ⑥ 참고.
+- **이관 도구**: `tools/vault_migrate.py` — 기존 초생산(4,222건)을 새 구조로 복사(dry-run 기본,
+  `1. 개인/` 제외). 절차는 `docs/OBSIDIAN_SETUP.md`.
+- **남은 사용자 액션**: ① 유출 키 재발급 ② 이 브랜치 PR 머지 ③ Obsidian Git 연동+이관
+  (`docs/OBSIDIAN_SETUP.md` 절차) ④ `PLAUD_TOKENS_JSON` Secret 등록(선택)
+  ⑤ 다음 세션: 학부모 파이프라인(노션)의 옵시디언 이관 설계.
+
+### 플라우드(Plaud) MCP 연동 + 제텔카스텐 확장 (2026-07-05, 브랜치 `claude/plaud-mcp-setup-6j07l1`)
 - **설치 완료(저장소 영구화)**: `.mcp.json`(프로젝트 스코프, `npx -y @plaud-ai/mcp@latest` stdio) +
   공식 스킬 7종(`.claude/skills/plaud-*`) + 자체 프로세스 스킬 **`/plaud-zettel`** 동봉.
 - **`/plaud-zettel` 프로세스**: 플라우드 녹음 → 제텔카스텐 원자 노트(노션 DB, 임시/문헌/영구) →
