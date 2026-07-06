@@ -17,8 +17,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from orchestrator import llm, notion_state, prompts
-from orchestrator.config import require_notion
+from orchestrator import llm, prompts
+from orchestrator import state as notion_state
 
 QUEUE_STAGE = "analysis"  # 큐시트 카드는 analysis stage로 구분
 QUEUE_PREFIX = "[큐시트] 프롬프트 개선안"
@@ -57,7 +57,7 @@ def _collect_performance() -> str:
 
 def retrospect():
     """회고 실행 → 개선안 큐시트 카드를 노션에 생성한다."""
-    require_notion()
+    notion_state.require_backend()
     corrections, learnings = _collect_honcho()
     performance = _collect_performance()
     if not any([corrections, learnings, performance]):
@@ -95,7 +95,7 @@ def retrospect():
 
 def apply_approved():
     """승인된 큐시트의 제안 지침을 Honcho approved-prompt-overlay로 승격한다."""
-    require_notion()
+    notion_state.require_backend()
     cards = [
         c for c in notion_state.query_cards(
             stage=QUEUE_STAGE, approval_status="approved",

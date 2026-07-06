@@ -162,6 +162,22 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
   중복 방지: `_system/logs/feedback_ledger.json`. 워크플로우에 되먹임 단계 추가.
   테스트 9종 통과(test_pipeline 6 + test_feedback 3).
 
+**노션 이관 M0~M1 구현 완료 + 에이전트 OS 1차 (2026-07-06 밤)**:
+- `orchestrator/obsidian_state.py`: notion_state와 동일 인터페이스, 카드=`vault/파이프라인/활성/*.md`
+  (frontmatter=속성, `## 섹션`=본문 토글, notify=텔레그램+결재함). 단위테스트 5종.
+- `orchestrator/state.py` 파사드: **Actions Variable `DG_STATE_BACKEND=obsidian`** 설정 시
+  오케스트레이터 전체(run·publish·daily_intake·rubric·style_learn·self_improve)가 노션 없이
+  볼트에서 돈다. 기본값 notion(안전). orchestrator.yml에 볼트 커밋 단계 내장.
+  **전환 절차**: 노션 잔여 카드 이전(M2, 다음 세션) → Variable 설정 → 노션 Secrets 삭제 → 구독 해지.
+- **에이전트 OS 1차**: `.claude/agents/zk-*` 지식팀 8종(transplanter·converter·classifier·
+  socrates·writer·researcher·reviewer·case-keeper, v3 §5) — 대화 세션에서 서브에이전트로 호출.
+  **socrates는 자동 잡으로 승격**: `vault_pipeline/socrates.py` + `vault-agents.yml`(매일 KST 05:08,
+  질문 3개→dialogues+텔레그램, 어제 답에 후속 질문). 나머지 야간 잡(zk-writer·reviewer·classifier)은
+  Roam 이식(Phase 2) 후 순차 승격 예정. 전체 테스트 16종 통과.
+- Honcho 판단: 새 볼트 루프는 파일 기반(style_lessons.md) 유지 — 투명·수정가능·무의존.
+  Honcho는 기존 학부모 파이프라인(diff_learner corrections)에서 계속 사용(이중 아님, 영역 분리).
+- Obsidian 공식 Sync 불필요 확정 — Obsidian Git 하나만 사용(이중 동기화 금지).
+
 - **남은 사용자 액션**: ① `TELEGRAM_BOT_TOKEN`·`TELEGRAM_CHAT_ID` Secrets 등록
   ② Obsidian Git 연동+이관(`docs/OBSIDIAN_SETUP.md`) ③ 맥에서 `tools/naver_blog_scrape.py` 실행
   ④ 정답 스레드 글을 `raw/스레드_정답글`에 투입 ⑤ 다음 세션: 노션 이관 M0~M1 + 음성 수정 루프
