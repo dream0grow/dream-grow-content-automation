@@ -74,6 +74,13 @@ jobs:
           fi
           python3 -m vault_pipeline.run $ARGS
 
+      # 사용자가 초안을 고쳐 '발행완료'로 바꾼 글 → 문체 학습 + 원자 메모 분해
+      - name: 발행 후 되먹임 (문체 학습·메모 분해)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 -m vault_pipeline.feedback
+
       - name: 플라우드 토큰 파일 확인
         id: plaud_token
         if: always()
