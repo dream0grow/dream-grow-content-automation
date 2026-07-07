@@ -23,7 +23,7 @@ MANUS_API_KEY = os.getenv("MANUS_API_KEY", "")
 MANUS_API_BASE = os.getenv("MANUS_API_BASE", "https://api.manus.ai")
 
 # 모델 (유틸리티/글쓰기 분리)
-MODEL_UTILITY = os.getenv("DG_MODEL_UTILITY", "claude-sonnet-4-6")
+MODEL_UTILITY = os.getenv("DG_MODEL_UTILITY", "claude-sonnet-5")
 MODEL_WRITING = os.getenv("DG_MODEL_WRITING", "claude-opus-4-8")
 
 # 에이전트 토론 라운드 제한 (끝없는 대화 방지)
