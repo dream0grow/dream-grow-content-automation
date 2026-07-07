@@ -79,5 +79,12 @@ jobs:
           git add vault/
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "오케스트레이터: 카드 갱신 $(date +%Y-%m-%dT%H:%M)"
-          git pull --rebase origin ${{ github.ref_name }}
-          git push origin HEAD:${{ github.ref_name }}
+          # 여러 워크플로우가 같은 브랜치에 동시 push하면 non-fast-forward로 거부된다.
+          # pull --rebase → push를 재시도해 경합으로 인한 워크플로우 실패를 막는다(A8).
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

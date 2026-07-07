@@ -223,6 +223,23 @@ def read_latest_section(page_id: str, heading_prefix: str) -> str:
     return latest.strip()
 
 
+def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
+    """heading이 주어진 접두사 중 하나로 시작하는 섹션들만 골라 읽는다(B3).
+
+    다음 단계에 카드 본문 전체 대신 필요한 섹션만 주입해 토큰을 아낀다.
+    접두사가 없으면 전체를 읽는다(notion 백엔드와 동일 시그니처).
+    """
+    if not prefixes:
+        return read_sections(page_id)
+    body = read_sections(page_id)
+    out: list[str] = []
+    for sec in re.split(r"^## ", body, flags=re.MULTILINE):
+        sec = sec.strip()
+        if sec and any(sec.startswith(p) for p in prefixes):
+            out.append("## " + sec)
+    return "\n\n".join(out)
+
+
 # ---------- 알림 ----------
 
 def notify(page_id: str, message: str) -> None:

@@ -51,6 +51,23 @@ def test_sections_latest_wins(vault):
     assert "첫 번째 초안" in st.read_sections(pid)     # 전체 이력은 보존
 
 
+def test_read_sections_by_prefix_filters(vault):
+    """B3: 접두사에 맞는 섹션만 골라 읽고, 무거운 누적 초안은 제외한다."""
+    pid = st.create_card("주제")
+    st.append_formatted_section(pid, "🔍 리서치: 감정", "부모의 언어")
+    st.append_formatted_section(pid, "🏷️ 키워드 후보 (승인 필요)", "키워드 표")
+    st.append_section(pid, "✍️ 초안 (thread)", "아주 긴 초안 본문")
+    st.append_formatted_section(pid, "✅ 교육윤리 검수 (thread)", "검수 결과")
+
+    picked = st.read_sections_by_prefix(pid, "🔍 리서치", "🏷️ 키워드")
+    assert "부모의 언어" in picked
+    assert "키워드 표" in picked
+    assert "아주 긴 초안 본문" not in picked   # 초안은 제외돼 토큰 절감
+    assert "검수 결과" not in picked
+    # 접두사 없으면 전체
+    assert "아주 긴 초안 본문" in st.read_sections_by_prefix(pid)
+
+
 def test_approval_gate_query(vault):
     """발행 승인 게이트: 사람이 frontmatter만 바꾸면 디스패치에 걸린다."""
     pid = st.create_card("승인 대기 글")

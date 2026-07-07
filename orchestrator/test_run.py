@@ -173,3 +173,44 @@ def test_split_posts_no_text_loss_on_long_paragraph():
 def test_split_posts_respects_separator():
     draft = "가나다\n---\n라마바"
     assert publish.split_posts(draft) == ["가나다", "라마바"]
+
+
+# ---------- B5: 벤치마킹·후킹은 첫 집필에만 주입 ----------
+
+def test_benchmark_and_hooks_only_in_first_draft(monkeypatch):
+    from orchestrator import agent_dialogue as ad
+
+    writer_prompts = []
+
+    class FakeLLM:
+        calls = {"json": 0}
+
+        @staticmethod
+        def call_writing(prompt, system="", max_tokens=8000):
+            writer_prompts.append(prompt)
+            return "초안 본문"
+
+        @staticmethod
+        def call_json(prompt, system="", **kw):
+            FakeLLM.calls["json"] += 1
+            if FakeLLM.calls["json"] == 1:
+                # 비평가 1라운드: revise → 재작성 유발
+                return {"verdict": "revise", "issues": ["더 구체적으로"],
+                        "suggestions": []}
+            if FakeLLM.calls["json"] == 2:
+                return {"verdict": "pass"}
+            # 교육윤리 검수: approved → 추가 재작성 없음
+            return {"review_status": "approved", "risk_level": "low"}
+
+    monkeypatch.setattr(ad, "llm", FakeLLM)
+    brief = {"core_message": "핵심", "cta": "행동"}
+    ad.run_draft_dialogue(
+        brief, "thread", style_context="학습된 문체",
+        hook_examples="후킹패턴XYZ", benchmark="벤치마킹ABC",
+    )
+    assert len(writer_prompts) >= 2          # v1 + 재작성 최소 1회
+    assert "벤치마킹ABC" in writer_prompts[0]  # 첫 집필엔 있음
+    assert "후킹패턴XYZ" in writer_prompts[0]
+    assert "벤치마킹ABC" not in writer_prompts[1]  # 재작성엔 없음(B5)
+    assert "후킹패턴XYZ" not in writer_prompts[1]
+    assert "학습된 문체" in writer_prompts[1]      # 스타일은 계속 유지

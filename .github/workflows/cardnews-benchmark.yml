@@ -45,5 +45,12 @@ jobs:
             echo "변경 없음"
           else
             git commit -m "chore(cardnews): 벤치마킹 자료 주간 갱신"
-            git push
+            # 경합 시 rebase 후 재시도(A8)
+            pushed=0
+            for i in 1 2 3 4 5; do
+              git pull --rebase origin ${{ github.ref_name }} || true
+              if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+              echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+            done
+            [ "$pushed" = 1 ]
           fi

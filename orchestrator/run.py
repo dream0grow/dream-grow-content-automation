@@ -196,7 +196,10 @@ def _save_research(page_id: str, results: list[dict]):
 
 def handle_keyword(card: dict):
     """keyword/queued → Claude 점수화 → 사람 승인 대기."""
-    research = notion_state.read_sections(card["page_id"])
+    # 키워드 점수화엔 리서치 산출물만 필요하다(누적 초안·검수 제외로 토큰 절감, B3).
+    research = notion_state.read_sections_by_prefix(
+        card["page_id"], "🔍 리서치", "📋 상세", "⚠️ Manus",
+    )
     scored = llm.call_json(
         prompts.KEYWORD_SCORE.format(
             topic=card["topic"], audience=card["audience"], research=research[:20000],
@@ -268,7 +271,11 @@ def handle_keyword_approved(card: dict):
     revision_note = notion_state.read_latest_section(page_id, REVISION_SECTION).strip()
     if revision_note:
         log(f"{card['content_id']} 수정 지시 반영해 재초안")
-    context = notion_state.read_sections(page_id)
+    # 브리프엔 리서치+키워드만 필요하다. 재초안 시 누적된 옛 초안/검수/평가를
+    # 통째로 다시 싣지 않도록 관련 섹션만 고른다(B3, A1 재초안 경로와 시너지).
+    context = notion_state.read_sections_by_prefix(
+        page_id, "🔍 리서치", "📋 상세", "🏷️ 키워드", "📝 수정 요청",
+    )
     brief = llm.call_json(
         prompts.BRIEF.format(
             keyword=keyword, topic=card["topic"],
@@ -288,6 +295,7 @@ def handle_keyword_approved(card: dict):
         result = agent_dialogue.run_draft_dialogue(
             brief, fmt, style_context=agent_dialogue.get_style_context(fmt),
             hook_examples=agent_dialogue.load_hooks(),
+            benchmark=agent_dialogue.load_benchmark(fmt),
             extra_directive=revision_note,
         )
         notion_state.append_section(

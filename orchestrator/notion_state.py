@@ -330,6 +330,36 @@ def read_latest_section(page_id: str, heading_prefix: str) -> str:
     return read_sections(matches[-1])
 
 
+def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
+    """heading이 주어진 접두사 중 하나로 시작하는 토글들만 골라 읽는다.
+
+    다음 단계 에이전트에 카드 본문 전체(누적 초안·검수·평가 포함)를 넣는 대신
+    필요한 섹션만 주입해 토큰을 아낀다(B3). 접두사가 없으면 전체를 읽는다.
+    """
+    if not prefixes:
+        return read_sections(page_id)
+    out: list[str] = []
+    cursor = None
+    while True:
+        path = f"/blocks/{page_id}/children?page_size=100"
+        if cursor:
+            path += f"&start_cursor={cursor}"
+        data = _request("GET", path)
+        for block in data.get("results", []):
+            if block["type"] != "toggle":
+                continue
+            heading = "".join(
+                x["plain_text"] for x in block["toggle"].get("rich_text", [])
+            )
+            if any(heading.startswith(p) for p in prefixes):
+                out.append(heading)
+                out.append(read_sections(block["id"]))
+        if not data.get("has_more"):
+            break
+        cursor = data.get("next_cursor")
+    return "\n".join(out)
+
+
 def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
                 audience: str = "", body: str = "") -> str:
     """새 콘텐츠 카드(또는 큐시트)를 생성하고 page_id를 반환한다."""
