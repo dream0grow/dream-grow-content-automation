@@ -76,10 +76,12 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
         feedback = "\n".join(
             critique.get("issues", []) + critique.get("suggestions", [])
         )
+        # 재작성 호출은 직전 초안이 이미 스타일을 담고 있으므로
+        # 벤치마크·훅 예시를 절반으로 줄여 토큰을 아낀다
         draft = llm.call_writing(
             prompts.WRITER.format(
-                format=fmt, brief=brief_text, style_context=style_block,
-                hook_examples=hook_block,
+                format=fmt, brief=brief_text, style_context=style_block[:4000],
+                hook_examples=hook_block[:1500],
                 feedback_block=(
                     "[비평가 피드백 - 반드시 반영하되 브리프의 핵심 메시지는 유지]\n"
                     f"{feedback}\n\n[직전 초안]\n{draft}"
@@ -114,8 +116,8 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
             break  # 되먹일 구체적 피드백이 없으면 재작성 불가 → 사람에게
         draft = llm.call_writing(
             prompts.WRITER.format(
-                format=fmt, brief=brief_text, style_context=style_block,
-                hook_examples=hook_block,
+                format=fmt, brief=brief_text, style_context=style_block[:4000],
+                hook_examples=hook_block[:1500],
                 feedback_block=(
                     "[교육윤리 검수 피드백 - 반드시 반영. 부모 죄책감/공포 유발, "
                     "아이 낙인 표현, 효과 과장·미검증 통계를 제거하되 "

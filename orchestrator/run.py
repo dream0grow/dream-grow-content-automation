@@ -182,7 +182,9 @@ def _save_research(page_id: str, results: list[dict]):
 
 def handle_keyword(card: dict):
     """keyword/queued → Claude 점수화 → 사람 승인 대기."""
-    research = notion_state.read_sections(card["page_id"])
+    # 토큰 절약: 카드 본문 전체 대신 리서치 섹션만 넣는다
+    research = (notion_state.read_sections_by_prefix(card["page_id"], "🔍 리서치")
+                or notion_state.read_sections(card["page_id"]))
     scored = llm.call_json(
         prompts.KEYWORD_SCORE.format(
             topic=card["topic"], audience=card["audience"], research=research[:20000],
@@ -250,7 +252,12 @@ def handle_keyword_approved(card: dict):
     notion_state.update_card(
         page_id, stage="brief", status="running", approval_status="not_requested",
     )
-    context = notion_state.read_sections(page_id)
+    # 토큰 절약: 브리프에 필요한 섹션(리서치+키워드 표+상세)만 넣는다
+    context = "\n\n".join(filter(None, (
+        notion_state.read_sections_by_prefix(page_id, "🔍 리서치"),
+        notion_state.read_sections_by_prefix(page_id, "🏷️ 키워드 후보"),
+        notion_state.read_sections_by_prefix(page_id, "📋 상세"),
+    ))) or notion_state.read_sections(page_id)
     brief = llm.call_json(
         prompts.BRIEF.format(
             keyword=keyword, topic=card["topic"],
@@ -288,21 +295,8 @@ def handle_keyword_approved(card: dict):
         if rank.get(review.get("review_status", "revise"), 1) > rank[worst_review]:
             worst_review = review.get("review_status", "revise")
 
-        # 자동 글 평가 - 사람 검수자가 승인 판단에 참고
-        try:
-            score = llm.call_json(
-                prompts.QUALITY_SCORE.format(format=fmt, draft=result["draft"]),
-                system=prompts.get_system(),
-            )
-            notion_state.append_formatted_section(
-                page_id,
-                f"📊 글 평가 ({fmt}) - 총 {score.get('total', '?')}/50점",
-                _fmt_score(score),
-            )
-        except Exception as e:
-            log(f"{card['content_id']} 글 평가 실패 ({fmt}): {e}")
-
-        # 평가표(사용자 글 기준) AI 검토 + 2차안(줄바꿈 교정) 토글 추가
+        # 평가표(사용자 글 기준) AI 검토 + 2차안(줄바꿈 교정) 토글 추가.
+        # 별도 글 평가(QUALITY_SCORE)는 평가표 채점과 중복이라 제거했다 (토큰 절약)
         try:
             from orchestrator import rubric_review
             if rubric_review.run_for_card(page_id, fmt, skip_if_exists=True):
@@ -312,13 +306,12 @@ def handle_keyword_approved(card: dict):
 
     notion_state.append_section(
         page_id, "⏸️ 발행 승인 요청",
-        "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
+        "확인 순서: 📐 평가표 점검 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
         "초안을 직접 수정해도 됩니다 ('✍️ 초안' 토글 안에서만, AI 원본은 그대로 두세요). "
         "수정분은 발행 시 자동으로 문체 학습에 반영됩니다.\n"
-        "approval_status를 approved로 바꾸면 thread는 Threads에, "
-        "newsletter는 스티비로 자동 발행됩니다 (STIBEE_AUTO_SEND가 꺼져 있으면 "
-        "스티비에 초안만 생성되니 대시보드에서 확인 후 발송하세요). "
-        "수정 요청은 approval_status=revision_requested + 코멘트.",
+        "① 발행: approval_status를 approved로 — thread는 Threads, newsletter는 스티비로 자동 발행.\n"
+        "② AI에게 수정 시키기: '🛠 수정 지시' 섹션(토글)을 만들어 지시를 적고 "
+        "approval_status를 revision_requested로 — 다음 실행이 재작성해 다시 승인 요청합니다.",
     )
     notion_state.update_card(
         page_id, stage="approval", status="needs_human",
@@ -337,10 +330,77 @@ def handle_keyword_approved(card: dict):
 def handle_final_approved(card: dict):
     """approval + approved + 검수 통과 → publish_ready (같은 실행에서 발행까지 이어짐)."""
     if card["review_status"] != "approved":
-        log(f"{card['content_id']} review_status={card['review_status']} → 게이트 차단")
+        # 조용히 차단하면 카드가 영구 정체된다(과거 6장 데드엔드의 원인).
+        # 승인 요청 상태로 되돌리고 이유와 다음 행동을 사람에게 통지한다.
+        notion_state.update_card(
+            card["page_id"], status="needs_human", approval_status="requested",
+        )
+        notion_state.notify(
+            card["page_id"],
+            f"⛔ [{card['content_id']}] 승인하셨지만 검수 상태가 "
+            f"'{card['review_status']}'라 발행을 막았습니다. 선택지:\n"
+            "① AI 재작성: '🛠 수정 지시' 섹션에 지시를 적고 "
+            "approval_status=revision_requested\n"
+            "② 검수 무시하고 발행: review_status를 approved로 바꾼 뒤 "
+            "approval_status를 다시 approved로",
+        )
+        log(f"{card['content_id']} review_status={card['review_status']} → 게이트 차단 통지")
         return
     notion_state.update_card(card["page_id"], stage="publish_ready", status="queued")
     log(f"{card['content_id']} publish_ready → 발행 대기열")
+
+
+def handle_revision_requested(card: dict):
+    """approval + revision_requested → 사람 지시대로 초안 재작성 → 재승인 요청.
+
+    지시는 '🛠 수정 지시' 섹션에서 읽는다. 지시가 없으면 어디에 적어야 하는지
+    알려주고 대기한다 (조용한 방치 금지).
+    """
+    page_id = card["page_id"]
+    instruction = notion_state.read_latest_section(page_id, "🛠 수정 지시").strip()
+    if not instruction:
+        if card["status"] != "needs_human":
+            notion_state.update_card(page_id, status="needs_human")
+            notion_state.notify(
+                page_id,
+                f"✏️ [{card['content_id']}] 수정 요청을 받았지만 지시문이 없습니다. "
+                "'🛠 수정 지시' 섹션(토글)을 만들어 무엇을 어떻게 고칠지 적어주세요. "
+                "다음 실행이 재작성합니다.",
+            )
+        return
+
+    notion_state.update_card(page_id, status="running",
+                             approval_status="not_requested")
+    brief_text = notion_state.read_sections_by_prefix(page_id, "📝 브리프")[:6000]
+    formats = [f.strip() for f in card["format"].split(",") if f.strip()]
+    supported = [f for f in formats if f in ("thread", "newsletter")] or ["thread"]
+    for fmt in supported:
+        draft = notion_state.read_latest_section(page_id, f"✍️ 초안 ({fmt})")
+        if not draft.strip():
+            continue
+        revised = llm.call_writing(
+            prompts.WRITER.format(
+                format=fmt, brief=brief_text, style_context="", hook_examples="",
+                feedback_block=(
+                    "[사용자 수정 지시 — 최우선으로 반영하라. 지시 밖의 내용은 "
+                    "가능한 한 직전 초안을 유지하라]\n"
+                    f"{instruction}\n\n[직전 초안]\n{draft}"
+                ),
+            ),
+            system=prompts.get_system(),
+            max_tokens=16000 if fmt == "newsletter" else 8000,
+        )
+        notion_state.append_section(page_id, f"✍️ 초안 ({fmt})", revised)
+    notion_state.update_card(
+        page_id, stage="approval", status="needs_human",
+        approval_status="requested",
+    )
+    notion_state.notify(
+        page_id,
+        f"✏️ [{card['content_id']}] 수정 지시를 반영해 재작성했습니다. "
+        "새 '✍️ 초안'을 확인하고 approval_status를 approved로 바꾸면 발행됩니다.",
+    )
+    log(f"{card['content_id']} 수정 지시 반영 → 재승인 대기 ⏸️")
 
 
 def handle_publish(card: dict):
@@ -386,13 +446,59 @@ DISPATCH = [
     ("research", "running", None, handle_research),
     ("keyword", "queued", None, handle_keyword),
     ("keyword_approval", None, "approved", handle_keyword_approved),
+    ("approval", None, "revision_requested", handle_revision_requested),
     ("approval", None, "approved", handle_final_approved),
     ("publish_ready", "queued", None, handle_publish),
 ]
 
+# 중간 크래시(Actions 타임아웃 등)로 running에 멈춘 카드를 재큐하는 임계 시간
+STUCK_RUNNING_MINUTES = int(os.getenv("DG_STUCK_RUNNING_MINUTES", "60"))
+RETRY_MARK = "[자동재시도] "
+
+
+def sweep_stuck_cards():
+    """조용히 죽은 카드를 되살리거나 사람에게 알린다 (무개입 자동화의 안전망).
+
+    1. status=failed: 1회 자동 재큐(RETRY_MARK로 표시). 재시도 후 또 실패하면
+       그대로 두고 알림만 보낸다 (무한 재시도 방지).
+    2. brief/draft가 running인 채 STUCK_RUNNING_MINUTES 초과: 실행 도중 크래시로
+       고아가 된 것 → keyword_approval/approved로 되돌려 다음 루프가 재생성.
+    """
+    for card in notion_state.query_cards(status="failed", page_size=10):
+        pid, cid = card["page_id"], card.get("content_id") or "?"
+        # 재시도 여부는 idempotency_key의 RETRY_MARK 접두사로 표시한다
+        if card["idempotency_key"].startswith(RETRY_MARK):
+            continue  # 이미 한 번 재시도한 카드 — 사람 판단 대기
+        retry_status = {"research": "running"}.get(card["stage"], "queued")
+        notion_state.update_card(
+            pid, status=retry_status,
+            idempotency_key=RETRY_MARK + card["idempotency_key"],
+        )
+        notion_state.notify(
+            pid, f"🔁 [{cid}] 실패한 카드를 자동 재시도합니다 "
+                 f"(stage={card['stage']}). 또 실패하면 다시 알립니다.")
+        log(f"{cid} failed → 자동 재시도 ({card['stage']}/{retry_status})")
+
+    for stage in ("brief", "draft"):
+        for card in notion_state.query_cards(stage=stage, status="running",
+                                             page_size=10):
+            if notion_state.age_minutes(card) < STUCK_RUNNING_MINUTES:
+                continue
+            notion_state.update_card(
+                card["page_id"], stage="keyword_approval", status="queued",
+                approval_status="approved",
+            )
+            log(f"{card.get('content_id')} {stage}/running "
+                f"{STUCK_RUNNING_MINUTES}분 초과 고아 → 재생성 큐")
+
 
 def run(only_stage: str | None = None):
     notion_state.require_backend()
+    if not only_stage:
+        try:
+            sweep_stuck_cards()
+        except Exception as e:
+            log(f"고아 카드 청소 실패 (계속 진행): {e}")
     processed = 0
     for stage, status, approval, handler in DISPATCH:
         if only_stage and stage != only_stage:
@@ -414,6 +520,18 @@ def run(only_stage: str | None = None):
                     last_error=f"{type(e).__name__}: {e}"[:1500],
                 )
                 log(f"{card.get('content_id') or card['page_id']} 실패: {e}")
+                # 침묵 금지: 재시도까지 실패한 카드는 사람이 알아야 한다.
+                # (첫 실패는 다음 실행의 sweep이 자동 재시도하므로 알리지 않는다)
+                if card["idempotency_key"].startswith(RETRY_MARK):
+                    try:
+                        notion_state.notify(
+                            card["page_id"],
+                            f"🚨 [{card.get('content_id') or '?'}] 자동 재시도까지 "
+                            f"실패했습니다 (stage={stage}). last_error를 확인해주세요: "
+                            f"{type(e).__name__}: {str(e)[:200]}",
+                        )
+                    except Exception as ne:
+                        log(f"실패 알림 발송 실패: {ne}")
     log(f"완료: {processed}개 카드 처리")
 
 

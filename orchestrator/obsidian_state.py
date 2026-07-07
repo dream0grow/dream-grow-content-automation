@@ -223,6 +223,18 @@ def read_latest_section(page_id: str, heading_prefix: str) -> str:
     return latest.strip()
 
 
+def read_sections_by_prefix(page_id: str, heading_prefix: str) -> str:
+    """같은 접두사의 모든 섹션을 이어 붙여 반환한다 — 전체 본문 대비 토큰 절약용."""
+    body = read_sections(page_id)
+    out = []
+    for sec in re.split(r"^## ", body, flags=re.MULTILINE):
+        if not sec.startswith(heading_prefix):
+            continue
+        heading, _, content = sec.partition("\n")
+        out.append(f"[{heading.strip()}]\n{content.strip()}")
+    return "\n\n".join(out)
+
+
 # ---------- 알림 ----------
 
 def notify(page_id: str, message: str) -> None:

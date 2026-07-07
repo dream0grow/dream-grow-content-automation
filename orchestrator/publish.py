@@ -47,10 +47,22 @@ def split_posts(draft: str) -> list[str]:
         candidate = f"{current}\n\n{para}".strip() if current else para
         if len(candidate) <= POST_CHAR_LIMIT - 20:
             current = candidate
-        else:
-            if current:
-                posts.append(current)
-            current = para[:POST_CHAR_LIMIT]
+            continue
+        if current:
+            posts.append(current)
+        # 한 문단이 글자 수 제한을 넘으면 문장 단위로 이월한다 (내용 유실 금지)
+        current = ""
+        for sentence in re.split(r"(?<=[.!?…])\s+|\n", para):
+            if not sentence.strip():
+                continue
+            cand = f"{current} {sentence}".strip() if current else sentence.strip()
+            if len(cand) <= POST_CHAR_LIMIT - 20:
+                current = cand
+            else:
+                if current:
+                    posts.append(current)
+                # 문장 하나가 제한을 넘는 극단적 경우만 하드 컷
+                current = sentence.strip()[:POST_CHAR_LIMIT - 20]
     if current:
         posts.append(current)
     return posts
@@ -169,8 +181,15 @@ def handle_publish(card: dict):
         # newsletter 단독 카드: 실발송 성공이면 발행 완료 처리, 아니면 사람 확인 대기
         if newsletter_sent:
             notion_state.update_card(page_id, stage="published", status="done")
+            notion_state.notify(
+                page_id, f"🚀 [{card.get('content_id') or ''}] 뉴스레터 발송 완료.")
         else:
             notion_state.update_card(page_id, status="needs_human")
+            notion_state.notify(
+                page_id,
+                f"⚠️ [{card.get('content_id') or ''}] 뉴스레터 자동 발송이 안 됐습니다. "
+                "카드의 발행 안내 섹션을 확인해주세요 (Secret 미설정/AUTO_SEND 꺼짐/오류).",
+            )
         return
 
     if not available():
@@ -180,6 +199,11 @@ def handle_publish(card: dict):
             "수동 발행 후 stage를 published로 바꾸거나, Secret 등록 후 status를 queued로 되돌리세요.",
         )
         notion_state.update_card(page_id, status="needs_human")
+        notion_state.notify(
+            page_id,
+            f"⚠️ [{card.get('content_id') or ''}] Threads Secret이 없어 자동 발행을 "
+            "건너뛰었습니다. 수동 발행하거나 Secret을 등록해주세요.",
+        )
         return
 
     draft = (
@@ -202,3 +226,9 @@ def handle_publish(card: dict):
     if permalink:
         fields["published_url"] = permalink
     notion_state.update_card(page_id, **fields)
+    # 성공도 폰에서 사이클이 닫히게 통지한다 (링크 포함)
+    notion_state.notify(
+        page_id,
+        f"🚀 [{card.get('content_id') or ''}] Threads 발행 완료 "
+        f"({len(media_ids)}개 체인) {permalink or ''}".strip(),
+    )

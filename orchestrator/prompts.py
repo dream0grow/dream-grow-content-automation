@@ -48,8 +48,16 @@ def get_system(extra: str = "") -> str:
     return "\n\n".join(parts)
 
 
+import functools
+
+
+@functools.lru_cache(maxsize=1)
 def _load_learned_overlay() -> str:
-    """Honcho의 approved-prompt-overlay 세션에서 승인된 개선 지침을 읽는다."""
+    """Honcho의 approved-prompt-overlay 세션에서 승인된 개선 지침을 읽는다.
+
+    get_system()이 모든 LLM 호출마다 불리므로, Honcho 원격 질의는
+    프로세스당 1회만 한다 (카드 하나에 10여 회 왕복하던 낭비 제거).
+    """
     try:
         from memory_manager import get_honcho_client
         client = get_honcho_client()
@@ -378,6 +386,8 @@ RUBRIC_REVIEW = """당신은 드림그로우의 콘텐츠 품질 평가·교정 
 - 내용·논리·핵심 메시지는 유지하고, 평가표에서 깎인 부분만 고친다.
 - 특히 길이가 긴 줄을 의미 단위로 끊어 모든 줄을 18자 이내로 만든다.
 - 이모지 금지. 본문 외 설명/주석 금지.
+- **총점 88점 이상이면 고칠 것이 적다는 뜻이므로 revised를 빈 문자열("")로 두어라**
+  (불필요한 전문 재작성으로 토큰을 낭비하지 않는다).
 
 초안:
 {draft}

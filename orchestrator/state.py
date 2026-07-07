@@ -16,12 +16,12 @@ if BACKEND == "obsidian":
     from orchestrator.obsidian_state import (  # noqa: F401
         age_minutes, append_formatted_section, append_section, create_card,
         next_content_id, notify, query_cards, read_latest_section,
-        read_sections, require_backend, update_card,
+        read_sections, read_sections_by_prefix, require_backend, update_card,
     )
 else:
     from orchestrator.notion_state import (  # noqa: F401
         age_minutes, append_formatted_section, append_section, create_card,
         next_content_id, notify, query_cards, read_latest_section,
-        read_sections, update_card,
+        read_sections, read_sections_by_prefix, update_card,
     )
     from orchestrator.config import require_notion as require_backend  # noqa: F401

@@ -107,5 +107,7 @@ jobs:
             exit 0
           fi
           git commit -m "플라우드 파이프라인: $(date +%Y-%m-%d) 볼트 갱신"
-          git pull --rebase origin ${{ github.ref_name }}
-          git push origin HEAD:${{ github.ref_name }}
+          for i in 1 2 3; do
+            git pull --rebase origin ${{ github.ref_name }} && git push origin HEAD:${{ github.ref_name }} && break
+            echo "push 재시도 $i"; sleep 5
+          done

@@ -302,6 +302,33 @@ def read_sections(page_id: str) -> str:
     return "\n".join(lines)
 
 
+def read_sections_by_prefix(page_id: str, heading_prefix: str) -> str:
+    """heading_prefix로 시작하는 모든 토글의 내용을 이어 붙여 반환한다.
+
+    read_sections(전체)를 LLM에 통째로 넣는 것보다 훨씬 토큰이 싸다.
+    예: read_sections_by_prefix(pid, "🔍 리서치") → 리서치 3건만.
+    """
+    matches: list[str] = []
+    cursor = None
+    while True:
+        path = f"/blocks/{page_id}/children?page_size=100"
+        if cursor:
+            path += f"&start_cursor={cursor}"
+        data = _request("GET", path)
+        for block in data.get("results", []):
+            if block["type"] != "toggle":
+                continue
+            heading = "".join(
+                x["plain_text"] for x in block["toggle"].get("rich_text", [])
+            )
+            if heading.startswith(heading_prefix):
+                matches.append(f"[{heading}]\n" + read_sections(block["id"]))
+        if not data.get("has_more"):
+            break
+        cursor = data.get("next_cursor")
+    return "\n\n".join(matches)
+
+
 def read_latest_section(page_id: str, heading_prefix: str) -> str:
     """카드 본문에서 heading_prefix로 시작하는 가장 최근 토글의 내용을 읽는다.
 

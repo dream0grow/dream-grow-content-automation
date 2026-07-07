@@ -22,12 +22,25 @@ from vault_pipeline.vault_io import (
 
 from orchestrator import llm
 
-# 되먹임 감시 대상 (노션 이관 후 vault/파이프라인 폴더가 추가된다)
+# 되먹임 감시 대상
 DRAFT_DIRS = [
     "프로젝트/교육운동/블로그_초안",
     "프로젝트/교육운동/페이스북_초안",
 ]
+# 학부모 파이프라인 카드(옵시디언 백엔드): stage=published가 완료 신호.
+# 문체 학습은 발행 시 style_learn(Honcho)이 하므로 여기서는 메모 분해만 한다.
+PIPELINE_DIRS = ["파이프라인/활성", "파이프라인/발행완료"]
 DONE_STATES = {"발행완료", "리뷰완료"}
+
+
+def _latest_section(body: str, prefix: str) -> str:
+    """카드 본문에서 prefix로 시작하는 마지막 `## 섹션`의 내용."""
+    import re
+    latest = ""
+    for sec in re.split(r"^## ", body, flags=re.MULTILINE):
+        if sec.startswith(prefix):
+            latest = sec.split("\n", 1)[1] if "\n" in sec else ""
+    return latest.strip()
 
 
 def _ledger_path() -> Path:
@@ -71,6 +84,27 @@ def find_published() -> list[dict]:
                 continue
             targets.append({"key": key, "path": p, "meta": meta,
                             "body": body.strip(), "dir": rel})
+
+    # 학부모 파이프라인 카드: 발행 완료(stage=published)된 초안을 메모로 환류
+    for rel in PIPELINE_DIRS:
+        directory = vault_root() / rel
+        if not directory.exists():
+            continue
+        for p in sorted(directory.glob("*.md")):
+            key = f"{rel}/{p.name}"
+            if key in ledger or f"{PIPELINE_DIRS[0]}/{p.name}" in ledger:
+                continue
+            meta, body = parse_frontmatter(
+                p.read_text(encoding="utf-8", errors="ignore"))
+            if str(meta.get("stage", "")).strip() != "published":
+                continue
+            draft = _latest_section(body, "✍️ 초안")
+            if not draft:
+                continue
+            meta = dict(meta, 채널=str(meta.get("format", "") or "thread"),
+                        published_url=meta.get("published_url", ""))
+            targets.append({"key": key, "path": p, "meta": meta,
+                            "body": draft, "dir": rel})
     return targets
 
 
