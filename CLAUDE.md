@@ -91,7 +91,32 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 
 ## 현재 상태 (세션마다 갱신)
 
-### 옵시디언 중심 재구축 + 플라우드 3종 시스템 (2026-07-06, 브랜치 `claude/content-automation-obsidian-mtsmj6`) — ⬅️ 이번 세션 작업
+### 오케스트레이터 안정성·토큰 수리 (2026-07-07, 브랜치 `claude/dreamgrow-orchestrator-review-z4zo4b`) — ⬅️ 이번 세션 작업
+
+무개입 자동화를 깨던 "조용히 멈추는 구멍" 봉합 + 토큰 절감. 전체 테스트 25종 통과(신규 `orchestrator/test_run.py` 9종).
+- **A1 수정 요청 데드엔드 해소**: `approval + revision_requested`를 처리하는 `handle_revision_requested`
+  추가(DISPATCH 배선). 사람이 `📝 수정 요청` 섹션에 지시를 적고 `approval_status=revision_requested`로
+  바꾸면 → keyword_approval로 되돌려 지시를 작가에게 되먹여 재초안(빈 키워드면 키워드 게이트로).
+  `run_draft_dialogue(extra_directive=...)`로 첫 집필부터 반영.
+- **A2 침묵 차단 해소**: `handle_final_approved`가 검수 미통과인데 승인된 경우 로그만 남기던 것을,
+  `needs_human`+`approval_status=blocked`로 디큐하고 사유·다음 행동(재승인/재초안)을 `notify()`로 통지.
+- **A3 실패 침묵 해소**: `run()`의 예외를 `_handle_failure`로 처리 — intake/research/keyword는 1회 자동
+  재시도(`last_error`에 `[자동재시도]` 표식), 재시도 후에도 실패면 `failed`+통지. keyword_approval/approval은
+  status 무시 쿼리라 표식으로 1회 재시도 후 `approval_status=failed`로 디큐. **publish_ready는 부분발행
+  중복 위험으로 재시도 제외**(즉시 통지).
+- **A4 고아 카드 청소기**: `run()` 시작 시 `_sweep_stale_running` — brief/draft가 running으로
+  `DG_STALE_RUNNING_MINUTES`(기본 60) 넘게 멈추면 keyword_approval/approved로 재큐.
+- **A5 스레드 글 유실 방지**: `split_posts`가 500자 초과 문단을 `[:500]`으로 잘라 버리던 것을
+  문장 단위(`_split_sentences`) 이월 분할로 교체 — 글이 유실되지 않음.
+- **A6 발행 성공 통지**: Threads/뉴스레터 발행 성공 시 링크와 함께 `notify()`(폰에서 사이클 종료).
+- **B1 토큰**: `prompts._load_learned_overlay`에 `@lru_cache` — 카드당 10여 회 Honcho 원격 질의를 1회로.
+- **B2 토큰**: 글 평가 총점이 `DG_RUBRIC_SKIP_QUALITY`(기본 45/50) 이상이면 2차안(전문 재작성) 생략.
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② ⚠️ **모델 ID 확인** — `config.py` 기본
+  `DG_MODEL_UTILITY=claude-sonnet-4-6`은 실재 여부 불확실. Secret으로 유효 ID를 덮고 있지 않다면
+  유틸리티 LLM 호출이 전부 404로 실패하니 `claude-sonnet-5` 등으로 고정 권장(별도 확인 요청).
+  ③ B4(CLAUDE.md 대청소: 상단을 옵시디언 현행으로 교체, 과거 로그 `docs/HISTORY.md` 이관)는 다음 세션.
+
+### 옵시디언 중심 재구축 + 플라우드 3종 시스템 (2026-07-06, 브랜치 `claude/content-automation-obsidian-mtsmj6`)
 
 **방향 전환 확정 (사용자 결정)**: ① 볼트(초생산)를 GitHub 저장소로 동기화(이 저장소 `vault/`)
 ② 시스템을 노션 → 옵시디언 중심으로 전면 재구축, **노션은 최종 철수(구독 해지)** —

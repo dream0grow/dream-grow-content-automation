@@ -36,6 +36,14 @@ ETHICS_MAX_ROUNDS = int(os.getenv("DG_ETHICS_MAX_ROUNDS", "2"))
 # 한 번의 cron 실행에서 처리할 최대 카드 수 (rate limit 보호)
 MAX_CARDS_PER_RUN = int(os.getenv("DG_MAX_CARDS_PER_RUN", "5"))
 
+# brief/draft 단계에서 running으로 이만큼 분을 넘기면 중간 크래시로 보고 재큐한다.
+# (Actions 타임아웃/OOM으로 초안 생성이 끊긴 고아 카드가 영구히 방치되지 않게)
+STALE_RUNNING_MINUTES = int(os.getenv("DG_STALE_RUNNING_MINUTES", "60"))
+
+# 글 평가(50점) 총점이 이 값 이상이면 평가표 2차안(전문 재작성) 호출을 생략한다.
+# 좋은 초안에 굳이 비싼 재작성을 돌리지 않기 위한 토큰 절감 게이트. 0이면 항상 생성.
+RUBRIC_SKIP_QUALITY = int(os.getenv("DG_RUBRIC_SKIP_QUALITY", "45"))
+
 # 키워드 자동 승인: 최고점 키워드를 사람 승인 없이 자동 채택 → 초안까지 자동 진행.
 # 사람 병목을 줄이기 위해 기본 ON. 발행 승인 게이트만 사람이 통과시킨다.
 # 끄려면 DG_AUTO_APPROVE_KEYWORD=false (또는 0/no/off). 빈 값/미설정은 ON으로 본다.

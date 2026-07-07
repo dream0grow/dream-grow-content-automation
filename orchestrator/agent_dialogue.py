@@ -37,10 +37,11 @@ def load_hooks(limit: int = 4000) -> str:
 
 
 def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
-                       hook_examples: str = "") -> dict:
+                       hook_examples: str = "", extra_directive: str = "") -> dict:
     """브리프 → 토론을 거친 초안을 생성한다.
 
     hook_examples: 후킹 DB에서 가져온 후킹 패턴/예시 (없으면 일반 지침만 적용)
+    extra_directive: 사람이 남긴 수정 지시(재초안 시). 첫 집필부터 반드시 반영한다.
     Returns: {"draft": str, "review": dict, "transcript": str, "rounds": int}
     """
     transcript: list[str] = []
@@ -48,13 +49,16 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
     brief_summary = f"{brief.get('core_message', '')} / CTA: {brief.get('cta', '')}"
     style_block = f"[채널 스타일 가이드]\n{style_context}" if style_context else ""
     hook_block = f"[후킹 예시 - 첫 글 작성 시 참고]\n{hook_examples}" if hook_examples else ""
+    directive_block = (
+        f"[사람의 수정 지시 - 최우선 반영]\n{extra_directive}" if extra_directive.strip() else ""
+    )
     # 뉴스레터는 3,000~6,000자 심화 콘텐츠라 토큰 예산을 크게 잡는다
     write_tokens = 16000 if fmt == "newsletter" else 8000
 
     draft = llm.call_writing(
         prompts.WRITER.format(
             format=fmt, brief=brief_text, style_context=style_block,
-            hook_examples=hook_block, feedback_block="",
+            hook_examples=hook_block, feedback_block=directive_block,
         ),
         system=prompts.get_system(),
         max_tokens=write_tokens,

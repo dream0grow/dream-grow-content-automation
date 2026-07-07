@@ -4,6 +4,7 @@
 자가 학습 루프(self_improve)가 승인된 개선안을 Honcho에 저장하면
 get_system()이 실행 시점에 오버레이로 합쳐 사용한다.
 """
+from functools import lru_cache
 
 BRAND_VOICE = """당신은 드림그로우(Dream_Grow)의 콘텐츠 에이전트입니다.
 드림그로우는 초등 학부모를 위한 교육 콘텐츠 브랜드입니다.
@@ -48,8 +49,14 @@ def get_system(extra: str = "") -> str:
     return "\n\n".join(parts)
 
 
+@lru_cache(maxsize=1)
 def _load_learned_overlay() -> str:
-    """Honcho의 approved-prompt-overlay 세션에서 승인된 개선 지침을 읽는다."""
+    """Honcho의 approved-prompt-overlay 세션에서 승인된 개선 지침을 읽는다.
+
+    카드 1장 처리에 get_system()이 10여 번 불리는데 그때마다 Honcho에 원격
+    질의하면 왕복 지연·비용이 크다. 오버레이는 실행 중 거의 바뀌지 않으므로
+    프로세스 내 1회만 조회하고 캐시한다 (cron이 매번 새 프로세스라 갱신은 자동).
+    """
     try:
         from memory_manager import get_honcho_client
         client = get_honcho_client()

@@ -42,18 +42,42 @@ def split_posts(draft: str) -> list[str]:
     if len(draft) <= POST_CHAR_LIMIT:
         return [draft]
 
-    posts, current = [], ""
+    # 문단을 순서대로 담되, 500자를 넘기는 문단은 문장 단위로 쪼개 이월한다.
+    # (예전엔 para[:500]으로 잘라 나머지를 통째로 버렸다 — 글 유실 위험 A5)
+    units: list[str] = []
     for para in draft.split("\n\n"):
-        candidate = f"{current}\n\n{para}".strip() if current else para
+        if len(para) <= POST_CHAR_LIMIT - 20:
+            units.append(para)
+        else:
+            units.extend(_split_sentences(para))
+
+    posts, current = [], ""
+    for unit in units:
+        unit = unit.strip()
+        if not unit:
+            continue
+        candidate = f"{current}\n\n{unit}".strip() if current else unit
         if len(candidate) <= POST_CHAR_LIMIT - 20:
             current = candidate
         else:
             if current:
                 posts.append(current)
-            current = para[:POST_CHAR_LIMIT]
+            # 한 문장이 그래도 한도를 넘으면(극단) 안전하게 조각내 모두 싣는다.
+            if len(unit) > POST_CHAR_LIMIT:
+                for i in range(0, len(unit), POST_CHAR_LIMIT):
+                    posts.append(unit[i:i + POST_CHAR_LIMIT])
+                current = ""
+            else:
+                current = unit
     if current:
         posts.append(current)
     return posts
+
+
+def _split_sentences(text: str) -> list[str]:
+    """한국어 종결부호 뒤에서 문장 단위로 나눈다 (분할 실패 시 통짜 반환)."""
+    parts = re.split(r"(?<=[.!?。…])\s+", text.strip())
+    return [p for p in parts if p.strip()] or [text.strip()]
 
 
 def publish_chain(posts: list[str]) -> tuple[list[str], str]:
@@ -169,8 +193,17 @@ def handle_publish(card: dict):
         # newsletter 단독 카드: 실발송 성공이면 발행 완료 처리, 아니면 사람 확인 대기
         if newsletter_sent:
             notion_state.update_card(page_id, stage="published", status="done")
+            notion_state.notify(
+                page_id,
+                f"✅ [{card.get('content_id', '')}] 뉴스레터가 스티비로 발행됐습니다.",
+            )
         else:
             notion_state.update_card(page_id, status="needs_human")
+            notion_state.notify(
+                page_id,
+                f"📧 [{card.get('content_id', '')}] 뉴스레터 자동 발송이 안 돼 "
+                "대시보드/스티비에서 확인이 필요합니다.",
+            )
         return
 
     if not available():
@@ -202,3 +235,8 @@ def handle_publish(card: dict):
     if permalink:
         fields["published_url"] = permalink
     notion_state.update_card(page_id, **fields)
+    notion_state.notify(
+        page_id,
+        f"✅ [{card.get('content_id', '')}] Threads 발행 완료 ({len(media_ids)}개). "
+        + (permalink or "링크 조회 실패"),
+    )
