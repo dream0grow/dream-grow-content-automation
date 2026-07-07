@@ -7,16 +7,9 @@ from dotenv import load_dotenv
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
-# 노션 (필수)
-NOTION_API_KEY = os.getenv("NOTION_API_KEY", "")
-NOTION_PIPELINE_DB_ID = os.getenv("NOTION_PIPELINE_DB_ID", "")
-NOTION_VERSION = "2022-06-28"
-# 승인 대기 시 멘션할 노션 사용자 ID. 이게 있어야 노션 푸시 알림이 뜬다.
-# Secret 미설정(빈 문자열)이면 C-Box 기본 사용자로 폴백해 알림이 꺼지지 않게 한다.
-NOTION_MENTION_USER_ID = (
-    os.getenv("NOTION_MENTION_USER_ID", "").strip()
-    or "595b4d12-18aa-43a7-9aee-5ee84f3dc7ac"
-)
+# 카드 저장소 = 옵시디언 볼트 하나 (노션 철수 완료). 볼트 경로는 DG_VAULT_ROOT(기본 vault/).
+# 볼트 동기화는 GitHub Actions가 vault/를 커밋·push하는 git/GitHub 단일 경로다.
+# 승인 대기·발행 알림은 텔레그램으로 나간다 (obsidian_state.notify → telegram_notify).
 
 # Manus (선택 - 외부 리서치 전담, 없으면 Claude 리서치로 폴백)
 MANUS_API_KEY = os.getenv("MANUS_API_KEY", "")
@@ -51,16 +44,3 @@ AUTO_APPROVE_KEYWORD = (
     os.getenv("DG_AUTO_APPROVE_KEYWORD", "").strip().lower()
     not in ("0", "false", "no", "off")
 )
-
-
-def require_notion():
-    """노션 설정이 없으면 명확한 에러로 중단한다."""
-    missing = []
-    if not NOTION_API_KEY:
-        missing.append("NOTION_API_KEY")
-    if not NOTION_PIPELINE_DB_ID:
-        missing.append("NOTION_PIPELINE_DB_ID")
-    if missing:
-        raise RuntimeError(
-            f"환경 변수 누락: {', '.join(missing)} (.env 또는 GitHub Secrets에 설정)"
-        )

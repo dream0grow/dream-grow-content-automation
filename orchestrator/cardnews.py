@@ -280,8 +280,7 @@ def main():
     ap.add_argument("--photos-dir", default="")
     ap.add_argument("--body-count", type=int, default=5)
     ap.add_argument("--out", default="cardnews_out")
-    ap.add_argument("--notion-page", default="", help="이 노션 페이지에 카피+카드를 자동 저장하고 앱 푸시")
-    ap.add_argument("--video-url", default="", help="표지 영상 URL(힉스필드 등) — 노션에 함께 저장")
+    ap.add_argument("--video-url", default="", help="표지 영상 URL(힉스필드 등) — 메타에 기록")
     args = ap.parse_args()
     out = Path(args.out)
     ensure_fonts()
@@ -335,29 +334,8 @@ def main():
     except Exception as e:
         log(f"에디터 생성 실패(카드는 정상): {e}")
     log(f"완료: {len(paths)}장 → {out.resolve()} ({sheet.name})")
-
-    # 노션 저장: 페이지 ID를 주면 그 페이지에, 비우면 파이프라인 DB에 새 카드를 자동 생성.
-    # (NOTION_API_KEY 없으면 조용히 건너뜀 — 로컬 드라이런 지원)
-    # 옵시디언 백엔드에서는 노션 업로드 자체가 없으므로 건너뛴다 (PNG는 로컬/아티팩트로 남음)
-    from orchestrator.config import NOTION_API_KEY
-    from orchestrator.state import BACKEND
-    if NOTION_API_KEY and BACKEND != "obsidian":
-        from orchestrator import notion_media
-        from orchestrator import state as notion_state
-        try:
-            page_id = args.notion_page.strip()
-            if not page_id:
-                # stage=published/status=done: 오케스트레이터 디스패치에 안 걸리는 안전한 상태
-                page_id = notion_state.create_card(
-                    f"🖼️ 카드뉴스: {topic[:80]}", stage="published", status="done")
-                log(f"노션 카드 자동 생성: {page_id}")
-            notion_media.save_cardnews(
-                page_id, plan,
-                image_paths=[str(p) for p in paths],
-                video_url=args.video_url)
-            log(f"노션 저장 + 앱 푸시 완료 → https://notion.so/{page_id.replace('-', '')}")
-        except Exception as e:
-            log(f"노션 저장 실패: {e}")
+    # 산출물(PNG·콘택트시트·플랜)은 로컬/Actions 아티팩트로 남는다.
+    # 파이프라인에 태우려면 볼트 카드에 첨부해 발행 단계에서 활용한다(카드뉴스는 발행 산출물).
 
 
 if __name__ == "__main__":

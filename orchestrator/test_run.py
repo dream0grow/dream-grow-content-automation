@@ -47,8 +47,8 @@ class FakeState:
 
 
 def _patch(monkey_state):
-    run.notion_state = monkey_state
-    publish.notion_state = monkey_state
+    run.store = monkey_state
+    publish.store = monkey_state
 
 
 def _last_update(state, page_id):

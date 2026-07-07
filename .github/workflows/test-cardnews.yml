@@ -1,6 +1,5 @@
 # 카드뉴스 실제 생성 (수동 실행)
-# 주제만 입력하면: 초안 → 카드뉴스(한국인 배경, 표지 영상/사진 판단) → 노션에 자동 저장 + 앱 푸시.
-# notion_page를 비우면 파이프라인 DB에 "🖼️ 카드뉴스: {주제}" 카드를 자동 생성해 저장한다.
+# 주제만 입력하면: 초안 → 카드뉴스(한국인 배경, 표지 영상/사진 판단) → PNG 아티팩트로 업로드.
 name: test-cardnews
 
 on:
@@ -13,11 +12,8 @@ on:
         description: "본문 카드 수 (기본 5)"
         required: false
         default: "5"
-      notion_page:
-        description: "저장할 노션 페이지 ID (비우면 새 노션 카드 자동 생성)"
-        required: false
       video_url:
-        description: "표지 영상 URL(힉스필드 등) — 노션에 함께 저장"
+        description: "표지 영상 URL(힉스필드 등) — 메타에 기록"
         required: false
 
 jobs:
@@ -35,9 +31,6 @@ jobs:
       DG_STOCK_PROVIDER: ${{ secrets.DG_STOCK_PROVIDER }}
       DG_PHOTO_ORDER: ${{ secrets.DG_PHOTO_ORDER }}
       DG_CARDNEWS_HANDLE: ${{ secrets.DG_CARDNEWS_HANDLE }}
-      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
-      NOTION_MENTION_USER_ID: ${{ secrets.NOTION_MENTION_USER_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -47,7 +40,7 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install requests python-dotenv honcho-ai playwright
+          pip install requests python-dotenv honcho-ai pyyaml playwright
           python -m playwright install --with-deps chromium
 
       - name: Install Claude Code CLI (Max 구독 인증용)
@@ -61,7 +54,6 @@ jobs:
           python3 -m orchestrator.cardnews \
             --topic "${{ github.event.inputs.topic }}" \
             --body-count "${{ github.event.inputs.body_count || '5' }}" \
-            --notion-page "${{ github.event.inputs.notion_page }}" \
             --video-url "${{ github.event.inputs.video_url }}" \
             --out cardnews_out
 

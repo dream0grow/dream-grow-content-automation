@@ -22,7 +22,7 @@ from vault_pipeline.vault_io import (
 
 from orchestrator import llm
 
-# 되먹임 감시 대상 (노션 이관 후 vault/파이프라인 폴더가 추가된다)
+# 되먹임 감시 대상 (교사 초안 폴더. 학부모 파이프라인 카드 환류는 카드 포맷 확정 후 추가 예정)
 DRAFT_DIRS = [
     "프로젝트/교육운동/블로그_초안",
     "프로젝트/교육운동/페이스북_초안",

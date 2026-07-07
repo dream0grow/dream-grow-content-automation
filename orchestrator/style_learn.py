@@ -2,13 +2,13 @@
 
 흐름:
   1. 초안 생성 시 '🗄️ AI 원본 (채널)' 토글에 원본을 보존한다
-  2. 사람이 노션에서 '✍️ 초안 (채널)' 토글을 직접 수정한다
+  2. 사람이 옵시디언에서 '✍️ 초안 (채널)' 섹션을 직접 수정한다
   3. 발행 직전 두 버전을 비교 → 수정 패턴을 Claude가 추출
   4. 기존 diff_learner와 같은 Honcho 세션({channel}-corrections)에 저장
      → 다음 초안부터 작가 에이전트 프롬프트에 자동 반영된다
 """
 from orchestrator import llm, prompts
-from orchestrator import state as notion_state
+from orchestrator import state as store
 
 
 def get_corrections_context(channel: str) -> str:
@@ -33,8 +33,8 @@ def learn_from_edits(page_id: str, channel: str) -> int:
 
     Returns: 저장된 패턴 수 (수정이 없거나 학습 불가면 0)
     """
-    ai_original = notion_state.read_latest_section(page_id, f"🗄️ AI 원본 ({channel})")
-    edited = notion_state.read_latest_section(page_id, f"✍️ 초안 ({channel})")
+    ai_original = store.read_latest_section(page_id, f"🗄️ AI 원본 ({channel})")
+    edited = store.read_latest_section(page_id, f"✍️ 초안 ({channel})")
     if not ai_original.strip() or not edited.strip():
         return 0
     if ai_original.strip() == edited.strip():
@@ -61,9 +61,9 @@ def learn_from_edits(page_id: str, channel: str) -> int:
                 session.add_messages([user.message(str(p))])
                 saved += 1
     except Exception as e:
-        print(f"Honcho 저장 실패 (학습 기록은 노션에만 남김): {e}")
+        print(f"Honcho 저장 실패 (학습 기록은 카드에만 남김): {e}")
 
-    notion_state.append_section(
+    store.append_section(
         page_id, f"🧠 문체 학습 ({channel})",
         f"사람 수정을 감지해 {len(patterns)}개 패턴을 추출했습니다 "
         f"(Honcho 저장 {saved}건). 다음 초안부터 반영됩니다.\n\n"

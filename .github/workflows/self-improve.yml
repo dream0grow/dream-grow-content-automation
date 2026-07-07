@@ -1,5 +1,5 @@
 # 자가 학습 루프 (설계 결정 #6, 헤르메스 스타일)
-# 매주 월요일 09:00 KST(00:00 UTC) 회고 → 프롬프트 개선 큐시트 제출.
+# 매주 월요일 09:00 KST(00:00 UTC) 회고 → 프롬프트 개선 큐시트를 볼트에 제출.
 # 매일 한 번 승인된 큐시트를 Honcho 오버레이로 반영.
 name: self-improve
 
@@ -18,12 +18,14 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
     env:
-      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +34,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install requests python-dotenv honcho-ai
+        run: pip install requests python-dotenv honcho-ai pyyaml
 
       # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
       - name: Install Claude Code CLI (Max 구독 인증용)
@@ -55,3 +57,20 @@ jobs:
           else
             python3 -m orchestrator.self_improve
           fi
+
+      # 회고 큐시트 카드/상태 변경분을 볼트에 커밋·push
+      - name: 볼트 카드 커밋
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "self-improve[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "자가 학습: 큐시트/상태 갱신 $(date +%Y-%m-%d)"
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

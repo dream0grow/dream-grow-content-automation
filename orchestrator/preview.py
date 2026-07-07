@@ -2,7 +2,7 @@
 
 파이프라인과 동일한 브리프→토론 초안 생성을 거친 뒤, 실제 발행에 쓰이는
 publish.split_posts(스레드 체인)와 stibee.markdown_to_html(뉴스레터 HTML)로 렌더링해
-파일로 저장한다. Notion·발행 API를 전혀 건드리지 않으므로 시크릿 없이도 돌아간다.
+파일로 저장한다. 발행 API를 전혀 건드리지 않으므로 시크릿 없이도 돌아간다.
 
 실행:
   python3 -m orchestrator.preview --topic "주제" --audience "초등 저학년 학부모" \

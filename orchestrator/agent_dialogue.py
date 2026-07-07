@@ -7,7 +7,7 @@
 원칙:
 - 라운드 제한(DIALOGUE_MAX_ROUNDS, 기본 2)으로 비평가 토론의 끝없는 대화 방지
 - 검수 되먹임도 라운드 제한(ETHICS_MAX_ROUNDS, 기본 2)으로 무한 재작성 방지
-- 모든 발언은 transcript로 반환되어 노션 카드 본문에 기록된다
+- 모든 발언은 transcript로 반환되어 카드 본문에 기록된다
 """
 import json
 from pathlib import Path

@@ -1,13 +1,12 @@
-"""옵시디언 볼트 카드 저장소 — notion_state와 같은 얼굴 (이관설계 M0)
+"""옵시디언 볼트 카드 저장소 — 파이프라인의 유일한 저장소 (노션 철수 완료)
 
 카드 = `vault/파이프라인/활성/<content_id> <topic>.md`
-- frontmatter = 노션 select/text 속성 (stage, status, approval_status …)
-- 본문 `## 제목 — 타임스탬프` 섹션 = 노션 본문 토글
+- frontmatter = 라우팅 속성 (stage, status, approval_status …)
+- 본문 `## 제목 — 타임스탬프` 섹션 = 단계 산출물
 - page_id = 저장소 루트 기준 카드 파일 상대경로 문자열
 
-notion_state의 공개 함수와 시그니처를 그대로 유지해, run.py 등 호출처가
-`orchestrator.state` 파사드를 통해 무수정으로 동작하게 한다.
-승인은 사람이 옵시디언/대시보드에서 frontmatter를 바꾸는 것으로 이뤄진다.
+공개 함수는 `orchestrator.state` 파사드를 통해 run.py 등 호출처에 노출된다.
+승인은 사람이 옵시디언/텔레그램에서 frontmatter를 바꾸는 것으로 이뤄진다.
 """
 import os
 import re
@@ -40,7 +39,7 @@ def _done_dir() -> Path:
 
 
 def require_backend() -> None:
-    """옵시디언 백엔드 준비 — 카드 폴더만 있으면 된다 (노션 키 불필요)."""
+    """볼트 준비 — 카드 폴더만 있으면 된다 (외부 키 불필요)."""
     _active_dir().mkdir(parents=True, exist_ok=True)
     _done_dir().mkdir(parents=True, exist_ok=True)
 
@@ -193,7 +192,7 @@ def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
     return page_id
 
 
-# ---------- 본문 섹션 (노션 토글 대응) ----------
+# ---------- 본문 섹션 (단계 산출물) ----------
 
 def append_section(page_id: str, heading: str, body: str) -> None:
     path = _resolve(page_id)
@@ -227,7 +226,7 @@ def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
     """heading이 주어진 접두사 중 하나로 시작하는 섹션들만 골라 읽는다(B3).
 
     다음 단계에 카드 본문 전체 대신 필요한 섹션만 주입해 토큰을 아낀다.
-    접두사가 없으면 전체를 읽는다(notion 백엔드와 동일 시그니처).
+    접두사가 없으면 전체를 읽는다.
     """
     if not prefixes:
         return read_sections(page_id)
@@ -243,7 +242,7 @@ def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
 # ---------- 알림 ----------
 
 def notify(page_id: str, message: str) -> None:
-    """텔레그램 폰 알림 + 결재함 기록 (노션 멘션 대응)."""
+    """텔레그램 폰 알림 + 결재함 기록."""
     card_name = Path(page_id).stem
     try:
         from vault_pipeline import telegram_notify

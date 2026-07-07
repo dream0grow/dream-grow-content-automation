@@ -1,7 +1,7 @@
 """자가 학습 루프 (헤르메스 스타일, 결정 #6)
 
 주 1회 실행. Honcho에 쌓인 사용자 수정 패턴 + 팀 학습 + 발행 성과를 분석해
-프롬프트 개선안을 노션 큐시트(승인 대기 카드)로 제출한다.
+프롬프트 개선안을 볼트 큐시트(승인 대기 카드)로 제출한다.
 
 - 제안까지만 자동. 사람이 카드에서 approval_status=approved로 바꾸면
   apply_approved()가 개선안을 Honcho approved-prompt-overlay에 승격하고,
@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import llm, prompts
-from orchestrator import state as notion_state
+from orchestrator import state as store
 
 QUEUE_STAGE = "analysis"  # 큐시트 카드는 analysis stage로 구분
 QUEUE_PREFIX = "[큐시트] 프롬프트 개선안"
@@ -47,17 +47,17 @@ def _collect_honcho() -> tuple[str, str]:
 
 
 def _collect_performance() -> str:
-    """노션의 published 카드에서 성과 메모를 모은다."""
+    """볼트의 published 카드에서 성과 메모를 모은다."""
     lines = []
-    for card in notion_state.query_cards(stage="published", page_size=10):
-        body = notion_state.read_sections(card["page_id"])
+    for card in store.query_cards(stage="published", page_size=10):
+        body = store.read_sections(card["page_id"])
         lines.append(f"- {card['topic']} ({card['content_id']})\n{body[:1500]}")
     return "\n\n".join(lines)
 
 
 def retrospect():
-    """회고 실행 → 개선안 큐시트 카드를 노션에 생성한다."""
-    notion_state.require_backend()
+    """회고 실행 → 개선안 큐시트 카드를 볼트에 생성한다."""
+    store.require_backend()
     corrections, learnings = _collect_honcho()
     performance = _collect_performance()
     if not any([corrections, learnings, performance]):
@@ -85,19 +85,19 @@ def retrospect():
         "다음 self_improve --apply 실행 시 반영됩니다.\n\n"
         f"[PROPOSED_RULES_JSON]\n{json.dumps(result.get('proposed_rules', []), ensure_ascii=False)}"
     )
-    page_id = notion_state.create_card(
-        f"{QUEUE_PREFIX} {notion_state.next_content_id()}",
+    page_id = store.create_card(
+        f"{QUEUE_PREFIX} {store.next_content_id()}",
         stage=QUEUE_STAGE, status="needs_human", body=body,
     )
-    notion_state.update_card(page_id, approval_status="requested")
+    store.update_card(page_id, approval_status="requested")
     print(f"개선안 큐시트 제출 완료: {page_id}")
 
 
 def apply_approved():
     """승인된 큐시트의 제안 지침을 Honcho approved-prompt-overlay로 승격한다."""
-    notion_state.require_backend()
+    store.require_backend()
     cards = [
-        c for c in notion_state.query_cards(
+        c for c in store.query_cards(
             stage=QUEUE_STAGE, approval_status="approved",
         )
         if c["topic"].startswith(QUEUE_PREFIX) and c["status"] != "done"
@@ -117,7 +117,7 @@ def apply_approved():
     user = client.peer("content-creator")
     session = client.session("approved-prompt-overlay")
     for card in cards:
-        body = notion_state.read_sections(card["page_id"])
+        body = store.read_sections(card["page_id"])
         marker = "[PROPOSED_RULES_JSON]"
         rules = []
         if marker in body:
@@ -127,7 +127,7 @@ def apply_approved():
                 pass
         for rule in rules:
             session.add_messages([user.message(f"[승인됨 {card['topic']}] {rule}")])
-        notion_state.update_card(card["page_id"], status="done")
+        store.update_card(card["page_id"], status="done")
         print(f"적용 완료: {card['topic']} ({len(rules)}개 지침)")
 
 
