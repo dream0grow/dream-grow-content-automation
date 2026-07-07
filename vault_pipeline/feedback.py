@@ -8,6 +8,11 @@
    author: 이한결, source_type: own_content(원출처 추적 필요 플래그) —
    글 하나가 다시 지식 벽돌이 되는 원소스 멀티유즈의 환류 구간.
 
+두 종류의 발행물을 환류한다:
+- **교사 초안**(`프로젝트/교육운동/*_초안`, `상태: 발행완료`): 문체 학습 + 메모 분해.
+- **학부모 파이프라인 카드**(`파이프라인/…`, `stage: published`, A7): 메모 분해만.
+  문체 학습은 발행 시 orchestrator/style_learn이 이미 수행하므로 중복하지 않는다.
+
 실행: python3 -m vault_pipeline.feedback  (plaud-pipeline 워크플로우가 매일 호출)
 중복 방지: _system/logs/feedback_ledger.json (기존 파일은 수정하지 않는다)
 """
@@ -22,12 +27,17 @@ from vault_pipeline.vault_io import (
 
 from orchestrator import llm
 
-# 되먹임 감시 대상 (노션 이관 후 vault/파이프라인 폴더가 추가된다)
+# 되먹임 감시 대상 — 교사 초안 폴더(`상태: 발행완료/리뷰완료`)
 DRAFT_DIRS = [
     "프로젝트/교육운동/블로그_초안",
     "프로젝트/교육운동/페이스북_초안",
 ]
 DONE_STATES = {"발행완료", "리뷰완료"}
+
+# 학부모 파이프라인 발행 카드(`stage: published`)의 원자 메모 환류 대상(A7).
+# 문체 학습은 orchestrator/style_learn이 발행 시 이미 하므로 여기선 atomize만 한다.
+PIPELINE_DIR = "파이프라인"
+MIN_DRAFT_CHARS = 100  # 이보다 짧은 스텁·빈 카드는 분해기에 넘기지 않는다
 
 
 def _ledger_path() -> Path:
@@ -71,6 +81,49 @@ def find_published() -> list[dict]:
                 continue
             targets.append({"key": key, "path": p, "meta": meta,
                             "body": body.strip(), "dir": rel})
+    return targets
+
+
+def find_published_pipeline() -> list[dict]:
+    """학부모 파이프라인의 발행 완료 카드를 원자 메모 환류 대상으로 모은다(A7).
+
+    orchestrator가 `stage: published, status: done`으로 표시한 카드에서 사람이 확정·발행한
+    최종 초안을 꺼내 atomize 대상 target으로 만든다. 문체 학습은 발행 시 이미 끝났으므로
+    여기서는 atomize만 한다. 최종 초안이 충분히 길고(스텁 방지) 아직 환류 안 한 카드만.
+    """
+    from orchestrator import state as store
+    ledger = _load_ledger()
+    targets: list[dict] = []
+    try:
+        cards = store.query_cards(stage="published", status="done", page_size=100)
+    except Exception as e:  # noqa: BLE001 — 조회 실패가 교사 되먹임까지 막으면 안 됨
+        log_line(f"파이프라인 발행 카드 조회 실패(교사 되먹임은 계속): {e}", dry_run=False)
+        return []
+    for card in cards:
+        page_id = card["page_id"]
+        key = f"pipeline:{page_id}"
+        if key in ledger:
+            continue
+        # 최종 초안(사람이 확정·발행한 본문). 뉴스레터가 있으면 우선(심화), 없으면 스레드.
+        nl = store.read_latest_section(page_id, "✍️ 초안 (newsletter)").strip()
+        th = (store.read_latest_section(page_id, "✍️ 초안 (thread)").strip()
+              or store.read_latest_section(page_id, "✍️ 초안").strip())
+        if nl:
+            draft, fmt = nl, "newsletter"
+        elif th:
+            draft, fmt = th, "thread"
+        else:
+            continue
+        if len(draft) < MIN_DRAFT_CHARS:
+            continue  # 스텁·빈 카드는 분해기에 넘기지 않는다
+        targets.append({
+            "key": key,
+            "path": vault_root() / page_id,
+            "meta": {"채널": fmt, "published_url": card.get("published_url", "")},
+            "body": draft,
+            "dir": PIPELINE_DIR,
+            "pipeline": True,   # main에서 문체 학습을 건너뛰는 표식
+        })
     return targets
 
 
@@ -151,7 +204,8 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    targets = find_published()
+    # 교사 초안(문체 학습 + 메모 분해) + 학부모 파이프라인 발행 카드(메모 분해만, A7)
+    targets = find_published() + find_published_pipeline()
     if not targets:
         log_line("되먹임: 새 발행완료 글 없음", dry_run=args.dry_run)
         return
@@ -159,9 +213,11 @@ def main() -> None:
     ledger = _load_ledger()
     for t in targets:
         try:
-            lessons = learn_style(t, args.dry_run)
+            # 학부모 파이프라인 카드는 발행 시 style_learn이 이미 문체를 학습했으므로 생략
+            lessons = 0 if t.get("pipeline") else learn_style(t, args.dry_run)
             memos = atomize(t, args.dry_run)
-            log_line(f"되먹임 완료: {t['key']} → 문체 규칙 {lessons}건, "
+            src = "학부모" if t.get("pipeline") else "교사"
+            log_line(f"되먹임 완료[{src}]: {t['key']} → 문체 규칙 {lessons}건, "
                      f"원자 메모 {memos}건", dry_run=args.dry_run)
             if not args.dry_run:
                 ledger[t["key"]] = {

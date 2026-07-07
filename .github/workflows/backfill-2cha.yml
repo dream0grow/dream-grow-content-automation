@@ -1,5 +1,5 @@
 # 평가표 2차안 소급 생성 (수동 실행 전용)
-# 기존 모든 카드의 '✍️ 초안'을 평가표로 검토하고 '✍️ 2차안' 토글을 추가한다.
+# 기존 모든 볼트 카드의 '✍️ 초안'을 평가표로 검토하고 '✍️ 2차안' 섹션을 추가한다.
 # 이미 2차안이 있는 카드/포맷은 건너뛴다(idempotent). 발행에는 영향 없음.
 name: backfill-2cha
 
@@ -14,9 +14,9 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: write
     env:
-      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
@@ -26,9 +26,26 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deps
-        run: pip install requests python-dotenv honcho-ai
+        run: pip install requests python-dotenv honcho-ai pyyaml
       - name: Install Claude Code CLI (Max 구독 인증용)
         if: ${{ env.ANTHROPIC_API_KEY == '' }}
         run: npm install -g @anthropic-ai/claude-code
       - name: Backfill 2차안
         run: python3 -m orchestrator.run --stage rubric_backfill
+
+      # 추가된 2차안 섹션을 볼트에 커밋·push
+      - name: 볼트 카드 커밋
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "backfill-2cha[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "2차안 소급 생성 $(date +%Y-%m-%d)"
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

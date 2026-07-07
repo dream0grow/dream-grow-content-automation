@@ -16,7 +16,7 @@ import urllib.request
 from pathlib import Path
 
 API_URL = "https://api.anthropic.com/v1/messages"
-JUDGE_MODEL = os.getenv("DG_JUDGE_MODEL", "claude-sonnet-4-6")
+JUDGE_MODEL = os.getenv("DG_JUDGE_MODEL", "claude-sonnet-5")
 # 세 기준 평균이 이 값 이상이면 통과
 PASS_THRESHOLD = float(os.getenv("DG_PHOTO_PASS_THRESHOLD", "0.62"))
 

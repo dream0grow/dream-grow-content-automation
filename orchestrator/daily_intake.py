@@ -3,7 +3,7 @@
 GitHub Actions가 하루 1회 실행(daily-intake.yml). 기존 카드 제목을 중복 회피 목록으로
 넘겨 Claude가 새 주제 N개를 제안하고, 각각을 intake/queued 카드로 생성한다.
 이후는 오케스트레이터(orchestrator.run)가 리서치 → 키워드(자동 승인) → 브리프 →
-토론 초안 → 검수까지 자동 진행하고, 초안이 완성되면 노션 멘션으로 알린다.
+토론 초안 → 검수까지 자동 진행하고, 초안이 완성되면 텔레그램으로 알린다.
 사람은 마지막 '발행 승인'만 하면 된다.
 
 실행:
@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import llm, prompts
-from orchestrator import state as notion_state
+from orchestrator import state as store
 
 # 하루에 만들 주제 수 (기본 1개 = 매일 글 1편)
 DAILY_TOPIC_COUNT = int(os.getenv("DG_DAILY_TOPIC_COUNT", "1"))
@@ -30,7 +30,7 @@ def log(msg: str):
 def _existing_topics() -> list[str]:
     """중복 회피용: 현재 DB에 있는 카드 제목을 모은다(최근 100개)."""
     try:
-        cards = notion_state.query_cards(page_size=100)
+        cards = store.query_cards(page_size=100)
     except Exception as e:
         log(f"기존 카드 조회 실패(중복 회피 없이 진행): {e}")
         return []
@@ -38,7 +38,7 @@ def _existing_topics() -> list[str]:
 
 
 def run():
-    notion_state.require_backend()
+    store.require_backend()
     existing = _existing_topics()
     existing_block = "\n".join(f"- {t}" for t in existing[:120]) or "(없음)"
 
@@ -64,7 +64,7 @@ def run():
             continue
         audience = (t.get("audience") or DEFAULT_AUDIENCE).strip()
         try:
-            page_id = notion_state.create_card(title, audience=audience)
+            page_id = store.create_card(title, audience=audience)
         except Exception as e:
             log(f"카드 생성 실패: {title} — {e}")
             continue

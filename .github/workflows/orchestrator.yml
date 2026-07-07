@@ -1,6 +1,6 @@
 # 드림그로우 24시간 오케스트레이터 (설계 결정 #4)
-# 30분마다 노션 콘텐츠 파이프라인 DB를 폴링하여 다음 stage를 실행한다.
-# 핸드폰(노션 모바일)에서 카드 생성/승인만 하면 나머지는 여기서 돌아간다.
+# 15분마다 볼트(vault/파이프라인/)를 폴링하여 다음 stage를 실행하고 변경분을 git에 커밋한다.
+# 사람은 옵시디언/텔레그램에서 카드 생성/승인만 하면 나머지는 여기서 돌아간다.
 name: orchestrator
 
 on:
@@ -22,9 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
-      NOTION_MENTION_USER_ID: ${{ secrets.NOTION_MENTION_USER_ID }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
@@ -40,8 +37,7 @@ jobs:
       STIBEE_SENDER_EMAIL: ${{ secrets.STIBEE_SENDER_EMAIL }}
       STIBEE_SENDER_NAME: ${{ secrets.STIBEE_SENDER_NAME }}
       STIBEE_AUTO_SEND: ${{ secrets.STIBEE_AUTO_SEND }}
-      # 카드 저장소 백엔드: notion(기본) | obsidian — Variables에서 전환 (이관설계 M1)
-      DG_STATE_BACKEND: ${{ vars.DG_STATE_BACKEND }}
+      # 카드 저장소 = 옵시디언 볼트(vault/). 경로 바꾸려면 DG_VAULT_ROOT (기본 vault/).
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     permissions:
@@ -69,9 +65,8 @@ jobs:
             python3 -m orchestrator.run
           fi
 
-      # 옵시디언 백엔드일 때: 카드 변경분을 볼트에 커밋 (노션 모드에선 변경이 없어 생략됨)
+      # 카드 변경분을 볼트에 커밋·push (git이 유일한 동기화 경로)
       - name: 볼트 카드 커밋
-        if: ${{ env.DG_STATE_BACKEND == 'obsidian' }}
         run: |
           python3 tools/vault_secret_scan.py vault/ --quiet
           git config user.name "orchestrator[bot]"
@@ -79,5 +74,12 @@ jobs:
           git add vault/
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "오케스트레이터: 카드 갱신 $(date +%Y-%m-%dT%H:%M)"
-          git pull --rebase origin ${{ github.ref_name }}
-          git push origin HEAD:${{ github.ref_name }}
+          # 여러 워크플로우가 같은 브랜치에 동시 push하면 non-fast-forward로 거부된다.
+          # pull --rebase → push를 재시도해 경합으로 인한 워크플로우 실패를 막는다(A8).
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

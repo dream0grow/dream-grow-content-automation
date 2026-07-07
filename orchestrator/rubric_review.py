@@ -5,7 +5,7 @@
 실패해도 파이프라인을 멈추지 않도록 호출부에서 try/except로 감싼다.
 """
 from orchestrator import llm, prompts
-from orchestrator import state as notion_state
+from orchestrator import state as store
 
 
 def _fmt_eval(r: dict) -> str:
@@ -41,25 +41,25 @@ def run_for_card(page_id: str, fmt: str, *, skip_if_exists: bool = True) -> bool
 
     Returns: 2차안을 추가했으면 True. (초안 없음/이미 2차안 있음/빈 결과는 False)
     """
-    if skip_if_exists and notion_state.read_latest_section(
+    if skip_if_exists and store.read_latest_section(
         page_id, f"✍️ 2차안 ({fmt})"
     ).strip():
         return False  # 이미 2차안이 있으면 건너뛴다 (idempotent)
 
     draft = (
-        notion_state.read_latest_section(page_id, f"✍️ 초안 ({fmt})")
-        or notion_state.read_latest_section(page_id, "✍️ 초안")
+        store.read_latest_section(page_id, f"✍️ 초안 ({fmt})")
+        or store.read_latest_section(page_id, "✍️ 초안")
     )
     if not draft.strip():
         return False
 
     result = review(draft, fmt)
-    notion_state.append_formatted_section(
+    store.append_formatted_section(
         page_id,
         f"📐 평가표 점검 ({fmt}) - 총 {result.get('total', '?')}/100",
         _fmt_eval(result),
     )
     revised = (result.get("revised") or "").strip()
     if revised:
-        notion_state.append_section(page_id, f"✍️ 2차안 ({fmt})", revised)
+        store.append_section(page_id, f"✍️ 2차안 ({fmt})", revised)
     return bool(revised)

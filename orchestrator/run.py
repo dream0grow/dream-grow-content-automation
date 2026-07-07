@@ -1,9 +1,9 @@
-"""오케스트레이터 메인 - 노션 stage 상태 머신 (24시간 가동, 결정 #4)
+"""오케스트레이터 메인 - 볼트 stage 상태 머신 (24시간 가동, 결정 #4)
 
-GitHub Actions cron(30분)이 실행한다. 노션 DB에서 처리할 카드를 찾아
+GitHub Actions cron이 실행한다. 볼트(vault/파이프라인/)에서 처리할 카드를 찾아
 stage별 핸들러를 호출하고, 산출물을 카드 본문에 기록한 뒤 상태를 전환한다.
 
-승인 게이트 (사람이 노션 모바일에서 처리):
+승인 게이트 (사람이 옵시디언/텔레그램에서 frontmatter로 처리):
   keyword_approval: approved_keyword 입력 + approval_status=approved
   approval:         approval_status=approved
 
@@ -22,8 +22,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from orchestrator import (
     agent_dialogue, llm, manus_research, naver_keywords, prompts,
 )
-from orchestrator import state as notion_state
-from orchestrator.config import AUTO_APPROVE_KEYWORD, MAX_CARDS_PER_RUN
+from orchestrator import state as store
+from orchestrator.config import (
+    AUTO_APPROVE_KEYWORD, MAX_CARDS_PER_RUN, RUBRIC_SKIP_QUALITY,
+    STALE_RUNNING_MINUTES,
+)
+
+# 사람이 재초안을 원할 때 수정 지시를 적어두는 섹션. handle_revision_requested가
+# 이 섹션을 읽어 작가에게 되먹인다(없으면 일반 재작성).
+REVISION_SECTION = "📝 수정 요청"
+
+# 다음 실행에서 1회 자동 재시도를 표시하는 last_error 접두사(A3).
+_RETRY_MARK = "[자동재시도]"
+
+# 실패해도 status를 되돌려 다음 실행에 재시도해도 안전한 stage → 재큐 status.
+# publish_ready는 부분 발행 후 재시도하면 중복 게시 위험이 있어 제외(즉시 사람 호출).
+_REQUEUE_STATUS = {"intake": "queued", "research": "running", "keyword": "queued"}
 
 
 def log(msg: str):
@@ -102,12 +116,12 @@ def _fmt_score(s: dict) -> str:
 def handle_intake(card: dict):
     """intake/queued → 리서치 시작. Manus 우선, 없으면 Claude 폴백."""
     page_id = card["page_id"]
-    content_id = card["content_id"] or notion_state.next_content_id()
+    content_id = card["content_id"] or store.next_content_id()
     idem = f"{content_id}:research"
     if card["idempotency_key"] == idem:
         log(f"{content_id} 중복 실행 차단 (idempotency)")
         return
-    notion_state.update_card(
+    store.update_card(
         page_id, content_id=content_id, idempotency_key=idem,
         stage="research", status="running", last_error="",
     )
@@ -115,14 +129,14 @@ def handle_intake(card: dict):
         task_ids = manus_research.create_research_tasks(
             content_id, card["topic"], card["audience"],
         )
-        notion_state.update_card(page_id, manus_task_ids=",".join(task_ids))
+        store.update_card(page_id, manus_task_ids=",".join(task_ids))
         log(f"{content_id} Manus 리서치 {len(task_ids)}개 병렬 생성")
     else:
         results = manus_research.claude_research_fallback(
             card["topic"], card["audience"],
         )
         _save_research(page_id, results)
-        notion_state.update_card(page_id, stage="keyword", status="queued")
+        store.update_card(page_id, stage="keyword", status="queued")
         log(f"{content_id} Claude 폴백 리서치 {len(results)}건 완료 → keyword")
 
 
@@ -148,11 +162,11 @@ def handle_research(card: dict):
             log(f"{card['content_id']} Manus 폴링 실패: {e}")
         if all_done and results:
             _save_research(page_id, results)
-            notion_state.update_card(page_id, stage="keyword", status="queued")
+            store.update_card(page_id, stage="keyword", status="queued")
             log(f"{card['content_id']} 리서치 완료 → keyword")
             return
 
-    age_min = notion_state.age_minutes(card)
+    age_min = store.age_minutes(card)
     if age_min < RESEARCH_STALL_MINUTES:
         log(f"{card['content_id']} 리서치 진행 중 "
             f"({len(results)}/{len(task_ids)}, {age_min:.0f}분 경과)")
@@ -160,7 +174,7 @@ def handle_research(card: dict):
 
     # 임계 시간 초과 → Claude 폴백 리서치로 우회 (Manus 부분 결과가 있으면 함께 저장)
     log(f"{card['content_id']} Manus {RESEARCH_STALL_MINUTES}분 초과 → Claude 폴백 우회")
-    notion_state.append_section(
+    store.append_section(
         page_id, "⚠️ Manus 리서치 우회",
         f"Manus 결과를 {RESEARCH_STALL_MINUTES}분 내에 받지 못해 Claude 리서치로 대체합니다.\n"
         f"마지막 폴링 디버그: {debug[:500]}",
@@ -169,20 +183,23 @@ def handle_research(card: dict):
         _save_research(page_id, results)
     fallback = manus_research.claude_research_fallback(card["topic"], card["audience"])
     _save_research(page_id, fallback)
-    notion_state.update_card(page_id, stage="keyword", status="queued")
+    store.update_card(page_id, stage="keyword", status="queued")
     log(f"{card['content_id']} Claude 폴백 리서치 {len(fallback)}건 → keyword")
 
 
 def _save_research(page_id: str, results: list[dict]):
     for r in results:
-        notion_state.append_formatted_section(
+        store.append_formatted_section(
             page_id, f"🔍 리서치: {r.get('research_focus', '')[:40]}", _fmt_research(r),
         )
 
 
 def handle_keyword(card: dict):
     """keyword/queued → Claude 점수화 → 사람 승인 대기."""
-    research = notion_state.read_sections(card["page_id"])
+    # 키워드 점수화엔 리서치 산출물만 필요하다(누적 초안·검수 제외로 토큰 절감, B3).
+    research = store.read_sections_by_prefix(
+        card["page_id"], "🔍 리서치", "📋 상세", "⚠️ Manus",
+    )
     scored = llm.call_json(
         prompts.KEYWORD_SCORE.format(
             topic=card["topic"], audience=card["audience"], research=research[:20000],
@@ -212,7 +229,7 @@ def handle_keyword(card: dict):
             line += f"\n  ↳ {naver_keywords.format_volume(volumes.get(k.get('keyword', '')))}"
         lines.append(line)
     table = "\n".join(lines)
-    notion_state.append_formatted_section(
+    store.append_formatted_section(
         card["page_id"], "🏷️ 키워드 후보 (승인 필요)",
         f"## 키워드 후보 (점수순)\n{table}\n\n"
         f"> 승인 방법: 위 키워드 중 하나를 골라 approved_keyword 속성에 입력하고 "
@@ -221,17 +238,17 @@ def handle_keyword(card: dict):
     # 자동 승인 모드: 최고점 키워드를 사람 승인 없이 채택 → 바로 브리프/초안으로 진행
     if AUTO_APPROVE_KEYWORD and keywords:
         top_kw = keywords[0].get("keyword", "")
-        notion_state.update_card(
+        store.update_card(
             card["page_id"], approved_keyword=top_kw,
             stage="keyword_approval", status="running", approval_status="approved",
         )
         log(f"{card['content_id']} 키워드 자동 승인: {top_kw}")
         return
-    notion_state.update_card(
+    store.update_card(
         card["page_id"], stage="keyword_approval", status="needs_human",
         approval_status="requested",
     )
-    notion_state.notify(
+    store.notify(
         card["page_id"],
         f"🏷️ [{card['content_id']}] 키워드 승인이 필요합니다. "
         f"'{card['topic']}' — 키워드 표를 확인하고 approved_keyword 입력 후 "
@@ -247,10 +264,18 @@ def handle_keyword_approved(card: dict):
     if not keyword:
         log(f"{card['content_id']} approved_keyword가 비어 있어 대기")
         return
-    notion_state.update_card(
+    store.update_card(
         page_id, stage="brief", status="running", approval_status="not_requested",
     )
-    context = notion_state.read_sections(page_id)
+    # 재초안 경로(handle_revision_requested)가 남긴 사람의 수정 지시가 있으면 반영한다.
+    revision_note = store.read_latest_section(page_id, REVISION_SECTION).strip()
+    if revision_note:
+        log(f"{card['content_id']} 수정 지시 반영해 재초안")
+    # 브리프엔 리서치+키워드만 필요하다. 재초안 시 누적된 옛 초안/검수/평가를
+    # 통째로 다시 싣지 않도록 관련 섹션만 고른다(B3, A1 재초안 경로와 시너지).
+    context = store.read_sections_by_prefix(
+        page_id, "🔍 리서치", "📋 상세", "🏷️ 키워드", "📝 수정 요청",
+    )
     brief = llm.call_json(
         prompts.BRIEF.format(
             keyword=keyword, topic=card["topic"],
@@ -258,11 +283,11 @@ def handle_keyword_approved(card: dict):
         ),
         system=prompts.get_system(),
     )
-    notion_state.append_formatted_section(page_id, "📝 브리프", _fmt_brief(brief))
+    store.append_formatted_section(page_id, "📝 브리프", _fmt_brief(brief))
 
     formats = [f.strip() for f in card["format"].split(",") if f.strip()]
     supported = [f for f in formats if f in ("thread", "newsletter")] or ["thread"]
-    notion_state.update_card(page_id, stage="draft", status="running")
+    store.update_card(page_id, stage="draft", status="running")
 
     rank = {"approved": 0, "revise": 1, "hold": 2, "risk": 3}
     worst_review = "approved"
@@ -270,31 +295,35 @@ def handle_keyword_approved(card: dict):
         result = agent_dialogue.run_draft_dialogue(
             brief, fmt, style_context=agent_dialogue.get_style_context(fmt),
             hook_examples=agent_dialogue.load_hooks(),
+            benchmark=agent_dialogue.load_benchmark(fmt),
+            extra_directive=revision_note,
         )
-        notion_state.append_section(
+        store.append_section(
             page_id, f"💬 에이전트 토론 ({fmt}, {result['rounds']}라운드)",
             result["transcript"],
         )
         # AI 원본은 문체 diff 학습용으로 보존, 사람은 '✍️ 초안'만 수정한다
-        notion_state.append_section(
+        store.append_section(
             page_id, f"🗄️ AI 원본 ({fmt}) - 수정 금지", result["draft"],
         )
-        notion_state.append_section(page_id, f"✍️ 초안 ({fmt})", result["draft"])
+        store.append_section(page_id, f"✍️ 초안 ({fmt})", result["draft"])
 
         review = result["review"]
-        notion_state.append_formatted_section(
+        store.append_formatted_section(
             page_id, f"✅ 교육윤리 검수 ({fmt})", _fmt_review(review),
         )
         if rank.get(review.get("review_status", "revise"), 1) > rank[worst_review]:
             worst_review = review.get("review_status", "revise")
 
         # 자동 글 평가 - 사람 검수자가 승인 판단에 참고
+        quality_total = None
         try:
             score = llm.call_json(
                 prompts.QUALITY_SCORE.format(format=fmt, draft=result["draft"]),
                 system=prompts.get_system(),
             )
-            notion_state.append_formatted_section(
+            quality_total = score.get("total")
+            store.append_formatted_section(
                 page_id,
                 f"📊 글 평가 ({fmt}) - 총 {score.get('total', '?')}/50점",
                 _fmt_score(score),
@@ -302,15 +331,20 @@ def handle_keyword_approved(card: dict):
         except Exception as e:
             log(f"{card['content_id']} 글 평가 실패 ({fmt}): {e}")
 
-        # 평가표(사용자 글 기준) AI 검토 + 2차안(줄바꿈 교정) 토글 추가
+        # 평가표(사용자 글 기준) AI 검토 + 2차안(줄바꿈 교정) 토글 추가.
+        # 글 평가 총점이 충분히 높으면 비싼 전문 재작성(2차안)을 생략해 토큰을 아낀다(B2).
         try:
-            from orchestrator import rubric_review
-            if rubric_review.run_for_card(page_id, fmt, skip_if_exists=True):
-                log(f"{card['content_id']} 2차안 추가 ({fmt})")
+            if (isinstance(quality_total, (int, float))
+                    and quality_total >= RUBRIC_SKIP_QUALITY):
+                log(f"{card['content_id']} 글 평가 {quality_total}점 → 2차안 생략 ({fmt})")
+            else:
+                from orchestrator import rubric_review
+                if rubric_review.run_for_card(page_id, fmt, skip_if_exists=True):
+                    log(f"{card['content_id']} 2차안 추가 ({fmt})")
         except Exception as e:
             log(f"{card['content_id']} 평가표 검토/2차안 실패 ({fmt}): {e}")
 
-    notion_state.append_section(
+    store.append_section(
         page_id, "⏸️ 발행 승인 요청",
         "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
         "초안을 직접 수정해도 됩니다 ('✍️ 초안' 토글 안에서만, AI 원본은 그대로 두세요). "
@@ -318,14 +352,15 @@ def handle_keyword_approved(card: dict):
         "approval_status를 approved로 바꾸면 thread는 Threads에, "
         "newsletter는 스티비로 자동 발행됩니다 (STIBEE_AUTO_SEND가 꺼져 있으면 "
         "스티비에 초안만 생성되니 대시보드에서 확인 후 발송하세요). "
-        "수정 요청은 approval_status=revision_requested + 코멘트.",
+        f"수정을 원하면 '{REVISION_SECTION}' 토글(섹션)에 고칠 점을 적고 "
+        "approval_status=revision_requested로 바꾸세요 → 지시를 반영해 재초안합니다.",
     )
-    notion_state.update_card(
+    store.update_card(
         page_id, stage="approval", status="needs_human",
         review_status=worst_review,
         approval_status="requested",
     )
-    notion_state.notify(
+    store.notify(
         page_id,
         f"✍️ [{card['content_id']}] 초안 완성, 발행 승인이 필요합니다. "
         f"'{card['topic']}' — 글 평가/검수와 초안을 확인하고 approval_status를 "
@@ -335,12 +370,57 @@ def handle_keyword_approved(card: dict):
 
 
 def handle_final_approved(card: dict):
-    """approval + approved + 검수 통과 → publish_ready (같은 실행에서 발행까지 이어짐)."""
+    """approval + approved → 검수 통과면 publish_ready, 아니면 사유를 사람에게 통지.
+
+    검수가 approved가 아닌데 사람이 발행 승인을 누른 경우, 예전엔 로그만 남기고
+    조용히 막혀 카드가 영구 정체됐다(A2). 이제는 needs_human으로 디큐하고 이유와
+    다음 행동(초안 수정 후 재승인 / 재초안 요청)을 통지해 침묵을 없앤다.
+    """
+    page_id = card["page_id"]
     if card["review_status"] != "approved":
-        log(f"{card['content_id']} review_status={card['review_status']} → 게이트 차단")
+        rv = card["review_status"] or "미검수"
+        store.update_card(
+            page_id, status="needs_human", approval_status="blocked",
+        )
+        store.notify(
+            page_id,
+            f"⛔ [{card['content_id']}] 발행 승인을 눌렀지만 교육윤리 검수가 "
+            f"'{rv}' 상태라 자동 발행을 멈췄습니다. 초안을 고친 뒤 review_status를 "
+            f"approved로 바꿔 다시 approval_status=approved 하거나, "
+            f"'{REVISION_SECTION}'에 지시를 적고 approval_status=revision_requested로 "
+            "재초안을 요청하세요.",
+        )
+        log(f"{card['content_id']} 검수 {rv} → 발행 차단, 사람 통지 ⏸️")
         return
-    notion_state.update_card(card["page_id"], stage="publish_ready", status="queued")
+    store.update_card(page_id, stage="publish_ready", status="queued")
     log(f"{card['content_id']} publish_ready → 발행 대기열")
+
+
+def handle_revision_requested(card: dict):
+    """approval + revision_requested → 재초안 경로로 되돌린다(A1).
+
+    예전엔 이 상태를 처리하는 핸들러가 없어 '수정 요청'이 영구 방치됐다. 이제는
+    keyword_approval/approved로 되돌려 handle_keyword_approved가 '{REVISION_SECTION}'의
+    사람 지시를 반영해 브리프→초안을 다시 만들고 발행 승인 대기로 재진입시킨다.
+    """
+    page_id = card["page_id"]
+    if not card["approved_keyword"].strip():
+        # 키워드가 없으면 재생성이 불가하므로 키워드 승인 대기로 되돌린다.
+        store.update_card(
+            page_id, stage="keyword_approval", status="needs_human",
+            approval_status="requested",
+        )
+        store.notify(
+            page_id,
+            f"↩️ [{card['content_id']}] 수정 요청을 받았지만 approved_keyword가 비어 "
+            "키워드부터 다시 골라야 합니다.",
+        )
+        return
+    note = store.read_latest_section(page_id, REVISION_SECTION).strip()
+    store.update_card(
+        page_id, stage="keyword_approval", status="running", approval_status="approved",
+    )
+    log(f"{card['content_id']} 수정 요청 → 재초안 큐 (지시 {'있음' if note else '없음'}) 🔁")
 
 
 def handle_publish(card: dict):
@@ -360,7 +440,7 @@ def handle_rubric_backfill():
     from orchestrator import rubric_review
     seen, count = set(), 0
     for stage in ("draft", "approval", "publish_ready", "published"):
-        for card in notion_state.query_cards(stage=stage, page_size=50):
+        for card in store.query_cards(stage=stage, page_size=50):
             page_id = card["page_id"]
             if page_id in seen:
                 continue
@@ -387,17 +467,86 @@ DISPATCH = [
     ("keyword", "queued", None, handle_keyword),
     ("keyword_approval", None, "approved", handle_keyword_approved),
     ("approval", None, "approved", handle_final_approved),
+    ("approval", None, "revision_requested", handle_revision_requested),
     ("publish_ready", "queued", None, handle_publish),
 ]
 
+# 쿼리가 status를 안 보는(status=None) stage. 실패 시 approval_status로 디큐해야 한다.
+_STATUS_AGNOSTIC = {"keyword_approval", "approval"}
+
+
+def _handle_failure(card: dict, stage: str, exc: Exception):
+    """핸들러 예외를 처리한다: 안전한 stage는 1회 자동 재시도, 이후 실패는 사람 통지(A3).
+
+    - intake/research/keyword: status를 되돌려 다음 실행에 1회 재시도.
+    - keyword_approval/approval: 쿼리가 status 무시라 그대로 두면 다음 실행에 재시도됨.
+    - 재시도 표식(last_error 접두사)이 이미 있으면 포기하고 needs_human + 통지.
+    - publish_ready는 여기 오지 않는다(부분발행 중복 위험 → 재시도 대상 제외).
+    """
+    page_id = card["page_id"]
+    cid = card.get("content_id") or page_id
+    err = f"{type(exc).__name__}: {exc}"
+    already_retried = card.get("last_error", "").startswith(_RETRY_MARK)
+    can_retry = (stage in _REQUEUE_STATUS or stage in _STATUS_AGNOSTIC)
+
+    if can_retry and not already_retried:
+        fields = {"last_error": f"{_RETRY_MARK} {err}"[:1500]}
+        if stage in _REQUEUE_STATUS:
+            fields["status"] = _REQUEUE_STATUS[stage]
+        store.update_card(page_id, **fields)
+        log(f"{cid} {stage} 실패 → 다음 실행에서 1회 자동 재시도 ({err[:120]})")
+        return
+
+    fields = {"status": "failed", "last_error": err[:1500]}
+    if stage in _STATUS_AGNOSTIC:
+        fields["approval_status"] = "failed"  # status 무시 쿼리에서 빼내 무한 재시도 방지
+    store.update_card(page_id, **fields)
+    store.notify(
+        page_id,
+        f"⚠️ [{cid}] '{stage}' 처리가 실패해 멈췄습니다: {err[:300]} — 확인이 필요합니다.",
+    )
+    log(f"{cid} {stage} 실패 → needs_human 통지")
+
+
+def _sweep_stale_running(now_limit: int = STALE_RUNNING_MINUTES):
+    """brief/draft 단계에서 running으로 오래 멈춘 고아 카드를 재큐한다(A4).
+
+    handle_keyword_approved가 brief/running·draft/running으로 상태를 바꿔가며 여러 번
+    LLM을 호출하는데, 도중에 Actions가 죽으면 그 stage를 다시 집는 핸들러가 없어
+    카드가 영구 고아가 된다. 일정 시간 방치되면 keyword_approval/approved로 되돌려
+    재생성 경로에 다시 태운다.
+    """
+    for stage in ("brief", "draft"):
+        for card in store.query_cards(stage=stage, status="running", page_size=20):
+            age = store.age_minutes(card)
+            if age < now_limit:
+                continue
+            if not card.get("approved_keyword", "").strip():
+                continue  # 키워드가 없으면 재생성 불가 — 건너뛴다
+            store.update_card(
+                card["page_id"], stage="keyword_approval", status="running",
+                approval_status="approved",
+            )
+            cid = card.get("content_id") or card["page_id"]
+            store.notify(
+                card["page_id"],
+                f"🔁 [{cid}] 초안 생성이 {age:.0f}분째 멈춰 있어 재시도합니다.",
+            )
+            log(f"{cid} {stage} 고아({age:.0f}분) → 재초안 큐")
+
 
 def run(only_stage: str | None = None):
-    notion_state.require_backend()
+    store.require_backend()
+    if not only_stage:
+        try:
+            _sweep_stale_running()
+        except Exception as e:  # noqa: BLE001 — 청소 실패가 본 처리를 막으면 안 됨
+            log(f"고아 카드 청소 실패(계속 진행): {e}")
     processed = 0
     for stage, status, approval, handler in DISPATCH:
         if only_stage and stage != only_stage:
             continue
-        cards = notion_state.query_cards(
+        cards = store.query_cards(
             stage=stage, status=status, approval_status=approval,
         )
         for card in cards:
@@ -409,11 +558,7 @@ def run(only_stage: str | None = None):
                 processed += 1
             except Exception as e:
                 traceback.print_exc()
-                notion_state.update_card(
-                    card["page_id"], status="failed",
-                    last_error=f"{type(e).__name__}: {e}"[:1500],
-                )
-                log(f"{card.get('content_id') or card['page_id']} 실패: {e}")
+                _handle_failure(card, stage, e)
     log(f"완료: {processed}개 카드 처리")
 
 
@@ -422,7 +567,7 @@ if __name__ == "__main__":
     if "--stage" in sys.argv:
         stage_arg = sys.argv[sys.argv.index("--stage") + 1]
     if stage_arg == "rubric_backfill":
-        notion_state.require_backend()
+        store.require_backend()
         handle_rubric_backfill()
     else:
         run(stage_arg)

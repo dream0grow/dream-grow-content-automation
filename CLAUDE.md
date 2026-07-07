@@ -1,31 +1,40 @@
 # 드림그로우 콘텐츠 자동화 — 프로젝트 컨텍스트
 
 > 이 파일은 새 세션이 자동으로 읽는다. 작업을 이어가려면 `/dreamgrow-resume` 스킬을 호출하라.
-> 마지막 갱신: 2026-07-01
+> 지난 세션 기록(2026-06~07)은 `docs/HISTORY.md`에 있다.
+> 마지막 갱신: 2026-07-07
 
 ## 무엇을 만들고 있나
 
-초등 학부모 교육 브랜드 "드림그로우"의 콘텐츠를 **노션 중심 멀티 에이전트 파이프라인**으로 자동 생산·발행한다.
-GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바일 앱에서 카드 생성·승인만 한다.
+초등 학부모 교육 브랜드 "드림그로우"의 콘텐츠를 **멀티 에이전트 파이프라인**으로 자동 생산·발행한다.
+GitHub Actions가 cron으로 카드 저장소를 폴링하고, 사람은 모바일에서 카드 생성·승인만 한다.
 
-흐름: `intake → 리서치 → 키워드 점수화 → ⏸️키워드 승인 → 브리프 → 작가↔비평가 토론 초안 → 검수/평가 → ⏸️발행 승인 → 발행(Threads/스티비)`
+흐름: `intake → 리서치 → 키워드 점수화 → ⏸️키워드 승인(자동승인 기본 ON) → 브리프 → 작가↔비평가↔검수 토론 초안 → 검수/평가 → ⏸️발행 승인 → 발행(Threads/스티비)`
+
+**저장소 = 옵시디언 볼트 하나** (노션 철수 완료). 카드는 `vault/파이프라인/활성/<id> <제목>.md`,
+frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹션`이 단계 산출물이다
+(`orchestrator/obsidian_state.py`, 볼트 경로 `DG_VAULT_ROOT` 기본 `vault/`). 호출부는 파사드
+`orchestrator/state.py`(`from orchestrator import state as store`)만 본다.
+**동기화는 GitHub Actions가 `vault/`를 커밋·push하는 git/GitHub 단일 경로다** (노션·Obsidian Sync 아님).
+승인·발행 알림은 텔레그램으로 나간다. 이관 경위는 `docs/HISTORY.md`, 기준 사양 `docs/기획/통합기획_v3.md`.
 
 상세 설계: `docs/ARCHITECTURE_V2.md`
 
 ## 핵심 ID / 리소스
 
-- 개발 브랜치: **`claude/fervent-bell-0iwlia`** (모든 작업은 여기서, main에 PR로 머지)
+- 개발 브랜치: **`claude/dreamgrow-orchestrator-review-z4zo4b`** (모든 작업은 여기서, main에 PR로 머지)
 - 저장소: `dream0grow/dream-grow-content-automation`
-- 노션 파이프라인 DB: `2581ffbe805540f68b4a472d07ae4197`
-- 노션 데이터소스(카드 생성용): `74292f89-a5ca-4cfc-ba23-5d7b49059e7f`
-- 노션 멘션 대상 user id(C-Box): `595b4d12-18aa-43a7-9aee-5ee84f3dc7ac`
+- 카드 저장소: 옵시디언 볼트 `vault/파이프라인/{활성,발행완료}/` (별도 DB 없음, git으로 동기화)
+- 볼트 경로 override: `DG_VAULT_ROOT` (기본 `vault/`)
+- 알림 채널: 텔레그램 (`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`)
 
 ## 코드 구조 (`orchestrator/`)
 
 | 파일 | 역할 |
 |---|---|
-| `run.py` | stage 상태 머신 (DISPATCH). cron이 `python3 -m orchestrator.run` 실행 |
-| `notion_state.py` | 노션 DB 읽기/쓰기, 카드 본문 토글, KST 타임스탬프, 멘션 알림(`notify`) |
+| `run.py` | stage 상태 머신 (DISPATCH) + 고아 청소·실패 재시도. cron이 `python3 -m orchestrator.run` 실행 |
+| `state.py` | 저장소 파사드 — 옵시디언 볼트 백엔드를 노출. 호출부(`store`)는 이 모듈만 본다 |
+| `obsidian_state.py` | 볼트 카드 저장소 — `vault/파이프라인/` md 카드 읽기/쓰기, 텔레그램+결재함 알림(`notify`) |
 | `prompts.py` | 브랜드 보이스/룰북 + 에이전트 프롬프트 (리서치/키워드/브리프/작가/비평가/검수/평가/회고) |
 | `agent_dialogue.py` | 작가↔비평가↔검수 토론 루프 + 벤치마킹/후킹 로드 |
 | `manus_research.py` | Manus 외부 리서치(전담). 25분 내 결과 없으면 Claude 폴백 |
@@ -61,209 +70,95 @@ GitHub Actions가 30분마다 노션 DB를 폴링하며, 사람은 노션 모바
 사람은 **마지막 발행 승인만** 하도록 설계. 그 앞 단계는 전부 자동:
 - **키워드 자동승인 기본 ON** (`config.AUTO_APPROVE_KEYWORD`): 최고점 키워드 자동 채택 → 브리프·초안까지 자동.
   끄려면 `DG_AUTO_APPROVE_KEYWORD=false`.
-- **초안 완성 시 노션 멘션 알림**: `handle_keyword_approved`가 발행 승인 게이트에서 `notify()` 호출.
-  `NOTION_MENTION_USER_ID` 미설정 시 C-Box 기본 사용자로 폴백해 알림이 항상 뜬다.
+- **초안 완성 시 텔레그램 알림**: `handle_keyword_approved`가 발행 승인 게이트에서 `notify()` 호출
+  → 텔레그램 폰 알림 + 볼트 `_system/review_queue.md` 결재함 기록.
 - **매일 자동 발제**: `daily-intake.yml`이 하루 1회 `daily_intake.py` 실행 → 새 주제 카드 생성.
   개수는 `DG_DAILY_TOPIC_COUNT`(기본 1), 대상은 `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모").
 
 ## 환경변수 / GitHub Secrets
 
-필수: `NOTION_API_KEY`, `NOTION_PIPELINE_DB_ID`, (`ANTHROPIC_API_KEY` 또는 `CLAUDE_CODE_OAUTH_TOKEN`)
-선택: `MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
+필수: (`ANTHROPIC_API_KEY` 또는 `CLAUDE_CODE_OAUTH_TOKEN`)
+선택: `DG_VAULT_ROOT`(기본 `vault/`), `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`(알림),
+`MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
-`NOTION_MENTION_USER_ID`(미설정 시 C-Box로 폴백), `DG_AUTO_APPROVE_KEYWORD`(기본 ON),
-`DG_DAILY_TOPIC_COUNT`(기본 1), `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모")
+`DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DAILY_TOPIC_COUNT`(기본 1),
+`DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모")
 
 ## 운영 — 자주 하는 작업
 
-- **새 글 만들기**: 노션 DB에 카드 생성 (stage=intake, status=queued, format=thread/newsletter, audience 입력)
-- **키워드 승인**: 키워드 표 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status=approved`
-- **발행 승인**: 초안/검수 확인 → `review_status=approved`이면 `approval_status=approved` → 자동 발행
+카드는 볼트 `vault/파이프라인/활성/`의 md 파일이다. 승인은 카드 frontmatter를 바꾸는 것
+(옵시디언/텔레그램). 사람이 바꾼 frontmatter를 cron이 감지해 다음 단계를 돌린다.
+
+- **새 글 만들기**: `vault/파이프라인/활성/`에 카드 생성 (frontmatter `stage: intake`, `status: queued`,
+  `format: thread`(또는 newsletter), `audience` 입력). 매일 발제(`daily-intake`)가 자동 생성하기도 한다.
+- **키워드 승인**: 키워드 섹션 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status: approved`
+- **발행 승인**: 초안/검수 확인 → `review_status: approved`이면 `approval_status: approved` → 자동 발행
+- **수정 요청**: 카드 `📝 수정 요청` 섹션에 지시 적고 `approval_status: revision_requested` → 재초안
 - **orchestrator 수동 실행**: GitHub Actions 탭 → orchestrator → Run workflow (Claude는 권한상 직접 실행 불가, 사용자가 클릭)
-- **대량 검토 생성**: `DG_AUTO_APPROVE_KEYWORD=true` Secret → 키워드 자동 채택 → 초안까지 자동 (발행만 사람)
+- **대량 검토 생성**: `DG_AUTO_APPROVE_KEYWORD=true` → 키워드 자동 채택 → 초안까지 자동 (발행만 사람)
 
 ## 알아둘 제약
 
 - Claude(이 세션)는 GitHub Actions 워크플로우를 **직접 실행 못 함**(403). 사용자가 Run workflow 클릭해야 함.
-- 노션 카드 본문이 커서 `notion-fetch` 결과가 토큰 초과하면 파일로 저장됨 → python 슬라이스로 읽기.
+- 볼트 카드는 md 파일이라 Glob/Grep/Read로 직접 읽는다. 본문이 크면 python 슬라이스로 읽기.
+- 볼트 동기화는 git 하나뿐 — 여러 워크플로우가 같은 브랜치에 push하므로 `pull --rebase → push`를 재시도한다.
 - cron이 정시(00/30분)엔 자주 누락 → `8,23,38,53분`으로 설정함. 불안정하면 수동 실행.
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
 
-### 옵시디언 중심 재구축 + 플라우드 3종 시스템 (2026-07-06, 브랜치 `claude/content-automation-obsidian-mtsmj6`) — ⬅️ 이번 세션 작업
+### 노션 완전 철수 → 옵시디언 볼트 + Git 일원화 (2026-07-07, 브랜치 `claude/dreamgrow-orchestrator-review-z4zo4b`) — ⬅️ 이번 세션 작업
 
-**방향 전환 확정 (사용자 결정)**: ① 볼트(초생산)를 GitHub 저장소로 동기화(이 저장소 `vault/`)
-② 시스템을 노션 → 옵시디언 중심으로 전면 재구축, **노션은 최종 철수(구독 해지)** —
-이관 사양서 `docs/기획/노션_옵시디언_이관설계.md` (M0~M3 로드맵, obsidian_state.py 설계)
-③ 교사 대상 블로그·페이스북은 초안까지 자동, 발행은 사람. 기획 기준 문서는 `docs/기획/통합기획_v3.md`(단일 사양서, v1/v2/v2.1 대체).
-단, v3의 D-29(볼트 동기화=Obsidian Sync)는 폐기 — 볼트 동기화는 git/GitHub 하나(사용자 확정).
+카드 저장소를 노션에서 완전히 걷어내고 옵시디언 볼트 하나로 고정, 동기화는 git/GitHub 단일 경로. 전체 27종 통과.
+- **백엔드 일원화**: `state.py` 파사드를 옵시디언 전용으로(이중 백엔드·`DG_STATE_BACKEND` 폐기).
+  `notion_state.py`·`notion_media.py` 삭제. 호출부 별칭 `notion_state`→`store`로 전 모듈 개명.
+- **config**: `NOTION_*`·`require_notion` 제거. 저장소=볼트(`DG_VAULT_ROOT`), 알림=텔레그램.
+- **워크플로우**: orchestrator·daily-intake·self-improve·backfill의 `NOTION_*` 시크릿 제거,
+  볼트에 쓰는 워크플로우 전부에 **git 커밋·push 단계**(경합 재시도)와 `pyyaml`·`contents:write` 추가.
+  test-cardnews의 노션 저장(`--notion-page`) 제거 → PNG 아티팩트만. cardnews의 노션 업로드 경로 삭제.
+- **문서**: CLAUDE.md·ARCHITECTURE_V2·PLAUD_INTEGRATION·dreamgrow-resume·plaud-zettel의 노션 서술을
+  볼트/Git로 교체. 통합기획 v3의 D-29(동기화=Obsidian Sync)를 **git/GitHub 유일**로 개정.
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② Actions Secrets에서 `NOTION_*` 삭제(선택) +
+  `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` 설정 확인 ③ 진행 중이던 노션 카드가 있으면 볼트로 옮긴 뒤 실행.
 
-**교육운동 프로젝트 (타겟 = 교사그룹, 학부모와 절대 혼용 금지)**: `vault/프로젝트/교육운동/` —
-꿈들·새넷·전교조 활동 녹음을 판별해 `활동기록/`에 요약을 남기고, 교사그룹 대상
-블로그·페북 초안(frontmatter `타겟: 교사그룹`, `활동: 꿈들|새넷|전교조|수업|일반`)을 생성한다.
+### 오케스트레이터 안정성·토큰 수리 (2026-07-07, 브랜치 `claude/dreamgrow-orchestrator-review-z4zo4b`)
 
-- **볼트 골격**: `vault/` — v3 전체 트리(raw·wiki·제텔카스텐 0~6·_검토대기·프로젝트 4종·SNS 시스템·_system·_archive),
-  교사그룹 초안은 `프로젝트/교육운동/{블로그_초안,페이스북_초안}`, `_system/`(candidates·.context·review_queue·values·lessons·logs),
-  볼트 헌법 `vault/CLAUDE.md`(쓰기 권한 매트릭스, `_ai` 딱지, 사례 신호등).
-- **플라우드 파이프라인**: `vault_pipeline/` — 녹음 전사 1건당 triage(LLM) 후
-  ①사례은행(초록 자동입고/노랑 `_노랑대기`+결재함/빨강 저장금지·로그만)
-  ②제텔카스텐 1.메모(구술 verbatim)→2.키워드(`K_ai`)→3.의견(`O - `, 화자가 표명한 것만)
-  ③교사 대상 블로그+페이스북 초안(`상태: 리뷰대기`). 중복 방지: `출처: plaud:<id>`+장부.
-  실행: `python3 -m vault_pipeline.run` / 워크플로우 `plaud-pipeline.yml`(매일 KST 22:08).
-  인증: `PLAUD_TOKENS_JSON` Secret(로컬 1회 로그인 토큰) 또는 무인증 인박스(`vault/수집함/plaud/`).
-  단위테스트 5종 통과(`vault_pipeline/test_pipeline.py`, LLM mock).
-- **보안(Phase 0)**: `tools/vault_secret_scan.py`(커밋 게이트, 워크플로우에 내장).
-  ⚠️ 업로드된 기존 볼트에서 실 API 키 발견(Anthropic·OpenAI·GitHub 토큰, Roam 일간노트) —
-  **키 전부 재발급 필요**, 위치는 `docs/OBSIDIAN_SETUP.md` ⑥ 참고.
-- **이관 도구**: `tools/vault_migrate.py` — 기존 초생산(4,222건)을 새 구조로 복사(dry-run 기본,
-  `1. 개인/` 제외). 절차는 `docs/OBSIDIAN_SETUP.md`.
-**사용자 답변으로 확정된 운영 방침 (2026-07-06 문답)**:
-- 초안 신뢰도 체감 10% — 사례·의미단위 줄바꿈·문체를 매번 수정(글당 5~10분). **최우선 요구 =
-  ①발행 직전 텔레그램 알림 ②음성으로 어디서든 수정 지시 ③수정본을 계속 학습해 문체 수렴**
-  (Honcho/lessons 스타일 학습 루프 — 차기 구현 1순위).
-- 문체 벤치마크: 본인 글을 `vault/raw/블로그글/`·`raw/페이스북글/`에 넣으면 교사 초안
-  system 프롬프트에 자동 주입(`writers.load_style_samples`, 최신 3편).
-- 사례 신호등: 초기엔 **애매하면 전부 노랑**(사람 결재로 하나씩 확대) — triage 프롬프트 반영.
-- `프로젝트/투자/` 에이전트 **읽기 허용** (투자 콘텐츠 확장 예정). 채널은 축소 없이 전부
-  (스레드·뉴스레터 운영 중 → 카드뉴스·릴스·유튜브 확장, 교사 블로그·페북은 품질 기준 완화).
-- 승인 가능 시간: 06:00~06:20, 14:00~16:00 중 20분 → 브리핑·알림 시각 설계 기준.
-- 플라우드 사용량: 일 ~3건/120분 (`--max 3` 기본값 적정).
-- 인프라: GitHub Actions 중심 유지, 텔레그램 알림은 서버리스(sendMessage)로, 버튼·음성
-  결재가 필요해지면 그때 옛 노트북에 봇만 systemd로 (하이브리드).
+무개입 자동화를 깨던 "조용히 멈추는 구멍" 봉합 + 토큰 절감. 전체 테스트 25종 통과(신규 `orchestrator/test_run.py` 9종).
+- **A1 수정 요청 데드엔드 해소**: `approval + revision_requested`를 처리하는 `handle_revision_requested`
+  추가(DISPATCH 배선). 사람이 `📝 수정 요청` 섹션에 지시를 적고 `approval_status=revision_requested`로
+  바꾸면 → keyword_approval로 되돌려 지시를 작가에게 되먹여 재초안(빈 키워드면 키워드 게이트로).
+  `run_draft_dialogue(extra_directive=...)`로 첫 집필부터 반영.
+- **A2 침묵 차단 해소**: `handle_final_approved`가 검수 미통과인데 승인된 경우 로그만 남기던 것을,
+  `needs_human`+`approval_status=blocked`로 디큐하고 사유·다음 행동(재승인/재초안)을 `notify()`로 통지.
+- **A3 실패 침묵 해소**: `run()`의 예외를 `_handle_failure`로 처리 — intake/research/keyword는 1회 자동
+  재시도(`last_error`에 `[자동재시도]` 표식), 재시도 후에도 실패면 `failed`+통지. keyword_approval/approval은
+  status 무시 쿼리라 표식으로 1회 재시도 후 `approval_status=failed`로 디큐. **publish_ready는 부분발행
+  중복 위험으로 재시도 제외**(즉시 통지).
+- **A4 고아 카드 청소기**: `run()` 시작 시 `_sweep_stale_running` — brief/draft가 running으로
+  `DG_STALE_RUNNING_MINUTES`(기본 60) 넘게 멈추면 keyword_approval/approved로 재큐.
+- **A5 스레드 글 유실 방지**: `split_posts`가 500자 초과 문단을 `[:500]`으로 잘라 버리던 것을
+  문장 단위(`_split_sentences`) 이월 분할로 교체 — 글이 유실되지 않음.
+- **A6 발행 성공 통지**: Threads/뉴스레터 발행 성공 시 링크와 함께 `notify()`(폰에서 사이클 종료).
+- **B1 토큰**: `prompts._load_learned_overlay`에 `@lru_cache` — 카드당 10여 회 Honcho 원격 질의를 1회로.
+- **B2 토큰**: 글 평가 총점이 `DG_RUBRIC_SKIP_QUALITY`(기본 45/50) 이상이면 2차안(전문 재작성) 생략.
+- **모델 ID 고정(완료)**: `config.py`·`photo_judge.py` 기본 유틸리티 모델을 실재하지 않던
+  `claude-sonnet-4-6` → **`claude-sonnet-5`**로 교체. (글쓰기는 `claude-opus-4-8` 유지)
+- **B4 CLAUDE.md 대청소(완료)**: 상단을 옵시디언 전환 현행으로 교체, 개발 브랜치 갱신,
+  과거 세션 로그(2026-06-13~07-06)를 `docs/HISTORY.md`로 이관(311→149줄).
+- **A8 볼트 push 경합 방지**: orchestrator·plaud·vault-agents·cardnews-benchmark 워크플로우의
+  `pull --rebase → push`를 5회 재시도 루프로 감싸 동시 push 실패(non-fast-forward)를 흡수.
+- **B3 컨텍스트 선별 주입**: `read_sections_by_prefix`(두 백엔드+파사드) 추가. 키워드/브리프 단계에
+  카드 본문 전체 대신 리서치·키워드 섹션만 주입 — A1 재초안 시 누적된 옛 초안 재주입을 막아 시너지.
+- **B5 무거운 참고자료 첫 집필만**: 후킹·벤치마킹(13KB+)을 v1에만 넣고 비평/윤리 재작성 호출에선 제외.
+  `get_style_context`에서 벤치마크 분리, `run_draft_dialogue(benchmark=...)`로 전달.
+- **A7 완료(노션 철수 후)**: 학부모 발행 카드(`stage: published`) 원자 메모 환류를
+  `vault_pipeline/feedback.py`에 추가(`find_published_pipeline`). 문체 학습은 발행 시 style_learn이
+  이미 하므로 atomize만 수행(author 이한결·source_type own_content). 발행완료+본문 100자↑ 카드만,
+  장부(feedback_ledger)로 중복 방지 — 잘못된 카드 유입 차단.
+- **테스트**: 전체 30종 통과(신규 `test_run.py` 10종, `test_obsidian_state` B3 1종, `test_feedback` A7 3종).
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② orchestrator Run workflow로 라이브 반영.
 
-**2차 문답 확정 (2026-07-06)**:
-- 텔레그램 봇 토큰 발급 완료 → **알림은 서버리스 구현 완료**(`vault_pipeline/telegram_notify.py`,
-  Secrets `TELEGRAM_BOT_TOKEN`+`TELEGRAM_CHAT_ID` 필요). 음성 수정은 ①플라우드 경유 ②텔레그램 보이스
-  둘 다 구축 예정(①이 선행, 서버 불필요).
-- 최종본 비교 학습 코드 확인: `diff_learner.py`(AI 초안 사본 vs `05 리뷰/완료` → Honcho corrections).
-  단 맥 로컬 경로 하드코딩 → 볼트 이관 후 `vault/` 경로·Actions 실행으로 전환 필요.
-- **발행 관리 웹 대시보드**: `dashboard/index.html` — 서버 없이 GitHub API로 볼트 초안을
-  목록·수정·상태/발행시간 변경·커밋. fine-grained PAT(Contents RW)로 로그인.
-- 문체 원천 확정: 스레드=`vault/raw/스레드_아카이브/`(CSV 2,068편+TOP30.md), 블로그=네이버
-  l0126j(`tools/naver_blog_scrape.py`로 로컬 스크랩→`raw/블로그글`), 정답글=`raw/스레드_정답글/`.
-  채널별 문체 분리 원칙(SNS마다 다르게). 뉴스레터 문체·values.md 재작성은 본인 글 분석 후(차기).
-- 콘텐츠 규칙 반영: **사례는 재료 없으면 넣지 않기(자리 표시도 금지)** + 논리 개연성 자체 점검
-  (교사 프롬프트+학부모 WRITER 모두).
-- 릴스·유튜브는 **대본까지만** 자동(본인이 읽고 촬영). 대본 문체 원본 = `raw/Roam.../유튜브 만들기`.
-- 리서치는 주 1회가 아니라 **2일 1회 Manus 자동**(Phase H 변형 — 차기 구현).
-- 스레드 성과: **2주 데이터 수집 → 조회수 상위를 카드뉴스로**(차기 구현, threads_insights 활용).
-- 노션 잔여 카드는 **전부 옵시디언으로 이관**(M2에서 종료 아닌 이전).
-- 주간 스냅샷 태그 워크플로우 추가(`weekly-snapshot.yml`, 일 KST 06:18).
-
-**최우선 요구 2건 구현 완료 (2026-07-06 저녁)**:
-- **문체 학습 루프**(`vault_pipeline/feedback.py`): 초안 생성 시 AI 원본을
-  `_system/ai_originals/`에 몰래 저장 → 사용자가 고쳐 `상태: 발행완료`로 바꾸면
-  diff에서 일반화된 편집 규칙을 추출해 `_system/style_lessons.md`에 채널별 누적 →
-  `writers.load_style_lessons`가 이후 모든 초안 프롬프트에 주입. 고칠수록 문체 수렴.
-  잘못 배운 규칙은 사람이 md에서 지우면 됨. Honcho 불필요(볼트 안에서 투명하게).
-- **원소스 멀티유즈 환류**: 발행완료 글을 원자 메모(1~5개, 발췌 그대로)로 분해해
-  `제텔카스텐/1. 메모` 입고 (author: 이한결, source_type: own_content, 원출처_추적: 필요).
-  중복 방지: `_system/logs/feedback_ledger.json`. 워크플로우에 되먹임 단계 추가.
-  테스트 9종 통과(test_pipeline 6 + test_feedback 3).
-
-**노션 이관 M0~M1 구현 완료 + 에이전트 OS 1차 (2026-07-06 밤)**:
-- `orchestrator/obsidian_state.py`: notion_state와 동일 인터페이스, 카드=`vault/파이프라인/활성/*.md`
-  (frontmatter=속성, `## 섹션`=본문 토글, notify=텔레그램+결재함). 단위테스트 5종.
-- `orchestrator/state.py` 파사드: **Actions Variable `DG_STATE_BACKEND=obsidian`** 설정 시
-  오케스트레이터 전체(run·publish·daily_intake·rubric·style_learn·self_improve)가 노션 없이
-  볼트에서 돈다. 기본값 notion(안전). orchestrator.yml에 볼트 커밋 단계 내장.
-  **전환 절차**: 노션 잔여 카드 이전(M2, 다음 세션) → Variable 설정 → 노션 Secrets 삭제 → 구독 해지.
-- **에이전트 OS 1차**: `.claude/agents/zk-*` 지식팀 8종(transplanter·converter·classifier·
-  socrates·writer·researcher·reviewer·case-keeper, v3 §5) — 대화 세션에서 서브에이전트로 호출.
-  **socrates는 자동 잡으로 승격**: `vault_pipeline/socrates.py` + `vault-agents.yml`(매일 KST 05:08,
-  질문 3개→dialogues+텔레그램, 어제 답에 후속 질문). 나머지 야간 잡(zk-writer·reviewer·classifier)은
-  Roam 이식(Phase 2) 후 순차 승격 예정. 전체 테스트 16종 통과.
-- Honcho 판단: 새 볼트 루프는 파일 기반(style_lessons.md) 유지 — 투명·수정가능·무의존.
-  Honcho는 기존 학부모 파이프라인(diff_learner corrections)에서 계속 사용(이중 아님, 영역 분리).
-- Obsidian 공식 Sync 불필요 확정 — Obsidian Git 하나만 사용(이중 동기화 금지).
-
-- **남은 사용자 액션**: ① `TELEGRAM_BOT_TOKEN`·`TELEGRAM_CHAT_ID` Secrets 등록
-  ② Obsidian Git 연동+이관(`docs/OBSIDIAN_SETUP.md`) ③ 맥에서 `tools/naver_blog_scrape.py` 실행
-  ④ 정답 스레드 글을 `raw/스레드_정답글`에 투입 ⑤ 다음 세션: 노션 이관 M0~M1 + 음성 수정 루프
-  + 문체 학습 루프 + 본인 글 분석으로 values·채널별 문체 가이드 생성.
-
-### 플라우드(Plaud) MCP 연동 + 제텔카스텐 확장 (2026-07-05, 브랜치 `claude/plaud-mcp-setup-6j07l1`)
-- **설치 완료(저장소 영구화)**: `.mcp.json`(프로젝트 스코프, `npx -y @plaud-ai/mcp@latest` stdio) +
-  공식 스킬 7종(`.claude/skills/plaud-*`) + 자체 프로세스 스킬 **`/plaud-zettel`** 동봉.
-- **`/plaud-zettel` 프로세스**: 플라우드 녹음 → 제텔카스텐 원자 노트(노션 DB, 임시/문헌/영구) →
-  콘텐츠 씨앗은 파이프라인 intake 카드로 승격 → 기존 오케스트레이터가 초안까지 자동.
-  중복 방지는 노션 노트의 `출처`(`plaud:<file_id>`) 필드가 겸한다. 상세: `docs/PLAUD_INTEGRATION.md`.
-- **인증 주의**: OAuth 브라우저 콜백 방식이라 원격(웹) 세션의 stdio 서버로는 로그인 불가.
-  ① 로컬 Claude Code에서 1회 로그인(`~/.plaud/tokens-mcp.json`) 또는
-  ② **claude.ai 설정 → 커넥터에 `https://mcp.plaud.ai/mcp` 추가**(웹 세션 권장, 노션처럼 동작).
-- **남은 사용자 액션**: ① claude.ai 커넥터 등록(위 ②) ② 이 브랜치 PR 머지 ③ `/plaud-zettel` 첫 실행 후
-  생성된 제텔카스텐 DB ID를 이 파일 "핵심 ID"에 추가.
-
-### 교육윤리 검수 되먹임 재작성 루프 (2026-07-01)
-- **구조적 갭 발견·해결**: 교육윤리 검수(ETHICS_REVIEW)가 초안 맨 끝에 딱 한 번 돌고 그 피드백이
-  작가에게 되먹여지지 않아, `review_status=revise` 카드는 재작성 경로 없이 `approval/needs_human`에
-  **영구히 막혀 있었다**(당시 approval 대기 13장 중 6장이 이 데드엔드). run.py의 DISPATCH에는
-  `approval+approved`용 `handle_final_approved`만 있고 그마저 `review_status!=approved`면 "게이트 차단"만 함.
-- **수정 (브랜치 `claude/automation-task-continuation-n5kpqy`, HEAD `8eddf84`, 푸시 완료 · PR 미생성)**:
-  `agent_dialogue.run_draft_dialogue`에 윤리 검수 되먹임 루프 추가. 검수가 revise면 `issues +
-  revision_suggestions`를 작가에게 되먹여 재작성→재검수, approved 되면 종료. hold/risk는 재작성 안 하고
-  사람에게(무regression), 피드백이 비면 종료. `config.ETHICS_MAX_ROUNDS`(`DG_ETHICS_MAX_ROUNDS`, 기본 2)로
-  무한 재작성 방지. mock 단위테스트 4종(revise→approved / 라운드제한 / hold미재작성 / 빈피드백) 통과.
-  **주의**: 이 코드는 앞으로 생성되는 초안에만 적용됨. 이미 approval에 막힌 기존 6장을 풀려면
-  각 카드를 재초안(예: stage=keyword_approval + approval_status=approved로 되돌려 재생성)해야 하는데,
-  본문 토글이 중복 append되니 사용자와 상의 후 진행.
-- **429 실패 카드 2장 리셋 완료**: DG-2026-0010(책읽기)·0013(화내고후회) → stage=intake, status=queued,
-  idempotency_key·last_error·manus_task_ids 비움. 다음 orchestrator 실행에 research 재시도(429 백오프는 이미 main).
-- **남은 사용자 액션**: ① 이 브랜치 PR 생성·머지 여부 결정 ② orchestrator Run workflow(리셋 카드 재시도 +
-  머지 시 새 루프 반영) ③ approval 대기 approved 7장(0001·0003·0005·0006·0007·0011·0012)의 최종 발행 승인.
-
-- 시스템 완성: 리서치~키워드~브리프~토론초안~검수~발행(Threads/스티비) 전부 작동. **스티비 실제 발송 성공 확인**.
-- 핸드오프 시스템 가동: CLAUDE.md + `/dreamgrow-resume` 스킬 (PR #18 머지됨).
-- **Manus 429 백오프 추가 (2026-06-13, PR #19로 main 머지 완료 — HEAD `9247caa`)**: 카드 대량 처리 시 `task.create`
-  버스트가 Manus 레이트리밋(429)에 걸려 research 단계에서 8개가 일괄 실패했었음. `manus_research.py`에
-  `_request_with_retry`(429/5xx 지수 백오프 2→4→8→16초, Retry-After 존중) + task.create 사이 1초 간격을 추가해 완화.
-  환경변수 `DG_MANUS_MAX_RETRIES`(기본 4)로 조절. **머지 후 사용자가 orchestrator를 Run workflow로 재실행해야 효과 발생**
-  (cron은 main에서 도는데, 머지 전 11:19 수동 실행은 옛 코드라 8개가 또 429 실패했을 수 있음 → 재실행 필요).
-- **노션 카드 현황** (2026-06-13 갱신):
-  - DG-2026-0001 (스마트폰 규칙): publish_ready, review·approval 모두 approved → 다음 orchestrator 실행 시 Threads 자동 발행
-  - DG-2026-0002 (친구 문제): 키워드 승인 완료(approval_status=approved 처리함) → 다음 실행에 브리프→초안 진행
-  - 받아쓰기/형제비교/칭찬함정: research running (Manus task 진행 중)
-  - 발표목소리/거짓말: intake 대기
-  - 429로 실패했던 8개(수학포기/자존감/책읽기/구구단/우는아이/1학년학교/화내고후회/심심해): stage=intake, status=queued로
-    리셋 완료 (idempotency_key·last_error 비움) → 다음 실행에 재시도. content_id는 유지됨.
-    (8번 1학년학교·10번 형제비교는 유지하기로 함 — 삭제 안 함)
-- **다음 자동 진행 대기**: `DG_AUTO_APPROVE_KEYWORD=true` Secret이 켜져 있으면, orchestrator를 2~3회 실행 시
-  검토용 카드들이 키워드 자동 채택 → 브리프 → 초안 → 검수까지 진행되어 "발행 승인 대기"로 모인다.
-  (Claude는 Actions를 직접 실행 못 하므로 사용자가 Run workflow 클릭 필요)
-
-### 뉴스레터 자동화 검토 결과 (2026-06-14) — ⬇️ 다음 세션 이어받을 작업
-
-경로는 견고함: `format=newsletter` → 토론초안(16k토큰·3000~6000자) → `✍️ 초안 (newsletter)` →
-`publish.py._publish_newsletter` → `stibee.create_and_send`(이메일생성→HTML주입→AUTO_SEND면 발송). 실발송 성공 이력 있음.
-검토에서 발견한 갭과 **사용자가 승인한 다음 할 일**:
-
-- **[구현 완료, 2026-06-14] 코드 수정 #1·#2·#4** (브랜치 `claude/vigilant-shannon-mcrpao`, PR 머지 대기):
-  - #1 (`publish.py`): newsletter **단독** 카드가 발송 성공해도 `published`로 안 넘어가던 문제 해결. ✅
-    `_publish_newsletter`가 실발송 성공 시 `True`(stibee `sent` 기반) 반환 → thread 없는 카드는 sent=True면
-    `stage=published, status=done`, 아니면 needs_human.
-  - #2 (`stibee.py` `markdown_to_html`): 리스트(`- `/`* `)·링크(`[t](url)`)가 평문으로 나오던 문제 해결. ✅
-    `_inline()` 헬퍼(볼드+링크) + `<ul><li>` 변환 추가. 로컬 렌더 테스트 통과.
-  - #4 (`run.py`): 발행 승인 안내 문구의 "Maily 붙여넣기" 옛 표현을 스티비 자동 발행 문구로 교정. ✅
-  - (#3 제목 중복은 이번 범위 제외 — 사용자가 #1·#2·#4만 선택.)
-  - **남은 사용자 액션**: 이 브랜치를 PR로 main에 머지.
-- **[사용자 액션] test-stibee로 실발송 검증**: GitHub Actions → `test-stibee` → Run workflow
-  (테스트 주소록에 실제 1통 발송, `STIBEE_AUTO_SEND=true` 강제). Claude는 직접 실행 불가.
-
-### 평가표 내장 + 2차안 자동화 (2026-06-16, 브랜치 `claude/vigilant-shannon-mcrpao`)
-
-- **평가표**: `data/thread_rubric.md`(사용자 글 CSV=benchmark_posts.md 기준, 100점=문체40/구조30/논리성30).
-  핵심 약점은 **줄 길이**(스레드는 한 줄 의미 단위 15~18자, `<br>`/Enter).
-- **파이프라인 내장(구현 완료)**:
-  - `prompts.py`: WRITER(thread)에 줄바꿈 규칙 주입 + `LINE_BREAK_RULE` + `RUBRIC_REVIEW` 프롬프트.
-  - `rubric_review.py`(신규): 초안 채점 → `📐 평가표 점검` + `✍️ 2차안 (fmt)` 토글 기록(idempotent).
-  - `run.py`: 초안 단계에서 자동 생성 + `--stage rubric_backfill`(기존 카드 소급).
-  - `.github/workflows/backfill-2cha.yml`: 수동 실행으로 기존 모든 카드 일괄 2차안.
-- **남은 사용자 액션**: ① 이 브랜치 main 머지(라이브 파이프라인=main에서 동작) ② `backfill-2cha`
-  Run workflow로 기존 카드에 2차안 일괄 생성(Claude는 Actions 실행 불가, 403).
-- **왜 노션에 글이 자동으로 안 쌓이나(진단)**: ① cron이 GitHub에 의해 대폭 누락(설정 15분, 실제 수 시간 간격).
-  ② 기존 카드는 전부 `status=needs_human`(발행 승인 대기)에서 멈춤 — 자동화는 끝났고 사람 승인 대기.
-  ③ 새 카드는 사람만 생성 → 새 글 자체가 안 늘어남. 결론: 막힌 게 아니라 승인 게이트에 모여 있음.
+> 지난 세션 기록은 `docs/HISTORY.md`로 이관했다 (2026-06-13 ~ 2026-07-06).
 
 ## 한국어 윤문 스킬 — 제3자 노출 문구는 무조건 적용 (필수)
 

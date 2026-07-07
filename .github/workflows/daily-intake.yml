@@ -1,7 +1,7 @@
 # 드림그로우 매일 콘텐츠 발제
-# 하루 1회 새 주제를 자동 발제해 intake 카드를 만든다.
-# 이후는 orchestrator(30분 cron)가 리서치→키워드(자동승인)→초안→검수까지 진행하고,
-# 초안이 완성되면 노션 멘션으로 알린다. 사람은 마지막 발행 승인만 한다.
+# 하루 1회 새 주제를 자동 발제해 볼트(vault/파이프라인/)에 intake 카드를 만든다.
+# 이후는 orchestrator(cron)가 리서치→키워드(자동승인)→초안→검수까지 진행하고,
+# 초안이 완성되면 텔레그램으로 알린다. 사람은 마지막 발행 승인만 한다.
 name: daily-intake
 
 on:
@@ -22,9 +22,9 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     env:
-      NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
-      NOTION_PIPELINE_DB_ID: ${{ secrets.NOTION_PIPELINE_DB_ID }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       DG_DAILY_TOPIC_COUNT: ${{ github.event.inputs.count || secrets.DG_DAILY_TOPIC_COUNT }}
@@ -37,7 +37,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
-        run: pip install requests python-dotenv honcho-ai
+        run: pip install requests python-dotenv honcho-ai pyyaml
 
       # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
       - name: Install Claude Code CLI (Max 구독 인증용)
@@ -46,3 +46,20 @@ jobs:
 
       - name: Generate daily topics
         run: python3 -m orchestrator.daily_intake
+
+      # 새로 만든 intake 카드를 볼트에 커밋·push (git이 유일한 동기화 경로)
+      - name: 볼트 카드 커밋
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "daily-intake[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "매일 발제: intake 카드 $(date +%Y-%m-%d)"
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

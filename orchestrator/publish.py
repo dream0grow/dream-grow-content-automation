@@ -1,6 +1,6 @@
 """Threads 자동 발행 - publish_ready 카드를 클라우드에서 발행 (로드맵 2단계)
 
-threads_publisher.py의 API 흐름을 노션 카드 기반으로 이식했다.
+threads_publisher.py의 API 흐름을 볼트 카드 기반으로 이식했다.
 발행 게이트: review_status=approved AND approval_status=approved 카드만 발행한다.
 THREADS_ACCESS_TOKEN 미설정 시 카드를 needs_human으로 두고 수동 발행을 안내한다.
 """
@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 import requests
 
-from orchestrator import state as notion_state
+from orchestrator import state as store
 
 THREADS_API_BASE = "https://graph.threads.net/v1.0"
 THREADS_ACCESS_TOKEN = os.getenv("THREADS_ACCESS_TOKEN", "")
@@ -42,18 +42,42 @@ def split_posts(draft: str) -> list[str]:
     if len(draft) <= POST_CHAR_LIMIT:
         return [draft]
 
-    posts, current = [], ""
+    # 문단을 순서대로 담되, 500자를 넘기는 문단은 문장 단위로 쪼개 이월한다.
+    # (예전엔 para[:500]으로 잘라 나머지를 통째로 버렸다 — 글 유실 위험 A5)
+    units: list[str] = []
     for para in draft.split("\n\n"):
-        candidate = f"{current}\n\n{para}".strip() if current else para
+        if len(para) <= POST_CHAR_LIMIT - 20:
+            units.append(para)
+        else:
+            units.extend(_split_sentences(para))
+
+    posts, current = [], ""
+    for unit in units:
+        unit = unit.strip()
+        if not unit:
+            continue
+        candidate = f"{current}\n\n{unit}".strip() if current else unit
         if len(candidate) <= POST_CHAR_LIMIT - 20:
             current = candidate
         else:
             if current:
                 posts.append(current)
-            current = para[:POST_CHAR_LIMIT]
+            # 한 문장이 그래도 한도를 넘으면(극단) 안전하게 조각내 모두 싣는다.
+            if len(unit) > POST_CHAR_LIMIT:
+                for i in range(0, len(unit), POST_CHAR_LIMIT):
+                    posts.append(unit[i:i + POST_CHAR_LIMIT])
+                current = ""
+            else:
+                current = unit
     if current:
         posts.append(current)
     return posts
+
+
+def _split_sentences(text: str) -> list[str]:
+    """한국어 종결부호 뒤에서 문장 단위로 나눈다 (분할 실패 시 통짜 반환)."""
+    parts = re.split(r"(?<=[.!?。…])\s+", text.strip())
+    return [p for p in parts if p.strip()] or [text.strip()]
 
 
 def publish_chain(posts: list[str]) -> tuple[list[str], str]:
@@ -114,11 +138,11 @@ def _publish_newsletter(page_id: str) -> bool:
     AUTO_SEND가 꺼져 초안만 생성된 경우도 sent=False라 False를 반환한다.
     """
     from orchestrator import stibee
-    draft = notion_state.read_latest_section(page_id, "✍️ 초안 (newsletter)")
+    draft = store.read_latest_section(page_id, "✍️ 초안 (newsletter)")
     if not draft.strip():
         return False
     if not stibee.available():
-        notion_state.append_section(
+        store.append_section(
             page_id, "📧 뉴스레터 발행 안내",
             "STIBEE_API_KEY/STIBEE_LIST_ID Secret이 없어 자동 발송을 건너뜁니다. "
             "'✍️ 초안 (newsletter)' 최종본을 스티비 에디터에 붙여넣어 발행하세요.",
@@ -126,13 +150,13 @@ def _publish_newsletter(page_id: str) -> bool:
         return False
     try:
         result = stibee.create_and_send(draft)
-        notion_state.append_section(
+        store.append_section(
             page_id, "📧 뉴스레터 발행 기록 (스티비)",
             f"{result['detail']}\n제목: {stibee.extract_subject(draft)}",
         )
         return bool(result.get("sent"))
     except Exception as e:
-        notion_state.append_section(
+        store.append_section(
             page_id, "📧 뉴스레터 발행 실패 (스티비)",
             f"{e}\n\n'✍️ 초안 (newsletter)'를 스티비 에디터에 수동 붙여넣기 해주세요. "
             "오류 내용이 API payload 문제라면 orchestrator/stibee.py 조정이 필요합니다.",
@@ -146,7 +170,7 @@ def handle_publish(card: dict):
 
     # 발행 게이트 재확인 (방어적 이중 체크)
     if card["review_status"] != "approved" or card["approval_status"] != "approved":
-        notion_state.update_card(page_id, status="needs_human",
+        store.update_card(page_id, status="needs_human",
                                  last_error="발행 게이트 미충족 (review/approval)")
         return
 
@@ -168,23 +192,32 @@ def handle_publish(card: dict):
     if "thread" not in formats:
         # newsletter 단독 카드: 실발송 성공이면 발행 완료 처리, 아니면 사람 확인 대기
         if newsletter_sent:
-            notion_state.update_card(page_id, stage="published", status="done")
+            store.update_card(page_id, stage="published", status="done")
+            store.notify(
+                page_id,
+                f"✅ [{card.get('content_id', '')}] 뉴스레터가 스티비로 발행됐습니다.",
+            )
         else:
-            notion_state.update_card(page_id, status="needs_human")
+            store.update_card(page_id, status="needs_human")
+            store.notify(
+                page_id,
+                f"📧 [{card.get('content_id', '')}] 뉴스레터 자동 발송이 안 돼 "
+                "대시보드/스티비에서 확인이 필요합니다.",
+            )
         return
 
     if not available():
-        notion_state.append_section(
+        store.append_section(
             page_id, "📤 발행 안내",
             "THREADS_ACCESS_TOKEN/THREADS_USER_ID Secret이 없어 자동 발행을 건너뜁니다. "
             "수동 발행 후 stage를 published로 바꾸거나, Secret 등록 후 status를 queued로 되돌리세요.",
         )
-        notion_state.update_card(page_id, status="needs_human")
+        store.update_card(page_id, status="needs_human")
         return
 
     draft = (
-        notion_state.read_latest_section(page_id, "✍️ 초안 (thread)")
-        or notion_state.read_latest_section(page_id, "✍️ 초안")
+        store.read_latest_section(page_id, "✍️ 초안 (thread)")
+        or store.read_latest_section(page_id, "✍️ 초안")
     )
     if not draft.strip():
         raise RuntimeError("카드에서 '✍️ 초안' 섹션을 찾지 못했습니다")
@@ -193,7 +226,7 @@ def handle_publish(card: dict):
     media_ids, permalink = publish_chain(posts)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    notion_state.append_section(
+    store.append_section(
         page_id, "📤 발행 기록",
         f"발행 시각: {timestamp}\n글 수: {len(media_ids)}개\n"
         f"media_ids: {', '.join(media_ids)}\npermalink: {permalink or '(조회 실패)'}",
@@ -201,4 +234,9 @@ def handle_publish(card: dict):
     fields = {"stage": "published", "status": "done"}
     if permalink:
         fields["published_url"] = permalink
-    notion_state.update_card(page_id, **fields)
+    store.update_card(page_id, **fields)
+    store.notify(
+        page_id,
+        f"✅ [{card.get('content_id', '')}] Threads 발행 완료 ({len(media_ids)}개). "
+        + (permalink or "링크 조회 실패"),
+    )
