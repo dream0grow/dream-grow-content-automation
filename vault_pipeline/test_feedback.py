@@ -88,4 +88,57 @@ def test_no_style_learning_without_original(vault):
     t = feedback.find_published()[0]
     assert feedback.learn_style(t, dry_run=False) == 0
     assert not (vault / "_system/style_lessons.md").exists()
+
+
+# ---------- A7: 학부모 파이프라인 발행 카드 원자 메모 환류 ----------
+
+def _make_pipeline_card(vault, *, stage="published", status="done", draft_len=200):
+    """파이프라인 발행 카드 파일을 만든다 (obsidian_state 포맷)."""
+    active = vault / "파이프라인/활성"
+    active.mkdir(parents=True, exist_ok=True)
+    body_draft = "아이의 오답을 함께 보는 저녁 대화가 배움을 바꿉니다. " * (draft_len // 30 + 1)
+    (active / "DG-2026-0001 오답 대화.md").write_text(
+        f"---\ntopic: 오답 대화\ncontent_id: DG-2026-0001\nstage: {stage}\n"
+        f"status: {status}\nformat: thread\naudience: 초등 저학년 학부모\n"
+        f"published_url: https://threads.net/abc\n---\n\n"
+        f"## ✍️ 초안 (thread) — 2026-07-07 10:00\n\n{body_draft}\n",
+        encoding="utf-8")
+
+
+def test_pipeline_atomize_only(vault):
+    """A7: 학부모 발행 카드는 메모 분해만(문체 학습 없음) 하고 own_content로 남긴다."""
+    _make_pipeline_card(vault)
+    targets = feedback.find_published_pipeline()
+    assert len(targets) == 1
+    t = targets[0]
+    assert t["pipeline"] is True
+    assert t["meta"]["채널"] == "thread"
+    assert "오답" in t["body"]
+
+    # 파이프라인 카드는 메모만 생성(문체 학습은 main에서 pipeline 표식으로 건너뜀)
+    memos = feedback.atomize(t, dry_run=False)
+    assert memos == 1
+    note = list((vault / "제텔카스텐/1. 메모").glob("*.md"))[0].read_text(encoding="utf-8")
+    assert "author: 이한결" in note and "source_type: own_content" in note
+
+
+def test_pipeline_skips_unpublished_and_stub(vault):
+    """미발행(draft) 카드와 너무 짧은 스텁은 환류 대상이 아니다."""
+    _make_pipeline_card(vault, stage="draft")          # 아직 발행 안 됨
+    assert feedback.find_published_pipeline() == []
+    # 발행됐지만 본문이 스텁(<100자)이면 제외
+    import shutil
+    shutil.rmtree(vault / "파이프라인")
+    _make_pipeline_card(vault, draft_len=10)
+    assert feedback.find_published_pipeline() == []
+
+
+def test_pipeline_ledger_idempotent(vault):
+    """장부 기록 후에는 같은 카드를 다시 환류하지 않는다."""
+    _make_pipeline_card(vault)
+    t = feedback.find_published_pipeline()[0]
+    ledger = feedback._load_ledger()
+    ledger[t["key"]] = {"memos": 1}
+    feedback._save_ledger(ledger)
+    assert feedback.find_published_pipeline() == []
     assert feedback.atomize(t, dry_run=False) == 1

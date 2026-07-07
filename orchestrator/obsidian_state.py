@@ -104,6 +104,7 @@ def _card_from_file(path: Path) -> dict:
         "approved_keyword": get("approved_keyword"),
         "manus_task_ids": get("manus_task_ids"),
         "idempotency_key": get("idempotency_key"),
+        "published_url": get("published_url"),
     }
 
 

@@ -151,9 +151,11 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   카드 본문 전체 대신 리서치·키워드 섹션만 주입 — A1 재초안 시 누적된 옛 초안 재주입을 막아 시너지.
 - **B5 무거운 참고자료 첫 집필만**: 후킹·벤치마킹(13KB+)을 v1에만 넣고 비평/윤리 재작성 호출에선 제외.
   `get_style_context`에서 벤치마크 분리, `run_draft_dialogue(benchmark=...)`로 전달.
-- **A7 보류(의도적)**: 학부모 발행글의 원자 메모 환류는 옵시디언 백엔드(현재 비활성)와 파이프라인
-  카드 포맷 확정에 의존. 지금 절반 구현하면 잘못된 카드를 분해기에 넘길 위험이 커 전환 완료 후로 미룸.
-- **테스트**: 전체 27종 통과(신규 `test_run.py` 10종 + `test_obsidian_state` B3 1종).
+- **A7 완료(노션 철수 후)**: 학부모 발행 카드(`stage: published`) 원자 메모 환류를
+  `vault_pipeline/feedback.py`에 추가(`find_published_pipeline`). 문체 학습은 발행 시 style_learn이
+  이미 하므로 atomize만 수행(author 이한결·source_type own_content). 발행완료+본문 100자↑ 카드만,
+  장부(feedback_ledger)로 중복 방지 — 잘못된 카드 유입 차단.
+- **테스트**: 전체 30종 통과(신규 `test_run.py` 10종, `test_obsidian_state` B3 1종, `test_feedback` A7 3종).
 - **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② orchestrator Run workflow로 라이브 반영.
 
 > 지난 세션 기록은 `docs/HISTORY.md`로 이관했다 (2026-06-13 ~ 2026-07-06).
