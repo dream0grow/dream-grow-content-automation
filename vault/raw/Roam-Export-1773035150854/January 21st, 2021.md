@@ -1,0 +1,19 @@
+- {{[[DONE]]}}  학교 방송 시스템 개선 
+    - 방송시스템 장비 개선 비용 확인
+    - 유튜브 방송용으로 변경할 때 비용 확인
+- {{[[DONE]]}} 노트북과 학교 컴퓨터 연결 방법 알아보기 : 졸업 방송
+    - https://m.blog.naver.com/siru13118/221915644692 (캡쳐보드)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FPRC4Z8al8t.png?alt=media&token=b888ba6c-3d43-4194-9ce8-06f40e42c0eb)
+    - 
+- [[공부]] 
+    - 교육받고 싶은 목록
+        - 교육받고 싶은 목록
+        - 씽크와이즈 : 1일 온라인 교육 -2/24일 저녁 8시30분~ 77000원 https://www.thinkwise.co.kr/purchase/learn_item.php?it_id=2755
+        - 네블스쿨 : 글쓰기 교육 22만원 
+        - [[아이디어]]
+            - [[아이디어]]
+            - 사진 찍는 인스타 만들기
+                - 제목 : 색을 수집하고 색을 바꿔 칠하자! 는 컨셉
+                    - 영문 네이밍 칼라 파레트 think on color palette 등 생각해보기
+- 애월 성적 (([[아이디어]]))
+  생활 소통 시스템 : Notion을 활용해서 평가 내용을 안내 하기도 하고 학생 출결 관련 내용도 핀란드처럼 서로 주고 받을 수 있는 환경을 구성 해 보기

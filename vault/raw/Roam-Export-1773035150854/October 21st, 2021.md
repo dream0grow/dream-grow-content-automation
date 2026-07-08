@@ -1,0 +1,9 @@
+- [[아이디어]]
+    - #[[책리뷰]] #[[좋은구절]]
+    - 독자를 타게팅 하는 문장
+        - 진아야 16년 동안 공부 하는 교육 시스템을 통과하고 40년 동안 일해야 하는 삶을 살고 싶다면 사랑하는 사람과 시간을 때 아끼면서 일을 하고 싶다면 이 책은 당신의 읽을 책이 아니다
+        - 레버리지는 당신이 사랑하는 것에 집중하고 그 이외 것을 줄여주기만 되는 것이다 레버리지는 당신의 시간과 불을 가져다 주는 것이다
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FQAIRRxE3R6.png?alt=media&token=0efff43b-3f68-455d-bc3c-b9079ce5a0f5)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FP8b9BG_pSg.png?alt=media&token=901988d7-3e30-4735-9110-2a6690b22b99)
+        - 당신은 나처럼 … 하지 않았으면 좋겠다.
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FJQGljmUNaA.png?alt=media&token=ee7dffdb-d3d4-4f16-b08c-892c50c0f6ac)

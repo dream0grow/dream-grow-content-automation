@@ -1,0 +1,3 @@
+- [[유튜브 만들기]] #아이디어 : 전하는 내용은 지식 + 감성 / 목표 성찰은 구체적으로 #okr #kpi
+    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FyjPKnDG2Rg.jpeg?alt=media&token=d421c670-ff40-4ca2-8f00-18f7b6c4d07d)
+    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F7PhDVNDn7F.jpeg?alt=media&token=c3140b3d-0b39-44ff-9ebd-34d17fe7c940)

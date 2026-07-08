@@ -1,0 +1,71 @@
+- [[꿈 펼치기]]
+    - ((학교 만들기))[[아이디어]]
+        - 초.중.고 교
+        - 부모 교육기관 : 배움 내용과 실천사항을 프로젝트로, 프로젝트 발표회+ 논문처럼 연구하여 실천하며 부모의 품이 넓어지는 기회를 갖도록 하기
+- [[유튜브 만들기]]
+    - 초등학교 1학년 준비
+        - 교과 학습, 배움을 즐겁게! 
+            - 선생님 놀이
+                - https://entertain.v.daum.net/v/20210220143034377
+                - 놀이로 바라는 점
+                    - 의자에 앉기
+                    - 배우는 재미 느끼기
+                    - ⭐️부모와 아이의 끈끈한 관계맺기
+                - 놀이 준비 
+                    - 가르치며 배우기 영상 보기
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FtAnXQoP-LI.PNG?alt=media&token=3ffc29ce-2bf7-42ff-ab8b-199ab7ffa600)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fn5XOElvgNm.PNG?alt=media&token=175fd534-1180-4bbb-910c-837c21006467)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FEEXD5gK8yq.jpg?alt=media&token=8760ebbd-a4df-4a25-bb58-63aff6e2fe17)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FVQSOALtILW.jpg?alt=media&token=c6062489-a9ff-4769-8631-ccd5f0e90ca6)
+                    - 선생님 놀이 목적 안내 : 서로 재미있게 놀면서 가르치고 싶은 것 기르치기
+                    - 함께 규칙 만들기
+                    - 놀이 준비물 : 화이트보드, 이젤, 선생님 복장(흰색 가운 또는 멋진 안경, 망토 등)
+                    - 어떤 것을 아이가 할 수 있는지 같이 찾기
+                        - “뭐 잘해?”, “무엇을 아빠에게 알려줄 수 있어?”, “뭐 가르쳐줄래?”,
+                           "내일 뭐 할래?", "뭐하고 싶어?"
+                    - 아이가 가르치지 않아도 되는, ****함께 배우는 (즐기는) 환경 만들기
+                        - 같이 앉아서 책 읽고 이야기 나누기
+                            - 등장인물 그림그리기
+                            - 책에서 재밌는 부분 찾기
+                            - 책 내용 퀴즈 내기
+                            - 책 그림 속에서 숨은 그림 찾기
+                            - 그림 바꿔 그리기 
+                        - 나들이 하기
+                            - 나들이(학교 주변) 후 찾은 자연물로 그림그리기, 놀이 
+                        - 만들기
+                            - 종이접기
+                            - 집 만들기
+                            - 놀이터 만들기
+                            - 학교 만들기 
+                            - 교실 만들기
+                                - 교실 영상, 교실 사진  
+                - 놀이 하기
+                    - 놀이 할 때 유의점
+                        - 재미있게 즐기기 
+                        - 관계 맺는 것이 핵심!
+                        - 놀이 시간 고정 : 7시30분 ~ 8시 30분 등, 아침 9시 ~ 12시 => 심리적 안정감
+                        - 짧은 시간만 의자에 앉아도 괜찮음, 1달~3달
+                        - “와!” “그렇구나” “그래?” “이건 아떻게해?” 등 아이의 활동에 긍정적 빈응, 질문하기
+                        - **__'책' __**  
+                - 내 사례 
+                    - 가족 회의로 하루에 하고 싶은 것과 할 일들 정하기 => 루틴 만들기
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FNAbaX5wIHy.jpg?alt=media&token=4d219e77-6588-430b-82e5-053f2b47782d)
+                    - 한글 만들기 놀이 
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FvdvW9OmQG9.jpg?alt=media&token=d65f8fa3-5d2e-43da-a685-6ce34c0dc569)
+                            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FY7ETKKcrtd.png?alt=media&token=cc668f8d-6cef-4199-8ddf-48a7d48c5413)
+                        - 
+                    - 도서 대출증 만들고 책 읽기 -> 그림 그리기 
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FDbokDO6H0J.jpg?alt=media&token=a601064c-d04c-49d1-b6ae-b5d79b628c26)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FDSgWS5ZxBw.jpg?alt=media&token=efe6cdb6-daa5-4286-bb57-d96c861173de)
+                        - 
+                    - 아이가 하고 싶은 활동 하기 
+                        - 두발 자전거 타기
+                        - 탐정 놀이 하기  
+            - 영상 설명 
+                - *영상 제목 만들 때 곤팀장 제목 만들기 내용 생각하면서 만들어보기! 
+                - *영상 제목 사례 수집 하기 
+                - 초등학교 입학하며 집에서 할 수 있는 활동 안내합니다. 한글 공부를 재미있게 하기 위해서는 그 전에 알고, 준비할 것이 있습니다. 이번 영상을 보면서
+                  아이에게 안정감을 줄 수 있는 시간이 되면 좋겠습니다.실천하는 부모님이 최고의 교사입니다. - 부모 교사 TV 웃음결 올림 -
+                    - . 가르치며 배우기 영상 : EBS, 왜 우리는 대학에 가는가? [5부 말문을 터라]
+                      https://www.youtube.com/watch?v=nttlAfVQT6w&t=1836s
+                      위 영상의 28분~30분 정도를 아이와 함께 보면 좋을 것이라 생각합니다. 부모님들은 28분~34분 또는 영상 전체를 보면 더 좋겠죠?

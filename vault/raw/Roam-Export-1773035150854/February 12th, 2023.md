@@ -1,0 +1,12 @@
+- [[사업]] [[아이디어]]
+    - 가게를 차릴 때 인센티브 지급안 만들기
+        - 특히 소비자 만족도를 높이는 측면 
+        - 공부하는 측면: 사업체 안에서 독서모임 운영, 잘 배우는 사람 인센티브지급 
+- 사이먼 시넥 : [골든 서클](https://www.ted.com/talks/simon_sinek_how_great_leaders_inspire_action?language=ko)
+    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FBHrmm6jnVI.jpeg?alt=media&token=68f5afe2-664a-4da9-8e37-ba4be155a605)
+    - 참고 블로그 : https://salaryblues.tistory.com/6
+    - 사업의 핵심 #나사장
+        - 나는 사장이다 
+        - 사업이 성공하려면 ‘왜?’ 에서 시작하라! 
+- 리더십 이론과 사이먼 시넥 골든 써클을 엮어서 회복적 생활교육 강의 하기 
+    - What - How - Why 에 모두 질문 던지기

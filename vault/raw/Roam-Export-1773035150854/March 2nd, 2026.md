@@ -1,0 +1,3 @@
+- 
+- Chat with AI assistant (GPT-5.2): 초등 학부모 자기주도학습 릴스 훅·가정환경 설계 #liveai/chat
+    - Me: 

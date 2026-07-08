@@ -1,0 +1,5 @@
+- [[스크랩]]
+    - 고요산책 화장실에서 본 글귀 속 사람 : 자연을 보는 눈과 시야, 지금 이 순간을 잘 담는 사진작가
+        -  ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZajs9vIVUn.jpeg?alt=media&token=13225528-052a-4b31-8dde-42794162e9e7)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FyaK-DwfMo6.jpeg?alt=media&token=92e631c7-4413-49f6-80c6-88f246653ee0)
+        - 라바북스 : 제주 서귀포시 남원읍 태위로 87 1층 - https://naver.me/5MsFeRut

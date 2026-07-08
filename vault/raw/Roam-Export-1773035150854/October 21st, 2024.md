@@ -1,0 +1,2 @@
+- {{[[pdf]]: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F8Ewt_FCTIn.pdf?alt=media&token=2b2a093f-f437-4850-b946-06816f210a62}} 금전적 동기 유형과 관계 만족도, 돈에 대한 동기
+- {{[[pdf]]: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FgMRMZUb2Rr.pdf?alt=media&token=2005c604-0e25-46e7-92a5-86e6f01a8546}} 금전적 동기 유형과 관계 만족도, 돈에 대한 동기

@@ -1,0 +1,25 @@
+- [[기사문]]
+    - 키워드:: 시스템즈 씽킹
+    - 스크랩 내용:: 암세포를 정상세포로 
+        -  [암세포, 정상세포로 되돌렸다…의사들 통념 깨뜨린 과학자](https://n.news.naver.com/article/008/0004704269) [[+Roam]]
+- [[웹사이트]] 
+    - 키워드:: #맥북 #파이널컷
+    - 스크랩 내용:: 파이널컷 인텔 플러그인 사용법 
+        - [macOS M1 에서 FCPX의 Intel 플러그인 사용하기](https://yespickbible.tistory.com/entry/macOS-M1-%EC%97%90%EC%84%9C-FCPX%EC%9D%98-Intel-%ED%94%8C%EB%9F%AC%EA%B7%B8%EC%9D%B8-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0?category=725065) [[+Roam]]
+- [[웹사이트]] 
+    - 키워드:: [[롬 리서치 활용]] #웹클리핑 
+    - 스크랩 내용:: 롬리서치로 웹클리핑 쉽게 하는 법 
+        -  [+Roam, a bookmarklet for Roam Research - Ness Labs](https://nesslabs.com/roam-research-bookmarklet) [[+Roam]]
+- [[웹사이트]] 
+    - 키워드:: [[롬 리서치 활용]] roam extensions
+    - 스크랩 내용:: 롬 리서치 웹 확장팩
+        - ____ — via [Browser extensions for Roam Research - Ness Labs](https://nesslabs.com/browser-extensions-roam-research) [[+Roam]]
+- [[웹사이트]] 
+    - 키워드:: [[육아]] [[가족]] [[별난가족기록]]
+    - 스크랩 내용:: 숫자로 보는 관계, 인생을 숫자로 본다면
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F4nI-T8UQdf.png?alt=media&token=6e093c6e-962e-46a8-926e-14b3553a7edd)
+        - __So what do we do with this information?
+        - Setting aside my secret hope that technological advances will let me live to 700, I see three takeaways here:
+        - 1) Living in the same place as the people you love matters. I probably have 10X the time left with the people who live in my city as I do with the people who live somewhere else.
+        - 2) Priorities matter. Your remaining face time with any person depends largely on where that person falls on your list of life priorities. Make sure this list is set by you—not by unconscious inertia.
+        - 3) Quality time matters. If you’re in your last 10% of time with someone you love, keep that fact in the front of your mind when you’re with them and treat that time as what it actually is: precious.__ — via [The Tail End — Wait But Why](https://waitbutwhy.com/2015/12/the-tail-end.html) [[+Roam]]

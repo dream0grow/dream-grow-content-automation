@@ -1,0 +1,18 @@
+- [[유튜브 만들기]]
+    - 영상시나리오 틀 
+        - 영상시나리오
+        - 카피한 영상 : https://www.youtube.com/watch?v=64cDoJFUb54
+        - 1. 인트로 
+            - 1-1. 관심 끌기
+                - 예시1) 영상 중 시청자가 가장 보고 싶어하는 정보 넣기 
+                - 예시2) 영상 중 제일 재미있는 정보 넣기 
+                - 실제 대사 : "가장 괜찮았던 달을 한번 볼까요? 10월이 가장 괜찮았어요. **122만원 가량 되네요.**"
+            - 1-2. 중간에 들어가는 로고 또는 채널아트
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FsbDPG0ylyx.png?alt=media&token=b0633dfe-8e0e-4cb9-87c6-8026f40215b1)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FBY2WIENjyI.PNG?alt=media&token=6ee636ad-dd24-4078-ba64-1fd035eb2a69)
+            - 1-3. 인삿말 
+                - 안녕하세요. 직장인의 격을 높여주는 프로직장러 와이입니다.
+                - 오늘 다뤄볼 주제는 직장인들이 가장 관심가질만한 주제인 "투잡" 입니다. 
+                - 강조 화면
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FGCYMPaNvbo.PNG?alt=media&token=3fa301e3-1e62-45dd-8a19-ed5217c327a5)
+                    - 

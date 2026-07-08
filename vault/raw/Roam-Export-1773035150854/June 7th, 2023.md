@@ -1,0 +1,5 @@
+- [[마케팅 사례]] -> 신한금융 ‘기발한 프로덕션’
+    - https://www.youtube.com/@shinhangroup_official/about 
+    - 반드시 벤치마킹 해야할 사례 : 광고로 상대를 위하기. 내가 드러나는 것이 아닌 상대를 더 가치롭게 만들기. 진실된 마음을 전하기. 새로운시도와 혁신 
+        - http://www.shinhangroup.com/kr/pr_center/pr_center_content.jsp?seq=7728
+        - 프로덕션 담당자 또는 팀 찾아서 벤치마킹하기 또는 배우기 또는 같이 작업하기

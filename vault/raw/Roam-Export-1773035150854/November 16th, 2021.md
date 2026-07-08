@@ -1,0 +1,7 @@
+- [[아이디어]]
+    - #독서하며얻은영감 #[[업스트림]] 을 읽고
+        - 시스템을 바꾸는데 개입지점을 분명히 해야 된다. 
+        - 지렛대 와 중심점을 찾아 힘을 줄 때 시스템에 영향을 줄 수 있는 것이다
+        - 개입지점을 찾는 방법은 시스템즈 thinking 퍼실 리케이션 기법에서 찾을 수 있다
+        - 시스템즈씽킹을 하는 방법 분명히 알고 그리고 시스템을 바꾸는 지점을 찾아 해결해보자.
+        - https://jjebook.jje.go.kr:8443/TextbookEpubViewer/index.html?JJBYuWGO+0ipZGk80xxwOx9QanuTvZQSj67ttvG8fNjyBiF52zxGvyNqV4PFBB3FYdbaTq4tlgmx/92ek6/nHpTFjhc6NmFpB7CnuMt8q06bczkfbYHjqV1bnkZMeMQlY5eaB98Wdb5lsDkL3kMLoxVJGO641RQVDKXQ157VLtpDt7JhwfsJ+0t23X2hqqiq01QoPqjD0v4FtROiV2p9msnWpw4a/W9VJmn2ecATik0=

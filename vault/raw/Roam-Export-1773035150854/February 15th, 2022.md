@@ -1,0 +1,4 @@
+- [[롬 리서치 활용]] 
+    - 옵시디안 기반 홈페이지
+        - https://seoulrain.net/Start+here
+        - 

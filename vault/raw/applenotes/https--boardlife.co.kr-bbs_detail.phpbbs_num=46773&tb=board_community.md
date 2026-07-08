@@ -1,0 +1,1 @@
+https://boardlife.co.kr/bbs_detail.php?bbs_num=46773&tb=board_community

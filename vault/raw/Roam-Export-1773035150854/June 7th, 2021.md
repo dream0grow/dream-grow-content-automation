@@ -1,0 +1,4 @@
+- [[생각의기술]] 
+    - [[정보처리시스템]] 정보처리 시스템의 가장 좋은 예시
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FaopkCkcSd9.png?alt=media&token=cd5e0c7a-a314-4408-b215-4632cb93fa59)
+        - https://www.wadiz.kr/web/campaign/detail/39151

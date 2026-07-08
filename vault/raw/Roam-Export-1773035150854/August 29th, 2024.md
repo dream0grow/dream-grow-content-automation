@@ -1,0 +1,2 @@
+- 챗GPT 유료 코드 복사 : VJNQ2NRYV1UJXE7NPKYRJ8CX
+- 

@@ -1,0 +1,48 @@
+- [[유튜브 만들기]]
+    - 수학을 포기 하는 이유
+        - 이전 내용이 앞으로의 내용에 너무 많이 영향력을 미쳐서
+        - 덧셈,뺄셈, 구구단 -> 분수, 분수의 곱셈 
+        - 이차 방정식 -> 이차 함수, 삼차 방정식 
+    - 교사만이 아는 수학 비법: 문제지 추천까지 확실히!
+        - 수학을 제대로 공부 하는 방법
+            -   수학에 계열성을 정확하게 알아라 
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FJ_E61Ks-jU.PNG?alt=media&token=32472d35-9dfc-46c4-9db4-f397ee79cd90)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FPXuEzhNKRE.png?alt=media&token=b7d26c6d-df1f-4dde-ac9a-a502cf899854)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fjo6LT4RL8q.png?alt=media&token=bb5ef263-bebb-47ff-a3ec-484c27f612cf)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FB__Z-hbIIe.png?alt=media&token=5a4ffc14-c4e6-4caa-af4f-78a947877918)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fipz-dtExBj.png?alt=media&token=63d0b483-1c35-4aab-8f31-b7e1cffb2ea2)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FbmcT1JffpB.png?alt=media&token=85251907-c87d-4294-a852-33a364950322)
+                - 
+        - 지금 내가 무엇이 모자란지 정확하게 판단하라 : 문제지 예시
+            - 진단 문제지 
+                - http://aladin.kr/p/jLqLr
+                - http://aladin.kr/p/eLqM1
+            - 공부 문제지
+                - http://aladin.kr/p/N2kXd
+                - http://aladin.kr/p/iN6z0
+                -  http://aladin.kr/p/GKGBR
+                - 
+        - 지금 여러분이 해야할 것 
+            - 선행학습?(X), 후행학습(O)
+                -  지금 모자라다 생각하는 부분을 확실하게 빠르게, 다시 공부하라! 
+                  그것이 제일 빨리 수학을 잘하는 길이다! 
+- 
+- [[유튜브 만들기]]
+    - 유튜브 홍보하기 (카페 공략)
+        - 홍보할 때 카페를 존중하며 글쓰기, 어차피 나인 거 아니까.
+          
+        - (홍보 가능)기출비 카페 : https://cafe.naver.com/michiexam
+            - 게시글 3개, 댓글 5회 
+                - 게시글 작성하기 
+        - (홍보 가능) 작은형 교육발전소 : https://cafe.naver.com/mindmapper?iframe_url=/MyCafeIntro.nhn%3Fclubid=16606230 
+            - 마인드맵 관련 공부 
+            - 게시글 1개, 댓글 10개 
+        - 맘카페 공략 (지영이 아이디로 로그인)
+            - 미즈넷 맘 : https://cafe.naver.com/miznett?iframe_url=/ArticleList.nhn%3Fsearch.clubid=15724392%26search.menuid=437%26search.boardtype=L
+            - 일등맘 수다방 : https://cafe.naver.com/sanmoschool
+                - 
+        - 학생 카페 공략 
+            - (가입 안될 수 있음)상위1%교육정보커뮤니티 : https://cafe.naver.com/mathall
+            - (유튜브 홍보 불가)디어블리 교육 연구소 :  https://cafe.naver.com/dearvely?iframe_url=/MyCafeIntro.nhn%3Fclubid=29191294
+                - 댓글 50개, 가입 후 2주 등업 
+        - 눈길을 끄는 글 작성하기 

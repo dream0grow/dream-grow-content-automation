@@ -1,0 +1,1 @@
+연수 원고 공유 드라이브입니다. https://drive.google.com/drive/folders/1GsR8lT23rjS4MUaC3UeRBaE4Drf6dmFI?usp=sharing

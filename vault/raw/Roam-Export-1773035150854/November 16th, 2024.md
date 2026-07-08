@@ -1,0 +1,16 @@
+- 우울증 극복 관련 유튜브 영상 
+    - 우울증 걸렸던 원장님 이야기 
+        - https://youtu.be/WYmnqBaWtW0?si=Fnt3CheuAwX46G1V
+    - 행복 호르몬 분비하게 하는 12가지 
+        - https://youtube.com/shorts/PXbb3EHLkiU?si=ByVF2wqtPM-kwo9F
+    -  우울감이 줄어드는 적응기가 제일 중요하다. 이 때 약 끊으면 안됨. 심리치료 그만두면 안됨
+        - 왜냐하면 또 비슷한 문제나 스트레스 상황이 내게 닥쳤을 때 우울감이 다시 크게 올라올 수 있기 때문.
+        - https://youtube.com/shorts/4v1eIAaeX5c?si=BxvGf6j9ARJJtiN0
+    - 우울증 치료에 적용하는 인지행동치료 기초내용
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FRVYtE1Fw8m.png?alt=media&token=63c0a301-94de-4c57-b62c-64634079f376)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fs_lwKWSnYs.png?alt=media&token=725148d9-3448-431c-9b16-cf9fa03dfb4c)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fwd41P2BHbx.png?alt=media&token=753cdb46-2c9c-4d2f-9880-7b9dc43a5a98)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FM35TCyIVxR.png?alt=media&token=d56138ee-8857-4099-bfa8-5794ec0ccc01)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FA2D3rxs1Zq.png?alt=media&token=1af8ecdd-d52e-431f-8308-481f95d45f32)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FBPUUzgiDcW.png?alt=media&token=85d6b80e-1a65-4d44-a34c-b12e8dce84a1)
+        - 

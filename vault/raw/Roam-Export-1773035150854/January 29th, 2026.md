@@ -1,0 +1,3 @@
+- roam ai 사용 api key
+    - google Ai api key : AIzaSyDq4j2UB9htRv6_gUhYClob8YZKAzyP-lw
+- 

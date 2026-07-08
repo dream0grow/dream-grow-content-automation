@@ -1,0 +1,14 @@
+- [[유튜브 만들기]] 
+    - 썸네일만들기 
+        - 썸네일 만들기에서 핵심 유의점 : https://do-first-dream-next.tistory.com/entry/%EC%9C%A0%ED%8A%9C%EB%B8%8C-%EC%8D%B8%EB%84%A4%EC%9D%BC-%EC%9D%B4%EB%A0%87%EA%B2%8C-%EB%A7%8C%EB%93%A4%EB%A9%B4-%EB%90%9C%EB%8B%A4-%EC%8D%B8%EB%84%A4%EC%9D%BC-%EC%9E%98-%EB%A7%8C%EB%93%9C%EB%8A%94-%EB%B0%A9%EB%B2%95-%EC%9E%91%EC%84%B1%EC%A4%91
+        - 썸네일 만들어주는 싸이트 : https://www.miricanvas.com/templates/search?templateTypeId=youtube_thumb
+            - 유튜브 로고 및 배경 그림 만들기
+        - 부모가 최고의 교사다 관련 키워드 검색어
+            - https://blog.naver.com/kje06/222048868953
+            - https://m.post.naver.com/viewer/postView.nhn?volumeNo=16615195&memberNo=24659848&vType=VERTICAL
+            - https://terms.naver.com/entry.nhn?docId=2118687&cid=41991&categoryId=41991
+            - https://book.naver.com/search/search.nhn?query=%EB%B6%80%EB%AA%A8%EA%B5%90%EC%82%AC
+            - https://cafe.naver.com/2008bunsamo/341123
+            - https://blog.naver.com/cnc4886/30038547162
+            - https://blog.naver.com/elps1217/221959314064
+            - https://blog.naver.com/toxworld/221975842993

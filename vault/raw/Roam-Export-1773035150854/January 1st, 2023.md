@@ -1,0 +1,8 @@
+- [[아이디어]] #사업 #오프라인사업 #건강한편의점
+    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FEAgHk7JsAs.jpeg?alt=media&token=30fbefe2-75a6-4079-b921-e30a29f84343)
+    - 라면 만드는 업체 : 제주소나이 등이랑 협업해서 건강한 음식을 유통하는 지점을 만듦. 
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FVqNCuNRDhj.jpeg?alt=media&token=b05af40b-29ba-4255-a3a5-f6a5a04a9ec9)
+    - 고기국수를 인스턴트로 만드는 업체까지
+    - 아니면 김밥 등 간단하고 맛있는 것 제공
+    - 서귀포 매일 올레시장 참고
+    - 미리 팔아보기

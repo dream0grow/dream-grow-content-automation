@@ -1,0 +1,111 @@
+- [[유튜브 만들기]]  
+    - 유튜브 만들 때 신경써야할 것들
+    - 유튜브 만들기 관련 웹북 : 
+        - {{pdf: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FzY3P-Svy0v.pdf?alt=media&token=66ae9a79-741c-4459-9d30-ed47e5b14086}}
+        - https://aljibooks.com/content/b/b18MG2Nv2ZWa
+    - 핵심 참고 : 배드 기획자 유튜브 -  https://www.youtube.com/channel/UC-AdivFM0B55KPIqLuAOmFQ 
+    - 로고 만들기 : https://mybrandnewlogo.com/ko
+        - 로고 디자인 요청해서 만들어주는 사이트 : http://www.bizhows.com/v/option?code1=200&code2=300&code3=330&mock=200_300_330_4
+        - 로고 색상 :  F69223,  RGB(246, 146, 35)
+        - 로고 예시 1
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FFoOmvR2YRi.png?alt=media&token=08f11ba9-f8c3-41bd-9e92-73059b021f7a)
+        - 로고 예시 2
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FbopHToV7pE.png?alt=media&token=48ea1cc0-f611-4cf8-95df-3b2ffc703925)
+        - 로고예시 3
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FkwOrkhQIQ6.png?alt=media&token=e668f1f5-75c1-426b-84c8-61bc81337365)
+        - 로고 예시 4
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FfZETEUYYF7.png?alt=media&token=a91de09e-4938-4b0c-962e-c5d26b9b8ef6)
+        - 로고완성
+            - https://www.canva.com/design/DAERFGdkfLw/pZ5hXOH4sF3E8fW8X0Qbuw/watch?utm_content=DAERFGdkfLw&utm_campaign=designshare&utm_medium=link&utm_source=homepage_design_menu
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FBbZFXX5FuI.png?alt=media&token=56dbd95a-c0b1-4533-b51f-ac91aa71cf40)
+    - 유튜브 채널아트 만들기 : https://www.canva.com/ko_kr/create/banners/youtube-banners/
+        - 채널아트 완성 : https://www.canva.com/design/DAERFJZARmY/qwfEpOWnnl1A78YMF5miVA/edit?utm_source=onboarding
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FbX0Cgx29f6.png?alt=media&token=7bfee9ea-c2e6-479c-ad62-146f631c2bd1)
+    - 채널아트 및 글씨폰트 롤 모델 유튜브 = 소린TV : https://www.youtube.com/c/%EC%86%8C%EB%A6%B0TV/featured
+    - 글씨 폰트 : https://noonnu.cc/index
+        - 폰트 알려주는 유튜브 (존코바) https://www.youtube.com/watch?v=7gOiGK83X-o
+    - 유튜브 채널 설명
+        - 안녕하세요. 
+        - 초등교사 웃음결입니다.
+        - 이 유튜브 채널은 교육에 대해서 고민하고 있는 부모님들을 위해 만들었습니다. 
+        - 초등학교 선생님으로 10년동안 아이들과 부모님을 만나면서 깨닫게 된 점은 '우리들은 누구나 다 배우고자 하는 마음을 가지고 있다.' 입니다. 
+        - 부모님들이 쉽고 편안하게 정보를 접했으면 합니다. 그리고 삶에 적용하고 지혜로 만들어나가길 바랍니다. 
+        - 부모님들의 지혜는 분명 아이들에게 사랑으로 갈 것임을 믿습니다.
+        - 교사는 교실에서 아이들과 1년동안 만납니다. 
+        - 부모는 가정에서 아이들과 평생을 만납니다.  
+        - 부모와 아이들은 교사와 비교할 수 없이 수많은 시간동안 상호작용을 합니다. 
+        - 예를 들면 교사가 아이에게 어떤 메시지를 1년동안 강조해서 10번 이야기했다면, 부모는 수 년간 100번, 1000번 이야기 하겠지요.
+        - 평생을 통한 반복과 강조, 아이들에게 부모가 최고의 선생님이 될 수 밖에 없는 이유입니다. 
+        - 부모의 말과 행동의 변화는 나비 효과와 같습니다.  한 마리 작은 나비의 날갯짓이 어느 곳에 태풍을 일으킬 수 있다는 것처럼 부모님들의 말, 행동 하나!의 변화는 아이들의 마음에 큰 파도를 만들 것입니다. 
+        - 부모님이 배우고 깊어지며 지혜로운 삶을 펼쳐가는 순간들을 함께 하고 싶습니다. 
+        - 부모님이 최고의 교사입니다. 
+        - '부모는 나비효과' 카페 또는 지혜로운 부모되기 카페 또는 부모는 최고의 교사 카페
+    - 유튜브 연계 SNS 채널 만들기 ([[교육플랫폼 만들기]])
+        - 카페
+            - 스마트폰 조절 할 수 있는 기수 신청 게시판
+            - 책 추천 게시판 : 공부머리 독서법 
+            - 정보 안내 글 게시판 
+            - 질문 게시판
+            - 카페 예시 찾아보기 : 김병완 독서 카페 등
+                - https://cafe.naver.com/dearvely?iframe_url=/MyCafeIntro.nhn%3Fclubid=29191294
+                - 디어블리 교육연구소 : 카페 - 스터디 - [[인스타]] - 밴드 처럼 SNS 계정을 연결하기 
+            - 카페 운영시 회원들에게 주는 혜택  
+                - 학생들 타겟 (봉사활동 시간): https://cafe.naver.com/gongsiny/62987 
+                - 
+        - 블로그 
+        - 홈페이지
+        - 카톡 채널
+        - https://educast.com/
+    - 영상 찍기 
+    - 영상 편집하기 
+    - 썸네일만들기 
+        -  검색하기 
+            - [[키워드찾는사이트]]
+                - 1. 키워드마스터 : http://whereispost.com/keyword/
+                - 2. 튜브버디 : [http://www.tubebuddy.com](http://www.tubebuddy.com/)
+                - 3. 키워드툴 : https://keywordtool.io/
+                - 키워드 안내 블로그 
+                    - https://blackkiwi.net/
+                    - http://whereispost.com/
+                    - http://blogutil24.com/HomeAction.do
+                    - https://keyzard.org/
+                    - http://www.blogchart.co.kr/
+                - -기본 키워드 사이트들-
+                    - 키워드
+                    - 네이버 키워드 광고 https://manage.searchad.naver.com/
+                    - 네이버 검색 트랜드 https://datalab.naver.com/keyword/trendSearch.naver
+                    - 구글키워드 플래너 https://ads.google.com/home/tools/keyword-planner/
+                    - 구글 트렌드 https://trends.google.com/trends/?geo=US
+        - 예시 자료 찾기 
+    - 영상 업로드하기 
+        - 태그
+    - 콘텐츠 마케팅
+        - 콘텐츠 마케팅
+        - 마케팅 시스템 만들기 
+            - 참고 예시 : 박현근 코치의 지식플랫폼 마케팅 
+        - 콘텐츠 마케팅의 목표 : 콘텐츠 마케팅의 최종 목표는 **'상품에 대한 고객 인지를 높여, 실제적인 구매 전환율을 개선하는 일'**에 있다는 것을 잊어선 안 됩니다. 
+          ( 콘텐츠 마케팅에 입문할 때, 많은 주니어 분들이 '콘텐츠'라는 앞글자에 집중하지만, 실제로 콘텐츠 마케팅의 정의는 **잠재고객에게 우리 상품으로 유입할 수 있는 다양한 콘텐츠를 제작하고 배포하는 다양한 활동**에 있습니다.)
+        - 마케팅 관련 주간, 월간 계획을 세워서 실천해본다.
+    - 유튜브 컨텐츠
+        - 유튜브 컨텐츠
+        - 온라인수업
+        - 방학생활
+        - 방학 생활 계획표 세우기 : 실질적인 계획법 
+        - 스마트폰사용 금지
+        - 공부법
+        - 성관계와 금딸
+        - 공부하기 전 명상
+        - YouTube 왕초보도 따라하게 하기
+            - 부모도 YouTube를 할 수 있다
+            - 표현 하면서 더 성장하자
+            - YouTube는 컨텐츠 주제 정하기가 핵심이다 : 질문 술사 님 질문표를 통해 YouTube 컨텐츠 주제를 스스로 만들 수 있게 한다. 컨텐츠 Hecker에게 코칭 받으면서 그 코칭 프로그램을 카피 해 본다
+        - 예시 유튜브
+            - 유재석의 인생을 바꾼 결정적인 말투
+                - 라고 '유재석'이라는 인물의 이야기를 통해 호기심으로 클릭을 유도.(썸네일 = 유재석 사진)
+                - 이야기 속에서 유재석 이야기는 하나의 소스일 뿐!
+                - 왜 유재석 이야기가 나오게 되었는지의 맥락은
+                - '말하는대로 된다.' 
+                - 말의중요성을 이야기하는 내용.
+                - + 영상 화면에 사람이 나오고 일부분은 글이 나옴으로써 영상을 보고 이해하는데 효과적임.
+                - ++ 영상시간의 지속성을 가지도록 하기 위해서 어떤 부분을 자극하면 좋을까?
+                - 이야기의 지속성을 가질 수 있도록 말하는 맥락을 고민해보면 좋겠다.

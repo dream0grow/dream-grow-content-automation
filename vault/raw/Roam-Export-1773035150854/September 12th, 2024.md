@@ -1,0 +1,4 @@
+- [[개념기반탐구수업]]
+    - 개념기반탐구수업 공책 사례
+        - {{[[pdf]]: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FDrRWCf9SL9.pdf?alt=media&token=2ae57413-3f4f-4050-932b-81686b312e73}}
+    - 

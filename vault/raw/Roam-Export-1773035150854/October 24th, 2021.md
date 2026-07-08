@@ -1,0 +1,17 @@
+- [[아이디어]]
+    - 카톡 운영 아이디어
+        - 카톡방 이벤트 실시 
+            - 주제에 맞는 이벤트를 실시한다. (참고 예시 _ 곤팀장 카톡방)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FI-WGEEmkA8.jpeg?alt=media&token=5a4e346d-8e48-49ba-b870-66cea2ab20de)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FakwWjCTtaa.jpeg?alt=media&token=63062201-d520-4750-851b-24e16ba7937a)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fo7tj3o6tme.jpeg?alt=media&token=6f851825-75bf-464d-b5ae-9ee5d671d790)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FoEspOkwalU.jpeg?alt=media&token=18c0fa96-0c12-4af1-9407-a115c11e013e)
+- [[아이디어]]
+    - [[사업]]
+        - 정말 평범한 주부가 [[사업]]가가 되는 풀 코스 과정
+            - 습관 만들기
+            - 인풋 시스템 구축
+            - 아웃풋 시스템 구축
+            - [[사업]]가 마인드셋
+            - 예비 [[사업]]가 과정
+            - 후기

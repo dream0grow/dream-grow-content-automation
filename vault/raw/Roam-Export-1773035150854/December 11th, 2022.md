@@ -1,0 +1,43 @@
+- #스크랩 [[웹사이트]] _ 홈페이지 만드는 외주 업체
+    - 태그:: #홈페이지 #상세페이지 #레버리지
+    - [분야]([[지식의 구조]]):: #000자기계발/010성공
+    - 스크랩 내용: 홈페이지 외주 맡겨도 좋을 업체 
+        - [엔드 스튜디오](https://end-studio.kr/)
+        - [곤팀장 엔드 스튜디오 홈페이지 글](https://m.blog.naver.com/PostView.naver?blogId=sungon531&logNo=222595391591&referrerCode=0&searchKeyword=%EC%97%94%EB%93%9C)
+        - [곤팀장 와디즈 상세페이지 글_엔드 스튜디오 작업](https://m.blog.naver.com/PostView.naver?blogId=sungon531&logNo=222814046225&referrerCode=0&searchKeyword=%EC%97%94%EB%93%9C%20%EC%8A%A4%ED%8A%9C%EB%94%94%EC%98%A4)
+- #스크랩 [[웹사이트]] _ 유튜브 편집 회사,  유튜브 만드는 외주업체
+    - 태그:: #레버리지 #유튜브 #[[유튜브 만들기]]
+    - [분야]([[지식의 구조]]):: #000자기계발/010성공
+    - 스크랩 내용: [비디오서울 네이버 블로그](https://m.blog.naver.com/PostList.naver?blogId=2_dot_&categoryName=%EC%98%81%EC%83%81%20%EC%9D%B8%EC%82%AC%EC%9D%B4%ED%8A%B8&categoryNo=22&logCode=0) , [비디오 서울 홈페이지](https://contained709.com/)
+        - 태그:: #블로그마케팅 #[[마케팅 사례]]
+- #스크랩 [[웹사이트]] _설문 사이트 (구글폼, 몽키서베이, typeform 같은)
+    - 태그:: #레버리지 #설문 
+    - [분야]([[지식의 구조]]):: #000자기계발/010성공
+    - 스크랩 내용: [tally _ 설문 사이트](https://tally.so/)
+- #스크랩 [[웹사이트]] _ 이상한 김팀장 네이버 카페 참고하기 
+    - 태그:: #[[[[사업]][[아이디어]]]] #[[네이버 카페 만들기]]
+    - [분야]([[지식의 구조]]):: #000자기계발/010성공
+    - 스크랩 내용: [이상한 김팀장 네이버 카페](https://cafe.naver.com/saygogona100)
+        - 카페 메뉴 목록 참고하기 
+        - 카페 대문 참고하기 
+        - 카페 교육프로그램 참고하기 
+        - 네이버 카페 디코딩 사례 
+            - 1. 곤팀장 네이버 카페
+            - 2. 피뎁카페 
+            - 3. 다이룸 행복학교
+            - 4. 이상한 김팀장 
+- [[마케팅]] 사례 
+    - [[아이디어]] 카카오톡으로 동영상 광고하는 방법
+        - #스크랩 내용: 카카오톡에서 동영상 광고 제공 
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FjT1ACFHP1j.jpeg?alt=media&token=1a25904e-a3b9-4a77-a442-570603db9e68)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F7Z-FzKhOyX.jpeg?alt=media&token=5fbd3618-faaf-4cde-a2d6-ab32eb1d4bde)
+- #스크랩 [[낙수효과]] 기업의 낙수 효과는 정말 있을까? 
+    - [[논문]] 
+        - 스크랩 내용: ([낙수효과의 개념과 실제에 관한 연구.pdf](hook://file/KN0R4JVft?p=4YSC4YWhL+OEsS7hhILhhanhhqvhhIbhha7hhqvhhIbhhanhhIvhhbPhhrc=&n=%E1%84%82%E1%85%A1%E1%86%A8%E1%84%89%E1%85%AE%E1%84%92%E1%85%AD%E1%84%80%E1%85%AA%E1%84%8B%E1%85%B4%20%E1%84%80%E1%85%A2%E1%84%82%E1%85%A7%E1%86%B7%E1%84%80%E1%85%AA%20%E1%84%89%E1%85%B5%E1%86%AF%E1%84%8C%E1%85%A6%E1%84%8B%E1%85%A6%20%E1%84%80%E1%85%AA%E1%86%AB%E1%84%92%E1%85%A1%E1%86%AB%20%E1%84%8B%E1%85%A7%E1%86%AB%E1%84%80%E1%85%AE%2Epdf))
+            - [분야]([[지식의 구조]]):: #200사회과학/220사회운동 
+- #스크랩 [[사업]] 에서 효율을 추구하는 방법
+    - [[기사문]]
+        - 스크랩 내용: [헨리 포드가 컨베이어 벨트를 발명한 이유 ](https://www.epnc.co.kr/news/articleView.html?idxno=95548)
+            - [분야]([[지식의 구조]]):: #100경제경영/130기업-경영자스토리
+               #100경제경영/120기업경영 
+              #100경제경영/170창업

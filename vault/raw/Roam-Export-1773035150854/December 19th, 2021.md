@@ -1,0 +1,83 @@
+- [[스크랩]]
+    - [[웹사이트]] 
+        - 키워드:: #유튜브 #신사임당
+        - 스크랩 내용:: 유튜브 성장시키는 법
+            - https://youtu.be/DMhIQ6C55e4
+- [[스크랩]]
+    - [[웹사이트]] 
+        - 키워드::#마케팅 #블로그마케팅
+        - 스크랩 내용:: 마케팅하는 법
+            - https://www.i-boss.co.kr/ab-6141-54730
+            - #아이보스
+- [[스크랩]]
+    - [[웹사이트]]
+        - 키워드:: #[[롬 리서치 활용]] #제텔카스텐
+        - 스크랩 내용:: 인덱스 넣는 법, 분류하는 법
+            - https://forum.zettelkasten.de/discussion/976/the-case-for-a-digital-folgezettel
+- [[유튜브 만들기]]
+    - [[유튜브컨텐츠]]
+        - #작심만일 #벤치마킹
+        - #터닝포인트 유튜브랑 작심만일 유튜브 비교하면서 차이점을 찾아내고, 작심만일처럼 유튜브 만들기 
+        - 썸네일 이미지, 썸네일 글자, 제목의 차이점 찾아보기
+        - 영상을 지속시키는 차이 알기
+            - 영상 내 글자체 : 예쁘고 세련된 글자체를 넣는다. 
+            -  내가 말하는 내용과 영상의 내용이 어울리는가? 어울리지 않으면 어울리는 영상으로 만들기
+                - 어울리는 영상이 이목을 끄는가? 집중도를 더 올리는가?
+            - BGM 분위기 : 영상에서 희망, 기대 같은 느낌을 주는 메인 BGM 찾기 
+            - 오프닝 : 핵심과 궁금증을 끄는 멘트를 하는 부분 찾기 
+        - 예시 
+            - 1. 짐퀵 영상 - 같은 사람의 영상이지만 하나는 2만 조회수, 다른 것은 200만 조회수임. 
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FBYBT6FgFWe.PNG?alt=media&token=64c7ec6b-028f-4a43-9ba2-173fb771c184)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FXhJJ7OsS5L.PNG?alt=media&token=2b6d412b-0351-4fa1-809f-d8da1618408d)
+            - 2. 타이로페즈 영상 - 이것도 같은 사람, 동기부여 영상이지만 하나는 10만조회 수, 다른 것은 100만 조회수임.
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fh8jSvfY8Tv.PNG?alt=media&token=94faa74c-ed26-478d-acc9-555a59607618)
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FQrxu9DluKP.PNG?alt=media&token=0a020395-8726-4f9a-9a95-0939ce7c70c0)
+    - [[유튜브컨텐츠]]
+        - #터닝포인트 의 토니로빈스 영상을 재구성해서 만들어보기 
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FCGcCC0gUs7.PNG?alt=media&token=ce8df25c-9a09-4a0e-95b8-3f80fdf05527)
+            - 토니 로빈스라면 100만회, 200만회를 넘을 수 있을 것임. 
+            - 제목과 썸네일에 상급 주제 단어가 들어가 있지 않음. 
+            - 오프닝이 상급 주제에 맞게 확 끌리지 않음. 토니 로빈스가 누구인지 이야기할 때 대통령, 부자들의 멘토, 부자들의 부자, 5000만원 강의를 지금 들어보세요. 등 더 듣고 싶게 만들기, 
+              그리고 토니로빈스 보면서 기립박수 또는 환호성을 외치는 모습 또는 토니 로빈스의 부를 상징하는 이미지가 촥촥촥 돌아가기 
+            - 부를 얻을 수 있는 핵심 메시지를 제대로 전달하기!
+            - https://www.youtube.com/watch?v=LQZqvF7X38Q
+            - #토니로빈스 
+                - 새로운 영상 
+                    - [Tony Robbins Shares Tips to Transform Your Life](https://www.youtube.com/watch?v=uI05xvqKpi8)
+    - [[유튜브컨텐츠]]
+        - [[스크랩]]
+            - [[웹사이트]] 
+                - 키워드:: #moneymindset #브레인코치  
+                - 스크랩 내용:: 
+                    - 뇌를 바꾸면 돈이 벌린다! 
+                        - 소스:: https://youtu.be/BrRZZ_8NTkg
+                        - 아래 영상은 오프닝이 좋음. 
+                        - 사람들이 내게 묻는다. 정말 평범한 우리가 부자처럼 돈을 버는 뇌로 바뀔 수 있나요? Yes! 당연하죠! 
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FNlpRAdrj5M.PNG?alt=media&token=72ef6d21-effb-4100-9a5d-b7665cec1e9d)
+                        - 영상 원본 찾기 : https://www.youtube.com/watch?v=1KesstfApXc 
+                            - 검색 : John Assaraf 
+    - [[유튜브컨텐츠]]
+        - 유튜브 컨텐츠를 찾을 때 영어로 검색해서 영어권에서 상급주제 찾기 
+            - Team Fearless : https://www.youtube.com/channel/UCf9_s9ii6BZ-klpgmtIi3WQ
+            - Be inspired : https://www.youtube.com/channel/UCaKZDEMDdQc8t6GzFj1_TDw
+            - Doctor OZ : https://www.youtube.com/channel/UCc8cHxAZ3jwWkrrDyaLwDUw
+    - [[유튜브컨텐츠]]
+        - [[스크랩]]
+            - [[영상]] 
+                - 키워드:: #습관 #[[유튜브 만들기]] #habit
+                - 스크랩 내용:: 새해 습관 바꾸기, 노력없이 
+                    - https://www.youtube.com/watch?v=ZXTy_dKwMa0 
+    - [[유튜브컨텐츠]]
+        - 유튜브 비교하기 
+            - 1분 유튜브
+                - 딱 1분만  :https://www.youtube.com/c/1%EB%B6%84%EB%A7%8CJUST1MIN
+                - 1분이면 충분해 : https://www.youtube.com/channel/UCSxtGGCLt2hXxm9ESBv7jJQ/videos
+    - [[유튜브컨텐츠]]
+        - [[스크랩]]
+            - [[영상]] 
+                - 키워드:: #brain #learnfast 
+                - 스크랩 내용:: [Unleash Your Super Brain To Learn Faster | Jim Kwik](https://www.youtube.com/watch?v=uT_GcOGEFsk)
+        - [[스크랩]]
+            - [[영상]]
+                - 키워드:: 기분좋아지는 
+                - 스크랩 내용:: [기분좋아지는 3분영상](https://youtu.be/FS-P6n4yYLM)

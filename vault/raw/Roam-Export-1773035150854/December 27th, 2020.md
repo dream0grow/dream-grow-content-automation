@@ -1,0 +1,6 @@
+- [[유튜브 만들기]]
+    - 가면 
+        - 눈사람 :  https://www.coupang.com/vp/products/4590157835?itemId=5642354859&vendorItemId=72941370997&q=%EC%96%BC%EA%B5%B4+%EA%B0%80%EB%A9%B4+%EC%8B%A4%EB%A6%AC%EC%BD%98&itemsCount=36&searchId=c5efa74e89064f6fbb9dbd62dec111c7&rank=96&isAddedCart=
+        - 도라에몽 : https://www.coupang.com/vp/products/4589979718?itemId=5641705448&vendorItemId=72940728837&q=%EC%96%BC%EA%B5%B4+%EA%B0%80%EB%A9%B4+%EC%8B%A4%EB%A6%AC%EC%BD%98&itemsCount=36&searchId=6265865f9bc840d2b10b701d968fb654&rank=67&isAddedCart=
+        - 마리오 : https://www.coupang.com/vp/products/98624779?vendorItemId=3744860158&sourceType=SDP_ALSO_VIEWED&rmdId=e6145774503c435f9a5c9708ac84ab0a&eventLabel=recommendation_widget_pc_sdp_001&platform=web&rmdABTestInfo=9745:B,9266:C,8534:A,10215:B,8088:A,8091:A,9437:A,10159:A&rmdValue=p1906800137:vt-1.0.0:p98624779&isAddedCart=
+        - 

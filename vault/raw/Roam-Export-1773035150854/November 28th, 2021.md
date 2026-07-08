@@ -1,0 +1,14 @@
+- [[아이디어]]
+    - [[글감]]
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FzsQ7sUKcci.jpeg?alt=media&token=45a0e9e5-dd69-402d-b6f8-1b47e42c484c)
+            - 이것처럼 우리 가족의 삶과 놀이터 이야기를 글로 엮어 출판하기
+- [[독서노트]]
+    - 책:: [[웰씽킹]]
+        - 저자:: #켈리최
+        - 태그:: #머니 #치유 #부자가되는생각
+        - 내용::
+            - 웰씽킹의 핵심 3가지
+                - 1. 부자들의 생각법을 확실히 익혔다.
+                - 2.시각화비법
+                - 3. 부를 생각하는 관점의 변화 : 돈x 돈과 인덕 등, 
+                - 추가적으로 존재의 확장 : 켈리스는 나, 전 지구적 관점

@@ -1,0 +1,32 @@
+- [[아이디어]]
+    - #습관만들기 #가족습관 #정리습관
+        - 정리를 게임화하기
+            - 정리와 보상
+                - 방탈출처럼 집안 곳곳에 카드 숨겨놓기
+                - 추리게임처럼 퀴즈를 숨겨놓기
+                - 보상은 좋아하는 먹을 것 또는 스티커
+            - 정리하면 추리 
+                - 어제 어지러진 방, 오늘 조금 달라진 방 : 달라진 방에서 보물힌트를 찾기, 정리하면 힌트 주기.
+    - #[[사업]][[아이디어]]
+        - [[블로그 발행 컨텐츠]]
+            - 내가 끝장 챌린지를 포기한 이유, 여러분은 꼭 성공하길 바래요.
+                - 글쓰기의 지속성을 알려주기
+                - 글쓰기 지속하지 못한 상황을 되돌아보기
+                - 압박감, 심리적 위축
+        - [[전자책만들기]]
+            - 전자책 만들기 준비과정을 만든다.
+                - [[창조습관]] 만들기
+                - 꾸준한 글쓰기 : 매일 8분 글쓰기와 제텔카스텐, 롬리서치(또는 옵시디안)
+                - 결과를 보여주는 글쓰기 : 전자책 글쓰기
+                - 결과와 꾸준함을 병행하는 블로그 글쓰기
+    - #[[인스타]]
+        - 100만뷰 글쓰기 를 적용하여 아래와 같이 테두리 + 끌리는 이미지 와 카피 작성
+        - 작성 툴은 (타일)타일(https://tyle.io/?loc=ko)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F3wUK3YEoCz.jpeg?alt=media&token=b607e8d2-0703-40ce-a116-92b66aa2fe8e)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fr1TWLkN7gk.jpeg?alt=media&token=4c2ae1c6-5901-43d9-9e70-ec4f6c509651)
+- [[수업 [[아이디어]]]]
+    - 가면 연주 : 오종협님 피아노 공연
+        - 베토벤 교향곡 편곡 후 가면 퍼포먼스![]
+        - 마음가면과 고뇌, 마음 가면을 쓸 수 밖에 없는 삶
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FmMcCEQ_kY1.jpeg?alt=media&token=7dc067ee-4e6d-4185-ae5b-a1a790ec29f4)
+        - (https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fg6avVD2hXM.jpeg?alt=media&token=4d734dcf-0825-4648-acd6-36d816576281)

@@ -1,0 +1,68 @@
+- [[앱 만들기]]
+    - [[아이디어]]
+        - 오픈칼리지, 플립 같은 어플
+        - 자유롭게 배우고 성장하는
+        - 그러면서 돈 벌 수 있는
+        - 멘토를 구해서 성장을 가속화 할 수 있도록 하는 시스템까지 있으면 좋을듯 (탈잉처럼)
+        - 홈피의 좋은점을 앱으로!
+        - 크몽처럼 능력판매까지? 재능 마켓 당근 마켓 참고 하기
+        - 클럽하우스 붐 분석하기
+        - 플래폼으로 : 습관 그룹개설자는 돈벌기 / 참가자는 질 높은 정보 얻기 + 실천 하게 도움받기
+        - 등급제 만들기 
+        - 개설 자도 맥시멈 돈 / 참가자도 등급에 따라 들어갈 수 있는 쿠루미 다름
+        - 
+- [[학교교육자료 만들기]]
+    - 생활인권규정 만들기 과정 (용샘 안내)
+- 
+- 
+- 하루에 영단어 150개 외운다. 
+  초대박 영단어 게임하면서 쉽게 외우는 법
+  남들보다 먼저 알고, 이득 보자!  
+    - 쉽고, 재미있고, 과학적으로 외우기 
+        - 클래스 카드라는 어플
+            - 영어 단어 200% 빠르게 암기하기 
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fw1ITLQg1Ds.JPG?alt=media&token=f59bbe02-ccb2-438e-ad7b-7c78a7f1777b)
+                - 저는 감히 200%가 아니라 2000%라고 이야기함. 
+        - 효과 
+            - 공부 하는 학생 1
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FSic238ZfEh.gif?alt=media&token=c0e542b8-cee0-4ed4-a858-a4f94576679f)
+                - 
+            - 공부 시간 인증
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F1g4505xH9R.JPG?alt=media&token=767a3ddb-e2a0-4b06-909a-4d026424a6f1)
+                - 
+            - 게임하며 재미있게! + 선의의 경쟁
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FjZxjv4An03.JPG?alt=media&token=45711913-185c-47fd-9039-1a30e6038738)
+                - 
+            - 문장 외우기 까지!
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FGzWugLTXGg.jpg?alt=media&token=eb2bfa9e-b560-47ba-9fcf-c2864b04f5e5)
+                - 
+        - 가격, 사용법
+            - 공짜!! / 풀버전 유료 결제도 1인당 월 12000원 밖에 안함. 
+              (해물 뚝배기 1그릇 값. 30일로 나누면 하루 400원 꼴. )
+                - 영어단어 연필로 쓰며 외우는데 드는 시간, 스트레스 등과 비교하면 엄~청! 싼 가격
+                - 화장실에서도, 버스에서도! 틈틈히 재미있게 가능하다는 것!
+            - 클래스 카드 카페 이용해서 자세히 알아보기 
+                - 이용 안내 : https://www.classcard.net/Home/support
+                - 학원 선생님 카페 : https://cafe.naver.com/classcardhakwon/827
+                - 학교 선생님 카페 : https://cafe.naver.com/classcardteacher
+        - 꿀꿀꿀~팁!
+            - 가입 시 꿀 팁 
+                - (학생 중심)영단어 공부를 할 주변 친구들을 모은다. 
+                    - 친구들 중 1명이** 그룹 공통계정**을 만든다. 
+                    - 학원 선생님 계정을 만든다. 
+                      아이디 비밀번호는 친구들끼리 공유할 수 있게.
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FgQfZZYUCcp.JPG?alt=media&token=f558b84c-e4d9-45c2-82bc-c8dcedc05df8)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FvjQt9dvZW0.gif?alt=media&token=5abce360-ef9a-43c6-8fe2-21c43f103e20)
+                    - 학원 선생님 계정으로 클래스 초대 번호 6자리를 확인 한다. (공유가능)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FYsReXBvsQ5.JPG?alt=media&token=e384a9d1-acc8-4c18-80a4-e9ef3e36048a)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FTGuOBi93nr.JPG?alt=media&token=1edf2c5c-de0e-4635-a406-03de3d371092)
+                    - 개별적으로 학생 아이디를 만들고, 클래스 초대 번호를 입력해 클래스에 가입한다. 
+                    - 다같이 단어장을 만들고 게임하며 단어를 외운다. 
+            - 단어장/ 문장 만들기 꿀 팁 
+                - 단어장 만드는 방법 : 클래스 카드 FAQ 참고 
+                - 단어장은 있는 것 이용해도 좋지만, 
+                  공통된 단어장을 구매(또는 학교 교과서)하여 해당 단어장을 직접 만드는 것이 제일 효과적!
+                - 첫번째 단어장은 스터디 그룹이 1주일치 50개, 1/n 해서 10개씩 만들기 또는 한명이 만들기
+                - 두번째 단어장부터는 게임으로 정하기 
+                  (예) 2/15일 까지 매칭게임 점수 꼴등이 2번째 단어장 만들기
+                - 세번째 단어장 (2/22일 크래쉬 게임 꼴등이 만들기 )

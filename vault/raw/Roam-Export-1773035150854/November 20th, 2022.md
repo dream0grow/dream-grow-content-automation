@@ -1,0 +1,7 @@
+- 지식의 건축가 되기 
+- 롬리서치에 필요한 능력 = '건축가'로서 지식의 구조를 만드는 것
+    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F40pFGQ5sWB.40.13.png?alt=media&token=7cb11f32-a56b-4fe2-9900-96f44908e9e0)
+    - 지식의 구조를 한국십진분류표가 아니라 알라딘 서적의 메뉴 구성으로 하면 어떨까? 
+    - 도서관은 확실히 많은 지식
+    - 그러나 그 많은 지식을 전부 내가 쓰지 않음
+    - 대중들이 많이 쓰는 지식의 구조는 알라딘 서적의 구조를 하면 어떨까? 

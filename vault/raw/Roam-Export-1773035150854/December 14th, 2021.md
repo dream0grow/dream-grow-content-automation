@@ -1,0 +1,58 @@
+- [[건강]]
+    - [[스크랩]]
+        - [[웹사이트]]
+            - 키워드 :: [[건강]]
+            - 스크랩 내용:: 목디스크 전문 자료 : https://www.sisain.co.kr/news/articleView.html?idxno=27763
+- [[스크랩]]
+    - [[웹사이트]]
+        - 키워드:: [[사업]] [[상세페이지]]
+        - 스크랩 내용 :: 상세페이지 예시 
+          https://m.blog.naver.com/PostView.naver?blogId=jungmistart&logNo=222593202088&proxyReferer=
+- [[아이디어]]
+    - [[유튜브컨텐츠]]
+        - bari tessler, art pf money
+            - 부의 심리학, 머니 테라피
+            - 돈과 관련한 마음을 치유할 수 있게 한다. 돈에도 마음이 전부다!
+        - 돈은 마음이다.
+        - 머니 테라피, 머니 테라피스트
+            - 와디즈 펀딩 도전
+    - [[육아]] 
+        - 말로 하는 육아, 행동으로 하는 육아
+            - 말로 하면 육아는 내가 쉽지만 영향력은 적다. 직접 움직이는 건 귀찮고 어렵지만 영향력이 크다. 제일 중요한 건 부정적인 저항력을 줄여 준다. 아이가 어떤 행동을 하기 쉽게 만들어 준다.
+            - 나를 예로 들면 윤슬이에게 양치 하라고 말로 한다. 하지만 윤슬이의 손을 잡고 같이 화장실에 가서 칫솔에 치약을 묻혀주고 양치를 하면 윤슬이가 양치를 빠르게 실천한다. 내가 잠깐 멈춰서 윤슬이를 보고 아이의 속도에 맞게, 윤슬이와 함께 행동하면 되는 것이다.
+- [[독서노트]]
+    - 책:: [[책 - 창조습관]]
+        - 저자:: #이홍
+        - 태그:: #습관 #창조
+        - 내용::
+            -  [[스크랩]]
+                - [[책 구절]]
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FEPVaIM-r_f.jpeg?alt=media&token=8030bb36-92fb-446a-9502-832605a5fd3e
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FUBgPA6V2qE.jpeg?alt=media&token=679fd5c8-dc09-4bef-9e4f-f5c6fa43ec43)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F9dp6jVkked.jpeg?alt=media&token=357aac0d-4ad3-4e77-bd6a-2c6d4caabc14)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fa6LWCnTS-g.jpeg?alt=media&token=1b93ff81-6942-4b1b-84a0-eae28074cf67)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FIDVTxBdvZW.jpeg?alt=media&token=4d5b62d5-1cd6-45a4-8c8b-41606becabb9)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fef531j0eVM.jpeg?alt=media&token=7e944cc5-a7b9-4527-9348-d7f544a026b0)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZZFLyw4-lT.jpeg?alt=media&token=f5149024-0067-48d0-af29-ed4e15a9d940)
+            - - 오늘의 핵심 - 
+                - 창조도 습관이다.
+                - 창조하는 것을 자연스럽게 하는 사람은 매일같이 창조한다.
+                - 우리가 양치하는 것처럼!
+                - 특허가 1000개 넘고, 발명 아이디어가 6000개가 넘는 사람도 있다.
+                - 창조를 하는 습관의 고리를 만드는 것이 핵심이다.
+                - 습관의 고리를 이 책에서는 5개로 나눈다.
+                - [[새로운 것을 창조하는 5가지 태도]]
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZZFLyw4-lT.jpeg?alt=media&token=f5149024-0067-48d0-af29-ed4e15a9d940)
+                - 1. 창조에 쉽게 다가가기
+                - 2. 보이지 않는 것을 보는 것
+                - 3. 고착에서 빠져나오기
+                - 4. 영감창고를 활용하기
+                - 5. 벼랑 끝에 서는 습관
+                - 지금 롬을 활용하여 메모창고를 만드는 것과 [[창조습관]]을 만드는 것은 동일한 과정이다.
+                - 나라고 못할 것 뭐있겠나.
+                - 내 습관의 힘이라면 분명 가능할 것이다.
+                - 확언:: 
+                    - “나는 편하고 쉽게 창조한다.”
+                    - “나는 폭발적으로 많은 양을 창조한다.”
+                    - “나는 자연스럽게 메모하고 메모에서 창조를 시작한다.”
+                    - “나는 흘러가는 내 아이디어가 새로운 창조의 씨앗임을 안다. 아이디어를 언제든 기록한다. 아이디어를 연결한다. 아이디어로 새로운 콘텐츠를 만든다.”

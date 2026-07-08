@@ -1,0 +1,59 @@
+- [[유튜브 만들기]]
+    - 유튜브 컨텐츠
+        - 방학생활
+            - 방학생활
+                - 참고 유튜브 : 
+                - **동기유발과 시작 이야기 
+                    - 한해 마무리 = 새로운 시작. 방학은 새로운 시작의 첫 발걸음
+                    - 방학 기간에 첫 단추를 잘 매면 한 해가 편해질 수 있다. 
+                    - 방학 때 할 수 있는 학습적인 측면/ 정서적인 측면을 알아보도록 할게요. 
+                      꼭! 끝까지 보시고 아이들과 함께 방학을 잘 보내시기를 바래요. 
+                - 코로나 시기, 집 나가지 않는 김에 아이들 방학을 잘 챙겨보자. 
+                - 학습과 마음 통장 채우기 
+                    - 학습에 대한 부분인데요. 이 부분이 가장 고민이 많으시죠? 
+                    - 어떻게 하면 아이들의 학습 능력을 키울 수 있을 것인가? 
+                    - HOOK 1: 이 영상을 끝까지 시청하면서 학습 성장의 단계라는 도구를 챙겨가시는 것 어떤가요? 
+                        - 학습 성장 단계에 따라 지금 내 아이에게 필요한 것은 무엇인지 의사결정할 수 있을 것입니다.
+                    - 책 하나 추천 드릴게요. 최상위권 1%의 비밀 추론력 
+                    - 이게 지금  품절된 책인데요. 중고책을 사시거나 도서관에서 한번 빌려봐보시는 것을 추천드려요. 
+                    - 제가 이 책을 추천하는 이유는 학습의 단계가 쉽게 나와 있기 때문입니다. ]
+                    - 이 책에서는 학습의 단계를 4단계로 이야기하는데 굉장히 동의가 되었어요. 
+                    - 학습의 기초 : 책 4단계 
+                        - 어휘 - 독해 - 구조화 - 추론화 
+                            - 새로운 단어들이 익숙해지게 하기 
+                            - EBS 중학교 과목 교재 읽어보기 
+                            - 책읽기, 책과 연관된 정보에 대해 자연스럽게 습득하도록 하기 
+                              (예) 초등 과학 3학년 : [나는 3학년 2반 7번 애벌레] / 6학년 5월의 달리기 / (http://www.aladin.co.kr/shop/wproduct.aspx?ItemId=80485717) / 중학생은 보일이 들려주는 기체 이야기 / 까칠한 재석이 시리즈 
+                        - 고릴라 왕과 대포, 흔들 흔들 다리에서
+                        - 어린이도서연구회가 추천하는 좋은 책 목록 
+                            - http://www.childbook.org/new3/netc.html?html=netc_main10.html
+                        - 저학년은 그림책과 오디오북 추천 : 라인프렌즈 키즈 - 명작동화 / 소리동화 레몽 - 명탐정 문달이  (예시일뿐 요런 정보를 많이 찾아보면 좋을 것임. )
+                        - 수학 = 계열성에 따라 연결지어서 복습하기 
+                            - 초등 -중등-고등 계열성 만들어보기 
+                                - 계열성에 따라 내가 부족한 부분이 어디인지 확인하고 그 부분을 채워보기. 
+                                - 학습이란 아는 것과 모르는 것을 구분하는 것에서 시작됨. 
+                                    - 수학 문제지 
+                                    - 1.초등수학 전과정 절대개념 123:  https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=176259309
+                                    - 2. 초등 키 수학 총정리 12일 완성  https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=196933364
+                                    - 1. 중등 키 수학 총정리 28일 완성 (2019년) https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=196910822
+                                    - 2. 중등 수학 전과정 절대개념 234 (2020년) : https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=211986215
+                                    - 1. 고등학교 0학년 수학 https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=175976480
+                                    - 
+                        - 초등~고등 공통교육과정 계열성 
+                            - 국가교육과정정보센터(ncic.go.kr) > 교육과정 자료실 > 교육과정 원문 및 해설서
+                                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FXNuPJ9CdEY.PNG?alt=media&token=5589871d-9422-4c1c-ad6d-d84d614420f8)
+                                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FfNqYBHFjUo.png?alt=media&token=81aa91f2-c2fc-46ad-8f9b-ac330ea29efe)
+                                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FOCxXwgtQiI.png?alt=media&token=1c671c64-2bb8-452f-ae4a-158900ca5a0f)
+                                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FraVzdxHxcQ.png?alt=media&token=d639d5b2-4183-42cd-8c3c-90184e5e6762)
+                                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fu-3K6q57iH.png?alt=media&token=77208088-c170-4a03-93e5-0e49d01f7762)
+                                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FNaLTHQ84N-.png?alt=media&token=88e817e0-556c-4211-8a62-753c8cb35f04)
+                                - {{pdf: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F3XQmaE-s7D.pdf?alt=media&token=acb24e4b-2dc2-4fed-94f3-d2cd0e7ce096}}
+                    - 마음 통장 채우기 
+                        - 새로운 추억 만들기 
+                        - 코로나 시기 특별한 활동해보기 
+                            - 산 오르기 
+                            - 눈싸움, 눈썰매, 스키 
+                            - 사람 많지 않은 곳에서 할 수 있는 것 (예시 찾아보기)
+                - 시간이 충분한 만큼 아이와 함께 하는 리듬을 만드는 것이 중요 
+                - 부모 삶의 리듬이 아이 삶의 리듬이 된다. 삶을 단순하게 하고 매일같이 실천하는 것이 습관이 됨. 
+                - 생활 [[아이디어]], 책추천 게시판을 만들고 함께 실천하고 이야기 나누기 

@@ -1,0 +1,20 @@
+- [[영구메모]]
+    - 언어는 사람들의 생활을 반영한다. 
+        - 왜냐하면 기본적인 단어의 유래는 우리의 일상을 기호화한 것이기 때문이다. 
+        - 언어는 자연 생활과 문화 생활을 반영한다. 
+        - 제주에서는 바람이 쌔고 바람을 아는 것이 중요해서 바람을 분류하는 많은 단어를 사용했다. 
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FvlD1hb7I6L.jpeg?alt=media&token=fe60e67a-3f23-4bcf-894f-27097c4149dc)
+            - .![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F5ll6D0ljZm.jpeg?alt=media&token=7147ee5c-4c02-4c6a-a7ba-5aa8239e2648)
+            - .![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fcq8zh-Vg9J.jpeg?alt=media&token=e6ac888d-9a14-4076-9674-6aaabb2cbed6)
+        - 단어를 사용할 때 단어안의 함축된 의미를 잘 생각해보는 것이 중요하다. 
+        - [[생각의 연결고리]] 
+            - 책:: [[브랜드짓다]]
+                - 저자:: 민은정
+            - [[기사문]]
+                - 키워드:: 
+                - 태그::
+                - 스크랩 내용: 이태원 참사? 이태원 사고? 희생자와 사망자 사이에 들어간 우리의 인식
+                    - https://n.news.naver.com/article/469/0000707226?sid=100
+                    - .
+                    - .
+                    - 

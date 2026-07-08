@@ -1,0 +1,118 @@
+- [[[[사업]][[아이디어]]]]
+    - #카피 #[[퍼스널 브랜딩]]
+        - 해빗 체인저 ([[habit]] changer) 
+            - 체인저스 (changers) : 챌린저스를 따라해서  이벤트 가능 
+            - 장점 : 변화에 대한 확실한 의미가 네이밍에서 느껴짐. 
+            - 단점 : 영어라서 '습관' 이라는 단어에 비해 직관성이 좀 떨어짐
+        - 습관 아티스트 
+            - 장점 : 아티스트라는 고급 포지셔닝, 습관 기술을 익혀 예술로 나아간다는 브랜딩 가능
+            - 단점 : 체인지라는 단어보다 역동성이 떨어짐. 고객들의 변화와 성장에 관심이라기 보다는 '나'의 고급 포지셔닝에 포인트를 두는 것 같음. 
+        - 둘다 사용할까? 
+            - 습관아티스트 해빗츠로 블로그 브랜딩
+            - 해빗 체인저는 카페이름으로 
+                - 카페 안의 사람들은 체인지 레벨 1 : 어벤져스 마블 캐릭터로 + 방해물을 어벤져스 악당으로 설정 
+- [[아이디어]]
+    - #교육자료  #한상담 #한교육 #[[회복적 생활교육]]
+        - 회복적 생활교육 - 한상담 교육자료 만들기 => peaceful class 
+            - 교육관련 컨텐츠 만들어서 판매하기 
+                - *컨텐츠 만드는 법 가이드라인 또는 워크 플로우를 내가 제일 잘 아는 지식으로 만들어보기
+                - 블로그로 홍보하면 dc 해주기, 곤팀장참고하여 상세페이지 작성
+            - 지금까지 내가 했던 교육 내용을 정리하기 
+                - 오프라인 판매 - 2월 초 
+                - 온라인 판매 요청 = 에듀니티에 제안서 작성하기 
+- [[꿈 펼치기]]
+    - [[학교만들기]] [[아이디어]]
+        - 하고 싶은 것 하면서 학교 운영하기 
+            - 실제 사례 : http://www.alp1991.com/contents/space/space.asp
+                - ALP 삶의 질 향상 센터와 레드스쿨 
+                - 마을을 만들고 있음. 
+                - 영성 교육을 하면서 마을을 만듦. 
+- [[아이디어]] [[사업]]
+    - 세무 협업
+        - 곤팀장과 세무법인 협업 글 : https://cafe.naver.com/monththousandjob/2280
+        - 세무법인 마케팅 글 : (곤팀장 작성)https://blog.naver.com/globeetax/222569122466
+    - #마케팅
+        - #블로그마케팅
+            - 곤팀장 블로그 마케팅 사례 : 세무사 블로그 무료 PDF 배포글 
+                - https://blog.naver.com/globeetax/222575417920
+                - 본문 글 사진 캡쳐본
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FoWfSZ44aLh.PNG?alt=media&token=0d58e522-6c2e-4c2e-bd79-5efb0ab865ec)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FrL4eA3CRyW.PNG?alt=media&token=4521a343-8eaf-4f48-9893-861d683a1aa6)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FArMnxkAv39.PNG?alt=media&token=301901d8-0cb7-4942-a807-7fd8a291322e)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FkwYNzx90TO.PNG?alt=media&token=78577fb6-e63e-493c-9860-0c56cfa7c61a)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FlgEKBo0GED.PNG?alt=media&token=7e3b5acb-7c3e-4685-9b6e-0b7ad2e48767)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FeOJ-DsijTX.PNG?alt=media&token=d9fbb5a1-ab7a-40ac-8d38-c605e4a656a1)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FbPStvZolxe.PNG?alt=media&token=35bfaaf2-8c84-4ba0-9cb7-196c324a2231)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FxgjWxZwvuj.PNG?alt=media&token=bb4946b0-3f7d-4fe2-b831-85debef83c42)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FRXYLbDQBsr.PNG?alt=media&token=3ae99405-c946-4aee-8c20-5f03d7fba99d)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FP2DtcsCp87.PNG?alt=media&token=26a56169-dfe1-472b-be03-cedd17591009)
+                    - 
+- [[유튜브 만들기]]
+    - #습관
+        - 습관채널명: 하루 3분
+        - 썸네일 : 딱 _ 3분만(닉네임)
+        - 채널아트 : 3분카레에 글씨 바꿔서
+            - 내 모든 습관을,
+            - 쉽고 빠르게 그리고 제대로 바꾸자.
+- [[글쓰기]] [[글감]]
+    - #[[머니 파이프라인을 만드는 기적의 습관]]
+        - 머니파이프라인의 종류 추가하기
+            - 부의추월차선 참고
+            - 유튜브 지금바로 집에서 할 수 있는 무자본 창업
+        - 머니파이프라인 중 지금 바로 할 수 있는 것 
+        - 그러면서 내 브랜딩에 제일 유리한 것 등 전자책의 장점 좀 더 서술하기
+            - 쇼컷처럼 통계이용하기
+        - 판매가 바로 가능한 것
+        - 전자책 선택하게 하기
+        - 7일동안 전자책 쓸 수 있는 가이드라인 제공
+            - 날짜는 바꿀 수 있음
+            - 전자책쓰기에 대해 안내하는 다른 전자책 참고
+- [[아이디어]] [[사업]]
+    - #생각의기술
+        - 동양과 서양의 생각 차이
+            - 서양인의 관점을 취해서 내 생각 업그레이드하기
+            - #생각의지도
+                - 오한마 유튜브
+                    - 침팬치, 바나나, 팬더를 두고 관련있는 2가지 동그라미 할 때 동양은 관계성 중요시해서 침팬치와 바나니, 서양은 개별적속성을 우선시해서 침팬치와 팬더(동물,포유류)를 선택함.
+        - #생각의탄생
+            - 새로운 것을 창조하는 13가지 기술
+        - #창조습관
+            - [[새로운 것을 창조하는 5가지 태도]] 
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZZFLyw4-lT.jpeg?alt=media&token=f5149024-0067-48d0-af29-ed4e15a9d940)
+                - 1. 창조에 쉽게 다가가기
+                - 2. 보이지 않는 것을 보는 것
+                - 3. 고착에서 빠져나오기
+                - 4. 영감창고를 활용하기
+                - 5. 벼랑 끝에 서는 습관
+        - 생각의 기술들을 사람들에게 안내하여 더 창조적이고 새로운 [[사업]] [[아이디어]]를 낼 수 있는 틀 제공하기
+            - #무기가되는스토리
+                - 스토리브랜드보드
+            - #린스타트업바이블
+                - 린보드
+            - 위 2가지책처럼 따라하면 되는 간단 안내자료 제공
+- [[독서노트]]
+    - 책:: [[습관의디테일]]
+        - 태그:: #습관 
+        - 저자:: BJ포그
+        - 내용::
+            - 에필로그
+                - [[스크랩]]
+                    - [[책 구절]]
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FG8_k8_pc-3.jpeg?alt=media&token=7ab75fc0-4e98-41c8-8cf0-8d69415d227f)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fmfj9KHFrni.jpeg?alt=media&token=eb6e481d-b8c6-404d-89cd-b2b95ca662b5)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZMqLBqFjD6.jpeg?alt=media&token=4e73a798-a499-4fe2-939d-5e7b43908312)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Ff9QQnuAm08.jpeg?alt=media&token=75646794-1c98-46c3-90b0-892e0e5b4ae0)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Frk5DYwfqbJ.jpeg?alt=media&token=7ef0e1e1-0ec8-40fe-a532-f2e3e149d314)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FG4q9CP2R4K.jpeg?alt=media&token=43e6876b-ce2e-459c-b40f-3cffe6bd216f)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FTLfQ93MgKJ.jpeg?alt=media&token=583b905e-a42f-4de8-9f80-027252a60921)
+                - - 오늘의 핵심 - 
+                    - 작게 시작한 변화가 삶의 변화를 가져온다. 
+                    - 작은 습관으로 자그마한 것을 변화시킨 것 같지만, 변화의 씨앗은 증식하고 성장한다. 
+                    - 제일 중요한 것은 우리가 경험하는 것의 근본적인 변화이다. 
+                    - 나는 안돼. 나는 못해. 에서 나는 할 수 있어. 나는 성공한다.  로! 
+                    - 그리고 이 변화는 나 만이 아니라 우리 모두 가능하다. 
+                    - [[행동 크래프팅 기술 ([[변화의 기술]])]](포그모형, PAC모형, 행동크래프팅 등)을 안내하고 익힐 수 있도록 한다. 우리가 운전을 익히면 처음에는 많은 에너지를 쓰지만, 나중에는 자동적으로 쉽게 운전하는 것처럼 [[변화의 기술]]들도 처음에는 익숙치 않을지 몰라도 나중에는 자동적으로, 쉽게 내게 다가올 것이다. 
+                    - *요즘 내게 가장 중요한 [[변화의 기술]]은 습관을 실천할 때  '지치다.', '힘들다.'라고 느낄 때 이다. 이 순간은 내가 지금 습관을 업그레이드하는데 너무 많은 의지력을 사용하고 있다는 "신호"이다. 
+                    - '지치다.', '어렵다.', '힘들다.' 라는 "신호"를 놓치지마라! 이 신호는 지금 습관행동을 작게 만들라는 것이다. 멈추는 것이 아니다. 포기하는 것이 아니다. 스타트 행동만 해도 된다. 또는 습관을 아주 작게 만들어도 된다. 
+                    - 예를 들면, 운동을 매일 할 때 턱걸이 1개만 한다.(작은 행동으로 만들기), 스타트 행동만 한다. (글쓰기를 할 때 노트북 열어 기록프로그램 켜기), 오늘 쓰고 싶은 주제 단어만 쓰기(작은 행동으로 만들기) 등이 있다. 
+                    - 이렇게 매일 조금씩 하자!  

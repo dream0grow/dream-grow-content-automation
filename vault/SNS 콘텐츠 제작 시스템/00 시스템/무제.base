@@ -1,0 +1,9 @@
+views:
+  - type: table
+    name: 표
+  - type: cards
+    name: 뷰
+    indentProperties: true
+    markers: bullet
+  - type: table
+    name: 뷰 2

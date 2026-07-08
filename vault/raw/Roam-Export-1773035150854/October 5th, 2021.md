@@ -1,0 +1,4 @@
+- [[PDF 책 만들기]]
+    - 홍보 방안
+        - 뉴스 기사로 홍보하기 : 인터넷 신문사에 보도자료 뿌리기 (검색해서 실천하기)
+        - http://www.globalnewsagency.kr/news/articleView.html?idxno=241327

@@ -1,0 +1,134 @@
+- [[사업]] [[아이디어]]
+    - #유튜브 [[네이버 카페 만들기]]
+        - 유튜브 끝장챌린지 진행
+            - 유튜브 만들기 위한 프로세스 작성 - 빠르게 전자책 만들기 (7일 완성과정)
+            - 유튜브 끝장챌린지- 글올리기로 실행
+            - 유튜브를 꾸준히 실천한다.
+        - 유튜브 왕초보가 바로 시작할 수 있게 해드립니다.
+            - 진짜 하나부터 열까지 다 알려드리는 유튜브 시작하기 A to Z 
+            - 유튜브 계정만들기
+            - 유튜브 채널아트, 썸네일 만들기, 로고 디자인
+        - 썸네일 게시판, 바스켓 게시판, 카피라이팅 게시판 만들기
+            - 게시판에 많은 사람들이 글을 올릴 수 있게 이벤트 열기 (공부머리 독서법 독서 게시판 따라하기)
+        - 카페 활성화 
+            - 카페 활성화를 위해 무료자료 배포 하기 벤치마킹은 비밀 무기 점 카페처럼 하기
+        - 유튜브 컨텐츠 만들기를 전자책 만들기 컨텐츠까지 연결짓기
+            - 전자책 만들기 레벨원 : 일단 완성하기 , 열을 동안 전자책 완성 해 보기
+            - 전자책 만들기 Lv.2 : 팔리는 전자책 주제
+            - 전자책 만들기 레벨 삼 : 잘 팔리게 상세페이지 만드는 법
+            - 전자책 만들기 챌린지 진행하기
+    - 머니파이프라인
+    - 유튜브 [[바스켓 이론]]을 [[특허]] 받을 수 있나?! 확인해보기
+        - 이 이론을 어떻게 내것으로 만들 수 있을까? 
+        - 다른 단어로 바꿔서 표현 한다면 어떻게 될까?
+            - [[계단이론]]을 퀀텀점프 이론으로 : 한번에 확 오른다. 라는 의미. 계단처럼 쉽게 이해할 수 있는 단어로 바꿔도 됨
+            - 바스켓은 무엇을 담는 것의 의미. 
+- [[강의]]
+    - [[듣고싶은강의]]
+        - 글쓰기 관련 강의
+            - 제텔카스텐을 활용하기 : https://www.classu.co.kr/class/classDetail/1006862
+        - [[사업]] 전문성을 얻기 위해
+            - 전자책 강의 1 : https://class101.net/products/EiUM36jzPSmz8nJPdX6m
+            - 전자책 강의 2 : https://class101.net/products/zyzx4oWNJw7KtzrI1QuA
+        - 업무 생산성을 높여주는 틀 얻기 : https://class101.net/products/WChANA5im9gAA6mV5k24
+        - 유튜브 - 신사임당 : https://www.mkyu.co.kr/major/details/200067
+        - 유튜브.기획 +만들기 https://taling.me/vod/view/26406
+- [[독서노트]]
+    - 책:: [[습관의디테일]]
+        - 내용:: 
+            - 프롤로그 
+                - [[스크랩]]
+                    - [[책 구절]]
+                        - > 변화에 실패하는 원인은 '내'가 아니라 '접근 방식'에 있다. 이렇게 생각해보자. 수납장을 조립하는데, 설명서가 잘못되었고 빠진 부품도 있다면? 결코 수납장을 완성할 수 없다. 누구의 잘못인가? 내 잘못은 아니다. 제조사의 잘못이다. 그런데 우리는 노력하다 실패했을 때 '제조사'를 비난하지는 않는다. 자신을 탓한다. 
+                        - > 당신이 실패의 원인이 아니다! 변화에 대한 접근 방식이 문제다. 성격상 결함이 아니라 설계상 결함이 원인이다. 
+                        - > 우리는 지킬 수 없는 시간표를 짤 때처럼 습관 형성과 변화에 관해 비현실적이고 높은 기준을 세우곤 한다. 
+                        - > 습관이 중요하다는 것은 안다. 그래서 좋은 습관을 늘리고 나쁜 습관을 줄이려고 한다. 하지만 변화를 위해 고군분투하다가 실패하면 또다시  내 탓이라는 생각을 반복한다. 내가 지금까지 해온 모든 연구와 경험을 토대로 단언할 수 있다. 이것은 잘못된 마인드 세트다. 
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FRtPSZS-fVe.jpeg?alt=media&token=e0370bf4-de5d-4e4f-9686-1da066849aff)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FyndYhfLGUd.jpeg?alt=media&token=454cfc6e-08f4-4423-9249-92b129e558ff)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FLnPWsg53-R.jpeg?alt=media&token=00a0947b-74e6-40f6-b198-efe0de05a5db)
+                - 원인은 내 자신이 아니다! 접근법이 문제다! 성격상 결함이 아니라 설계상 결함이 원인이다.
+                    - - 오늘의 핵심 - 
+                        - 얼마나 많이 후회를 하는가! 얼마나 나 자신을 탓하는가? 사실 변화하는 데 필요한 재료가 없었던 것 뿐이다. 재료가 없는 것이 내 탓인가? 아니다. 우리는 습관이 변하는 데 필요한 재료를 제대로 안다면 누구나! 언제든지! 변화할 수 있다. 
+                        - 습관을 바꾸는 것은 쉽고 간단하다. 그리고 행동 변화를 확실히 할 수 있다.
+- [[독서노트]]
+    - 책:: [[습관의디테일]]
+        - 내용:: 
+            - 프롤로그 
+                - [[스크랩]]
+                    -  [[책 구절]]
+                        - > 좋아하는 습관을 만들고 행동을 바꾸는 일이 성공하려면 다음 세가지를 지켜야 한다.
+                        - > 1. 내 탓하기를 멈춘다.
+                          > 2. 원하는 것을 아주 작은 행동으로 쪼갠다.
+                          > 3. 실수는 새로운 발견이다. 이를 발판으로 앞으로 나아간다. 
+                        - > 어떤 사람들은 올바른 정보를 안다면 사람들의 태도가 변하고 따라서 행동의 변화를 가져올 수 있다고 믿는다. 많은 프로그램과 선의의 전문가들은 교육을 통해 사람들을 변화시키려고 한다. 나는 이것을 [[정보-행동 동일시 오류(information - action fallacy)]] 라고 부른다. 정보만으로 행동을 바꿀 수 없다. 여러분 스스로의 경험만으로 미뤄봐도 알지만, '안다고' 삶이 바뀌지 않는다. 
+                        - > 올바른 프로그램을 따른다면 '환경을 바꾸고.' '조금씩 습관을 기르는' 두 가지 선택지를 통해 변화를 지속시킬 수 있다. 두 선택지의 출발점이 바로 작은 습관 기르기다. 사소하고 긍정적인 습관이 성장하고 확장하면 이는 훨씬 중요한 습관으로 발전한다.
+                        - > 작은 습관 기르기를 한마디로 정리하면, 
+                          > 1. 하고 싶은 행동을 정해서 작게 쪼개고
+                          > 2. 일상 속에 자연스럽게 끼워 넣을 곳을 찾고
+                          > 3. 그것을 꾸준히 해나가는 것이다. 
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FK1xIDEC-W2.jpeg?alt=media&token=488faf04-ebc6-43e3-a7a3-bec126dbec71)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZZ0fEqaOgM.jpeg?alt=media&token=e1918659-7f6b-4027-bb94-1a9e84b40cf1)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FIMTTzexd_N.jpeg?alt=media&token=182849e0-4b73-4c36-b9b2-f82986922ab8)
+                            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F0_wxgrLk1A.jpeg?alt=media&token=5dbe0f17-0e0e-46e7-9dbb-8ff3d5e20ab3)
+                - 내 탓하기를 멈춘다 -> 변화를 위한 제대로 된 접근법을 안다. -> 제대로 된 접근법은 2가지다. -> (1) 환경의 변화 (2) 작은 습관행동부터 실천
+                    - - 오늘의 핵심 -
+                        - 가장 먼저 내 탓하기를 멈춘다. 지금 잘못된 것은 내가 행동을 바꾸는 접근 방식이 잘못되었기 떄문이다. 제대로된 접근 방식을 배우자. 
+                        - 그리고 행동을 바꾸는 데 있어서 환경을 바꾸고, 자그마한 행동부터 습관으로 만들자! 
+                        - 작은 습관 기르기의 핵심은 
+                        - 1. 하고 싶은 행동을 찾고 정한다. (열망을 이루는 행동군 탐색)
+                        - 2. 이것을 작게 쪼개서 작은 행동으로 만든다. (스타터 행동과 작은 습관 만들기)
+                        - 3. 일상 속에서 자연스럽게 작은 행동을 끼워 넣을 곳을 찾는다. (앵커)
+                        - 4. 꾸준히 반복한다. 그러면 습관은 성장하고 증식할 것이다. 
+- [[독서노트]]
+    - 책:: [[습관의디테일]]
+        - 내용:: 
+            - 프롤로그 
+                - [[스크랩]]
+                    - [[책 구절]]
+                        - > ☆ 근본적인 변화를 위해 작게 시작하는 게 좋다.  작은 습관 행동으로 시작하는 것이 좋은 이유 는 다음과 같다.  
+                          > 1. 작은 습관은 금방 기를 수 있다.  
+                          > 2. 작은 습관은 당장 시작할 수 있다. 
+                          > 3. 작은 습관은 안전하다. 
+                          > 4. 작은 습관이 큰 습관으로 성장한다. 
+                          > 5. 작은 습관은 동기에 의존하지 않는다.
+                            - 작은 습관 행동으로 시작하는 것이 좋은 이유
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fh5eC4IvUM4.jpeg?alt=media&token=b010ef2b-f235-41c8-a91b-3c0f9dc0d635)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FkeCo9I1bgL.jpeg?alt=media&token=b26403ad-cdff-4724-8f29-fe16b8ce573c)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F4g-kZAabg5.jpeg?alt=media&token=38387a43-de28-489f-976f-335ae6f4efcc)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F1vWadI5XLt.jpeg?alt=media&token=91fbd01f-475a-4aa3-896b-9f72235df661)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FA-ce7Gsdj7.jpeg?alt=media&token=8ea8e94e-ad9b-453f-8510-94a037fd4b83)
+                -  당장 시작할 수 있고, 시간이 부족하다고 변명하지도 못할만큼 작게 습관행동을 만들어라! 딱 30초라도 매일 하자! 
+                    - - 오늘의 핵심 - 
+                        - 작은 습관은 정말 작게 시작한다. 이렇게 시작하고 매일 제대로 축하하자! 처음에는 '이렇게 조금하는 데도 내가 성장할까?' 의아하고 불안할 수도 있다. 하지만 우리는 매일 습관행동을 함으로써 [[변화의 기술]]을 익히고 있다.
+                        - 변화의 기술을 제대로 익히면, 당장 시작할 수 있다. 언제든지 내가 원하는 것을 쉽고 빠르게 시작할 수 있다. 일단 실천하면 꿈은 현실이 된다. 
+                        - 제일 중요한 것은 "매일 성공하는 기분"이다. 하루 하루 스스로 '성공'하고 있다는 마음을 느끼는 것! 우리가 매일 하는 경험이 본질적으로 변한다! 고통에서 희망으로, 후회에서 자신감으로 말이다! 
+- [[독서노트]]
+    - 책:: [[습관의디테일]]
+        - 내용:: 
+            - 프롤로그 
+                - [[스크랩]]
+                    - [[책 구절]]
+                        - [작은 습관 행동으로 시작하는 것이 좋은 이유](((wBJk7MT9o)))
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F33hWu0DLEu.jpeg?alt=media&token=bdac9a30-a170-432b-866e-0f040c7fa139)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FzWDba4CjWt.jpeg?alt=media&token=06c15d89-1825-450c-bf7b-86ab2167b2e6)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FAexRz4Mx6g.jpeg?alt=media&token=c79678a3-9172-40dd-88f7-3d06124c1fd1)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F3qJ0Atbofg.jpeg?alt=media&token=2126fd1c-fc1b-48f3-8dec-a72d25573d4b)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F4-rMkKS7bv.jpeg?alt=media&token=50e47e2c-b1ee-4d3e-b2c4-e1a51f5afd90)
+                - - 오늘의 핵심 -
+                    - 작은 습관은 부담이 적고, 위험도가 낮다. 뇌의 저항없이 자연스럽게, 매일 실천할 수 있게 된다. 
+                    - 뭔가 위대한 것을 실천할 필요 없다. 작게 매일 매일 실천해보자. 거기서부터 시작이다. 
+                    - 동기는 자꾸 변하기 때문에 동기보다는 행동 기술을 배워 능력을 키우고, 환경을 지혜롭게 구성하여 내가 원하는 자극을 자꾸 받을 수 있도록 하자! 
+- [[독서노트]]
+    - 책:: [[습관의디테일]]
+        - 내용:: 
+            - 프롤로그 
+            -  [[스크랩]]
+                - [[책 구절]]
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FwD1-vw78YT.jpeg?alt=media&token=b0d14331-e662-4b1b-876f-780e72bdbfa9)
+            - 아무리 작은 성공이라도 축하한다! 습관 형성에서 가장 효과적인 방법은 바로 '축하하기'다! 성공했다는 느낌! 내가 지금 잘하고 있다는 느낌! 그것은 새로운 습관을 뇌에 새기고 지속하도록 한다! 후회와 자책 대신 스스로 격려하는 삶, 스스로를 칭찬하는 삶을 살자! 
+            - 확언:: 
+                - "나는 매일 내 삶을 축하한다."
+                - "오늘 하루도 잘했어!"
+                - "내가 오늘 잘한 3가지는 이거야. 첫째, 둘째, 셋째" 
+                - "정말 대단해!"
+                - "역시 이한결이야!" 

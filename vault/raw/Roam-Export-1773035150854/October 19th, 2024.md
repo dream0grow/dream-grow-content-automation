@@ -1,0 +1,7 @@
+- [[사업]][[아이디어]] 고객이 성장할 수 있게 평가, 진단하는 것이 필요하다. 
+    - 예를 들어, 비즈니스 PT(또는 쉽게 연구소) 를 한다고 할 때 
+    - 고객이 지금 어느정도 수준인가? 시작할 때 능력에 대한 평가 
+    - 그러려면 비즈니스(또는 논문 작성, 개인의 성실함 정도)에 대한 영역과 단계가 필요 > 단계를 넘어가게 하기 위한 교육내용을 준비하는 것이 필요 
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fd6lPih_lP9.png?alt=media&token=a1374d76-575c-4dc7-b2bc-34dd6a5bfd24)
+    - 고객에 대해서 평가를 하는 방법, 고객을 관리하는 방법, 고객이 성장할 부분을 안내하는 방법을 개념도(알고리즘)를 그리고 개념도에 따라서 강사교육이 필요하다. 그리고 강사가 어떻게 고객을 관리하고 기록하고 측정하는지, 고객에게 지금의 내용을 전달하는지 알려주는 것도 서비스로서  강조하는 것이 필요하다. 
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F2hh4VolAE4.png?alt=media&token=88b98c6c-f931-4c74-8f6c-1cee2da7a418)

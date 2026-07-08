@@ -1,0 +1,22 @@
+- [[수업]] [[아이디어]]
+    - 롬리서치를 이용하면서 중요하게 느끼는 것은 지식의 구조를 만들고 거기에 노트를 분류하는 것이다. 
+    - 비슷한 것끼리 분류되어 있을 때 연결을 더 잘할 수 있게 된다. 
+    - ^^**제텔카스텐에서 제일 중요한 것은 건축가, 정원사, 사서의 능력을 골고루 갖는 것이다.**^^
+    - 노트 작성보다 먼저 건축가처럼 지식의 구조를 만드는 것을 하는 것이 중요하다. 
+    - ---
+    - 학교에서 아이들에게 공책정리를 가르칠 때에도 내가 1년동안 안내할 지식의 구조를 먼저 안내하고 인덱스를 만든 후 아이들에게 분류하라고 하면 좋겠다.
+        - [30공 큰 인덱스(대분류)](https://search.shopping.naver.com/catalog/25159434077?cat_id=50008048)와 포스트잇 [작은 인덱스(소분류)](https://search.shopping.naver.com/catalog/33384484330?cat_id=50003558)로 나누기 
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FScHUSgAiDZ.png?alt=media&token=210fc165-843d-41f2-ad6a-38383507ace7)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F8LBj_iwvEr.png?alt=media&token=010a2be0-60e5-4531-b35d-2b52a8ffc172)
+        - 대분류. 프로젝트 수업
+            - 소분류. 새출발 프로젝트
+            - 생명평화인권 프로젝트
+        - 교과 수업
+            - 국어
+            - 수학
+            - 사회
+            - 영어
+        - 웃프 특강
+            - 뇌과학과 공부법
+            - 심리학과 인간관계
+- [[책]]

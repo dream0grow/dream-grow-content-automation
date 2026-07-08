@@ -1,0 +1,29 @@
+- [[유튜브 만들기]]
+    - 공부법 영상 20개 만들기 
+        - 참고 사이트 :  https://www.gongsin.com/courses/intro/sm/show?cate=%ED%95%84%EC%88%98%EA%B3%B5%EB%B6%80%EB%B2%95
+    - 공부를 잘할 수 있는 방법에 대한 타겟 정확하게!! 
+        - 학생들을 타겟으로 할까?
+        - 부모를 타겟으로 할까? 
+            - 부모가 타겟이 되려면 어떤 메시지를 주어야 할까? 
+        - 둘 다 타겟이 되었을 때 효과를 얻을 수 있는 부분은 없을까? 
+    - 부모를 위한 영상을 만드는 것을 병행하면 어떨까? 
+        - 부모 교육을 위한 영상 
+    - [[인스타]], 블로그를 만들어서 유튜브 만드는 것과 병행해서 홍보한다. 
+    - 잘한 점 : 매주 2개씩 영상을 만들었다, 만드는 데 힘을 뺐다. 내가 이야기 하고 싶은 주제를 편안하게 전달했다.
+    - 아쉬운 점 : 영상 매력도가 떨어진다. 메시지에서 핵심만 전달한다. (예시보다는 내용 중심), 필요성과 중요성을 강조한다. 공감되는 말을 찾아본다. (댓글 등)
+    - 실천할 점 : 공감 댓글을 모은다. 영상 만드는 패턴을 5가지 만든다. (홍보채널처럼), 영상의 지속성은 많은 사람들의 관심이다. 관심이 많으면 또 만들고 싶고 더 하고 싶다! 
+- [[PDF 책 만들기]]
+    - 주제 : 다모임 
+        - 학생 자치의 목적 2가지 
+            - 자치 능력 향상
+            - 관계성 향상 
+        - 학생이 스스로 만드는 문화를 만들기 위해 알아야할 O가지 철학 
+        - 학생들이 스스로 할 수 있기 위해 효과적으로 준비하면 좋을 환경 
+            - 환경을 만들면 자연스럽게 성장 
+        - 학생 자치를 위한 핵심 활동 
+        - 학생 자치 FAQ 
+    - 다모임을 위한 글 작성한다고 하면서 사람들에게 파일 일부 제공 + 질문받기 
+        - https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FTtcvMbz_i-.hwp?alt=media&token=87a5b552-cf59-40de-9168-f535b5e7d79e
+            - https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FUHNYjF04Kd.hwp?alt=media&token=5b317504-3c04-4eca-ac27-e588f9422ca9
+            - https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F-TruVjpCc5.hwp?alt=media&token=3ddb2b86-e545-4e94-b09f-97f27beaf9d8
+    - 

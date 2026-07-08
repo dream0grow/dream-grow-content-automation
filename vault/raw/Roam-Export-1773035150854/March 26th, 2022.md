@@ -1,0 +1,5 @@
+- [[수업 [[아이디어]]]]
+    - 학교에 계신 선생님들 인터뷰해서 동생들에게 알려주기 : 인사할 수 있게 하기 
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FASIHrRjWd1.jpeg?alt=media&token=718bdc9c-cbc6-45ec-aa61-f10c50f08d0c)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F_Kf0fqdnu1.jpeg?alt=media&token=7cffbdfc-4f4e-492f-85e9-8843c2e68c0c)
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FwqYpchcXTr.jpeg?alt=media&token=b9f91fee-975d-4c75-b7e9-8178c5340b87)

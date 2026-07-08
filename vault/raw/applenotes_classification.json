@@ -1,0 +1,5138 @@
+{
+  "summary": {
+    "education_content": 381,
+    "personal": 83,
+    "creator_business": 48,
+    "other": 38,
+    "video_notes": 25,
+    "classroom_material": 11
+  },
+  "education_subcategories": {
+    "감정/심리": 122,
+    "학습": 72,
+    "독서": 65,
+    "양육/소통": 30,
+    "놀이": 23,
+    "기타": 21,
+    "수학": 20,
+    "훈육": 15,
+    "미디어/AI": 13
+  },
+  "total_files": 586,
+  "files": {
+    "'2022년 6학년_평화를 바라는 올리브반' 밴드로 초대합니다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "아래 링크를 눌러 들어오세요."
+    },
+    "'집에서 AI를 활용해 자기주도학습 능력을 기르는 방법'.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "자녀",
+        "학습",
+        "초등",
+        "자기주도"
+      ],
+      "first_line": "도구를 잘 활용하면, 학습효과는 높아질 수 밖에 없습니다. "
+    },
+    "( 야간술래 잡기할 때 지우 덕분에 살았던 날).md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "수학"
+      ],
+      "first_line": "# 오늘 수학여행 마지막 시간이 있다. 그래서 야간"
+    },
+    "( 제주 항일 기념관에서 모르는 것 알아서 좋았던 날).md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "수학",
+        "화"
+      ],
+      "first_line": "# 수학여행 2일차 때 제주 항일 기념관이 인상 깊었다. 왜냐하면 4-3때 죽었던 사람이 많았다는 걸 알았고"
+    },
+    "(시작하기 전에 자기 연결, 감동의 목소리와 눈빛).md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "성장",
+        "자기주도",
+        "댓글"
+      ],
+      "first_line": "특별한 추억을 안겨준 학생들에게,"
+    },
+    "------아래 링크 클릭 ➡️ 예산 확인 후 점선 부분은 지우세요.-------.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "<작성법>"
+    },
+    "-수학여행 안내-.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "학부모"
+      ],
+      "first_line": "수학여행 준비사항 및 예산내역이 변경되었습니다. "
+    },
+    "-오늘의 핵심 -.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "읽기",
+        "글쓰기",
+        "습관"
+      ],
+      "first_line": "11/6"
+    },
+    "0000 독이 되는 친구 관계의 악영향.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "감정",
+        "화",
+        "대화법",
+        "인사이트"
+      ],
+      "first_line": "00:45 1) 감정 블랙홀 유형의 친구  "
+    },
+    "0000 무시하면 안되는 이유.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "01:12 남을 무시하는 게 정말 문제되는 상황"
+    },
+    "0000 아이 자존감 하락은 부모의 말에서 시작된다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "훈육",
+        "자존감"
+      ],
+      "first_line": "01:22 자녀 자존감을 망가뜨리는 최악의 말 Top 1  "
+    },
+    "0000 우울증 극복 2가지.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "우울",
+        "불안",
+        "화",
+        "심리"
+      ],
+      "first_line": "00:41 우울증 극복 핵심 - 뇌"
+    },
+    "0000 우울증 약 불안장애 약 정말 먹어야할까.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "우울",
+        "불안",
+        "화",
+        "심리"
+      ],
+      "first_line": "00:34 넷플릭스가 폭로하는 약의 부작용"
+    },
+    "0000 우울증 약에만 의존하면 문제다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "집중력",
+        "우울",
+        "불안",
+        "화"
+      ],
+      "first_line": "00:42 우울증 치료 1단계 - 인식"
+    },
+    "0000 위축된 아이, 후회하는 부모.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자존감",
+        "화",
+        "대화법"
+      ],
+      "first_line": "01:11 화를 낼 때 부모가 하는 말이 중요한 이유 "
+    },
+    "0000 이혼을 생각하는 원인은 대화다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "화",
+        "대화법"
+      ],
+      "first_line": "00:29 말의 순서가 갈등을 만드는 이유"
+    },
+    "0000 인트로.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "00:24 미루기를 하는 심리 5가지 유형"
+    },
+    "0000 자존감 낮은 아이의 문제상황.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "자존감",
+        "감정"
+      ],
+      "first_line": "00:44 격려하는 말이 문제가 되는 이유"
+    },
+    "0000 자존감 높이려는 시도가 문제가 된다.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "성장",
+        "심리",
+        "채널"
+      ],
+      "first_line": "00:53 자존감 높이는 게 실패할 수 밖에 없는 이유"
+    },
+    "0000 회사 인간관계의 본질.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "화",
+        "대화법",
+        "인사이트"
+      ],
+      "first_line": "01:01 1) 업무와 인간관계 우선 순위 원칙  "
+    },
+    "0000 훈육의 일반적인 문제점, 혼내는 것의 문제점.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "부모",
+        "훈육",
+        "자존감",
+        "감정",
+        "혼내"
+      ],
+      "first_line": "00:25 혼내지 않아도 바뀌는 훈육의 비밀 "
+    },
+    "01099085502.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 01099085502"
+    },
+    "035 연수.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "칭찬",
+        "화"
+      ],
+      "first_line": "서은이 변화 : 아이들이 변하니 연수 의미를 느낌"
+    },
+    "0802 방학 습관 프로젝트  학습 습관과 건강한 습관 만들기 7일차.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "공부",
+        "습관"
+      ],
+      "first_line": "1. 여러분의 공부계획에 맞춰 공부를 실천하세요!"
+    },
+    "0805 방학 습관 프로젝트  학습 습관과 건강한 습관 만들기 10일차.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "공부",
+        "습관"
+      ],
+      "first_line": "1. 여러분의 공부계획에 맞춰 공부를 실천하세요!"
+    },
+    "1) 설-연휴 단골 질문 바꾸기.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "감정",
+        "공부"
+      ],
+      "first_line": "스레드:"
+    },
+    "1) 역설과 충격 강조형.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "감정",
+        "영어"
+      ],
+      "first_line": "이 구조는 대치동 = 성공이라는 공식이 있는데"
+    },
+    "1) 자기 소개 및 지금 느낌, 어떻게 오게 되었는지 간단히 이야기 나누고 시작.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "<p style=\"text-align:justify;margin:0\">"
+    },
+    "1) 학급회의 주제.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "감정",
+        "화"
+      ],
+      "first_line": "•\t**“교실 내 보드게임을 소수 학생들이 독차지하고 있어서 갈등이 생김.**"
+    },
+    "1-1..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "초등",
+        "공부",
+        "성장"
+      ],
+      "first_line": "# 나는 초등학교 "
+    },
+    "1. 수헙표 출력  8월2일 화요일 10시 부터 수험표 출력 가능. 각자 수험표를 프린트해서 ᄆ.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모"
+      ],
+      "first_line": "2. 시험장은 부모님 차량으로 이동 "
+    },
+    "1. 디지털 미니멀리즘.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "독서",
+        "공부"
+      ],
+      "first_line": "## **2. 뽀모도로 테크닉**"
+    },
+    "1. 엄마(아빠)는 너를 있는 그대로 사랑해..md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이",
+        "성장"
+      ],
+      "first_line": "1. 엄마(아빠)는 너를 있는 그대로 사랑해."
+    },
+    "1. 오프닝 & 안내 (5분).md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "교육",
+        "성장",
+        "자기주도",
+        "화"
+      ],
+      "first_line": "- 이미 아이스브레이킹은 마쳤으므로, **오늘 프로그램의 목적과 개요**를 간단히 안내."
+    },
+    "1. 인사.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "교육",
+        "화",
+        "인스타",
+        "GPT"
+      ],
+      "first_line": "2. 지난 강의 호응 안내+ 전교조 홍보"
+    },
+    "1. 일상생활에서 느끼는 부담감.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모",
+        "공부",
+        "친구관계",
+        "화",
+        "동생"
+      ],
+      "first_line": "\\[ \\] 시험이나 과제 제출 때문에 마음이 무거워요 "
+    },
+    "1. 천재적 통찰 도출 공식 (Genius Insight Formula).md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "화",
+        "알고리즘"
+      ],
+      "first_line": "## 1. 천재적 통찰 도출 공식 (Genius Insight Formula)"
+    },
+    "1.나는 주로 어떤 순간에 무의식적으로 스마트폰을 확인하는가 (지루할 때, 외로울 때,.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "감정",
+        "스마트폰",
+        "불안",
+        "화",
+        "습관"
+      ],
+      "first_line": "2.\t**오늘 하루 중 스마트폰을 사용하며 가장 의미 있었던 순간과 가장 의미 없었던 순간은 언제였나?**"
+    },
+    "1.이번 감수성 훈련을 하면서 나는 만남의 의 미에 대해서 다시 한번 생각하게 되었.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "감정",
+        "학습",
+        "불안",
+        "화"
+      ],
+      "first_line": "만남이란 나를 표현하고 상대를 알아주며 상대와 함께 감정적으로 공유 되는 느낌. "
+    },
+    "1.마피아.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 새와 둥지 "
+    },
+    "1.우유갑 혼자서 열기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "화"
+      ],
+      "first_line": "2.부모님 연락처 하나는 반드시 외우기"
+    },
+    "11- 26.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "화",
+        "습관"
+      ],
+      "first_line": "- 오늘의 핵심 - "
+    },
+    "1인 연예 소속사를 가정한.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "의사소통",
+        "협찬"
+      ],
+      "first_line": "세무 기장 위임 프로세스"
+    },
+    "1일차.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "수학",
+        "성장",
+        "놀이",
+        "화"
+      ],
+      "first_line": "제목: 3시간이 1분으로 줄어드는 방법"
+    },
+    "2. 방법.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "교육",
+        "학습",
+        "화"
+      ],
+      "first_line": "<p style=\"text-align:justify;margin:0\"> "
+    },
+    "2. 생산성의 본질.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "아이",
+        "스마트폰"
+      ],
+      "first_line": "2-1.생산성이 높다는 것은 “절대적으로 양이 많은 것”을 의미합니다.   ‘2009년 아이폰3, 대한민국 상륙’ 이라는 뉴스를 봤을 때, "
+    },
+    "20,000원 일시불.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "20,000원 일시불"
+    },
+    "2022-3-2.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "칭찬",
+        "놀이",
+        "화",
+        "떼"
+      ],
+      "first_line": "놀다가 팔 꺽일 뻔 했던 개학날."
+    },
+    "2022.03.24.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "놀이",
+        "화"
+      ],
+      "first_line": "마음 나누기"
+    },
+    "2022선거 관련 사람들.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "#선거"
+    },
+    "2024 꿈꾸는 교실_ 개념기반탐구수업_2주차 연수(24.09.22.일)_개념 기반 탐구 학습 플래너.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "학습",
+        "읽기",
+        "글쓰기",
+        "화"
+      ],
+      "first_line": "[**2024 꿈꾸는 교실_ 개념기반탐구수업_2주차 연수(24.09.22.일)_개념 기반 탐구 학습 플래너**](https://docs.google.com/presentation/"
+    },
+    "2025년 2월 작업 체크리스트.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- [ ] **(2/7)**"
+    },
+    "21 스레드.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "감정",
+        "초등"
+      ],
+      "first_line": "초등교사입니다."
+    },
+    "2편은 업로드 되면 파란 화살표 밑에 뜨게 됩니다.  영상 시청 정말 감사 드리고, 구도.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "# 2편은 업로드 되면 파란 화살표 밑에 뜨게 됩니다.  영상 시청 정말 감사 드리고, 구독을 하시면 더 재밌고 즐거운 영상을 볼 수 있습니다. 좋은 영상으로 찾아 뵙겠습니다."
+    },
+    "2월 단기 계획 수립 + 일정 넣을 수 있게 만들어줘.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "학습",
+        "자기주도",
+        "화"
+      ],
+      "first_line": "아래  2월 계획은 전자책 집필에 집중되어 있어. "
+    },
+    "2월 초생산성 모임 참가자 여러분들~ 반갑습니다..md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "2월 모임 일정과 준비물 안내 할게요! "
+    },
+    "2월 초생산성 챌린지를 열어요..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "제가 이랬어요. "
+    },
+    "2일에 팔로워가 400명이 늘었습니다..md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "이번에는 의도적으로 글을 썼습니다."
+    },
+    "2층 비밀번호 8910.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 2층 비밀번호 8910#"
+    },
+    "3-30 일요일 일정.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "8:20 전교조 사무실"
+    },
+    "3.제주교육감 선거 전략 수립.pdf 는 내가 중요하게 여기는 선거 전략을 정리한 것이.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "이것을 요약 정리해줘."
+    },
+    "3.입사 후 포부.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "\\[회사의 장기적 성장을 도모할 인재\\]"
+    },
+    "4페이지  착각에서 빠져 나오세요..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "습관"
+      ],
+      "first_line": "(쇼츠 영상 속 표준 분포 곡선 그림처럼 그려 넣기)"
+    },
+    "5월 30일 - 49일차, 학습 습관 만들기 19일차.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "학습",
+        "습관"
+      ],
+      "first_line": "**\\[성찰 잘 한 학생은 명예의 전당으로!\\]**"
+    },
+    "5초 준다 게임 주제.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "1. 여름 옷 종류 / 겨울 옷 종류"
+    },
+    "8가지 체크.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 썸네일 : 구조 연습 - 핫 비디오로 구조 연습, 27주차 주제 및 구조 디벨롭 확인, 19개 구조로 연습"
+    },
+    "9002-2070-3000-0 벽진이씨 노형문중회.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "9002-2070-3000-0 벽진이씨 노형문중회"
+    },
+    "@aguskafree 본 영상은 aguskafree님께서 만든 영상입니다. 👍👍👍.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "너무 멋진 그녀의 모습을 보며"
+    },
+    "@수향 @soohyang_keum  수향님! 반갑습니다!!.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "좋은 정보 나눠주셔서 감사해요 ㅎㅎ"
+    },
+    "BTS 지민이 전하는 꿈을 위해 최선을 다한 시간. 그 때 그시절 방탄소년단  동기유발 .md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "습관",
+        "인사이트"
+      ],
+      "first_line": "#성공하는습관"
+    },
+    "Brazil.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "Canada "
+    },
+    "Chapter 2. 쓰레드 AI 시스템, 공식 설명서 완벽 해부.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "성장",
+        "글쓰기",
+        "콘텐츠",
+        "댓글"
+      ],
+      "first_line": "- **AI는 어떻게 순위를 결정하는가? (메타가 공개한 3단계 프로세스)**"
+    },
+    "Dr Tara welcome to the podcast a pleasure to have you here if people….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "Dr Tara welcome to the podcast a pleasure to have you here if people listen to this interview and th"
+    },
+    "EFT 확언.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "성장",
+        "화"
+      ],
+      "first_line": "## **【제1단계: 셋업 확언 — 현재의 나를 수용하기】**"
+    },
+    "FTX 혁신 영상 쇼츠 시나리오.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "상상도 못한 반전 "
+    },
+    "I see. Here are some of the best translation apps for iPhone that….md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "- Flitto"
+    },
+    "Instagram의 지환 & 영상편집님  요즘 유행하는 신기한 릴스 제작 법 📱 ⠀ 오늘은 캡컷 ᄒ.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[**Instagram의 지환 & 영상편집님 : \"요즘 유행하는 신기한 릴스 제작 법 📱 ⠀ 오늘은 캡컷 효과를 활용해 신기한 릴스를 만들어 봤습니다!!😁 문과 휴대폰만 있으면 쉽"
+    },
+    "Let's assume that the participants are new to the lecture. tell me….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "Let's assume that the participants are new to the lecture. tell me more about reflective writing tha"
+    },
+    "One day seven blind mice were surprised to find a strange Something….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "\"What is it?\" they cried, and they all ran home."
+    },
+    "PDF 4쪽 - 즉답형 1.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# **PDF 7쪽 - 즉답형 2**"
+    },
+    "The Technical Co-Founder.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "AIEDGE"
+    },
+    "This is relevant to EVERY prompty I ask..md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "Answer me in Korean."
+    },
+    "Web발신.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "연수 원고 공유 드라이브입니다. https://drive.google.com/drive/folders/1GsR8lT23rjS4MUaC3UeRBaE4Drf6dmFI?usp=shari"
+    },
+    "dna 가 떨어져 있어도 감정에 반응한다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정"
+      ],
+      "first_line": "# 감정은 양자장을 통해 서로 연결되어 아무리 멀리 있아도 서로 연결되어 반응 한다. "
+    },
+    "doll asmr toy straykids coconut 인형계 cute.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "#doll #asmr #toy #straykids #coconut #인형계 #cute"
+    },
+    "eft매도.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "7/12일 나스닥 87290원 10주 매도 = 872,900"
+    },
+    "https--boardlife.co.kr-bbs_detail.phpbbs_num=46773&tb=board_community.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://boardlife.co.kr/bbs_detail.php?bbs_num=46773&tb=board_community"
+    },
+    "https--docs.google.com-forms-d-e-1FAIpQLSfReN4QorShqZx68pudY1ulLC0xJ_ZoUqVXwOIZCk4z5JnPGg….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://docs.google.com/forms/d/e/1FAIpQLSfReN4QorShqZx68pudY1ulLC0xJ_ZoUqVXwOIZCk4z5JnPGg/viewform"
+    },
+    "https--generativelanguage.googleapis.com-v1beta-models-gemini-1.5….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=AIzaSyDq4"
+    },
+    "https--tumblbug.com-funnelutm_source=%25EB%2584%25A4%25EC%259D%25B4….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://tumblbug.com/funnel?utm_source=%25EB%2584%25A4%25EC%259D%25B4%25EB%25B2%2584%25EC%25B9%25B4%"
+    },
+    "https--www.instagram.com-mangoavenue2023-.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.instagram.com/p/C5ZuQONh-Gk/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA=="
+    },
+    "https--www.threads.com-@dream_on_lee-post-DPwKmmuEZBOxmt=AQF0hy4mS3U07qEIX9hkEhBn5R03jHI2….md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.threads.com/@dream_on_lee/post/DPtjy5OEXaU?xmt=AQF0iDc6xXj1RMYOjbwxqZW9qPvauD1bVrejRcFcF"
+    },
+    "https--www.threads.com-custom_feed-17869904721353666-profiles.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.threads.com/custom_feed/17869904721353666/profiles"
+    },
+    "https--www.youtube.com-live-M_UuDc4am2ssi=g3czVDpMYaNUWYs0.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.youtube.com/live/M_UuDc4am2s?si=g3czVDpMYaNUWYs0"
+    },
+    "https--youtu.be-MjRLYJh4sTQlist=PLCD8JPzqwXoOttmOb45iF7jNCI6_wMTdB.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://youtu.be/6Y5szSa1jDs?list=PLCD8JPzqwXoOttmOb45iF7jNCI6_wMTdB"
+    },
+    "https--youtu.be-oOygdpVQ_nU.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://youtu.be/bvWByCzVhVg"
+    },
+    "https--youtu.be-xDIT_yEDqXElist=PLCD8JPzqwXoOttmOb45iF7jNCI6_wMTdB.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://youtu.be/yQIVTWhSDxA?list=PLCD8JPzqwXoOttmOb45iF7jNCI6_wMTdB"
+    },
+    "https--youtube.com-@DolDolKong.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[[IMG_2849.jpeg]]"
+    },
+    "https--youtube.com-shorts-eAWErcPOjD0si=fvSE7CeuUeO5R32i.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://youtube.com/shorts/_ZI0AKnoV-Q?si=kESqw9rNgHVQf-f8"
+    },
+    "ib 표선 지속가능성.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "화"
+      ],
+      "first_line": "- 교사수급, 양적팽창의 우려스러움, dp교육에서 진학, 표선 학생수 포화 (토산과 학구 연계)"
+    },
+    "kdb 은행 계좌번호.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "020-5604-1018-895"
+    },
+    "orp 연구소- 퍼실리테이션샵.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "fcm -"
+    },
+    "ppt 에 추가할 부분.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "학습",
+        "화"
+      ],
+      "first_line": "1. 화복적 협의회 목적 "
+    },
+    "role 20년차 전문 작가 로서 내 생각에 조언을 해줘..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "학습",
+        "초등",
+        "공부",
+        "자기주도"
+      ],
+      "first_line": "나는 책을 쓰고 싶어. 작가로서 책 목차를 만들고 있어. "
+    },
+    "x-mas이벤트5만원쏩니다! 댓글로 맞춰주세요. 가장 빨리 맞추신 구독자 분에게 드립니.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# \\[x-mas이벤트\\]5만원쏩니다! 댓글로 맞춰주세요. 가장 빨리 맞추신 구독자 분에게 드립니다.  **기한 :2023.12.24 18시 23분까지! (24시간)**"
+    },
+    "각 단체가 단독으로 감당하기 어려운 연수 기획·운영·홍보의 부담을 공동으로 ᄇ.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "3월, 봄내음 나는 일식 코스 요리로 준비되어 있습니다."
+    },
+    "대화 기술 높이려 7년간 상담을 배우면서 알게 된 놀라운 사실 를 제목으로 유튜브 .md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "* \"대화 기술 높이려 7년간 상담을 배우면서 알게 된 놀라운 사실\" 를 제목으로 유튜브 쇼츠 원고를 쓰고 싶어."
+    },
+    "릴스(쇼츠) 1.   초등학생 여러분, 제가 여러분을 수학 학원의 늪에서 구해드릴게요. (ᄉ.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "초등",
+        "공부",
+        "분수"
+      ],
+      "first_line": "저는 초등학교 선생님입니다. (아이들 가르치는 모습 영상) "
+    },
+    "망하는 마케팅으로 가지 마세요.   1.자청님, 자청님 팬입니다.  쓸데없는 소리 각설.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "2. 동기부여 뒤집기 영상 이후   지금 자청님의 SNS 콘텐츠들은  \"완전 비효율의 길\"로 가고 있습니다."
+    },
+    "무의식의 반작용을 줄이는 확언법 1. 선택확언  나는 .... 를 선택한다. (예) 나는 .md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "욕구를 찾지 못하고"
+    },
+    "미라클모닝 모닝루틴 아침형인간 새벽기상 습관만들기 해빗츠 의 해빗 만들ᄀ.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "독서",
+        "습관",
+        "루틴"
+      ],
+      "first_line": "(6월) 1일차"
+    },
+    "발표 자료를 만들면서 배운점은 제주도는 국회의원이 3명이란걸 듣고 놀라웠고.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "칭찬"
+      ],
+      "first_line": "1. 발표를 하면서 내가 말이 꼬일때가 있었는데도 애들이 계속 흔들림없이 편안하게 들어줘서 고마웠다"
+    },
+    "발표자료 준비하며배운점연극할때 승우랑 은찬이랑 준호이랑 예호이랑 나랑 ᄀ.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 발표회하며내느낌:기쁘고 긴장되고 용기있었다."
+    },
+    "부모님들, 제가 오늘 아이들 상황 보며 집에서 검사를 해보니~ 자가진단키트로 양성ᄋ.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모"
+      ],
+      "first_line": "부모님들, 제가 오늘 아이들 상황 보며 집에서 검사를 해보니~ 자가진단키트로 양성이 나왔어요."
+    },
+    "사람들은 어떻게 살아야 하지라는 질문을 하곤 합니다. 하지만 이 질문에 대답하ᄅ.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "감정",
+        "공부",
+        "성장"
+      ],
+      "first_line": "그 과정에서 우리는 평소 보고 들은 것, 부모님의 말씀, 혹은 TV와 세상이 말하는 기준에 따라 선택하고 결정합니다. 남들처럼 결혼하고, 아이를 낳고, 돈을 더 많이 벌면 행복해질"
+    },
+    "소감책을 다 읽었는 데 책이 재미있던게  두근두근편의점이 왜재미있냐면   아이ᄀ.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 신기했다 그리고 계속편의점에 가니까?좀 놀라웠고 기쁘다"
+    },
+    "스친님 안녕하세요. 쓰레드 전자책을 발송할 예정이었던 KKul_lee 계정의 교사 이한결.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "성장",
+        "화",
+        "팔로워"
+      ],
+      "first_line": "먼저, 쓰레드 전자책을 신청해주셔서 감사드립니다."
+    },
+    "아래 내용은 ‘나중에 비즈니스에서 만나는 사람들을 자동으로 follow-up(안부, 감사, 새 소시.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "아이디어 **메모**"
+    },
+    "안녕하세요.  9.4일 (고) 서이초 선생님을 기리며 열리는  제주 추모 문화제 홍보를 담ᄃ.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "화"
+      ],
+      "first_line": "먼저 곧 있을 9월  2일 집회에  기꺼이 나서려는 선생님들에게 정말로 감사드립니다.  여러분들의 움직임을 통해 많은 국민들, 많은 사람들이 "
+    },
+    "얘들아, 오늘 너희들 상황 보며 집에서 검사를 해보니~ 자가진단키트로 양성이 나왔ᄋ.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "내일 선생님도 pcr 검사 받으러 가고 몸상태를 봐보아야할 것 같아."
+    },
+    "오늘 피드백에서는 정보성 유튜브의 근본적인 바른 방향에 대해서 이야기 하고 싶ᄂ.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "오늘 피드백에서는 정보성 유튜브의 근본적인 바른 방향에 대해서 이야기 하고 싶네요.  "
+    },
+    "우리가 아이를 키울 때 아이를 키우는 부모님마다에 양육방식이 있죠 나라는 어린아.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "양육",
+        "육아",
+        "습관"
+      ],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">우리가</span> 아이를 키울 때 아이를 키우는 부모님마다에 양육방식이 있죠 나라"
+    },
+    "우리는 어떤 습관을 다룰 것인가  행복, 생활, 학습 - 인생의 길, 행복한 삶을 .md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "교육",
+        "학습",
+        "습관"
+      ],
+      "first_line": "[[IMG_9082.jpeg]]"
+    },
+    "이 충격적인 변화 앞에서 교육은 그 어느 때보다 근원적인 질문을 해야 한다고 새.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "“아이들에게 무엇을 가르쳐야 하는가?”"
+    },
+    "자기 인식을 높이면 여러분의 일상생활에서 정말 놀라운 변화를 경험할 수 ᄋ.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "우울",
+        "화",
+        "심리",
+        "첫째"
+      ],
+      "first_line": "- 예를 들면,"
+    },
+    "자청님, 망하는 마케팅으로 가지 마세요.   1.자청님, 자청님 팬입니다.  쓸데없는 소.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "2. 동기부여 뒤집기 영상 이후   지금 자청님의 SNS 콘텐츠들은  \"완전 비효율의 길\"로 가고 있습니다."
+    },
+    "저도 엔딩을 반대의견 활용으로 할꺼 같아요. 왜냐하면 여전히 청소가 뭐라고.... 라고 .md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "집중력"
+      ],
+      "first_line": "그런데 공감 멘트를 다음과 같이 할 꺼 같아요.  1. 이렇게 영상을 보더라도 '내가 바쁘니깐 청소를 안하지... 여유있었으면 내가 청소를 했지!' '부자들은 청소를 여유있으니깐 "
+    },
+    "제주 지역 교사와 학부모, 지역주민들이 자발적으로 연대해 제주 교육의 미래를 논의ᄒ.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "성장"
+      ],
+      "first_line": "이번 행사는 행정이나 관 주도가 아닌, 교육의 실질적 주체인 교원단체 ‘새로운학교제주네트워크(대표 강은주)’, 학부모 대표 기구인 ‘제주특별자치도학교운영위원장협의회(회장 고성조)’"
+    },
+    "존의 다혼디 배움학교의 성과와 한계를 진단할 때 연구가 아닌 현재 학교에 있는 .md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">존의</span> 다혼디 배움학교의 성과와 한계를 진단할 때 연구가 아닌 현재 학교"
+    },
+    "중요 영상 속에서 제가 박수를 치는 부분은 편집점 입니다. 앞부분에서 어버버한 .md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "- 예를 들어, 영상에서 ...분 ...초에서 제가 박수를 칩니다. 박수 친 후 첫 멘트가 \" \" 입니다. "
+    },
+    "진심으로 아이들을 위하고 존중하고 아끼며,,미상적인 선생님의 모습을 두루 다 가.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모"
+      ],
+      "first_line": "|  | <span style=\"font-family:.AppleSDGothicNeoI-Regular;\">적극적으로</span> 학생들과 소통 해주시며, 혁생들 스스로 목표를 미룰"
+    },
+    "컷 1 화면 문제집 넘기는 손, 아이가 멍하니 연필 굴리는 장면 자막 분수 하나 놓.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "초등",
+        "공부"
+      ],
+      "first_line": "컷 2 화면: 수학책에 분수, 소수, 퍼센트가 차례로 등장 자막: 분수 → 소수 → 비율 내레이션: 분수에서 뚫린 구멍은 3학년 소수를 삼키고, 6학년 비와 비율에서 아이를 완전히"
+    },
+    "타이슨은 헤비급치고 작은 키였기에 대부분 키 큰 아웃복서를 상대한 것이 대부부.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": ". 타이슨은 헤비급치고 작은 키였기에 대부분 키 큰 아웃복서를 상대한 것이 대부분이었는데, 이번 상대는 똑같은 인파이터 스타일의 버스터 매티스. 타이슨 수감기간 3년동안 20전, "
+    },
+    "태 특히나 머리를 흔들면서 리듬에 맞춰 북을 치는 3학년 학생들이 참 인상적ᄋ.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "성장"
+      ],
+      "first_line": "# 윤 :그니깐요. 풍물의 꿈나무들이 앞으로 어떻게 성장해 갈지 정말 궁금합니다. "
+    },
+    "하루를 망칠 수 있는 10가지 아침 습관 아침부터 기분이 안 좋은가요 아마도 잠에서 ᄁ.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "미디어",
+        "불안",
+        "화",
+        "습관"
+      ],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">하루를</span> 망칠 수 있는 10가지 아침 습관 아침부터 기분이 안 좋은가요 "
+    },
+    "해봤자 쓸데없는 메모 TOP 3 뇌가 오히려 망가져요. (쓸데없는 메모 3위 많이 쓴 메모 2위 보고 .md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[[스크린샷 2024-12-13 오전 7.56.44.png]]"
+    },
+    "헐 ㅎㅎㅎ 누나! 이렇게 리스트와 이유를 뽑아주다니! 대박이에요. 게다가 4개나 ㄷㄷㄷ 역시 머릿ᄉ.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "제가 2시간 검색해서 1개 찾을까 말까 한 것을 누나를 통해 훨씬 빨리 찾고 도움을 받아요 ㅜㅜㅜㅜ 졸업 시즌에 이 1시간이 얼마나 소중한지 아시죠?! 그만큼 너무 큰 도움이라 감"
+    },
+    "“공교육 정상화를 위한 ‘학교법’ 제정해야”.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "훈육",
+        "학습",
+        "훈계",
+        "화"
+      ],
+      "first_line": "“공교육 정상화를 위한 ‘학교법’ 제정해야”"
+    },
+    "“다른 친구는 다 선행을 해서 수업 시간에 우리 아이가 주눅 들까 걱정이에요.”.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "학습",
+        "불안",
+        "화"
+      ],
+      "first_line": "1."
+    },
+    "“선생님 수학 선행해도 되나요”.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "초등",
+        "학부모"
+      ],
+      "first_line": "1. 방학 때 부모들에게 가장 많이 받는 질문입니다. "
+    },
+    "• 퍼실리테이션 기법 친화도법 (Affinity Mapping) 1. 6가지 핵심 아이디어(N행시, 모자이크 사진 등….md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "각 아이디어 "
+    },
+    "③ (보고서식) 법인칙 별지 제63호의10 서식(법인칙 §19의2③).md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "③ (보고서식) 법인칙 별지 제63호의10 서식(법인칙 §19의2③)"
+    },
+    "▶◀고 서이초 선생님을 추모합니다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "화"
+      ],
+      "first_line": "어제 제주도 교사 대표 운영진으로 추모 문화제 운영회의에 참석을 했습니다. "
+    },
+    "『쓰레드, 터지는 글에는 공식이 있다』.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "들어가며: 당신의 쓰레드가 성장하지않는 이유"
+    },
+    "ㅁ.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "양육",
+        "성장",
+        "분노"
+      ],
+      "first_line": "ㅁ"
+    },
+    "가장 쓸모없는 아이디어.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "는 학교에 가고, 직장을 구하고, 열심히 일하고, 돈을 저축하고,"
+    },
+    "가장 안전해야 할 학교에서.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "아이가 친구들과 뛰놀았던 곳에서 "
+    },
+    "가족 자전거 여행, 함께 달린다는 것.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "가족이 한 방향으로 페달을 밟는 일은 "
+    },
+    "갈등 유형 다섯 까지 와 그림책.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "그리고 내가 강점을 어떻게 해결 하는지 스스로 찾아 보기 더 나은 해결을 위해 어떤 유형의 키워 나가면 좋을지 생각해 봐"
+    },
+    "갈만한 곳.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "# 한림쪽"
+    },
+    "감사한 마음을 늦게 나마 전해드려요..md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 감사한 마음을 늦게 나마 전해드려요."
+    },
+    "감수성 & 마음나누기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "공부"
+      ],
+      "first_line": "“행복한 연결,  신뢰를 만들다.“  <- 교사들 축하"
+    },
+    "감수성 훈련 후기.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "아이",
+        "감정",
+        "성장",
+        "화"
+      ],
+      "first_line": "흠뻑 빠졌다. "
+    },
+    "감수성훈련 오리엔테이션.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "화",
+        "의사소통"
+      ],
+      "first_line": "오리엔테이션의 목적 : (확인하기) "
+    },
+    "강의 타임라인 -.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "교육",
+        "수학",
+        "감정",
+        "학습"
+      ],
+      "first_line": "- 강의 타임라인 -"
+    },
+    "개념 기반탐구 수업.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이",
+        "교육"
+      ],
+      "first_line": "개념 = 핵심 아이디어를 만드는 것과 전이를 하는 것 . 개념적 이해, 전이 가능한"
+    },
+    "개인적으로.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "칭찬",
+        "감정",
+        "육아",
+        "성장"
+      ],
+      "first_line": "감정을 받아주면서 공감하는 육아가 "
+    },
+    "경주.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 자전거"
+    },
+    "고객은 혜택을 구매한다..md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "성장"
+      ],
+      "first_line": "고객은 강의를 구매하는 것이 아니다. "
+    },
+    "고모 PPT 수정.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "성장"
+      ],
+      "first_line": "우리가 함께 더불어 사는 그곳, 우리 복지관 "
+    },
+    "고의숙 선생님 수행비서.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 김진경"
+    },
+    "고전 역학과 양자역학에 차이점.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "고전 역학과 양자역학에 가장 큰 차이점은"
+    },
+    "골든벨 퀴즈.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "칭찬"
+      ],
+      "first_line": "1. 점수체크 "
+    },
+    "공문서 작성.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://youtu.be/nERmJyD9Q5o?si=7rO7Oq1VwvnU4Y8-"
+    },
+    "공부 맨날 잔소리 해도... 똑같고 ㅜㅜ.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "수학",
+        "학습"
+      ],
+      "first_line": "왜 우리 아이 이럴까요??"
+    },
+    "공부를 매일 미루거나.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "학습",
+        "공부"
+      ],
+      "first_line": "# 싫어하는 우리 아이, "
+    },
+    "공부방 아이디어.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "공부"
+      ],
+      "first_line": "공부방 시스템 만들기"
+    },
+    "공부방 운영진 회의 피드백.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부",
+        "화"
+      ],
+      "first_line": "1. 회의 안건 준비되어 있음. "
+    },
+    "공부방20주년 기획 퍼실.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "공부",
+        "화"
+      ],
+      "first_line": "1. 목적 소개"
+    },
+    "공부하기 싫어!를 외치는 아이, 어떻게 해야 말이 바뀔까요.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "감정",
+        "학습"
+      ],
+      "first_line": "1. "
+    },
+    "공유오피스가서 5일  전자책 완성 + 워크숍 완성 (광고 포함).md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "전자책 + 워크숍 완성하기 : 워크숍 강의, 워크숍 카페 틀, 워크숍 카페 운영 준비, 광고 준비하기 => 비전 보고서 작성까지 하면 BEST"
+    },
+    "광양초 4학년 반 배정 및 등교 안내.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자녀",
+        "초등",
+        "화"
+      ],
+      "first_line": "안녕하세요? 따뜻한 봄날, 우리 4학년 학생들을 맞이하게 되어 기쁩니다. "
+    },
+    "광양초 비밀번호.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "주차장 : 4358#"
+    },
+    "교사 공동체.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "비민주적인 학교의 모습 : 신규 교사"
+    },
+    "교사 전문성을 키울 수 있는 곳, 꿈꾸는 교실.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "학습",
+        "공부",
+        "놀이"
+      ],
+      "first_line": "100시간 이렇게 배웁니다."
+    },
+    "교사가 학부모에게 절대 말하지 않는 것들이 있다..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "학습",
+        "발달"
+      ],
+      "first_line": "솔직히 말하겠다.  특히 \"통지표\"의 비밀에 대해서..."
+    },
+    "교육을 중심에!.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이",
+        "교육"
+      ],
+      "first_line": "1. 저는 2011년 교단에 처음 발 딛었습니다. "
+    },
+    "교육톡 희망톡.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "화"
+      ],
+      "first_line": "존경하는 제주 교육공동체 여러분, 안녕하십니까. 교사, 학부모, 지역주민이 원탁에 둘러앉아 '제주 교육'을 이야기하는 소통의 장을 마련했습니다. 부디 참석하시어 자리를 빛내주십시오"
+    },
+    "구독 목록.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 드롭박스 (내년 멈추기 - 아이클라우드로 대체?) 1년 199달러 (29만원)"
+    },
+    "그로우 써클 릴스 기획 1.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학습",
+        "초등"
+      ],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">장면</span> 1: 초등교사가 계획 없이 아이들을 만나는 충격적인 이유   \"개"
+    },
+    "그리고 제 삶에 운명의 변곡점이 될 책을 만나죠..md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "“부의 추월차선\" "
+    },
+    "글쓰기 2022, 3, 3-박효인.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "<지우와 함께하는 첫날>"
+    },
+    "글쓰기 2022, 3, 4-효인.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "성장",
+        "글쓰기",
+        "경청"
+      ],
+      "first_line": "<시연이의 한걸음>"
+    },
+    "글쓰기 9.28..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "수학",
+        "감정",
+        "글쓰기",
+        "화",
+        "동생"
+      ],
+      "first_line": "# #글쓰기 9.28."
+    },
+    "글쓰기 모임.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "1. 뭔가 되야만 글쓰기? "
+    },
+    "글쓰기.2022.3.2.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기",
+        "놀이"
+      ],
+      "first_line": "# 제목:첫날부터 놀이?"
+    },
+    "글쓰기.2022.3.4 (은찬).md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기",
+        "화"
+      ],
+      "first_line": "#글쓰기.2022.3.4 (은찬)"
+    },
+    "글쓰기.2022.4.12.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "# 제목:우리 술래 아니야!"
+    },
+    "글쓰기.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부",
+        "성장",
+        "글쓰기",
+        "습관"
+      ],
+      "first_line": "# 글쓰기"
+    },
+    "글을 어떻게 쓸 것인가.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기",
+        "후킹"
+      ],
+      "first_line": "# 이상한 사진 보여 주고 그 사진을 보며 사람들이 후킹 되게 하고,"
+    },
+    "글자크기 비율 과 가독성.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "1. 속도 감 "
+    },
+    "기다려줘서 고마워!.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "읽기",
+        "화",
+        "후킹",
+        "수익화"
+      ],
+      "first_line": "스친 글들을 다 봤어! 멋진 책도 있고, 글도 참 잘쓰더라! "
+    },
+    "기억 기록.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://youtu.be/4u_Nvd3opnw"
+    },
+    "긴장하면서 목소리에 힘이 줄어든 느낌..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "칭찬"
+      ],
+      "first_line": "1. 6분 50초 : 사실 의미 듣기는 하고 있느나 공감을 할 때 에너지를 실어서 더 먼저 했으면 좋았을 것 같다. "
+    },
+    "김민지 - 2조로.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "권민지 박지민 박지영 따로"
+    },
+    "김찬경 10.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 고의숙10(나중에 현금)"
+    },
+    "꽃달고 살아남기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "불안"
+      ],
+      "first_line": "# 우주의 집. 추천"
+    },
+    "꿈들 현실 확장팩 머니백 머니 팩에서는 월급 금액 10년 뒤 월급 금액.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "꿈들 현실 확장팩 머니백 머니 팩에서는 월급 금액 10년 뒤 월급 금액 "
+    },
+    "꿈들2차 qr설문.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "이름 연락처 스터디원이름 분리여부"
+    },
+    "꿈들x전교조 교권보호 -갑질 방지 사례 및 보호 방안.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모",
+        "학부모"
+      ],
+      "first_line": "# 학부모 상담 방법"
+    },
+    "꿈들에서 공부방을 위해 하는 일.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "교육",
+        "공부",
+        "성장"
+      ],
+      "first_line": "- 제일 중요한 기부금과 가치 "
+    },
+    "꿈을 나누고 더불어 성장하는 교육.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "교육",
+        "성장",
+        "화"
+      ],
+      "first_line": "<p style=\"text-align:center;margin:0\">"
+    },
+    "꿈이 절로 피어나는 교육 공간,  꿈꾸는 교실.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "교육",
+        "성장"
+      ],
+      "first_line": "1. 2023년 많은 일상들이 회복되었다. "
+    },
+    "끌어당김 - 올드 스파이스광고.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "말하는 대로"
+    },
+    "끌어당김 영상 수집.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.youtube.com/watch?v=9AkHeiXCFu4"
+    },
+    "끌어당김과 양자역학 자료 수집.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 영적 스승들이 상상하면 현실이 된다고 이야기한 사례, 명언 "
+    },
+    "끌어당김의 법칙 명상 가이드 만들 때 챗 GPT 활용하기.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "끌어당김의 법칙과 미움받을 용기, 부자의 그릇처럼 "
+    },
+    "끌어당김의 법칙과 욕망.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "욕망하는 것을 끌어당김 법칙과 반대된다. "
+    },
+    "나는 ‘습관의 과학’ 대한 책을 쓰고 싶어..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "성장",
+        "화",
+        "습관"
+      ],
+      "first_line": "1) 습관이란 : 자동반사적으로 하는 행동 "
+    },
+    "나는 “설거지” 로.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "독서",
+        "공부",
+        "화",
+        "습관",
+        "인사이트"
+      ],
+      "first_line": "# 모든 습관을 다 바꿨다. "
+    },
+    "나는 건강하다.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 나는 스스로 건강한 몸을 만든다"
+    },
+    "나는 노출 클릭율 20% 영상을 만든다.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "내게 노출 클릭율 20% 썸네일과 영상 주제는 자연스럽게 다가온다. "
+    },
+    "나에게 돈이란.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "심리"
+      ],
+      "first_line": "돈의 의미 "
+    },
+    "낮은 아이 자존감 - 천재로.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자존감",
+        "감정",
+        "육아"
+      ],
+      "first_line": "“엄마, 난 못 해! 난 바보야.“"
+    },
+    "내가 쓰레드에서 지킨 글쓰기 원칙 5가지.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "1. **남들이 보고 싶어하는 글을 써라**"
+    },
+    "내가 작성한 도입부야..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "자존감"
+      ],
+      "first_line": "1) 가장먼저 내가 요청하는 것이 무엇인지 정확하게 나열해줘."
+    },
+    "내사랑 윤슬💕님과 통화.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "[[내사랑 윤슬💕님과 통화.m4a]]"
+    },
+    "내성적인 아이들을 연결하는 시간.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "칭찬",
+        "성장",
+        "놀이",
+        "화"
+      ],
+      "first_line": "오늘 교실은 13명인데, "
+    },
+    "너는 내 개인 전략가이자 손자병법 해석가다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "감정",
+        "동기부여",
+        "화"
+      ],
+      "first_line": "내가 올린 사진 속 한 문장을 먼저 정확히 읽어라."
+    },
+    "너무 다정하면 안되는 10가지 이유.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "감정",
+        "화",
+        "댓글"
+      ],
+      "first_line": "1.\t상대방이 당신을 만만하게 볼 수 있다."
+    },
+    "네이버 신청폼 https--naver.me-G4xdCUCe.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "참고노션 https://onneplanning.notion.site/2-39f58ba82f244f8c83f8a6fa3426fbe0?pvs=4"
+    },
+    "네이버 카페 크롤링 으로 DB 만들기.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "네이버 카페에서 DB 크롤링 프로그램으로 돌려서 만들기"
+    },
+    "노션 템플릿은 간단해요..md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 내가 해야 할 일을 기록 합니다."
+    },
+    "노트북 LM 슬라이드 만들기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "프롬프트"
+      ],
+      "first_line": "# 프롬프트"
+    },
+    "노형 동남당 연동 625.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 토지대장 등기부등본 묘적계"
+    },
+    "노형 문중회_부고 안내.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "이상봉(제주도의회 의장)종원님의 모친 故양 화숙(96세)님께서 "
+    },
+    "노형문중회 묘이장 안내.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- 28세손 일엽 할아버지 외 4기 묘 이장 "
+    },
+    "놀러가고 싶은 곳.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "캠핑"
+    },
+    "놀이 추가.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "놀이",
+        "화"
+      ],
+      "first_line": "늑대가 나타났다"
+    },
+    "님, 책 목록 신청해 주셔서 정말 감사합니다!.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "교육",
+        "독서",
+        "습관",
+        "인스타"
+      ],
+      "first_line": "이제 아이와 함께 독서 습관, 즐겁게 시 작해보세요."
+    },
+    "다들 올한해 잘 지내게! ㅎㅎ.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "첫째",
+        "둘째"
+      ],
+      "first_line": "다릌게 아니라 우리 총학이 다같이 고민하면 좋겠다 싶어서~ 요렇게 몇명만 따로 불런. "
+    },
+    "다음은 부모가 자녀에게 전하는 사랑의 중요성을 담은 짧은 글 10가지입니다..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "감정",
+        "성장"
+      ],
+      "first_line": "1."
+    },
+    "단 한 글자 차이가 아이를 송두리째 바꾼다.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "감정",
+        "화"
+      ],
+      "first_line": "**1-1. 공감** : 아이의 감정을 이해하고 인정하기"
+    },
+    "단 한 명의 아이의 의견도 소외시키지 않는 회의.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "1.오늘은 특별한 날, 퍼실리테이션을 활용해 학년 규칙을 함께 만드는 시간이었다."
+    },
+    "닭가슴살 잡채 레시피 불지 않는 잡채 만드는 법 설날 잡채 만들기.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[닭가슴살 잡채 레시피 불지 않는 잡채 만드는 법 설날 잡채 만들기](https://m.blog.naver.com/PostView.naver?blogId=pig_1996&logNo"
+    },
+    "닮다담다 홍보 카드뉴스 질문.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "“닮다 담다 “"
+    },
+    "당신의 역할.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "부모",
+        "교육",
+        "학습",
+        "학부모",
+        "미디어"
+      ],
+      "first_line": "당신은 수많은 선거 캠페인을 승리로 이끈 경험이 풍부한 수석 정치 전략가이자 데이터 분석가입니다. 당신의 임무는 냉철한 데이터 분석과 날카로운 정치적 통찰력을 바탕으로, 주어진 '"
+    },
+    "대출증 비밀번호.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "이한결 0211"
+    },
+    "도새기 샤브샤브.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "4.3 한경지회장"
+    },
+    "도서관 번호.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "양지영 14900513045566"
+    },
+    "도파민 영상.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1분 47초~ "
+    },
+    "독서 효율 200% 향상!맨날 책 읽기 전에 '이것' 알고 책 읽어라..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "독서",
+        "읽기"
+      ],
+      "first_line": "독서 효율 200% 향상!맨날 책 읽기 전에 '이것' 알고 책 읽어라."
+    },
+    "독서를 즐기기 위한 책 추천.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "독서"
+      ],
+      "first_line": "1. 고양이 해결사 깜냥 "
+    },
+    "독서습관 리딩타임 책스타그램 미라클모닝 새벽독서 모닝루틴.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "독서",
+        "성장",
+        "습관",
+        "루틴",
+        "심리"
+      ],
+      "first_line": "#창조습관 (12일차)"
+    },
+    "돈 버는 마인드 셋이 중요하다고 하는 명언, 책 글귀, 유튜브 썸네일.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "불안",
+        "화",
+        "뇌과학",
+        "썸네일",
+        "댓글"
+      ],
+      "first_line": "1. 이렇게 한다고 정말 될까?  의문제기 "
+    },
+    "돈 버는 아이디어.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "읽기",
+        "습관",
+        "블로그",
+        "채널"
+      ],
+      "first_line": "# <span style=\"font-family:.SFUI-Regular;\">첫 번째 책 읽고 책 내용에 문자 이틀을 참 여자에게 안내하기 잠이 여자가 궁금해 하는데요 한 여자가 "
+    },
+    "돈 없이도 황금 같은 노후를 누리는 '1가지 방법'.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- 구조 : 돈 없이도 황금같은 (원하는 A)를 이루는 '1가지 방법' "
+    },
+    "돈의 속성을 아는 것 전에 생각의 비밀을 알아야 부자가 됩니다..md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "'사장학 개론'의 저자, 6000억 자산가 김승호 회장님은"
+    },
+    "두고간 신발.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 난 1987에서 가장 인상적인 "
+    },
+    "드림 그로우 프로필 설명문.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "초등",
+        "공부"
+      ],
+      "first_line": "아이와 부모의 꿈을 키우는 사람, 초등교사"
+    },
+    "라이언 그림 그릴 때.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 엄마랑 에버랜드 놀러갔을 때 "
+    },
+    "루미큐브 규칙 어려움- 재미 없음.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "몇명 독점 x 규칙 정하자! "
+    },
+    "리더의 역할과 업무 재구조화.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "화",
+        "생활지도"
+      ],
+      "first_line": "- 리더는 의사결정에 책임을 지는 사람이다. "
+    },
+    "리딩앤 용돈.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "읽기"
+      ],
+      "first_line": "총 5500  / 총 15권  읽음/ 긴책은 읽기만해도 500원, 발음 승리 500원, 단어 맞추기 300원"
+    },
+    "리포좀 비타민C 500 (1,100mg x 30정) 3박스 3개월분.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[**리포좀 비타민C 500 (1,100mg x 30정) 3박스 3개월분**](https://www.celltrionbeauty.com/item/DL2024030666?t&utm_"
+    },
+    "릴스 1 제목 수학 1등급, 초등 5학년에 이미 끝납니다!.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "초등",
+        "릴스",
+        "마케팅"
+      ],
+      "first_line": "\\[도입부 : 0초 ~ 15초 / 단호하고 몰입감 있는 목소리로\\]"
+    },
+    "릴스 2 자녀와의 평생 관계, 10살 전에 전부 결정됩니다.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "자존감",
+        "발달"
+      ],
+      "first_line": "**(0~5초 - 오프닝)** 10살 전에 부모의 말과 행동이 아이의 평생을 결정해요. 과장이 아닙니다!"
+    },
+    "릴스 강의.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.youtube.com/live/b1B0Up1yfc8?si=N23kn0fxHRph-l-8"
+    },
+    "릴스 벤치마킹.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.instagram.com/reel/DJ9IzHkyLk-/?igsh=MTV6ejN5OXhpdGIzNQ=="
+    },
+    "마을 교사제.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 초빙으로 "
+    },
+    "마을교육 공동체.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "초등",
+        "화",
+        "sns"
+      ],
+      "first_line": "지속 가능 : 예산 "
+    },
+    "마음챙김 명상.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "우울",
+        "화"
+      ],
+      "first_line": "20분 명상"
+    },
+    "마지막으로 은지의 챌린지를 도와주면,.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "루틴",
+        "도달"
+      ],
+      "first_line": "수업 루틴을 만들고 있잖아?! "
+    },
+    "마케팅 방법.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 인스타 5명 - 스토리 쓸 수 있게"
+    },
+    "마케팅의 핵심 과정.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 노출 클릭 선택"
+    },
+    "만약 배움 노트 쓸 학년이 안 됐다면.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "만약 배움 노트 쓸 학년이 안 됐다면"
+    },
+    "만족도 조사 관련 안내.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "학생 만족도 조사 설문 관련 다음주 중 학급에서 실시해 주시기 바랍니다.  1월 3일까지 가능하면 좋겠네요. "
+    },
+    "말미잘 - 놀이가 다소 어려움. 보드레이싱- 줄세우는 거 어려움.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "놀이"
+      ],
+      "first_line": "말미잘 - 놀이가 다소 어려움. 보드레이싱- 줄세우는 거 어려움 "
+    },
+    "메모와 생산성 피드백.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "메타인지",
+        "스마트폰",
+        "화",
+        "후킹",
+        "썸네일"
+      ],
+      "first_line": "1. 서론 후킹 전략 선택 "
+    },
+    "목걸이 (별칭).md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 상대 정보 많이 찾기 (a4)"
+    },
+    "목차.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "부모",
+        "교육",
+        "학부모",
+        "성장",
+        "체험"
+      ],
+      "first_line": "1.제안서 제목 : 매출과 직결하는 블로그 마케팅 (솔루션) 제안"
+    },
+    "목표 100번쓰기 하는 사람들에게 끌어당김 워크북 무료 배포.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "(서이추 메시지)"
+    },
+    "무릉초 비밀번호.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "wifi 비번 : murs169876"
+    },
+    "무엇이 아이들의 성적을 높이는 데 결정적인 차이를 만드는가.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학습",
+        "학부모"
+      ],
+      "first_line": "이 질문에 대한 답을 찾기 위해 오랫동안 고민했습니다. "
+    },
+    "물총.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 마니또 공개를 했다. 이연이가 내 마니또 였다. 이미알고 있어서"
+    },
+    "미라클 모닝.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모",
+        "브이로그"
+      ],
+      "first_line": "충격적인 이야기와 사례"
+    },
+    "미라클 모닝과 수면 강의 계획.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "칭찬",
+        "학습",
+        "스마트폰",
+        "놀이",
+        "뇌과학"
+      ],
+      "first_line": "1) 놀이 시작 :8시50분~9시10분"
+    },
+    "미래가 너무 불안한 나에게.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "성장",
+        "불안",
+        "첫째",
+        "둘째"
+      ],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">멘탈이</span> 약해 이것도 울컥, 저것도 눈물... "
+    },
+    "미루기 영상 리스트.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부",
+        "성장",
+        "동기부여",
+        "습관",
+        "뇌과학"
+      ],
+      "first_line": "라이프코드 :공부를 자꾸 미루는 습관. 모든 수험생의 자책. 그러나 충격적 반전의 답변. \\[계획 실천법, 공부자극, 동기부여\\]"
+    },
+    "미션.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "앞글자 편지 "
+    },
+    "바른 건강 빠른 제품 추천.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 바빠"
+    },
+    "박효인-첫날부터 땀으로 절였다.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "글쓰기",
+        "놀이",
+        "불안"
+      ],
+      "first_line": "#글쓰기 2022, 3, 2"
+    },
+    "방학 때 맨날 영어 단어 공부해도 영어 단어 실력이 늘지 않는 이유.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "공부",
+        "읽기",
+        "루틴",
+        "영어"
+      ],
+      "first_line": "**‘눈’으로만 외웠기 때문**입니다!!"
+    },
+    "배드민턴.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1그룹 : 강우솔 장승우 배은찬 윤이언"
+    },
+    "변화의 시작, 습관으로! (제목바꾸기).md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "독서",
+        "공부",
+        "읽기",
+        "글쓰기",
+        "미디어"
+      ],
+      "first_line": "누구나 다 지금의 나보다 더 나은 나를 꿈꾼다. "
+    },
+    "병의원 무료 세미나 강의 틀.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 자기 스토리 전달하기 "
+    },
+    "복층 다가구 임대 사업.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://m.jejuall.com/CProperty/detail?num=5456907"
+    },
+    "부고 양지영 부친상.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "故양보윤 님께서 별세하셨기에 삼가 알려드립니다."
+    },
+    "부동산 강의.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "💥 잠시 후 20시부터 무료강의를 진행할 예정입니다! 💥 "
+    },
+    "부모 교육 릴스_드림그로우.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "부모",
+        "교육",
+        "수학",
+        "공부",
+        "릴스"
+      ],
+      "first_line": "12/24_1_ 수학 공부법 "
+    },
+    "부모가 간과하는 진짜 뇌 발달 치트키!.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모",
+        "발달"
+      ],
+      "first_line": "그건 바로 ‘운동’ 이야. "
+    },
+    "부모는 문제가 아니다..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모",
+        "교육",
+        "학습",
+        "자기주도",
+        "불안"
+      ],
+      "first_line": "불안한 부모를 품어주는 사회 "
+    },
+    "부자처럼 보일 것인가 진짜 부자로 살 것인가.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "불안",
+        "화",
+        "코딩"
+      ],
+      "first_line": "백만장자 처럼 꾸미고 다르지만 실제로 가진 돈이 없는 사람이 있습니다"
+    },
+    "불신과 신뢰사회.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "공부"
+      ],
+      "first_line": "먼저, 하늘나라로 간 아이와 피해자 유가족에게 깊은 애도를 표한다. "
+    },
+    "불안감 많은 사람들의 특징 5가지.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "불안",
+        "댓글"
+      ],
+      "first_line": "친구가 요즘 불안감 때문에 힘들어하더라고. 도움 주려 찾아보니까 이런 특징들이 있대."
+    },
+    "블로그 댓글작업.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "워크북 좋다고"
+    },
+    "블로그 마케팅.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "라라마케팅"
+    },
+    "비즈니스 PT 전체 요약.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "왜 유튜브를 하고 있는가? "
+    },
+    "비즈니스 PT 피드백.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 2월 6일 "
+    },
+    "비즈니스 pt 회원 강의.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.youtube.com/live/bK0Giclpv9A?si=29PPRFOLJ4GkuKg5"
+    },
+    "사랑하는 여보에게.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "성장",
+        "화",
+        "짜증"
+      ],
+      "first_line": "여보~ 지난 며칠 너무 힘들었지?! "
+    },
+    "사랑하는 의진이에게.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "초등",
+        "성장",
+        "화"
+      ],
+      "first_line": "이모부가 "
+    },
+    "사촌들 계모임 + 여행 계획.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모"
+      ],
+      "first_line": "# 에니어그램 연수와 자기 이해"
+    },
+    "상상을 현실로 이루는 한 남자의 이야기  시크릿&끌어당김의 법칙  말하는대로.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "동기부여",
+        "습관",
+        "인사이트"
+      ],
+      "first_line": "웃으며 영상을 넘길 수도 있지만, "
+    },
+    "상처가 공감이 되는 순간  가이드라인 만들기 활동 핵심.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "교육",
+        "성장",
+        "화"
+      ],
+      "first_line": "1.우리반 가이드라인을 만드는 시간. "
+    },
+    "상품화 코칭.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "교육",
+        "자존감"
+      ],
+      "first_line": "- &nbsp;"
+    },
+    "새넷 연수 기록.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "교육",
+        "학습",
+        "화",
+        "진로",
+        "적성"
+      ],
+      "first_line": "- 프로젝트의 학습이 어떻게 지속적으로 이뤄질 수 있을까? 그것은 학교 교육과정으로 가능! "
+    },
+    "새넷 정책 회의 요약.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "성장",
+        "화"
+      ],
+      "first_line": "1. 교사회 - 단협을 통해 진행하도록 "
+    },
+    "새로운 녹음 47.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "2022.12.28 수 오후 5:20 ・ 1분 54초"
+    },
+    "생산성 정복 공식.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "부모",
+        "독서",
+        "공부",
+        "집중력",
+        "화"
+      ],
+      "first_line": "생산성 = 집중력 X 절제된 환경 "
+    },
+    "선거 후 만남 주최.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "#선거 후 만남 주최"
+    },
+    "선생님~ 생각날 때 문자드려요..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "교육",
+        "학습",
+        "체험"
+      ],
+      "first_line": "내가 너랑 함께 하고 싶은 것이 있거든. 이게 또 언제 열릴지 몰라서 ㅠㅜ 나도 주말에 시간이 없지만... 이것을 같이 듣고 싶은 바람이 있어서 생각나서 연락해."
+    },
+    "선생님~~.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 오늘 이문식선생님 퇴임하며"
+    },
+    "선생님들 안녕하세요..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "노션"
+      ],
+      "first_line": "2차 준비들은 잘 하고 계신가요?!  "
+    },
+    "선생님들 오늘 잘 보내고 계시나요!.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "화"
+      ],
+      "first_line": "연가나 병가를 쓰신 선생님들도, "
+    },
+    "설명글.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "자존감",
+        "감정",
+        "화",
+        "의사소통"
+      ],
+      "first_line": "00:00 가족 갈등의 문제 즉시 해결"
+    },
+    "성공 명언 10가지.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "영어",
+        "블로그"
+      ],
+      "first_line": "1. 일에는 즐거움이 있고 건강이 있다. 자기 직분에서 즐거움을 느끼고 보람을 찾는 사람은 틀림없이 성공한다. ¹"
+    },
+    "성적표라는 착시 현상.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "수학",
+        "학습"
+      ],
+      "first_line": "우리는 오랫동안 성적표의 숫자가 아이의 모든 것을 말해준다고 믿어왔습니다. 100점은 '우수함'의 증거이고, 70점은 '부족함'의 낙인처럼 여겨졌습니다. 하지만 정말 그럴까요? 시"
+    },
+    "소감.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 이번 13살로 6학년의 정점을 찍는 6학년 학생들의 소중한 마지막 예술제가 있었습니다.  6학년들이 하기 싫어하면서도 열심히 후배를 챙기며 본인의 일에 충실히 하는 모습이 정말"
+    },
+    "소세지 검은 비닐에 넣기.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 초콜릿 브라우니"
+    },
+    "소신발언 쎄게 간다..md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "아이",
+        "부모",
+        "스마트폰",
+        "화",
+        "알고리즘"
+      ],
+      "first_line": "소신발언 쎄게 간다."
+    },
+    "소풍 아이디어.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "날씨 추움 - 옷 잘 껴입기"
+    },
+    "쇼츠 영상 시나리오 템플릿 만들기.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "책 편집을 하다 보면 가끔씩 다른"
+    },
+    "쇼츠 원고 작성 템플릿 1 - 호기심 + 재미.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- 영상 타이틀, 썸네일, 유튜브 제목 - 궁금증 자극"
+    },
+    "쇼츠 피드백.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 행동버튼 직접 말로하기 = 아예 고정 댓글로 가라. ~~ 한 것을 고정댓글에 따로 적어놨으니.... 그거 보세요. -> 고정댓글에서 관련 동영상 보세요. // 관련 동영상 보"
+    },
+    "쇼포츠.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "음바페 VS 홀란드"
+    },
+    "수정.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "3:03초 “여기서 그다음~ ”"
+    },
+    "수진 누나 강의 홍보글.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "뉴스"
+    },
+    "수학 공부 잘하고 싶어요!.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "수학",
+        "공부"
+      ],
+      "first_line": "# 아~ 수학 공부하기 귀찮다. "
+    },
+    "수학여행 안내.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "수학",
+        "학습",
+        "화"
+      ],
+      "first_line": "•  일시 : 4/18(월)~19(화)"
+    },
+    "수학책 추천.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "화"
+      ],
+      "first_line": "-수학연계 소설-"
+    },
+    "숙제 다 했어 잔소리 없이 아이 스스로 숙제하게 하는 마법의 3단계.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "교육",
+        "칭찬"
+      ],
+      "first_line": "1."
+    },
+    "슈퍼 노멀 소개글.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "성장",
+        "인사이트"
+      ],
+      "first_line": "(전) 180만 유튜버 - 주언규 PD ( 구,신사임당) 의 책 슈퍼노멀에서"
+    },
+    "슈퍼노멀 쇼츠.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "댓글"
+      ],
+      "first_line": "나는 누구일까요!"
+    },
+    "슈퍼노멀 슈퍼노멀공모전 4등.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "#슈퍼노멀 #슈퍼노멀공모전 #4등"
+    },
+    "스레드 오픈카톡방 글쓰기 챌린지 4주 과정.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "성장",
+        "글쓰기",
+        "화"
+      ],
+      "first_line": "앞으로 톡방 활성화를 위해 스레드 글쓰기 챌린지를 할까 합니다. "
+    },
+    "스마트폰 하고 싶을 때.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "스마트폰"
+      ],
+      "first_line": "10/24"
+    },
+    "스스로 공부하는 아이 생활 습관에서 나온다..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "공부",
+        "습관"
+      ],
+      "first_line": "일단, 생활 습관부터 스스로 하자. "
+    },
+    "스스로 공부하는 아이,.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "학습",
+        "공부"
+      ],
+      "first_line": "# 스스로 공부하는 아이, "
+    },
+    "스친 글 너무 잘 읽었어..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "부모",
+        "교육",
+        "초등",
+        "육아",
+        "글쓰기"
+      ],
+      "first_line": "어쩜 이렇게 감성 뿜뿜이야?! "
+    },
+    "스친! 스친은 이제 팔로워가 많아질 수밖에 없는 사람이네!.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">글쓰기</span> 능력, 분야에 대한 전문성, 포트폴리오까지 "
+    },
+    "스친~ 완전 인플루언서 포텐셜 만땅인 사람이자나!.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "글쓰기",
+        "스레드"
+      ],
+      "first_line": "요새 AI가 가장 트렌드인데. "
+    },
+    "스친~.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "육아",
+        "화",
+        "댓글"
+      ],
+      "first_line": "# 작가를 희망하는 열망이 느껴져서 글을 읽으며 나도 맘을 다 잡았어! "
+    },
+    "스친은 완전 블로그 부업 전문가구나! .md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "sns 감 있으니깐 금방 쓰레드에 적응할꺼라 생각해. "
+    },
+    "스쿠버 연수 날짜 (최종).md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "오픈워터 7/26~28일 13시~17시 : 김소연, 노성구, 박주혜,안지혜, 이선민, 수현, 오지연, 현재경"
+    },
+    "스터디 그룹 안내.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부"
+      ],
+      "first_line": "1. 스터디 그룹은 중1~고1까지 신청한 학생들이 함께 합니다. (지금 초 6학년 3명 초대함) 서로 다른 학년이 함께 하니 선배는 롤모델로서 책임감이 부여되고, 후배는 보고 배우"
+    },
+    "습관 1일차 연속 1일.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "성장",
+        "글쓰기",
+        "습관"
+      ],
+      "first_line": "- 잠 잔 시간 : 12시10분 ()"
+    },
+    "습관 게으름 미루기 무기력 미루기극복 마음챙김 성장.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "성장",
+        "스마트폰",
+        "화",
+        "습관"
+      ],
+      "first_line": "#습관 #게으름 #미루기 #무기력 #미루기극복 #마음챙김 #성장 "
+    },
+    "습관 바꿔 생산성 높이는 입문 책 3권.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "성장",
+        "동기부여",
+        "집중력",
+        "화",
+        "습관"
+      ],
+      "first_line": "1. 습관의 재발견"
+    },
+    "습관.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "독서",
+        "글쓰기",
+        "습관",
+        "루틴"
+      ],
+      "first_line": "#습관"
+    },
+    "습관의 과학 자동화된 성공을 만드는 법.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "화",
+        "습관",
+        "뇌과학",
+        "심리"
+      ],
+      "first_line": "## 제1부: 습관의 본질을 이해하다"
+    },
+    "습관의힘 책리뷰.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "독서",
+        "감정",
+        "글쓰기",
+        "습관"
+      ],
+      "first_line": "-오늘의 핵심 리뷰 -"
+    },
+    "시기별 놀이가 아이 발달에 주는 선물.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "발달",
+        "초등",
+        "집중력",
+        "놀이"
+      ],
+      "first_line": "1.\t영유아기 – 잼잼, 도리도리, 까꿍"
+    },
+    "시작.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "입으로 듣기 : 내용 가지고 오기"
+    },
+    "시작할 때.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "아이",
+        "GPT"
+      ],
+      "first_line": "1. 출판사 에디터로 내가 가진 아이디어에 대해서 검토함"
+    },
+    "신발 날리기.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "신발 고구마"
+    },
+    "신사임당 & 노아 유튜브 강의.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "주제특강 강의 링크 <a href=\"https://www.youtube.com/watch?v=s_n7qPPGh_8\" rel=\"noopener\" class=\"external-link"
+    },
+    "신사임당 유튜브 강의 목록.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "**0.2023년 돈 버는 유튜브 채널을 만드는 방법**"
+    },
+    "실력이 전부다  구글 드라이브.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "링크 - https://drive.google.com/drive/folders/1GerdpD7dAN5uMcbViCj7JjYguWOGKKwm"
+    },
+    "실패를 즐기는 사람이 좋더라..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "실패를 즐기는 사람이 좋더라."
+    },
+    "썸네일 문구 구조 분석.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[[스크린샷 2024-07-23 오후 3.27.52.png]]"
+    },
+    "쓰레드 40일, 1만 팔로워 달성 비법.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "글쓰기"
+      ],
+      "first_line": "“자랑 하기!”"
+    },
+    "쓰레드 글 만들기 프롬프트.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- 1. 사진의 내용의 글 구조를 반드시 그대로 이용해야해!"
+    },
+    "아래 지침을 기억해줘. 내가 지금 만드려는 문서의 맥락이야..md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "교육",
+        "초등",
+        "성장",
+        "화"
+      ],
+      "first_line": "1. 나는 doc 문서를 만들거야. "
+    },
+    "아래 템플릿에 맞춘 ‘자기주도 학습 습관’ 쇼츠 스크립트 예시입니다..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "학습",
+        "공부",
+        "자기주도",
+        "화"
+      ],
+      "first_line": "(짧은 영상 대본 느낌으로 작성)"
+    },
+    "아버지, 이석문.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "초등",
+        "공부"
+      ],
+      "first_line": "<아버지, 이석문> "
+    },
+    "아빠 vs 윤슬 습관 만들기 대결 !.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "습관"
+      ],
+      "first_line": "승자는 2일동안 자기 마음대로 시간 쓰기 "
+    },
+    "아이가 엄마에게 보여주며,.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "불안",
+        "분노",
+        "화"
+      ],
+      "first_line": "“선생님이 꼬집었어.”"
+    },
+    "아이가 울고 떼 쓸 때 안심 시키는 대화 3단계.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "감정",
+        "초등",
+        "성장"
+      ],
+      "first_line": "1단계 : 아이가 왜 우는지 확인부터 합니다. "
+    },
+    "아이가 이유 없이 짜증 낼 때,.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "훈육",
+        "성장",
+        "화"
+      ],
+      "first_line": "계속 울고 블안해할 때"
+    },
+    "아이들을 위한 교육감, 이석문 .md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "교육",
+        "공부"
+      ],
+      "first_line": "1. 아버지가 교육감으로 출마하십니다."
+    },
+    "아이디어.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이",
+        "자녀",
+        "영어"
+      ],
+      "first_line": "제주 외국인 - 제주도민 - 자녀 "
+    },
+    "아이에게 진정으로 따뜻한 말은.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "감정",
+        "성장",
+        "심리"
+      ],
+      "first_line": "아이에게 진정으로 따뜻한 말은 "
+    },
+    "아이의 잠재력을 폭발시키는 부모의 행동 11가지.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "감정",
+        "성장"
+      ],
+      "first_line": "1.아이의 작은 시도도 진심으로 칭찬하는 부모"
+    },
+    "아침마다 이야기 영상 보지 않고 시간 보내기 815까지.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "아침마다 이야기 영상 보지 않고 시간 보내기 8:15까지"
+    },
+    "아침에 일어나면 성공에 한 걸음 더 가까워진다. - 미셸 오바마.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "집중력",
+        "습관"
+      ],
+      "first_line": "1. \"아침에 일어나면, 하루 중 가장 중요한 결정을 내리는 것입니다.\" - 톰 롤"
+    },
+    "안녕 나는 6학년 주보영이야!.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "너네 오늘 여기 왜 온 지 알아?"
+    },
+    "안녕하세요 편집자님, 저는 제게 맞는 편집자님을 찾고 있어요..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "채널"
+      ],
+      "first_line": "안녕하세요 편집자님, 저는 제게 맞는 편집자님을 찾고 있어요. "
+    },
+    "안녕하세요. 곧 문을 열게 될 ‘혜복’의 김방훈입니다..md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "안녕하세요. 곧 문을 열게 될 ‘혜복’의 김방훈입니다."
+    },
+    "안녕하세요..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "학습",
+        "자기주도",
+        "습관"
+      ],
+      "first_line": "저는 광양초 교사 이한결 입니다. "
+    },
+    "애니메이션 만드는 사이트.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "애니메이션 만드는 사이트"
+    },
+    "애월초 귀신의 집 놀이.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "놀이",
+        "화"
+      ],
+      "first_line": "귀신 세명 선생님 1명 모두 귀신처럼 문자 가기"
+    },
+    "애월초 원드라이브 계정.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "lucille@aewol.jje.es.kr"
+    },
+    "약과 에너지바 프로틴주스.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 약과 에너지바 프로틴주스 "
+    },
+    "양경식 - 서귀포 선거 도움.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 교대 07 동창 양준혁 아버지"
+    },
+    "양육할 때 가장 좋았던 책.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "훈육",
+        "양육",
+        "애착"
+      ],
+      "first_line": "1. 5가지 사랑의 언어"
+    },
+    "어느 한 마을, 오래된 원형 극장에 ‘모모’라는 아이가 나타났다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "<p style=\"text-align:justify;margin:0\">"
+    },
+    "어린이 목소리 녹음 대사.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "감정"
+      ],
+      "first_line": "(불만스러운 감정을 담아) \"당연히 돈을 더 벌어서 편하게 살고 싶죠! 사실 누구나 부자가 되고 싶잖아요!“ "
+    },
+    "어머니 연설문.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "성장",
+        "화"
+      ],
+      "first_line": "안녕하세요. 이석문 교육감 후보 배우자 입니다."
+    },
+    "어제 OpenAI에서 ChatGPT 폭탄급 발표가 있었어요!.md": {
+      "category": "education_content",
+      "subcategory": "미디어/AI",
+      "keywords": [
+        "아이",
+        "교육",
+        "성장",
+        "화",
+        "프롬프트"
+      ],
+      "first_line": "요새 AI트렌드를 많이 보는 데 "
+    },
+    "어제 신규 교사 연수를 다녀왔다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "성장",
+        "화"
+      ],
+      "first_line": "짧은 시간이었지만, “왜 우리가 교사로서 사회적 약자를 돌봐야 하는지” "
+    },
+    "엄청 노력 하네! ㅜㅜ.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "독서",
+        "성장",
+        "어휘"
+      ],
+      "first_line": "진짜 심화 문제는 "
+    },
+    "업 스트림을읽고.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "스마트폰",
+        "화"
+      ],
+      "first_line": "문제를 파악하기 위해 데이터를 활용하라"
+    },
+    "여리고 선한 사람이 마음에 병이 생기는 이유.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감"
+      ],
+      "first_line": "엄마가 하는 말이 자꾸만 비수를 꽂아요."
+    },
+    "여행 전 살 것.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "- [ ] 렌즈 사기"
+    },
+    "여행 중 할일.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기",
+        "습관",
+        "인스타",
+        "노션"
+      ],
+      "first_line": "- [ ] 하이클래스 글쓰기"
+    },
+    "연구 주제 선택을 위한 질문 5가지.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 내가 가장 흥미를 느끼는 학문 분야나 주제는 무엇인가?"
+    },
+    "연극 준비하면서 배운것.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "부모",
+        "학부모",
+        "경청"
+      ],
+      "first_line": "# 군인들이 총 대신 칼을 쓴거다. "
+    },
+    "연동과 노형 지역 학부모 설득 할 수 있는 교육정책.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "학부모",
+        "화"
+      ],
+      "first_line": "# 학종 강화 추세 : 지역균형발전 원으로 학급당학생수 감소 - 담임이 아이 한명을 좀 더 신경 쓸 수 있는 구조 만들기 "
+    },
+    "영상 도입부 만들기 프롬프트.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "자녀",
+        "교육",
+        "자존감",
+        "육아"
+      ],
+      "first_line": "\"자존감 바닥 아이를 천재로 만든 충격적인 육아법 \"교사인 저도 경악했습니다.\" (딱 2주만 해보세요. 실패를 최고의 성공을 바꾸는 비법 l 육아 자녀 대화법ㅣ자녀 교육)\" 를 제"
+    },
+    "영상 제목 3월 전쟁, 지금 준비 안 하면 늦습니다 (feat. 18년 차 교사의 조언).md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "초등",
+        "학부모"
+      ],
+      "first_line": "**타겟:** 초등 학부모, 자기계발에 관심 있는 성인"
+    },
+    "영상 채널명  KeyAll - 부의 모든 것.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "수학",
+        "초등",
+        "공부",
+        "채널"
+      ],
+      "first_line": "영상 제목 : "
+    },
+    "영상.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "우울",
+        "댓글"
+      ],
+      "first_line": "영상 주제 괜찮음. "
+    },
+    "영상과 활동의 의도.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 피해자측 마음 헤아리기 가장 필요한 것 찾아내기"
+    },
+    "영어유치원보다 더 효과적인 엄마표 영어교육.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "초등",
+        "공부"
+      ],
+      "first_line": "1."
+    },
+    "영화 찰리와초콜릿공장 속 부자, 윌리웡카가 부자가 된 이유를 파헤칩니다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "# 영화 #찰리와초콜릿공장 속 #부자, 윌리웡카가 부자가 된 이유를 파헤칩니다."
+    },
+    "예전 카드번호.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 4854 7904 0229 2739"
+    },
+    "오! 이승규 선생님이신가요 아니면 윈드에듀.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이",
+        "스레드"
+      ],
+      "first_line": "저 이번에 생공을 옆반 선생님께 추천받아서 "
+    },
+    "오늘 하루 잘 마무리 하셨나요!.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "화",
+        "sns"
+      ],
+      "first_line": "제주 추모문화제 홍보팀 이한결입니다. "
+    },
+    "오전 써클 줄이기.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "칭찬",
+        "학부모"
+      ],
+      "first_line": "# 주도성 강의 - 맥락과 인생은 마라톤 맥락 연결 짓기"
+    },
+    "올해 가장 의미있는 것.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "수학",
+        "초등",
+        "성장",
+        "불안"
+      ],
+      "first_line": "나는 교실에서 아이들을 만나는 것이 영적인 과정이라 생각한다. "
+    },
+    "완전 제 뼈를 때리는 말이었어요. (15분 42초 쯤).md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "---"
+    },
+    "외모가 중요하지 않다고 누가 말해!.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "외모 진짜 중요하네. "
+    },
+    "요리 목록.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "볶음밥류 "
+    },
+    "요새 아이들이 숙제할 때 친구들끼리 가장 많이 하는 말이 뭔지 아시나요.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "성장",
+        "글쓰기",
+        "어휘"
+      ],
+      "first_line": "“야! 그냥 챗GPT 써!”"
+    },
+    "우리 모두가 함께 안전한 학교를 만들기 위한 마음을 전하며.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "교육",
+        "수학",
+        "학습",
+        "화",
+        "채널"
+      ],
+      "first_line": "안전하지 않고 교육에 위협받는 상황 -> 메세지 "
+    },
+    "우리 아이 성적 떨어뜨리는 편의점 음식의 충격적 진실.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "학습",
+        "발달",
+        "공부"
+      ],
+      "first_line": "편의점 라면과 과자가 뇌를 공격하고 있습니다. "
+    },
+    "우리 전통문화가 널리 알려지기 바라는 마음에서 올렸습니다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "본 영상의 출처는 @**Francezone_TV 입니다.**"
+    },
+    "우리아이 글쓰기 어떻게 할까.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "감정",
+        "발달",
+        "글쓰기",
+        "놀이"
+      ],
+      "first_line": "왜 일기는 매일 비슷하게만 쓰는거야? "
+    },
+    "우와! 이 영상 진짜 대박이에요..md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 이런 영상을 무료로 보다니 진짜 영광입니다. 양자역학을 이렇게 차근차근 설명 해주시니 시간 가는 줄 모르고 봤어요."
+    },
+    "운송장번호(AWB)480580090980.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "운송장번호(AWB#):480580090980"
+    },
+    "워크북 관련 할일.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- [ ] 중간 내용 수정 보완 -> "
+    },
+    "월 1000만원 구체적 계획.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "- 9만원 미션 * 50명 = 450만원"
+    },
+    "위축되고 남 눈치 봐서 이 말 딱 한달줬더니 인생이 완전 바뀌었어요..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "자존감"
+      ],
+      "first_line": "망가진 아이 자존감 이 말 하나만 하세요. 다시 자존감 팔팔해 집니다. "
+    },
+    "유튜브 썸네일 제목을 만드려고해..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자존감",
+        "화",
+        "습관"
+      ],
+      "first_line": "- 1. <span style=\"font-family:.AppleSDGothicNeoI-Regular;\">유튜브</span> <span style=\"font-family:.Appl"
+    },
+    "유튜브 자동화 피드백 멘트.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "화",
+        "댓글"
+      ],
+      "first_line": "1. 스크립트 피드백"
+    },
+    "유튜브 제목.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "학습",
+        "우울",
+        "화",
+        "썸네일"
+      ],
+      "first_line": "# 정신과 의사도 모른 우울한 사람의 진짜 모습 "
+    },
+    "윤슬 YouTube 아이디어.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "감정",
+        "조회수"
+      ],
+      "first_line": "**A. 캐릭터를 “IP”로 설계하기 (1주 안에 정리)**"
+    },
+    "윤슬 공모전.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "웹툰 "
+    },
+    "윤슬 공부.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부"
+      ],
+      "first_line": "[[IMG_1950.png]]"
+    },
+    "윤슬 공부약속.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부"
+      ],
+      "first_line": "매일 체크리스트 만들어서 체크하기"
+    },
+    "윤슬 금요일 특별 교육 프로그램.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "- 수영"
+    },
+    "윤슬 아웃스쿨 강의.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "1. 스티커 : https://outschool.com/ko/classes/procreate-sticker-design-MiFt7Tkg?sectionUid=864b671e-ab4d"
+    },
+    "윤슬 여행 글쓰기.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "글쓰기",
+        "놀이",
+        "화",
+        "짜증"
+      ],
+      "first_line": "7/30(화) "
+    },
+    "윤슬 영상 돈 91100원.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "인스타"
+      ],
+      "first_line": "# 90000원 + 스플랜더 5만 + 인스타 초상권 2만"
+    },
+    "윤슬 용돈 기입장.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "7/30-7/31"
+    },
+    "윤슬 프랑스 유로 사용.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "미니소 42.8유로"
+    },
+    "은행 추격전.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "떼"
+      ],
+      "first_line": "1일차떼 가위바위보 해서 은행냄새 맡기 하자고 해서"
+    },
+    "음악 평가.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "집중력"
+      ],
+      "first_line": "고가은 : "
+    },
+    "의원.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "교육위원장 오승식"
+    },
+    "이 영상은 여러분에게 행운을 가져다 줍니다..md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "## 이 영상은 1시간 안에 다른 사람에게 전달되어야 합니다. "
+    },
+    "이게 되네.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "교육",
+        "화"
+      ],
+      "first_line": "1. 9.4일 서이초 선생님의 49재가 있는 날입니다. "
+    },
+    "이동평균('{종가}',{5일}) - 이동평균('{종가}',{20일}) AND 'ADX({14일}) 0.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">이동평균</span>('{종가}',{5일}) - 이동평균('{종가}',{20일}) "
+    },
+    "이번주 청소 매일.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "수학",
+        "공부",
+        "인스타"
+      ],
+      "first_line": "# 다음주까지 5개 인스타툰"
+    },
+    "이선영 도련초.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 강다인 오름중"
+    },
+    "이영지 차린것은 쥐뿔도.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "보고 또 봐도 "
+    },
+    "이예호7.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 주보영"
+    },
+    "이지영 유튜브 원고 상황 묘사 벤치마킹.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "부모",
+        "사춘기"
+      ],
+      "first_line": "옥상에 올라가서 죽어야지! 하고 봤는데"
+    },
+    "인덱스 상자.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "올리오 박스 : https://m.coupang.com/vm/products/6055374030?itemId=11113499748&q=%EB%A9%94%EB%AA%A8%EB%B0%"
+    },
+    "인성 함양.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "인성"
+      ],
+      "first_line": "설전도 수련관"
+    },
+    "인스타 글.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "아이",
+        "학습",
+        "놀이",
+        "인스타"
+      ],
+      "first_line": "“체육해요!”라고 말하는 아이 : 관계와 질서 만들기"
+    },
+    "인스타 태그 글.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "감정",
+        "동기부여",
+        "화",
+        "습관",
+        "인스타"
+      ],
+      "first_line": "# 생산성 10배 늘리는 법 : 몰입"
+    },
+    "인스타 팔로우 프로그램.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "l0211l@nate.com"
+    },
+    "인스타 피드 내용.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "공부",
+        "성장",
+        "동기부여",
+        "인스타"
+      ],
+      "first_line": "🔅 감사한 마음으로 아침을 맞이하세요."
+    },
+    "있고 없고 문제.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 마법의 모자가 있어 마법에 모자에는 어떤 것이든 나오는 신비에 모자 이지이 모자에 주문을 외우면 무엇이든 나와 "
+    },
+    "자기♡님과 통화.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "[[자기♡님과 통화.m4a]]"
+    },
+    "자기사랑 1강 강의안.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "습관"
+      ],
+      "first_line": "1. 자기 스스로를 사랑하지 못해 겪는 문제들 그리고 본질적인 해결책 "
+    },
+    "자기주도 학습 (학습 습관 만들기) 학생캠프.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "칭찬",
+        "독서",
+        "학습",
+        "공부"
+      ],
+      "first_line": "자기주도 학습 (학습 습관 만들기) 학생캠프 "
+    },
+    "자기주도 학습 캠프 나만의 학습 여정 만들기.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "공부",
+        "성장",
+        "자기주도"
+      ],
+      "first_line": "A. 기초 다지기 (WHY)"
+    },
+    "자기주도학습 5일차 강의 개요.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "학습",
+        "자기주도",
+        "읽기",
+        "글쓰기"
+      ],
+      "first_line": "1. 놀이 : "
+    },
+    "자기주도학습 실천 집단 만들기.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "교육",
+        "칭찬"
+      ],
+      "first_line": "1. 독서능력 향상 집단 만들기 : 다양한 책 그룹 만들기"
+    },
+    "자기주도학습 전자책.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "칭찬",
+        "수학"
+      ],
+      "first_line": "## 들어가며"
+    },
+    "자기주도학습 참고 인스타.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "자기주도",
+        "인스타"
+      ],
+      "first_line": "교사 박은선 : https://www.instagram.com/green__hae?igsh=MWx3ZzltYmYwazR0aA=="
+    },
+    "자기주도학습을 꾸준하게 만드는 힘.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "학습",
+        "학부모"
+      ],
+      "first_line": "오늘 학부모 강의 까지, 6일간 진행한 *학습자 주도성 향상 진로캠프*가 막을 내렸다."
+    },
+    "자존감 낮은 사람이 꼭 알아야 할 진실 5가지.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "성장",
+        "우울"
+      ],
+      "first_line": "1. 완벽해야 한다고 생각하면 → 실수를 성장의 기회로 보세요"
+    },
+    "자존감 때문에 10년을 고민한 내가 마지막에 깨달은 한 마디.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감",
+        "불안"
+      ],
+      "first_line": "\"나는 왜 이렇게 부족할까?\" 이런 생각, 자주 하시나요?"
+    },
+    "자존감 책.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "자존감"
+      ],
+      "first_line": "나는 자존감에 대한 책을 쓰고 싶어. "
+    },
+    "작가 피드백.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "성장",
+        "읽기",
+        "글쓰기",
+        "화"
+      ],
+      "first_line": "작가님, 정말 잘 작성하셨어요. "
+    },
+    "장정주 형 선생님 서은 아빠님과 통화.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "[[장정주 형 선생님 서은 아빠님과 통화.m4a]]"
+    },
+    "저는 아이와 감정적으로 화를 낼 때 크게 두가지 경우라고 생각합니다..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "감정",
+        "공부",
+        "성장"
+      ],
+      "first_line": "1/"
+    },
+    "저작권 관련 안내.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "본 영상은 저작권법 및 관련 법령에 의하여 보호되는 저작물이며 당사의 영업 비밀을 포함하고 있습니다."
+    },
+    "저학년 추천 도서.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "비밀요원 레너드"
+    },
+    "저희반에 우울증 학생이 있었어요..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "감정",
+        "발달",
+        "우울",
+        "불안"
+      ],
+      "first_line": "그 학생을 보며 느낀 건 우울과 불안을 계속 방치하면 안되는 거였습니다. "
+    },
+    "전교조 꿈들 비번  입구.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "전교조 입구 : 0466 -> 0611"
+    },
+    "전교조 꿈들 홍보 연락.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "감정",
+        "초등",
+        "놀이",
+        "괴롭힘"
+      ],
+      "first_line": "\\[전교조 X 꿈들\\] 학급 운영 강의 "
+    },
+    "전교조 정책.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "초등"
+      ],
+      "first_line": "혁신학교 모임"
+    },
+    "전교조.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 0466# -> 0611#"
+    },
+    "절대로 놓치지 마세요!.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "독서",
+        "습관"
+      ],
+      "first_line": "“학원보다 강력한 우리 아이 인생책 80권” "
+    },
+    "절망의 시대.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "# 입시 경쟁의 구조 속에서 윤리성은 없고 병폐는 일어나고 있다 "
+    },
+    "정주영회장이 제일 중요하게 여긴 것은 실행력이다..md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "**그래서** "
+    },
+    "제 쓰레드가 오류 ㅜㅜ.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "다시 적었습니다! "
+    },
+    "제목  성장의 시작_목표 설정과 감정의 균형 잡기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "칭찬",
+        "감정",
+        "성장",
+        "화"
+      ],
+      "first_line": "•\t왜 목표를 설정해야 하는가? 목표 설정을 통해 어떤 장점을 얻을 수 있는가?"
+    },
+    "제목 .md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "동기부여"
+      ],
+      "first_line": "성공하고 싶다면, 인생이 바뀌고 싶다면 \\[서정진, 셀트리온 회장, 동기부여, 자기계발, 마인드셋, 열정\\] "
+    },
+    "제목 제주교육의 미래, 도민이 직접 디자인한다..md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "부모",
+        "교육",
+        "학부모"
+      ],
+      "first_line": "'교육톡 희망톡 100인 집담회' 21일 개최"
+    },
+    "제목 존중의 뜻은 무엇일까 (보영).md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "오늘 가이드라인을 만들었다. 친구들은 이해, 존중, 안전을 중요하게 우선순위로 생각했다. 우리 모둠엔 (정)지후, 지우, 혜림, 윤송이랑 내가 있었다. 우리 모둠은 이해, 존중, "
+    },
+    "제목 첫날.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "글쓰기"
+      ],
+      "first_line": "#글쓰기"
+    },
+    "제목-훅 선택 1.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "첫째",
+        "둘째",
+        "SNS"
+      ],
+      "first_line": "충격 강조형"
+    },
+    "제목짓기.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "양육",
+        "초등",
+        "공부"
+      ],
+      "first_line": "아이의 지능에 영향 준 부모의 양육태도 TOP3"
+    },
+    "제안서.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "화",
+        "구독자"
+      ],
+      "first_line": "# 제목 > 제주에서, 제주 교사들에게~ 역사를 가장 역사답게 펼쳐지는 강연을 요청합니다."
+    },
+    "제주 변호사.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "| <span style=\"font-family:.AppleSDGothicNeoI-Regular;\">제주</span> <span style=\"font-family:.AppleSDG"
+    },
+    "제주교육 역사상 최대 규모. 2000명 운집,.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "교육",
+        "우울",
+        "화"
+      ],
+      "first_line": "교사들의 절박함을 보여준 ‘9.4 제주 추모 문화제’ "
+    },
+    "제주대 대학생 청소년 교육지원 사업단.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "인력지원 요청하면 근로장학생 이 옴."
+    },
+    "제주대학교 RIS +E사업.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "교육",
+        "공부"
+      ],
+      "first_line": "https://www.jejusori.net/news/articleView.html?idxno=410759"
+    },
+    "제주중 퍼실 강의 초안.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 강의 핵심내용 인쇄 자료 배부 "
+    },
+    "젠포트 조건식 작성법 학습 프롬프트.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습",
+        "연산",
+        "프롬프트"
+      ],
+      "first_line": "내가 요청한 것은 젠포트 조건식을 정확히 {} 대괄호와 '따옴표, () 소괄호를 쓰는 방법을 학습했으면 좋겠는거야.   1. 대괄호는 {팩터} 사이에 팩터를 넣어. (예) {분기자"
+    },
+    "준비물 체크리스트.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- [ ] 간식 : 바나나, 방울토마토, 과자류"
+    },
+    "지금 나의 걸림돌.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "읽기",
+        "짜증",
+        "습관",
+        "루틴"
+      ],
+      "first_line": "지금 나의 걸림돌은 생산 하는 것을 부담스러워 하는 것이다 생산하는데 글을 쓰고 가만히 앉아가지고 에너지를 쏟아 내는 것 자체가 부담스럽고 하기 싫은 행동이다 특히 지금 전자책은 "
+    },
+    "지금 당장.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 쓰레드 시작하세요!! "
+    },
+    "지식정보화 사회.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "발달",
+        "화"
+      ],
+      "first_line": "티비 유튜브 "
+    },
+    "진짜 너무 화날 때, 부모가 하지말아야 할 5가지.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "자존감",
+        "감정",
+        "화"
+      ],
+      "first_line": "1.욕 하거나 존재 자체를 부정하지 않기 "
+    },
+    "진짜 포기하고 싶었다..md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "노력한 만큼 결과가 나오지 않는다는 것이 정말 허무했다."
+    },
+    "집에서 제일 쉽게 하는 영재교육.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "독서",
+        "영재"
+      ],
+      "first_line": "독서가 영재로 가는 가장 빠른 지름길이다. "
+    },
+    "차이나는 클라스 보여준  강사님박수.md": {
+      "category": "classroom_material",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "강의 호응 : 좋았지요?! "
+    },
+    "참 여운이 많이 남은 수업 성찰이었다..md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "참 여운이 많이 남은 수업 성찰이었다. "
+    },
+    "참가 퍼실리테이터 명단 (10명)   고승희.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "고정희 "
+    },
+    "채널명 만들기.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 영상 퀄리티 유지하기 : 음성, bgm, 자막 편집 및 원고 "
+    },
+    "책 나눔.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "훈육",
+        "수학"
+      ],
+      "first_line": "동한 "
+    },
+    "책 목차.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "화"
+      ],
+      "first_line": "- 서론: 끌어당김의 법칙과 나의 인생 여정"
+    },
+    "책 안 읽는 아이들 있으면.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "독서",
+        "읽기",
+        "습관"
+      ],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">뭐가</span> 안되는지 체크해보세요. "
+    },
+    "책쓰기 - 자기주도학습.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "자녀",
+        "교육",
+        "수학"
+      ],
+      "first_line": "# **1. 책 제목:** 아이의 공부 잠재력, 부모가 깨우는 자기주도학습법"
+    },
+    "책을 읽기 전에.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "성장",
+        "읽기"
+      ],
+      "first_line": "먼저 피자는 오 년간 100 여명의 사람들과 함께 원 만들기를 실천했다 그리고 참여하는 사람들의 관해 디테일하고 확실하게 성장시키는 만들어 보았다."
+    },
+    "체육.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 고가은 : 상, 최상"
+    },
+    "초등 교사 입니다..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "초등",
+        "공부",
+        "화"
+      ],
+      "first_line": "아이 입에서"
+    },
+    "초등 저학년, '매일 30분 책상 앉기' 습관 들이기.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "초등",
+        "공부"
+      ],
+      "first_line": "1."
+    },
+    "초등교사가 말하는 “독서교육” 골든타임.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "부모",
+        "교육",
+        "독서",
+        "학습"
+      ],
+      "first_line": "1.  "
+    },
+    "초등교사로서 부탁합니다. 아이 앞에서 '한숨' 쉬지 마세요..md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "자존감",
+        "초등"
+      ],
+      "first_line": "교실에서 유독 눈치 보는 아이들, 공통점이 뭔지 아시나요?"
+    },
+    "초등교사입니다..md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "수학",
+        "초등",
+        "공부",
+        "분수"
+      ],
+      "first_line": "분수 하나 놓치면 초등 수학 전체가 무너집니다."
+    },
+    "초등학생이 읽으면 좋은 그림책, 동화책 100개.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "초등",
+        "화"
+      ],
+      "first_line": "- 제목, 저자, 출판사"
+    },
+    "초록우산 복지관  수학체험교실 자원봉사자 모집.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "교육",
+        "수학",
+        "초등",
+        "체험",
+        "화"
+      ],
+      "first_line": "수학체험교실에 참가하며 봉사할 분들 모집합니다. "
+    },
+    "초생산성 네이버 카페로 초대합니다..md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://naver.me/GXqJvXRh"
+    },
+    "초생산성챌린지 1월 소감.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "습관",
+        "영어"
+      ],
+      "first_line": "## 😊오랜만에 피드를 올린다.  안 올릴 수가 없었다. "
+    },
+    "추모문화제.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "1. 웹 자보 홍보물 만들기 "
+    },
+    "추모에서 행동으로  9.4 추모 문화재 안내.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "부모",
+        "교육",
+        "학부모",
+        "화"
+      ],
+      "first_line": "안녕하세요 선생님,  "
+    },
+    "축복같은 제자들과.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "수학",
+        "화"
+      ],
+      "first_line": "성인이 된 제자들과 만났다. "
+    },
+    "칼 융  동시성의 원리와 양자역학.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "의식 측면에서 인과관계에 있어야 설명가능한 것이지만"
+    },
+    "캐리어 비번.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "372"
+    },
+    "캠핑 관련 살것.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "- [ ] 랜턴"
+    },
+    "컬러링북 참고.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[**Toca Boca coloring paper DIY kit 🎨💕 #tocalifeworld**](https://www.youtube.com/shorts/Ic6dAsvSQYk)"
+    },
+    "켈리최, 김승호회장님 처럼 매번 쓰고 되뇌이라고 하는 경우 - 단기 적용.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "학습"
+      ],
+      "first_line": "1. 진쏠미, 리얼리티 트랜서핑, 시크릿처럼 이미 된 것처럼 상상하라고 하는 경우 - 장기 적용. "
+    },
+    "쿠팡 파트너스 세금 신고.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "쿠팡 파트너스 세금 신고 : [쿠팡파트너스 원천징수 및 세금신고 관련 : 네이버 블로그](https://m.blog.naver.com/cpacow/221947960840)"
+    },
+    "쿠팡파트너스 팁.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이",
+        "블로그"
+      ],
+      "first_line": "트위터로 아이돌 굿즈 공략"
+    },
+    "키네틱 타이포 그래피.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "1. 승디터"
+    },
+    "타임 라인 및 요약.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "[**1강(클래스101 무료공개 됐던 웰컴챕터 '1강~4강' 먼저 순차적으로 오픈 합니다) - YouTube**](https://www.youtube.com/watch?app=de"
+    },
+    "타입캐스트 공유 계정.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# [coppee.maker@gmail.com](mailto:coppee.maker@gmail.com)"
+    },
+    "토크 콘서트 사회자 역할.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 맥락 잡아서 이끌기"
+    },
+    "통합교육 포럼 인사말.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "교육",
+        "수학",
+        "감정",
+        "경청"
+      ],
+      "first_line": "(인사말) "
+    },
+    "통화 녹음.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "[[통화 녹음.m4a]]"
+    },
+    "특강. 아이를 기질대로 바라보기.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "mbti 를 중심으로"
+    },
+    "특허 고객 번호.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "**4-2023-082253-0**"
+    },
+    "파리 올림픽 경기.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 배드민턴 <span style=\"font-family:.AppleSDGothicNeoI-Regular;\">(예선전) 혼합복식, 여자</span> 단식, <span style="
+    },
+    "파리올림픽 계정.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "leehg0211@gmail.com"
+    },
+    "팔로워가 빨리 늘었으면 좋겠다..md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 그런데 글은 쓰기 귀찮다. "
+    },
+    "팔로워만 보세요!.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "자존감",
+        "공부"
+      ],
+      "first_line": "팔로워만 보세요! "
+    },
+    "퍼실리테이션 면접 예상질문.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "칭찬",
+        "화",
+        "경청"
+      ],
+      "first_line": "# 사전 단계"
+    },
+    "퍼실리테이션 사례를 제출할 때.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "성장",
+        "화"
+      ],
+      "first_line": "1. 상세기술할 회의 목록 5개와 상세 기술 확인서 받기 "
+    },
+    "퍼실리테이션.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 수업성찰처럼 가이드 만들기"
+    },
+    "퍼실리테이션의 첫 번째 단계 온전한 참여.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "경청"
+      ],
+      "first_line": "<p style=\"text-align:justify;margin:0\">"
+    },
+    "퍼실리테이터의 마음가짐.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "교육",
+        "화"
+      ],
+      "first_line": "본격적인 진행에 앞서, 오늘 하루 동안 테이블에서 여러분이 어떤 존재인지를 먼저 기억해주시면 감사하겠습니다."
+    },
+    "편안함에 안주하고 게을러서 실패했다면 아무런 변명도 하지 마시길 바랍니다..md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "<span style=\"font-family:.AppleSDGothicNeoI-Regular;\">편안함에</span> 안주하고 게을러서 실패했다면 아무런 변명도 하지 마시길 바랍니"
+    },
+    "푸조 노란색.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "복스홀 주황색"
+    },
+    "피드백 방법.md": {
+      "category": "education_content",
+      "subcategory": "놀이",
+      "keywords": [
+        "칭찬"
+      ],
+      "first_line": "# 칭찬 하는 방법 "
+    },
+    "필요 서류.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 바뀔 대표자 신분증"
+    },
+    "하영아~! 잘 지내고 있어! ㅎㅎ.md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "교육",
+        "성장"
+      ],
+      "first_line": "3월은 한주 한주가 진짜 빨리 지나간다! "
+    },
+    "하와이 대저택 퍼스트 히트 영상 구조.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "습관",
+        "심리",
+        "후킹"
+      ],
+      "first_line": "유인 - 쉽게 크게 변할 수 있다. (권위적인 연구진을 통해) "
+    },
+    "학교 문집 하나 출판.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "064-725-6950"
+    },
+    "학급 자동화 시스템.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "화"
+      ],
+      "first_line": "아이들이 스스로 움직이게 하고 싶나요?"
+    },
+    "학부모 상담 때 절대 하면 안되는 말 “남들 만큼만 하면 좋겠다”.md": {
+      "category": "education_content",
+      "subcategory": "양육/소통",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "학습",
+        "학부모"
+      ],
+      "first_line": "교사로서 수많은 학부모 상담을 진행하면 "
+    },
+    "학생들은.md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "공부"
+      ],
+      "first_line": "\"공부 잘하는 것\" 이 제일 중요한 일이 된 사회잖아요. "
+    },
+    "학생자치.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화"
+      ],
+      "first_line": "- 간식데이 : 전천당 + 다문화 과자"
+    },
+    "학원 강의 듣는 시간, 순공으로 계산하지 마세요..md": {
+      "category": "education_content",
+      "subcategory": "학습",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "공부",
+        "화"
+      ],
+      "first_line": "그건 공부가 아니라 ‘강의 감상’입니다."
+    },
+    "학원 없이 집에서 영어 잘하는 법 3가지 핵심 원칙.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이",
+        "칭찬",
+        "학습",
+        "공부",
+        "읽기"
+      ],
+      "first_line": "원칙 1: '노출'이 '학습'보다 우선이다"
+    },
+    "학원비 30만원 아끼는 초등 수학 완전정복법.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "초등",
+        "공부"
+      ],
+      "first_line": "수학, 더 이상 학원에 의존하지 마세요: 집에서 만드는 수학 100점"
+    },
+    "학원비 50만원 아끼는 초등 수학 완전정복법.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "아이",
+        "부모",
+        "수학",
+        "학습",
+        "초등"
+      ],
+      "first_line": "사실 부모가 최고의 수학 교사입니다."
+    },
+    "학폭 = 강제전학으로 폭탄 돌리기 - 교육청  케어하는 교사 전담팀.md": {
+      "category": "education_content",
+      "subcategory": "기타",
+      "keywords": [
+        "교육"
+      ],
+      "first_line": "# 학폭 = 강제전학으로 폭탄 돌리기 -> 교육청 : 케어하는 교사 전담팀"
+    },
+    "한 달만에 6000명 돌파.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "하지만"
+    },
+    "한결 여행 글쓰기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "감정",
+        "성장",
+        "글쓰기",
+        "화"
+      ],
+      "first_line": "2024.07.30"
+    },
+    "한수에게.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "부모",
+        "감정",
+        "공부",
+        "불안"
+      ],
+      "first_line": "한수야, 이렇게 너한테 편지쓰는 것이 거의 처음같은데... 맞지? "
+    },
+    "핫끝 리뷰.md": {
+      "category": "education_content",
+      "subcategory": "수학",
+      "keywords": [
+        "수학",
+        "영어"
+      ],
+      "first_line": "1. 수학 강의 : https://youtu.be/PcqGH4vEpww?si=6Gy69Iv_VbsoiO-g"
+    },
+    "핫비디오 문구.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "https://www.youtube.com/watch?v=x1M8MHtShRw"
+    },
+    "항파두리성.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "놀이",
+        "화"
+      ],
+      "first_line": "항파두리성 입지 이유 (추측)"
+    },
+    "햄치즈1.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 해물2"
+    },
+    "행발 누가기록.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "칭찬",
+        "수학",
+        "독서",
+        "공부",
+        "놀이"
+      ],
+      "first_line": "11월 ? 일 "
+    },
+    "행운 고양이의 반전 - 네덜란드 복권 광고.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "울음"
+      ],
+      "first_line": "행운 고양이의 반전"
+    },
+    "허수호 이한결 김성진 김상은 송승헌.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "이서현 이상국 강동한 이현정 허은지 "
+    },
+    "현상 욕구 분석 프롬프트.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "자녀",
+        "교육",
+        "훈육",
+        "자존감"
+      ],
+      "first_line": "나는 영상의 제목을 클릭하고 들어온 사람들이 자신이 가지고 있는 호기심, 욕구를 해결했으면 좋겠어."
+    },
+    "현수막.md": {
+      "category": "other",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "학교차원 홍보 단체별 요청"
+    },
+    "협재 제주석재사.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "진주 사진관"
+    },
+    "혜원이 이야기.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "팔로워"
+      ],
+      "first_line": "비공식적대화로 공식적 문화 만들기"
+    },
+    "혼자 하는 과정 질문.md": {
+      "category": "creator_business",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "1. 콘텐츠 관리 시트 만드는 방법 "
+    },
+    "확언, 끌어당김의 문제점.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "감정",
+        "화"
+      ],
+      "first_line": "1. 과거 기억의 정화, 지금 감정의 정화가 필요하다. 그런데 그냥 긍정적인 말 반복으로 해결하려고 한다. 이것은 다른 한쪽의 감정을 무시하는 경우가 될 수 있다. "
+    },
+    "확언.md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "화",
+        "구독자"
+      ],
+      "first_line": "나는 1,000,000 구독자 유튜버가 된다"
+    },
+    "회복 탄력성 스토리.md": {
+      "category": "video_notes",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "링컨 : https://youtube.com/shorts/9sJyG3H6XxM?si=YteILZV5WiV9KtPB"
+    },
+    "회복탄력성은 내부적인 요인과 외부적인 요인으로 나뉩니다..md": {
+      "category": "education_content",
+      "subcategory": "훈육",
+      "keywords": [
+        "글쓰기",
+        "화"
+      ],
+      "first_line": "내부적인 요인은"
+    },
+    "회의 4단계.md": {
+      "category": "personal",
+      "subcategory": null,
+      "keywords": [],
+      "first_line": "# 잘안되는 회의 모습 - 잘되는 회의 모습 "
+    },
+    "회의에 대한 고찰.md": {
+      "category": "education_content",
+      "subcategory": "독서",
+      "keywords": [
+        "아이"
+      ],
+      "first_line": "일반 학교와 혁신학교 회의 의 차이점 분명히 알려 주기"
+    },
+    "📚 챕터 1 마음 독립 - 자기주도의 씨앗 심기 (1주차).md": {
+      "category": "education_content",
+      "subcategory": "감정/심리",
+      "keywords": [
+        "아이",
+        "부모",
+        "칭찬",
+        "감정",
+        "학습"
+      ],
+      "first_line": "**목표:** 아이의 마음을 이해하고 신뢰를 형성하여 자기주도 학습의 토대를 만듭니다. (모델 1단계: 공감 및 신뢰 쌓기)"
+    }
+  }
+}

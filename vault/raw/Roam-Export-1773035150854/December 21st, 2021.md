@@ -1,0 +1,22 @@
+- [[스크랩]]
+    - [[웹사이트]]
+        - 키워드:: [[카피 예시]]
+        - 스크랩 내용:: 정말 잘 쓴 상세 페이지
+            - 와디즈 펀딩 #임팀장
+            - https://m.cafe.naver.com/ca-fe/web/cafes/29727675/articles/1766
+- [[스크랩]]
+    - [[책 - 창조습관]]
+        - 저자:: #이홍
+        - [[책 구절]]
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FKQ2ZrV3RpG.jpeg?alt=media&token=1c7b9240-5f7f-4b46-b01b-d79d8d199cb8)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F2RTnIXbm-l.jpeg?alt=media&token=02fae714-31ca-4838-b0d6-a9eecfcd89b9)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FOILNWH-l3x.jpeg?alt=media&token=56aeccb8-467f-48d3-bbd5-a75553d2a4f3)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F0U5UVRSAbi.jpeg?alt=media&token=030fffb1-ae9d-4908-9db7-4f61061f1249)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FU7Ldah2viG.jpeg?alt=media&token=95fe7f27-ae13-4baa-8e60-c77a600e14b3)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FjIdVZOfZNh.jpeg?alt=media&token=a3f8d3a5-00ab-4898-8390-39ffc1cb02ef)
+        - - 오늘의 핵심 -
+            - 현상을 관찰하고 질문을 통해 호기심을 가질 때 창조의 기회가 온다. 
+            - 창조 기회를 포착하는 핵심은 바로 '불편함' 이 닥쳤을 때 바로, 무조건! '질문'을 던져보자. 
+            - "왜 이렇게 될까?"
+            - "이게 뭘까?" 
+            - 질문을 하면 자연스럽게 호기심이 생기고 새로운 창조의 시간이 열릴 것이다.

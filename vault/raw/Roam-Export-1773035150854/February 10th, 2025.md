@@ -1,0 +1,3 @@
+- [[챗GPT]] API Key : [REDACTED-OpenAI API 키]
+    - [REDACTED-OpenAI API 키]
+- 

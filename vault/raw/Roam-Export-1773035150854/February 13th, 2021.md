@@ -1,0 +1,27 @@
+- [[매크로 만들기]]
+    - 코딩 배워 매크로 만들기 
+        - [[인스타]] 좋아요 매크로 만든 사람 : https://blog.naver.com/xkrwnsghks/222151287838
+        - [[[[사업]] 시스템]] 체계 에시 
+            - https://cafe.naver.com/byecompany2016?iframe_url_utf8=%2FArticleRead.nhn%3Fclubid%3D29727675%26articleid%3D2758
+- [[세일즈 퍼널 만들기]]
+    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fu5X_YhfjVB.png?alt=media&token=e2d71b32-b6ed-45e4-8243-862aefd5eb29)
+    - 2021년 2월 13일 현재 내 상태 
+        - 내 컨텐츠를 만들고 있는 상태 : '컨텐츠 5개'가 전부 
+        - 1. 꾸준한 컨텐츠 발행 
+            - 듣는 사람들이 흥미있게 들을 수 있게 '주의 끌기'
+            - '잡아두기' 를 확실하게 하기! : 자청 강의 보면서, 
+        - 2. 고객들이 다양하게 '인지'할 수 있는 구조 만들기 
+            - 붐랩 블로그
+            - 붐랩 [[인스타]] 
+            - 붐랩 페이스북 
+            - 붐랩 홈페이지 
+            - 붐랩 카페 
+        - 3. 고객들이 구매할 수 있는 상품 만들기 
+            - pdf 책
+            - 일반 책 
+            - 교육과정 
+            - 영상 강의 
+        - 4. 사례 수집하기 및 2월 계획하기
+            - 타임 메이커 : 탁샘 과 관련된 사례
+            - 곤팀장 사례 
+            - **사례를 통해 2월 동안 내가 할 수 있는 일들 데드라인 만들어서 계획하기 **

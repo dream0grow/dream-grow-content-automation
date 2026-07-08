@@ -1,0 +1,10 @@
+- [[한교육]] [[아이디어]]
+    - 미덕의 유래
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FGiDPKwXY7B.jpeg?alt=media&token=b225f9de-4038-4a5d-bcbd-7a7a3dc1fa32
+- [[새출발 프로젝트]]
+    - 첫 날 할 수 있는 놀이 준비하기 
+        - '전학생을 알아봐' 원조 놀이 + 모퉁이 놀이로 변형
+        - 선생님을 소개합니다 ppt + 하얀 거짓말 놀이
+            - 교사 소개 할 때 하얀 거짓말의 내용은 겨사의 경험과 영향이 교실에 어떻게 반영될지 고민하면 더 좋음. 
+        - 포스트잇 쪽지를 활용한 방학생활 맞추기 + 스피드 퀴즈
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FiWQp-Msw0w.png?alt=media&token=19fdc5c9-8d79-45f7-98bd-9ecc66b5c0d7)

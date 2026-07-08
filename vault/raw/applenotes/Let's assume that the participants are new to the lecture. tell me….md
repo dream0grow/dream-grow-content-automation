@@ -1,0 +1,1 @@
+Let's assume that the participants are new to the lecture. tell me more about reflective writing that provide them with open - ended prompts related to the lecture content and ask them to write their thoughts, insights, and questions.

@@ -1,0 +1,65 @@
+- #곤팀장 [[December 26th, 2022]] 창업 관련 Q&A 라이브강의  인사이트 
+    - 퍼스널 브랜딩과 수익화는 차이가 있다. 퍼스널 브랜딩(인지단계)보다 먼저 세팅할 것은 무엇을 팔 것인가?(구매단계)를 세팅하는 것이 먼저이다. 
+        - 나는 무엇을 팔 것인가? 그리고 내가 파는 것을 어떻게 소비자가 알 수 있게 할 것인가?로 질문을 바꿔야 한다. 
+            - ![세일즈퍼널](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F1ixt-pn6vg.jpg?alt=media&token=a1eb1d09-9f8c-4b4a-b082-88a31e2d0de5)
+            - ![돌다리 이론](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FS4NsV9tTiZ.png?alt=media&token=08832466-4d24-4147-862a-cbc592d43117)
+        - #사업 분야에서 준비할 사항 
+            - {{[[TODO]]}} 유튜브 강의 주제 및 목록
+            - {{[[TODO]]}} 유튜브 성장 습관_ 무료 배포 전자책
+            - {{[[TODO]]}} 유튜브 강의 결재 랜딩페이지 - [곤팀장 와디즈 랜딩페이지](https://www.wadiz.kr/web/campaign/detail/146622), [임팀장 와디즈 랜딩 페이지](https://www.wadiz.kr/web/campaign/detail/83131)
+    - 타켓팅과 목적을 가지고 내 상품을 전달하는 것이 중요하다. 무료이든 유로이든 마찬가지이다. 무료로 배포한다면, 참여하는 사람들에게 피드백을 적극적으로 받고, 그 내용을 수정 보완한다. 
+        - #사업 에서 준비할 사항
+            - {{[[TODO]]}} 상품 다각화 브레인 스토밍 
+            - {{[[TODO]]}} 상품 판매 가설 설정 및 미리 팔아보기 
+                - 미리 팔기 적용을 잘 알려주는 예 유튜브 - https://m.youtube.com/watch?v=Gaq0K4tq1gw
+                - #창업 과 미리 팔아보기 핵심 과정  
+            - {{[[TODO]]}} 미라클모닝 + 꿈 100번 쓰기 모임 열기 
+            - {{[[TODO]]}} 바로 정기적 수입을 얻을 수 있는 상품을 만들기 : 모임 수익화의 법칙, 탈잉 온라인 라이브 강의처럼 주기적으로 할 수 있는 것 세팅 ([유성우 원데이 특강](https://taling.me/Talent/Detail/17319))
+    - 100%의 만족도로 10의 속도라면 90% 만족도로 50의 속도를 내는 게 사업가의 정신이다. 돈을 잘 버는 것은 최상의 퀄리티를 내는 것이 아니라 평균 이상의 퀄리티를 빠르게 내면서 상대의 니즈를 제 때 해결해주는 것이다. 
+    - 제대로 된 경제적, 시간적 자유는 패시브 인컴이 들어오는 것이다. 이것은 내가 일을 하는 것이 아닌 다른 사람으로 레버리지를 해야한다. 내가 일하는 것이 아닌 사원들이 실행 가능하도록 조직을 만들어야 한다. 
+- {{[[TODO]]}}  신사임당 강의 유튜브 강의 듣기 : https://www.mkyu.co.kr/major/details/200067
+- [[교육]] [[가족]][[가족습관]]
+    - 스마트폰을 쥐어주는 기준 
+        - 스마트폰으로 만드는 가치 > 스마트폰이 없을 때 만드는 가치
+        - 스마트폰을 효과적으로 사용할 수 있는가? 연결(친구들과 연락), 가치생산(그리기 등)을 충분히 하는가? 
+        - 스마트폰이 없을 때 시간을 보낼 수 있는 힘이 있는가? 스마트폰이 없어도 잘 지낼 수 있으면 절제력이 커지는 것
+- [[퍼실리테이션]]
+    - 퍼실리테이션 자격증 (CF) 취득과정 안내 내용 정리 
+        - [자격인증 심사 관련 서류](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FyAOEzn83Wb.zip?alt=media&token=4936da11-6980-4263-9631-071c43a5be4d)
+        - **퍼실리테이션 사례를 제출할 때 **
+            - 상세기술할 회의 목록 5개와 상세 기술 확인서 받기
+                - 개교기념 행사 진행 회의
+                - 학생 전체 다모임 진행 회의 - 운동회 만들기
+                - 성읍초 다모임 회의
+                - 예술교과 회의
+                - 5학년 자전거 도일주 회의
+            - 상세기술하기
+        - ---
+        - 역량이 다 포함된 사례를 기술하는 것이 기준이다.
+            - ![퍼실리테이션 역량_디자인스킬](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FcgtQ3iGW7Y.png?alt=media&token=b1abe8dc-d4ea-45a8-b3aa-751645b721da)
+            - ![퍼실리테이션 역량_퍼실리테이션 스킬1](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FdfwIIFmMdK.png?alt=media&token=abd42836-9757-4692-adb1-fc754ddb0751)
+            - ![퍼실리테이션 역량_퍼실리테이션 스킬2](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FrPmkKnsAn3.png?alt=media&token=5ad332a3-4cbf-4646-bde4-f255e84909cd)
+            - ![퍼실리테이션 역량_펀더먼털 스킬](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F7mPAaFbanm.png?alt=media&token=5657cd52-df0a-4f79-a210-42735c58618f)
+        - 역량별로 5점 정도 라고 생각할 수 있음. (설계, 진행 스킬은 항목이 많고 가중치가 있을 수 있음. 내 생각엔 갈등 관리 역량과 인터렉션 스킬은 중요하게 느껴짐.)
+        - 발산 - 수렴 - 의사결정까지 과정이 드러나야 좋음.
+        - 시작 인터뷰부터 좌석배치(사진 첨부 하면 좋음) 등 자세히 쓰면 좋음.  좌석 배치는 환경 관리에 들어감.
+        - 하나로만 상세 기술서를 완성하는 것이 아니라
+        - 역량이 다 드러나게 1, 2개 더 적어도 괜찮다.
+        - 미팅 퍼실리테이션과 러닝 퍼실리테이션의 차이를 확실하게 확인하자.
+        - 상세 기술서 작성은 미팅 퍼실리테이션을 중심으로 작성하기.
+        - 미팅 퍼실리테이션이란 무엇인가? 라고 생각하면 다름이 도움이 되도록!  하는 것이 미팅 퍼실리테이션이고,
+        - 퍼실리테이션과 코칭의 차이점
+            - 퍼실리테이션은 팀, 회의와 의사결정 / 코칭은 개별, 성장과 역량개발 / 그런데 코칭도 그룹코칭과 문제해결을 하는 것들도 있어서 많이 옅어짐. 
+            - 퍼실리테이션과 코칭의 공통점은 질문이라는 것, 인간에 대한 애정이 비슷함.
+        - 미팅 퍼실리테이션이 잘 되는 상세 기술이 필요함.
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FsCY7d8KfSB.png?alt=media&token=95615705-366a-4e9d-91f7-7bbd955599a5)
+            - ￼
+        - 미팅 퍼실리테이션을 할 때 같이 준비한 동료들과 함께 한 것을 적어도 됨. 핵심 기준은 역량을 중심으로 기술하는 것이다.
+        - 사례를 서술할 때 갈등사례 를 다루면서 합의하는 것이 드러나는 사례가 좋은 사례임.
+        - 내가 어떤 활동을 했는가 (What?) 을 중심으로 작성하는 것만이 아니라
+        - Why와 How 를 통해 내가 왜 이 활동을 했는지, 어떤 과정으로 진행을 했는지
+        - 퍼실리테이션 역량을 담고 있는가? 확인을 해가며 작성해야함.
+        - 대화문(" ")를 통해 내가 인터렉션 스킬, 갈등해결 사안들을 잘 활용했다고 이야기를 하면 좋음.
+        - 설계와 진행이 어떻게 변했는지 생각을 해볼 필요가 있음.
+        - 퍼실리테이터로서 성찰이 필요함. (펀더먼털 역량)
+        - 응시 기간 : 3,6,9,12월

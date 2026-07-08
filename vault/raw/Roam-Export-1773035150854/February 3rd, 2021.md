@@ -1,0 +1,52 @@
+- [[유튜브 만들기]]
+- 유튜브 컨텐츠
+    - 공부법
+        - 공부의 질을 3배 높이는 계획 방법
+            - 우리가 실천하는 공부 계획의 문제점
+                - 공부를 하루, 이틀 열심히 하다가 못하는 이유
+                    - '동기'가 있을 때는 잘 됨. 하지만 장기적으로 실천하는 '반복'을 어려워 함.
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FtGqccSmfvw.JPG?alt=media&token=87aa0ad2-f7a9-40bc-b832-13a74771199c)
+                        - 정말 중요한 것은 '일상적으로' , '지속적으로', '반복해서' 하루 하루 지내는 것. 
+                        - 그래서 우리가 실천하고 있는 것이!
+                            - 공부 계획표 : 계획을 세우고 하루 하루 반복해서 실천해 나감. 
+                                - 계획의 의미 = 목표를 세분화하여 미래의 일을 차근 차근 달성해 나가는 것
+                                - 핵심 : 계획 - 실제로 실천 / 실천과 계획의 간극을 줄이는 것
+                - 작심삼일
+            - 공부의 질을 높이는 공부 계획 방법
+                - 1. 시간 계획형
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F164t6zgTVZ.PNG?alt=media&token=a49623bf-09ce-4271-ac16-6eed7502d7d3)
+                - 2. 체크리스트형
+                    - 문제점 
+                        - 공부의 양은 체크, BUT 공부의 질은 확인 못함.
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FWT1GiqljCi.png?alt=media&token=9d8ac835-0210-4ac9-b6e5-fd1776fd2a9d)
+                    - 문제점 : 공부의 질, 공부는 양
+                - 3. OOOO 계획형
+                    - "뽀모도로(토마토)" 계획 
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FDoY5nE08Bk.PNG?alt=media&token=e41877f7-f442-492d-b570-7d8dc4f19a6a)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FXvk2WPM6cG.PNG?alt=media&token=70bb71cd-a333-4b32-afd3-ee6fcb9a0130)
+                            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FjXEwSsUCwh.PNG?alt=media&token=0ae5c218-730b-4b40-b604-5420e874b4e5)
+                    - 뽀모도로 계획의 장점
+                        - 내가 어느만큼 집중하고 있는지 체크가 가능하다.
+                            - 양 확인 -> 질 확인까지!
+                        - "25분 동안 내가 최선을 다해서 일을 (공부를) 했는가?" 
+                        - 성찰을 주기적으로 한다!
+                            - 내가 공부하는 것이 어느 만큼 '뽀모도로'가 걸리는지 확인할 수 있다. 
+                                - 수학 20문제를 40분 동안 푸는 것으로 생각했지만 사실 50분~1시간이 평균시간일 수 있다.  (25분 * 2뽀모도로 =50분 만큼) 
+                                - 내가 평소에 공부하는 계획과 현실에서 하고 있는 것의 차이를 체크하며 확인하자!
+                            - 방해하고 있는 요소를 기록하자!
+                                - 외부 방해요소
+                                    - 주변 사람들의 말
+                                    - 핸드폰 
+                                - 내부 방해요소
+                                    - 딴 생각
+                                    - 배고픔 
+                            - 1주일, 한달 데이터를 누적하고 다음 계획에 반영한다. 
+        - 남은 방학 동안, 수학 공부 방법 - 수학 능력 제대로 잡고가자!
+            - 수학에서 우리가 헤매는 이유 
+            - 수학이라는 과목의 특성
+                - 계열성 
+                - 수학의 계열성 
+                - 수학을 주제별 공부
+            - 실질적으로 공부할 수 있는 내용 안내 
+        - 트리거 
+            - '최선을 다하고 있는가?' 

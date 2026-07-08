@@ -1,0 +1,60 @@
+- [[아이디어]]
+    - 인스타와 티스토리 연동
+        - 매일 성장하는 명언을 올리기
+        - 사진과 함께 명언 + 명언 영상 재생
+- [[스크랩]]
+    - 책:: [[습관의디테일]]
+        - 습관을 만들며 융통성있게 조절하기::
+            - 습관을 진행하면서 
+                - > 새로운 습관을 꾸준히 실천하다 보면 자연스럽게 그 이상을 추구 하게 된다. 그때 안전지대의 경계가 어디까지이며 그 경계를 살짝 넘 으면 어떤 느낌일지 알게 된다 안전지대를 알면 습관을 약화시키는 고통이나 좌절을 피할 수 있다.안전지대의 경계는 직선이 아니다. 하락과 상수를 반복하는 주식시장 그래프에 더 가깝다. 시간이 지나도 습관을 계속 지기면 안전지 대의 경계가 영구히 확장된다. 하지만 지금은 현재의 안전지대 경계를 찾는 데 집중하자.
+                    - > 다음은 습관의 난이도를 조절할 때 도움이 되는 지침들이다!
+                        - >  작은 습관 이상을 하려고 자신을 압박하지 말라. 아프거나, 피곤하거나, 그냥 기분이 내키지 않을 때는 그 습괸을 최소한으로 축소하라. 그 이상을 원하면 언제든 기대치를 높일 수 있고, 필 요할 때는 최소한도로 기대치를 낮출 수 있다. 띵통성도 이 기 술의 일부다.
+                        - > 그 이상을 원한다면 습관의 확장을 제한하지 말라. 얼마나 많 이, 얼마나 열심히 습관을 확대할지는 그때의 동기 수준을 따 라라.
+                        - > 습관을 지나치게 확대했다면 더 힘껏 축하하래 습관의 확대를 ![]()위해 자신을 너무 밀어붙이면 고통과 좌절이 생길 수 있고 습 관이 약해질 수 있다. 만약 그런 일이 발생한다면(그럴 것이다) 더 ! 힘껏 축하함으로써 부정적 기문을 상쇄할 수 있다.
+                        - > 감정적 신호를 통해 자신의 한계를 파악하도록 하라. 좌절 고 통, 특히 회피는 습관에 문제가 생기고 있다는 신호다. 아마 습 관의 난이도를 너무 많이, 너무 빨리 높였을 것이다. 반대로 습 관이 지루해졌다면 난이도를 높일 필요가 있다!
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F5UifowYM-R.jpeg?alt=media&token=06d750bf-6ba6-4e4f-8b5f-28a5b788c552)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F8eWAViI6QW.jpeg?alt=media&token=127d5f87-17e0-49f2-be2a-04b6c7678cdd)
+                        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F50sdGglmW4.jpeg?alt=media&token=d432511c-b4ce-4d6e-a509-8b75a24fdaa8)
+                        - ---
+        - [[독서노트]]
+            - 책 :: [[습관의디테일]]
+                - 내용::
+                    - 습관을 만들며 융통성있게 조절하기
+                        - - 오늘의 핵심 - 
+                            - 습관을 만드는 과정은 주식시장 그래프와 같다. 
+                            - 먼저, 우리는 작은 습관을 매일 실천할 수 있다. 
+                            - 작은 습관 이상을 하려고 스스로 압박하지 말자! 작은 습관을 있는 그대로 믿어라. 언제든 내킬 대 그 이상 할 수 있다. 그리고 힘들면 기대치도 낮출 수 있다. 
+                            - 계속 하다보면, 습관은 성장하고 증식한다. 
+                            - 팔굽혀펴기 2개가 10개가 될 수 있고,(성장) 팔굽혀펴기만 하던 데서  윗몸일으키기도 할 수 있다. (증식) 
+                            - 습관이 자라는 것은 내 삶의 안전 지대를 벗어나는 것이다. 
+                            - 성공할 때 마다 크게 축하하라! [[축하]]
+                            - 내 뇌에게 기쁨을 선사하라! 
+                            - [[축하]]는 습관을 제대로 정착시킬 것이다. 
+                            - 안전지대를 벗어나면 부정적 감정이 들 수 있다. 
+                            - 이 부정적 감정을 잘 알아차려라! 
+                            - 이것은 '화재경보기'와 같다. 
+                            - 회피, 좌절, 고통은 습관에 문제가 생기고 있다는 신호다. 
+                            - 아마 습관의 난이도가 높기 때문에 생기는 것이다. 
+                            - 난이도를 낮추자. 
+                            - [[능력체인5가지]]를 확인해보는 것이다. 
+                                - 그 행동을 할 시간이 많지는 않은가? 
+                                - 그 행동을 할 돈이 너무 많이 들지는 않는가?
+                                - 그 행동을 할 때 신체적 능력이 너무 많이 요구되지는 않는가? 
+                                - 그 행동에서 정신적 에너지가 너무 많이 쓰지는 않는가? 
+                                - 그 행동이 일상생활에 지장을 많이 주지는 않는가? 
+                            - 어떤 것에 걸리는지 확인하고 좀 더 하기 쉽게 바꾸자! 
+                            - 습관이 되는 과정은 주식 시장의 그래프처럼 상승과 하락을 반복한다. 
+                            - 계속 하다보면 결국 우상향할 것이다! 
+                            - 뇌는 지금 행동에 적응한다. 
+                            - 나는 더 많은 것들을 할 수 있다.
+- [[글쓰기]]
+    - [[제텔카스텐]]
+        - 제텔카스텐 방법 안내 : https://roambrain.com/implementing-zettelkasten-in-roam/
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FPIRPGgoBNQ.png?alt=media&token=711a5aec-5059-4987-bbdf-41146e81e888)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FO0A_fa2y_g.png?alt=media&token=6515bb2e-3ceb-4ed0-8861-c3ee3bf0adc5)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FISYtfiDPNU.png?alt=media&token=4c1f4155-735b-4015-ba0e-bd5c9974e293)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F7cfe5hLUjl.png?alt=media&token=b314e8f9-b8ed-4539-8784-7ef05f1d3ba4)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FJnaK1eYeSJ.png?alt=media&token=5964ae6d-8b60-4215-a599-22309a6023b2)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FAi7otZwmCo.png?alt=media&token=5ae730dd-7ef8-4cc6-b134-1de79070c192)
+            - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FZy8UWunCvd.png?alt=media&token=b7ecba62-6902-4aec-b9eb-b897fdd18a1c)
+            - 

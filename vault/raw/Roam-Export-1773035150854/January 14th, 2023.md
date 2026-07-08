@@ -1,0 +1,4 @@
+- [[카피라이팅]]
+    - #[[카피 예시]] 
+        - eatopia
+        - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FXBlszpPQu3.jpeg?alt=media&token=a4f6914d-cf42-49ab-98d3-c38c697f2450)

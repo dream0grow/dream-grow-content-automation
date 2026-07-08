@@ -1,0 +1,27 @@
+- [[유튜브 만들기]]
+    - "설날 때 공부 어떻게 해야할까요?"
+        - '공부'의 특징 
+            - 공부는 장기전 
+                - 단기기억 -> 장기 기억 
+                - 인풋보다 중요한 것은 아웃풋
+                    - "몸은 기억한다." 
+                    - 아웃풋은 운동성 기억
+                    - 앎에서 삶으로! 자꾸 표현~
+        - 1. ㅈㅇ ㅅㄱ 만들기를 시작하라! 
+            - 작은 습관의 힘 
+                - 변화의 시작점
+                    - 작은 것을 실천하는 것에서부터! 
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2F2rXXhoM-yN.jpeg?alt=media&token=fe2e5ddd-1fe1-4ded-ae72-e5f24a06f35e)
+                    - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2Fk23czSdyU0.jpeg?alt=media&token=dc77c825-7f3e-4447-932a-314b8df81fcf)
+                    - (예) 집 앞 문을 나선다.  신발을 신는다. 
+                             책상에 앉는다. 책 목차를 훑어본다.
+                             이번 방학에서 배운 내용 1단원의 단어들을 동생에게 말해본다. 
+                    - 
+        - 2. 지혜로운 ㅎㄱ 만들기 
+            - 환경의 중요성!
+                - ![](https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Fnormal_is_special%2FFmu06yuwbx.jpeg?alt=media&token=cf4b5643-ec09-4c5c-804b-395fe35ea5b0)
+                - (예) 스마트폰, 독서실 또는 재수학원 
+            - 내 주변 환경 되돌아보기
+                - 공부 환경인 것 찾기 +++
+                - 공부에 방해되는 환경 찾기 ---
+                - 더 나은 환경 만들기 
