@@ -65,6 +65,13 @@ jobs:
             python3 -m orchestrator.run
           fi
 
+      # 원고 수정·보완 핑퐁(yt_research 연동): ① 05 리뷰/대기의 새 원고를 파일명 포함
+      # 텔레그램으로 알리고 ② _system/feedback의 status: pending 노트를 반영한다.
+      # stage 지정 실행(수동 디버그)일 땐 건너뛴다.
+      - name: 원고 수정·보완 핑퐁 (알림 + 피드백 반영)
+        if: ${{ github.event.inputs.stage == '' }}
+        run: python3 -m vault_pipeline.script_feedback
+
       # 카드 변경분을 볼트에 커밋·push (git이 유일한 동기화 경로)
       - name: 볼트 카드 커밋
         run: |

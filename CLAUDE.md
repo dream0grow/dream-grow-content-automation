@@ -107,7 +107,28 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 플라우드 파이프라인 "새 녹음 없음" 오판 수리 (2026-07-10, 브랜치 `claude/plaud-mcp-setup-6j07l1`) — ⬅️ 이번 세션 작업
+### 원고 수정·보완 핑퐁 오케스트레이터 쪽 완성 (2026-07-10, 브랜치 `claude/claude-md-telegram-pingpong-hfb443`) — ⬅️ 이번 세션 작업
+
+yt_research 사이트가 만든 롱폼 원고(`vault/SNS 콘텐츠 제작 시스템/05 리뷰/대기/원고_*.md`)와
+사용자의 텔레그램 답장을 잇는 핑퐁의 **오케스트레이터 쪽 나머지 절반**을 구현했다.
+사이트 수신부(웹훅 → `_system/feedback/` pending 노트 저장)는 yt_research에 이미 있었다.
+신규 모듈 `vault_pipeline/script_feedback.py` + 테스트 7종(전체 43종 통과).
+- **① 초안 완성 알림**: `05 리뷰/대기`의 `type: youtube-script` + 검수 대기 원고를 찾아
+  **파일명을 포함한** 텔레그램 메시지를 보낸다. 사용자가 이 메시지에 답장하면 사이트 웹훅이
+  파일명을 추출해 피드백 노트를 만든다. 중복 알림은 `_system/logs/script_feedback_ledger.json`로 차단.
+- **② 피드백 반영**: `_system/feedback/`의 `type: feedback, status: pending` 노트를 읽어 대상 원고를
+  `llm.call_writing`(+`SCRIPT_REVISE` 프롬프트, HUMANIZE_RULES 주입)로 수정하고, 노트를
+  `status: applied`(대상 없음/유실 의심 시 `error`)로 갱신 → 재처리 방지. 반영 완료를 텔레그램 통지.
+- **안전장치**: 원고 수정은 **프론트매터 원문을 그대로 보존**하고 본문만 교체(끝에 HTML 주석 감사 흔적).
+  수정본이 200자 미만이거나 원본의 50% 미만이면 내용 유실로 보고 반영하지 않고 `error`로 남긴다.
+- **폴더/스키마 정합**: `VAULT_SCRIPT_PATH`(기본 `SNS 콘텐츠 제작 시스템/05 리뷰/대기`)·
+  `VAULT_FEEDBACK_PATH`(기본 `_system/feedback`)를 사이트 lib/vault.ts와 동일 기본값으로 맞췄다.
+- **배선**: `orchestrator.yml`(15분 cron)에 `python3 -m vault_pipeline.script_feedback` 단계 추가
+  (기존 볼트 커밋·push 재시도 루프가 원고/피드백 변경도 함께 동기화). 수동 stage 실행 시엔 건너뜀.
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② yt_research가 원고를 저장하는 실제 폴더가 기본값과
+  다르면 양쪽 `VAULT_SCRIPT_PATH`를 같은 값으로 맞출 것 ③ orchestrator Run workflow로 라이브 반영.
+
+### 플라우드 파이프라인 "새 녹음 없음" 오판 수리 (2026-07-10, 브랜치 `claude/plaud-mcp-setup-6j07l1`)
 
 텔레그램에 "처리할 새 녹음 없음"만 오던 원인 3개를 수리. vault_pipeline 테스트 20종 통과(신규 6종).
 - **근본 원인**: 플라우드에서 **전사 안 된** 녹음은 `get_transcript`가 `[]`를 반환하는데, 이걸 유효
