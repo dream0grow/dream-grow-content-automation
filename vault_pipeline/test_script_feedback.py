@@ -92,8 +92,25 @@ def test_announce_includes_filename_and_ledgers(vault):
     assert names == ["원고_YT롱폼_수학_초등수학.md"]
     # 텔레그램 메시지에 원고 파일명이 포함돼야 답장 핑퐁이 성립한다.
     assert any("원고_YT롱폼_수학_초등수학.md" in m for m in vault["sent"])
+    # 클릭 가능한 GitHub 링크(퍼센트 인코딩)가 포함돼야 한다.
+    assert any("https://github.com/" in m and "/blob/main/" in m
+               for m in vault["sent"])
     # 두 번째 실행은 장부 때문에 재알림하지 않는다.
     assert sf.announce_new_scripts(dry_run=False) == []
+
+
+def test_script_links_github_and_obsidian(monkeypatch):
+    name = "원고_YT롱폼_수학_초등수학.md"
+    monkeypatch.delenv("DG_OBSIDIAN_VAULT", raising=False)
+    monkeypatch.delenv("VAULT_SCRIPT_PATH", raising=False)
+    gh = sf.script_links(name)
+    assert gh.startswith("🔗 GitHub: https://github.com/")
+    assert "%20" in gh  # 공백이 인코딩돼 텔레그램이 URL로 인식한다
+    assert "obsidian://" not in gh  # vault 이름 미설정 시 옵시디언 링크 생략
+    # vault 이름을 주면 옵시디언 링크도 붙는다.
+    monkeypatch.setattr(sf, "OBSIDIAN_VAULT", "dreamgrow")
+    both = sf.script_links(name)
+    assert "obsidian://open?vault=dreamgrow" in both
 
 
 def test_announce_skips_non_pending_review(vault):
