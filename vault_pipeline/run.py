@@ -68,13 +68,20 @@ def main() -> None:
                     help="처리 대상과 계획만 출력, 볼트에 쓰지 않음")
     args = ap.parse_args()
 
-    recordings, warnings = fetch_recordings(args.since_days, args.max * 3,
-                                            source=args.source)
+    recordings, warnings, pending = fetch_recordings(
+        args.since_days, args.max * 3, source=args.source)
     for w in warnings:
         log_line(w, dry_run=args.dry_run)
+    if pending:
+        log_line(f"전사 대기 {len(pending)}건 (플라우드 앱에서 전사하면 자동 처리): "
+                 + ", ".join(pending[:5]), dry_run=args.dry_run)
 
     done = processed_ids()
-    todo = [r for r in recordings if r.id not in done][:args.max]
+    todo = [r for r in recordings if r.id not in done]
+    # 오래된 녹음부터 — 최신 녹음이 quota를 선점해 옛 녹음이 since_days 창을
+    # 벗어나기 전에 처리되지 못하는 기아 현상을 막는다.
+    todo.sort(key=lambda r: r.recorded)
+    todo = todo[:args.max]
     skipped = len(recordings) - len(todo)
     log_line(f"녹음 {len(recordings)}건 조회 — 신규 {len(todo)}건 처리 예정"
              + (f", 기처리 {skipped}건 생략" if skipped else ""),
@@ -107,11 +114,11 @@ def main() -> None:
             log_line(f"실패({rec.id} {rec.name}): {e}")
             traceback.print_exc()
 
-    # 폰 알림 (TELEGRAM_* Secrets 있을 때만) — 확인할 것이 있거나 실패 시
-    if todo or failures:
+    # 폰 알림 (TELEGRAM_* Secrets 있을 때만) — 확인·대기할 것이 있거나 실패 시
+    if todo or failures or pending:
         sent = telegram_notify.send(telegram_notify.briefing(
             total["drafts"], total["yellow"], total["green"], total["memos"],
-            failures))
+            failures, pending=len(pending)))
         if sent:
             log_line("텔레그램 알림 발송 완료")
 
