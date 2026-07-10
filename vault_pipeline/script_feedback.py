@@ -31,6 +31,7 @@ import json
 import os
 import re
 from pathlib import Path
+from urllib.parse import quote
 
 from vault_pipeline import prompts, telegram_notify
 from vault_pipeline.vault_io import (
@@ -62,6 +63,34 @@ def _script_dir() -> Path:
 def _feedback_dir() -> Path:
     rel = os.getenv("VAULT_FEEDBACK_PATH", FEEDBACK_DIR_DEFAULT).strip("/")
     return vault_root() / rel
+
+
+# 링크 생성용 설정(볼트=옵시디언 볼트=git 저장소의 vault/ 폴더).
+GITHUB_REPO = os.getenv("DG_GITHUB_REPO", "dream0grow/dream-grow-content-automation")
+GITHUB_BRANCH = os.getenv("DG_GITHUB_BRANCH", "main")
+# 저장소 안에서 볼트 루트가 놓인 폴더(옵시디언 볼트 루트 = 이 폴더).
+REPO_VAULT_PREFIX = os.getenv("DG_VAULT_REPO_PREFIX", "vault")
+# 옵시디언 앱에서 열기용 vault 이름(사용자 볼트 이름). 없으면 옵시디언 링크는 생략.
+OBSIDIAN_VAULT = os.getenv("DG_OBSIDIAN_VAULT", "").strip()
+
+
+def script_links(name: str) -> str:
+    """원고 파일명 → 클릭 가능한 링크 묶음(GitHub 웹 + 옵시디언). 텔레그램이 자동 링크한다.
+
+    - GitHub: 웹에서 바로 원고를 본다(항상 포함).
+    - 옵시디언: DG_OBSIDIAN_VAULT가 설정돼 있으면 앱에서 열기 링크도 추가한다.
+    """
+    script_rel = os.getenv("VAULT_SCRIPT_PATH", SCRIPT_DIR_DEFAULT).strip("/")
+    in_vault_path = f"{script_rel}/{name}"                 # 옵시디언 볼트 기준 경로
+    in_repo_path = f"{REPO_VAULT_PREFIX}/{in_vault_path}"  # git 저장소 기준 경로
+    gh = (f"https://github.com/{GITHUB_REPO}/blob/{GITHUB_BRANCH}/"
+          + quote(in_repo_path, safe="/"))
+    lines = [f"🔗 GitHub: {gh}"]
+    if OBSIDIAN_VAULT:
+        obs = (f"obsidian://open?vault={quote(OBSIDIAN_VAULT)}"
+               f"&file={quote(in_vault_path, safe='')}")
+        lines.append(f"🟣 옵시디언: {obs}")
+    return "\n".join(lines)
 
 
 def _ledger_path() -> Path:
@@ -137,7 +166,8 @@ def announce_new_scripts(dry_run: bool, max_items: int = DEFAULT_MAX) -> list[st
         head = f"✍️ 새 원고 초안 완성{f' · {title}' if title else ''}{f' ({length})' if length else ''}"
         msg = (
             f"{head}\n"
-            f"원고: {s['name']}\n\n"
+            f"원고: {s['name']}\n"
+            f"{script_links(s['name'])}\n\n"
             "이 메시지에 답장으로 수정 의견을 보내면 다음 실행에 반영됩니다. "
             "(예: 도입부를 더 짧게, 사례를 교실 장면으로)"
         )
@@ -263,8 +293,8 @@ def apply_one(fb: dict, dry_run: bool) -> str:
     log_line(f"피드백 반영 완료: {target_path.name} ← {fb['path'].name}")
     telegram_notify.send(
         f"✅ 원고 수정 반영 완료: {target_path.name}\n"
-        f"요청: {fb['instruction'][:200]}\n"
-        "볼트 05 리뷰/대기에서 확인하세요.")
+        f"{script_links(target_path.name)}\n"
+        f"요청: {fb['instruction'][:200]}")
     return "applied"
 
 
