@@ -31,7 +31,7 @@ def send(text: str) -> bool:
 
 
 def briefing(drafts: list[str], yellows: int, cases: int, memos: int,
-             failures: int) -> str:
+             failures: int, pending: int = 0) -> str:
     """파이프라인 실행 결과 요약 메시지를 만든다."""
     lines = ["🌙 플라우드 파이프라인 결과"]
     if drafts:
@@ -43,7 +43,10 @@ def briefing(drafts: list[str], yellows: int, cases: int, memos: int,
         lines.append(f"🧠 자동 입고: 사례 {cases}건, 메모 {memos}건")
     if failures:
         lines.append(f"⚠️ 처리 실패 {failures}건 — Actions 로그 확인")
+    if pending:
+        lines.append(f"⏳ 전사 대기 {pending}건 — 플라우드 앱에서 전사를 돌리면 "
+                     "다음 실행에 자동 처리")
     if len(lines) == 1:
-        lines.append("처리할 새 녹음 없음")
+        lines.append("새로 처리한 녹음 없음")
     lines.append("\n옵시디언(초생산)에서 확인 → 발행은 대시보드/복붙")
     return "\n".join(lines)

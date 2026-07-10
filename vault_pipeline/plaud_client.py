@@ -191,6 +191,54 @@ def _extract_items(raw: str) -> list[dict]:
     return []
 
 
+def _transcript_text(raw: str) -> str:
+    """get_transcript 응답에서 실제 발화 텍스트만 뽑는다.
+
+    플라우드는 앱에서 전사를 돌리기 전까지 `[]` 같은 빈 구조를 반환한다 —
+    이걸 그대로 전사로 쓰면 몇 시간짜리 녹음도 "짧아서 생략"으로 오판된다.
+    빈 구조면 ""를 반환해 호출부가 '전사 아직 없음'을 구분하게 한다.
+    JSON이 아니면(포맷된 평문 전사) 원문을 그대로 돌려준다.
+    """
+    s = raw.strip()
+    try:
+        data = json.loads(s)
+    except json.JSONDecodeError:
+        return s
+    if isinstance(data, str):
+        return data.strip()
+    if isinstance(data, dict):                      # {"data": [...]} 등 래핑 해제
+        for key in ("data", "source_list", "items", "results"):
+            if isinstance(data.get(key), list):
+                data = data[key]
+                break
+    texts: list[str] = []
+    items = data if isinstance(data, list) else [data]
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        # 원격 형식: data_type=transaction 항목의 data_content 안에
+        # 세그먼트 목록이 JSON 문자열로 다시 감싸여 있다 (outline/polish는 제외)
+        if item.get("data_type") not in (None, "", "transaction"):
+            continue
+        inner = item.get("data_content") or item.get("content")
+        segments = None
+        if isinstance(inner, list):
+            segments = inner
+        elif isinstance(inner, str) and inner.strip():
+            try:
+                segments = json.loads(inner)
+            except json.JSONDecodeError:
+                texts.append(inner.strip())   # 이미 평문
+                continue
+        if isinstance(segments, list):
+            for seg in segments:
+                if isinstance(seg, dict):
+                    content = str(seg.get("content", "")).strip()
+                    if content:
+                        texts.append(content)
+    return "\n".join(texts)
+
+
 def _item_date(item: dict) -> str:
     for key in ("start_time", "created_at", "create_time", "date", "recorded"):
         v = item.get(key)
@@ -208,8 +256,14 @@ def _item_date(item: dict) -> str:
     return now_kst().strftime("%Y-%m-%d")
 
 
-def fetch_mcp(since_days: int, limit: int, _retry: bool = True) -> list[Recording]:
-    """최근 since_days일의 녹음과 전사를 가져온다. 미인증이면 PlaudUnavailable."""
+def fetch_mcp(since_days: int, limit: int,
+              _retry: bool = True) -> tuple[list[Recording], list[str]]:
+    """최근 since_days일의 녹음과 전사를 가져온다. 미인증이면 PlaudUnavailable.
+
+    반환: (전사 있는 녹음 최대 limit건, 전사가 아직 없는 녹음 이름들).
+    전사 없는 녹음은 Recording으로 만들지 않는다 — 장부에 오르지 않아야
+    나중에 앱에서 전사한 뒤 다음 실행에서 정상 처리된다.
+    """
     if not _bootstrap_tokens():
         raise PlaudUnavailable(
             "PLAUD_TOKENS_JSON 미설정 — 로컬에서 1회 로그인한 뒤 "
@@ -228,25 +282,35 @@ def fetch_mcp(since_days: int, limit: int, _retry: bool = True) -> list[Recordin
                 return fetch_mcp(since_days, limit, _retry=False)
             raise PlaudUnavailable(
                 "플라우드 토큰 만료 — 로컬 재로그인 후 Secret을 갱신하세요.")
-        recs = []
-        for item in _extract_items(raw)[:limit]:
+        recs: list[Recording] = []
+        pending: list[str] = []
+        # limit으로 미리 자르지 않는다 — 전사 없는 최신 메모들이 자리를 다
+        # 차지하면 정작 전사된 옛 녹음이 영영 순번을 못 받는다(기아 현상).
+        for item in _extract_items(raw):
+            if len(recs) >= limit:
+                break
             file_id = str(item.get("id") or item.get("file_id") or "").strip()
             if not file_id:
                 continue
+            name = str(item.get("name") or item.get("title") or file_id)
             try:
-                transcript = session.call_tool("get_transcript", {"file_id": file_id})
+                raw_tr = session.call_tool("get_transcript", {"file_id": file_id})
             except PlaudUnavailable:
                 continue
-            if not transcript.strip() or "Not authenticated" in transcript:
+            if "Not authenticated" in raw_tr:
+                continue
+            text = _transcript_text(raw_tr)
+            if not text:
+                pending.append(name)
                 continue
             recs.append(Recording(
                 id=file_id,
-                name=str(item.get("name") or item.get("title") or file_id),
+                name=name,
                 recorded=_item_date(item),
-                transcript=transcript.strip(),
+                transcript=text,
                 source="mcp",
             ))
-        return recs
+        return recs, pending
     finally:
         session.close()
 
@@ -254,15 +318,18 @@ def fetch_mcp(since_days: int, limit: int, _retry: bool = True) -> list[Recordin
 # ------------------------------------------------------------------- 통합 입구
 
 def fetch_recordings(since_days: int, limit: int,
-                     source: str = "auto") -> tuple[list[Recording], list[str]]:
-    """(녹음 목록, 경고 메시지들). source: auto | inbox | mcp"""
+                     source: str = "auto",
+                     ) -> tuple[list[Recording], list[str], list[str]]:
+    """(녹음 목록, 경고 메시지들, 전사 대기 녹음 이름들). source: auto | inbox | mcp"""
     warnings: list[str] = []
+    pending: list[str] = []
     recs: list[Recording] = []
     if source in ("auto", "inbox"):
         recs.extend(fetch_inbox())
     if source in ("auto", "mcp"):
         try:
-            recs.extend(fetch_mcp(since_days, limit))
+            mcp_recs, pending = fetch_mcp(since_days, limit)
+            recs.extend(mcp_recs)
         except PlaudUnavailable as e:
             msg = f"플라우드 API 생략: {e}"
             if source == "mcp":
@@ -278,4 +345,4 @@ def fetch_recordings(since_days: int, limit: int,
             continue
         seen.add(r.id)
         unique.append(r)
-    return unique[:limit], warnings
+    return unique[:limit], warnings, pending

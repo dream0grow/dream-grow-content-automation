@@ -201,3 +201,84 @@ def test_no_files_on_llm_failure(vault, monkeypatch):
         pipeline_run.process_recording(recs[0], dry_run=False)
     assert not list((vault / "제텔카스텐/1. 메모").glob("*.md"))
     assert "test-rec-001" not in vault_io.processed_ids()
+
+
+# ------------------------------------------------- 전사 없음/기아/알림 회귀 방지
+
+def test_transcript_text_empty_structure():
+    """전사 안 된 녹음의 `[]` 응답은 빈 문자열 — '짧은 녹음' 오판 금지."""
+    from vault_pipeline.plaud_client import _transcript_text
+    assert _transcript_text("[]") == ""
+    assert _transcript_text('{"data": []}') == ""
+
+
+def test_transcript_text_remote_format():
+    """원격 커넥터 형식(transaction 안에 세그먼트 JSON)에서 발화만 뽑는다."""
+    from vault_pipeline.plaud_client import _transcript_text
+    segments = json.dumps([
+        {"content": "오답을 같이 보는 순간 아이들 표정이 풀린다.", "start_time": 800},
+        {"content": "평가는 피드백이어야 한다.", "start_time": 36160},
+    ])
+    raw = json.dumps([
+        {"data_type": "transaction", "data_content": segments},
+        {"data_type": "outline",
+         "data_content": json.dumps([{"topic": "요약 토픽(전사 아님)"}])},
+    ])
+    text = _transcript_text(raw)
+    assert "표정이 풀린다" in text and "피드백이어야 한다" in text
+    assert "요약 토픽" not in text            # outline은 전사가 아니다
+
+
+def test_transcript_text_plain_passthrough():
+    """JSON이 아닌 평문 전사는 그대로 통과한다."""
+    from vault_pipeline.plaud_client import _transcript_text
+    plain = "[00:01 - 00:20] 이한결: 오늘 수학 시간에 오답 공유 활동을 했다."
+    assert _transcript_text(plain) == plain
+
+
+def test_no_transcript_not_marked_processed(vault, monkeypatch):
+    """전사 대기 녹음은 장부에 오르지 않고, 알림은 전사 대기를 보고한다."""
+    from vault_pipeline import plaud_client
+
+    def fake_fetch(since_days, limit, source="auto"):
+        return [], [], ["2026-07-09 17:18:07"]      # 전사 대기 1건
+    monkeypatch.setattr(pipeline_run, "fetch_recordings", fake_fetch)
+
+    sent = []
+    monkeypatch.setattr(pipeline_run.telegram_notify, "send",
+                        lambda text: sent.append(text) or True)
+    monkeypatch.setattr("sys.argv", ["run"])
+    pipeline_run.main()
+    assert not vault_io.processed_ids()               # 장부에 안 오름
+    assert sent and "전사 대기 1건" in sent[0]         # 대기 사실을 알림
+    assert "처리할 새 녹음 없음" not in sent[0]
+
+
+def test_todo_oldest_first(vault, monkeypatch):
+    """quota는 오래된 녹음부터 — 최신 메모의 기아 유발 방지."""
+    from vault_pipeline.plaud_client import Recording
+    order = []
+
+    def fake_fetch(since_days, limit, source="auto"):
+        recs = [Recording(id=f"r{i}", name=f"녹음{i}", recorded=d,
+                          transcript="충분히 긴 전사 " * 20, source="mcp")
+                for i, d in enumerate(["2026-07-09", "2026-07-04", "2026-07-06"])]
+        return recs, [], []
+    monkeypatch.setattr(pipeline_run, "fetch_recordings", fake_fetch)
+    monkeypatch.setattr(pipeline_run, "process_recording",
+                        lambda rec, dry_run: order.append(rec.recorded) or
+                        {"artifacts": [], "drafts": [], "green": 0,
+                         "yellow": 0, "memos": 0})
+    monkeypatch.setattr(pipeline_run.telegram_notify, "send", lambda t: False)
+    monkeypatch.setattr("sys.argv", ["run", "--max", "2"])
+    pipeline_run.main()
+    assert order == ["2026-07-04", "2026-07-06"]      # 오래된 것부터, max 준수
+
+
+def test_briefing_pending_line():
+    from vault_pipeline import telegram_notify
+    msg = telegram_notify.briefing([], 0, 0, 0, 0, pending=3)
+    assert "전사 대기 3건" in msg
+    assert "처리할 새 녹음 없음" not in msg
+    msg2 = telegram_notify.briefing([], 0, 0, 0, 0, pending=0)
+    assert "새로 처리한 녹음 없음" in msg2
