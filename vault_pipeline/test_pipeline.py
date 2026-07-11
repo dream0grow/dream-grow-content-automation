@@ -268,7 +268,7 @@ def test_todo_oldest_first(vault, monkeypatch):
     monkeypatch.setattr(pipeline_run, "process_recording",
                         lambda rec, dry_run: order.append(rec.recorded) or
                         {"artifacts": [], "drafts": [], "green": 0,
-                         "yellow": 0, "memos": 0})
+                         "yellow": 0, "memos": 0, "detail": {}})
     monkeypatch.setattr(pipeline_run.telegram_notify, "send", lambda t: False)
     monkeypatch.setattr("sys.argv", ["run", "--max", "2"])
     pipeline_run.main()
@@ -282,3 +282,20 @@ def test_briefing_pending_line():
     assert "처리할 새 녹음 없음" not in msg
     msg2 = telegram_notify.briefing([], 0, 0, 0, 0, pending=0)
     assert "새로 처리한 녹음 없음" in msg2
+
+
+def test_briefing_details_block():
+    """녹음별 메모 제목·키워드가 알림에 표시된다 (상한 5개 + 외 N건)."""
+    from vault_pipeline import telegram_notify
+    details = [{
+        "녹음": "07-10 강의: 고객 현상과 욕구",
+        "메모": [f"메모 제목 {i}" for i in range(7)],
+        "키워드": ["소비자 행동분석 5단계", "직결감"],
+        "의견": ["욕구는 검색해서 떠밀려야 한다"],
+    }]
+    msg = telegram_notify.briefing([], 0, 0, 7, 0, details=details)
+    assert "📼 07-10 강의: 고객 현상과 욕구" in msg
+    assert "메모 제목 0" in msg and "메모 제목 4" in msg
+    assert "메모 제목 5" not in msg and "외 2건" in msg      # 상한 5개
+    assert "🔑 키워드: 소비자 행동분석 5단계, 직결감" in msg
+    assert "💬 의견: 욕구는 검색해서 떠밀려야 한다" in msg

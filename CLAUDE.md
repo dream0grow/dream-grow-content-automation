@@ -141,6 +141,11 @@ yt_research 사이트가 만든 롱폼 원고(`vault/SNS 콘텐츠 제작 시스
   다음 실행에 자동 처리" 표시. 잘못된 장부 6건 리셋(ledger 비움).
 - **운영 메모**: 이 파이프라인은 **플라우드 앱에서 전사가 돌아간 녹음만** 가공할 수 있다.
   자동 전사 설정을 켜두거나, 녹음 후 앱에서 전사를 실행해야 한다.
+- **후속 수리 2건**: ① plaud-pipeline·vault-agents 워크플로우에 Claude Max CLI 폴백 배선
+  (ANTHROPIC_API_KEY 시크릿이 비어 있어 FileNotFoundError('claude')로 전건 실패하던 것,
+  orchestrator.yml 패턴 이식). ② 텔레그램 알림에 **녹음별 산출물 상세**(📼 녹음명 + 메모 제목
+  최대 5개 + 🔑키워드 + 💬의견)와 저장 위치(`vault/제텔카스텐/{1.메모,2.키워드,3.의견}`) 표시 —
+  `process_recording`이 `detail`을 반환, `briefing(details=)`가 렌더.
 
 카드 저장소를 노션에서 완전히 걷어내고 옵시디언 볼트 하나로 고정, 동기화는 git/GitHub 단일 경로. 전체 27종 통과.
 - **백엔드 일원화**: `state.py` 파사드를 옵시디언 전용으로(이중 백엔드·`DG_STATE_BACKEND` 폐기).

@@ -30,17 +30,43 @@ def send(text: str) -> bool:
         return False
 
 
+MAX_TITLES_PER_KIND = 5      # 녹음당 종류별 제목 표시 상한 (폰 화면 보호)
+
+
+def _detail_block(detail: dict) -> list[str]:
+    """녹음 1건의 산출물 제목을 메시지 줄들로 만든다."""
+    lines = [f"\n📼 {detail.get('녹음', '')}"]
+    for kind, icon in (("메모", "·"), ("키워드", "🔑"), ("의견", "💬")):
+        titles = [t for t in detail.get(kind) or [] if t]
+        if not titles:
+            continue
+        if kind == "메모":          # 메모 제목이 곧 핵심 내용 — 줄 단위로
+            lines += [f"  · {t}" for t in titles[:MAX_TITLES_PER_KIND]]
+            if len(titles) > MAX_TITLES_PER_KIND:
+                lines.append(f"  · … 외 {len(titles) - MAX_TITLES_PER_KIND}건")
+        else:                       # 키워드/의견은 한 줄 요약
+            shown = ", ".join(titles[:MAX_TITLES_PER_KIND])
+            more = (f" 외 {len(titles) - MAX_TITLES_PER_KIND}건"
+                    if len(titles) > MAX_TITLES_PER_KIND else "")
+            lines.append(f"  {icon} {kind}: {shown}{more}")
+    return lines
+
+
 def briefing(drafts: list[str], yellows: int, cases: int, memos: int,
-             failures: int, pending: int = 0) -> str:
+             failures: int, pending: int = 0,
+             details: list[dict] | None = None) -> str:
     """파이프라인 실행 결과 요약 메시지를 만든다."""
     lines = ["🌙 플라우드 파이프라인 결과"]
     if drafts:
-        lines.append(f"\n✍️ 교사그룹 초안 {len(drafts)}건 — 리뷰대기")
+        lines.append(f"\n✍️ 교사그룹 초안 {len(drafts)}건 — 리뷰대기"
+                     " (vault/프로젝트/교육운동)")
         lines += [f"  · {t}" for t in drafts[:5]]
     if yellows:
         lines.append(f"📋 사례 노랑 결재 대기 {yellows}건")
     if cases or memos:
         lines.append(f"🧠 자동 입고: 사례 {cases}건, 메모 {memos}건")
+    for detail in details or []:
+        lines += _detail_block(detail)
     if failures:
         lines.append(f"⚠️ 처리 실패 {failures}건 — Actions 로그 확인")
     if pending:
@@ -48,5 +74,6 @@ def briefing(drafts: list[str], yellows: int, cases: int, memos: int,
                      "다음 실행에 자동 처리")
     if len(lines) == 1:
         lines.append("새로 처리한 녹음 없음")
-    lines.append("\n옵시디언(초생산)에서 확인 → 발행은 대시보드/복붙")
+    lines.append("\n🗂 저장: 옵시디언 vault/제텔카스텐 (1.메모 · 2.키워드 · 3.의견)"
+                 " → 발행은 대시보드/복붙")
     return "\n".join(lines)
