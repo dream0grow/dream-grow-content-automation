@@ -145,7 +145,8 @@ yt_research 사이트가 만든 롱폼 원고(`vault/SNS 콘텐츠 제작 시스
   (ANTHROPIC_API_KEY 시크릿이 비어 있어 FileNotFoundError('claude')로 전건 실패하던 것,
   orchestrator.yml 패턴 이식). ② 텔레그램 알림에 **녹음별 산출물 상세**(📼 녹음명 + 메모 제목
   최대 5개 + 🔑키워드 + 💬의견)와 저장 위치(`vault/제텔카스텐/{1.메모,2.키워드,3.의견}`) 표시 —
-  `process_recording`이 `detail`을 반환, `briefing(details=)`가 렌더.
+  `process_recording`이 `detail`을 반환, `briefing(details=)`가 렌더. 제목은 **GitHub 노트로
+  열리는 링크**(텔레그램 HTML 모드, `note_url()` — blob/main URL). push 완료 후 링크가 열린다.
 
 카드 저장소를 노션에서 완전히 걷어내고 옵시디언 볼트 하나로 고정, 동기화는 git/GitHub 단일 경로. 전체 27종 통과.
 - **백엔드 일원화**: `state.py` 파사드를 옵시디언 전용으로(이중 백엔드·`DG_STATE_BACKEND` 폐기).

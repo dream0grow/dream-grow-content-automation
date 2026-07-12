@@ -277,7 +277,7 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
     path = write_note("프로젝트/교육운동/블로그_초안", f"{today()} {blog_title}", meta,
                       f"# {blog_title}\n\n{blog}", dry_run=dry_run)
     save_ai_original(path, f"# {blog_title}\n\n{blog}", dry_run=dry_run)
-    artifacts.append(path.name)
+    artifacts.append(f"프로젝트/교육운동/블로그_초안/{path.name}")
 
     fb = llm.call_writing(
         prompts.TEACHER_FACEBOOK.format(topic=topic, core=core, quotes=quotes),
@@ -288,5 +288,5 @@ def write_teacher_posts(rec: Recording, seed: dict, dry_run: bool) -> list[str]:
     path_fb = write_note("프로젝트/교육운동/페이스북_초안", f"{today()} {topic}",
                          meta_fb, fb, dry_run=dry_run)
     save_ai_original(path_fb, fb, dry_run=dry_run)
-    artifacts.append(path_fb.name)
+    artifacts.append(f"프로젝트/교육운동/페이스북_초안/{path_fb.name}")
     return artifacts
