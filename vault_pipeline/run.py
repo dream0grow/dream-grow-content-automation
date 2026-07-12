@@ -15,6 +15,7 @@
 import argparse
 import sys
 import traceback
+from pathlib import Path
 
 from vault_pipeline import prompts, telegram_notify, writers
 from vault_pipeline.plaud_client import (
@@ -58,10 +59,13 @@ def process_recording(rec: Recording, dry_run: bool) -> dict:
     artifacts += drafts
     detail = {
         "녹음": rec.name,
-        "메모": list(memo_stems.keys()),
-        "키워드": [f.removesuffix(".md").removeprefix("K_ai - ")
+        "메모": [{"제목": title, "경로": f"제텔카스텐/1. 메모/{stem}.md"}
+                for title, stem in memo_stems.items()],
+        "키워드": [{"제목": f.removesuffix(".md").removeprefix("K_ai - "),
+                   "경로": f"제텔카스텐/2. 키워드/{f}"}
                   for f in keyword_files],
-        "의견": [f.removesuffix(".md").removeprefix("O - ")
+        "의견": [{"제목": f.removesuffix(".md").removeprefix("O - "),
+                 "경로": f"제텔카스텐/3. 의견/{f}"}
                 for f in opinion_files],
     }
     return {"artifacts": artifacts, "drafts": drafts,
@@ -128,9 +132,11 @@ def main() -> None:
 
     # 폰 알림 (TELEGRAM_* Secrets 있을 때만) — 확인·대기할 것이 있거나 실패 시
     if todo or failures or pending:
+        draft_links = [{"제목": Path(p).stem, "경로": p}
+                       for p in total["drafts"]]
         sent = telegram_notify.send(telegram_notify.briefing(
-            total["drafts"], total["yellow"], total["green"], total["memos"],
-            failures, pending=len(pending), details=details))
+            draft_links, total["yellow"], total["green"], total["memos"],
+            failures, pending=len(pending), details=details), html=True)
         if sent:
             log_line("텔레그램 알림 발송 완료")
 

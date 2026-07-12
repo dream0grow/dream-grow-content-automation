@@ -246,7 +246,7 @@ def test_no_transcript_not_marked_processed(vault, monkeypatch):
 
     sent = []
     monkeypatch.setattr(pipeline_run.telegram_notify, "send",
-                        lambda text: sent.append(text) or True)
+                        lambda text, **k: sent.append(text) or True)
     monkeypatch.setattr("sys.argv", ["run"])
     pipeline_run.main()
     assert not vault_io.processed_ids()               # 장부에 안 오름
@@ -269,7 +269,7 @@ def test_todo_oldest_first(vault, monkeypatch):
                         lambda rec, dry_run: order.append(rec.recorded) or
                         {"artifacts": [], "drafts": [], "green": 0,
                          "yellow": 0, "memos": 0, "detail": {}})
-    monkeypatch.setattr(pipeline_run.telegram_notify, "send", lambda t: False)
+    monkeypatch.setattr(pipeline_run.telegram_notify, "send", lambda t, **k: False)
     monkeypatch.setattr("sys.argv", ["run", "--max", "2"])
     pipeline_run.main()
     assert order == ["2026-07-04", "2026-07-06"]      # 오래된 것부터, max 준수
@@ -299,3 +299,27 @@ def test_briefing_details_block():
     assert "메모 제목 5" not in msg and "외 2건" in msg      # 상한 5개
     assert "🔑 키워드: 소비자 행동분석 5단계, 직결감" in msg
     assert "💬 의견: 욕구는 검색해서 떠밀려야 한다" in msg
+
+
+def test_briefing_links(monkeypatch):
+    """경로가 있는 항목은 GitHub 노트 링크(HTML 앵커)로 렌더된다."""
+    from vault_pipeline import telegram_notify
+    monkeypatch.setenv("GITHUB_REPOSITORY", "dream0grow/dream-grow-content-automation")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    details = [{
+        "녹음": "07-10 강의",
+        "메모": [{"제목": "A < B 라는 통찰",
+                 "경로": "제텔카스텐/1. 메모/A B 라는 통찰.md"}],
+        "키워드": [], "의견": [],
+    }]
+    msg = telegram_notify.briefing([], 0, 0, 1, 0, details=details)
+    assert ('<a href="https://github.com/dream0grow/dream-grow-content-automation/'
+            'blob/main/vault/%EC%A0%9C%ED%85%94%EC%B9%B4%EC%8A%A4%ED%85%90/'
+            '1.%20%EB%A9%94%EB%AA%A8/A%20B%20%EB%9D%BC%EB%8A%94%20'
+            '%ED%86%B5%EC%B0%B0.md">') in msg
+    assert "A &lt; B 라는 통찰</a>" in msg          # 제목은 HTML 이스케이프
+    # 문자열 항목(경로 없음)은 여전히 평문으로 동작
+    msg2 = telegram_notify.briefing([], 0, 0, 1, 0,
+                                    details=[{"녹음": "x", "메모": ["평문 제목"],
+                                              "키워드": [], "의견": []}])
+    assert "평문 제목" in msg2 and "<a href" not in msg2.split("📼")[1].split("🗂")[0]
