@@ -214,3 +214,21 @@ def test_benchmark_and_hooks_only_in_first_draft(monkeypatch):
     assert "벤치마킹ABC" not in writer_prompts[1]  # 재작성엔 없음(B5)
     assert "후킹패턴XYZ" not in writer_prompts[1]
     assert "학습된 문체" in writer_prompts[1]      # 스타일은 계속 유지
+
+
+# ---------- 새 카드 접수 텔레그램 통지 ----------
+
+def test_intake_notifies_new_card(monkeypatch):
+    state = FakeState()
+    state.append_formatted_section = lambda *a, **k: None
+    _patch(state)
+    fake_manus = types.SimpleNamespace(
+        available=lambda: False,
+        claude_research_fallback=lambda topic, audience: [],
+    )
+    monkeypatch.setattr(run, "manus_research", fake_manus)
+    run.handle_intake({
+        "page_id": "p1", "content_id": "DG-2026-0009",
+        "idempotency_key": "", "topic": "받아쓰기 우는 아이", "audience": "학부모",
+    })
+    assert any("🆕" in msg and "받아쓰기 우는 아이" in msg for _, msg in state.notes)
