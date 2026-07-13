@@ -170,3 +170,91 @@ def test_dry_run_writes_nothing(vault):
     fb = list(vault["fb_dir"].glob("*.md"))[0].read_text(encoding="utf-8")
     assert "status: pending" in fb
     assert not sf._ledger_path().exists()
+
+
+# ---------- 파이프라인 카드 핑퐁 (스레드/뉴스레터/카드뉴스) ----------
+
+CARD_FM = (
+    "---\n"
+    "topic: 받아쓰기 시험만 보면 우는 아이\n"
+    "content_id: DG-2026-0001\n"
+    "stage: approval\n"
+    "status: needs_human\n"
+    "format: thread\n"
+    "approval_status: requested\n"
+    "review_status: approved\n"
+    "approved_keyword: 받아쓰기\n"
+    "created_time: 2026-07-08 07:35\n"
+    "---\n\n"
+    "## ✍️ 초안 (thread) — 2026-07-08 08:47\n\n초안 본문\n"
+)
+
+CARD_FEEDBACK_FM = (
+    "---\n"
+    "type: feedback\n"
+    'target: "DG-2026-0001"\n'
+    "status: pending\n"
+    "출처: telegram\n"
+    "---\n\n"
+    "# 피드백 -- DG-2026-0001\n\n"
+    "도입을 질문으로 시작하고 교실 사례를 하나 넣어주세요.\n"
+)
+
+
+def test_apply_card_target_records_revision_request(vault):
+    active = vault["root"] / "파이프라인" / "활성"
+    active.mkdir(parents=True)
+    card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
+    card.write_text(CARD_FM, encoding="utf-8")
+    for p in vault["fb_dir"].glob("*.md"):
+        p.unlink()
+    fb = vault["fb_dir"] / "2026-07-13 1200 DG-2026-0001 피드백.md"
+    fb.write_text(CARD_FEEDBACK_FM, encoding="utf-8")
+
+    counts = sf.apply_pending_feedback(dry_run=False)
+
+    assert counts.get("applied") == 1
+    text = card.read_text(encoding="utf-8")
+    # 수정 지시가 orchestrator가 읽는 섹션에 기록되고, 재초안 경로로 디큐된다.
+    assert "## 📝 수정 요청" in text
+    assert "도입을 질문으로 시작하고" in text
+    assert "approval_status: revision_requested" in text
+    # 초안 본문은 여기서 건드리지 않는다(재초안은 오케스트레이터 몫).
+    assert "초안 본문" in text
+    # 피드백 노트는 재처리되지 않게 applied로 남는다.
+    assert "status: applied" in fb.read_text(encoding="utf-8")
+    assert any("수정 요청 접수" in m for m in vault["sent"])
+
+
+def test_apply_card_target_not_found_falls_to_error(vault):
+    for p in vault["fb_dir"].glob("*.md"):
+        p.unlink()
+    fb = vault["fb_dir"] / "2026-07-13 1201 DG-2026-9999 피드백.md"
+    fb.write_text(CARD_FEEDBACK_FM.replace("DG-2026-0001", "DG-2026-9999"),
+                  encoding="utf-8")
+    counts = sf.apply_pending_feedback(dry_run=False)
+    assert counts.get("unresolved") == 1
+    assert "status: error" in fb.read_text(encoding="utf-8")
+
+
+# ---------- 알림 확대: 스레드/릴스 등 전 형식 + 백로그 폭주 방지 ----------
+
+def test_announce_includes_recent_non_youtube_script(vault):
+    today = sf.now_kst().strftime("%Y-%m-%d")
+    (vault["script_dir"] / "스레드_감정_새글.md").write_text(
+        f"---\n주제: 새 스레드\n카테고리: 감정\n채널: thread\n상태: 리뷰대기\n"
+        f"생성일: {today}\n검수상태:\n---\n\n1/ 본문\n", encoding="utf-8")
+    names = [s["name"] for s in sf.find_new_scripts()]
+    assert "스레드_감정_새글.md" in names
+
+
+def test_announce_skips_old_backlog_and_published(vault):
+    (vault["script_dir"] / "스레드_옛글.md").write_text(
+        "---\n주제: 옛 글\n상태: 리뷰대기\n생성일: 2026-05-26\n검수상태:\n---\n\n1/ 본문\n",
+        encoding="utf-8")
+    (vault["script_dir"] / "릴스_발행끝.md").write_text(
+        "---\ntype: draft-script\n상태: 발행완료\n생성일: 2026-07-12\n---\n\n본문\n",
+        encoding="utf-8")
+    names = [s["name"] for s in sf.find_new_scripts()]
+    assert "스레드_옛글.md" not in names
+    assert "릴스_발행끝.md" not in names
