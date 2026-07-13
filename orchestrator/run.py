@@ -125,6 +125,11 @@ def handle_intake(card: dict):
         page_id, content_id=content_id, idempotency_key=idem,
         stage="research", status="running", last_error="",
     )
+    store.notify(
+        page_id,
+        f"🆕 [{content_id}] 새 카드 접수 — {card['topic']}\n"
+        "리서치부터 초안까지 자동으로 진행하고, 초안이 완성되면 다시 알립니다.",
+    )
     if manus_research.available():
         task_ids = manus_research.create_research_tasks(
             content_id, card["topic"], card["audience"],
