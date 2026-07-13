@@ -1,0 +1,9 @@
+{
+  "openBehavior": "",
+  "userIgnoreFilters": [
+    "tools/",
+    "skills-draft/",
+    "agents/",
+    "docs/"
+  ]
+}

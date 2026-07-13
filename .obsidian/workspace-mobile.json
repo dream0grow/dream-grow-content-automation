@@ -1,0 +1,229 @@
+{
+  "main": {
+    "id": "5ac6d62b11ee2712",
+    "type": "split",
+    "children": [
+      {
+        "id": "d04eeac6d4e8f035",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "1c8ccba2bf30fda9",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "새 탭"
+            }
+          },
+          {
+            "id": "0d23b1aa4af72303",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "vault/파이프라인/활성/DG-2026-0001 받아쓰기 시험만 보면 우는 아이, 어떻게 다독일까.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "DG-2026-0001 받아쓰기 시험만 보면 우는 아이, 어떻게 다독일까"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "b5e74a3e83990698",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "f0ad6d785dabecd3",
+        "type": "leaf",
+        "state": {
+          "type": "file-explorer",
+          "state": {
+            "sortOrder": "alphabetical",
+            "autoReveal": false
+          },
+          "icon": "lucide-folder-closed",
+          "title": "파일 탐색기"
+        }
+      },
+      {
+        "id": "36375d716dfc4202",
+        "type": "leaf",
+        "state": {
+          "type": "search",
+          "state": {
+            "query": "",
+            "matchingCase": false,
+            "explainSearch": false,
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical"
+          },
+          "icon": "lucide-search",
+          "title": "검색"
+        }
+      },
+      {
+        "id": "be2768e26fae0526",
+        "type": "leaf",
+        "state": {
+          "type": "tag",
+          "state": {
+            "sortOrder": "frequency",
+            "useHierarchy": true,
+            "showSearch": false,
+            "searchQuery": ""
+          },
+          "icon": "lucide-tags",
+          "title": "태그"
+        }
+      },
+      {
+        "id": "71a8edc9e9a5dc08",
+        "type": "leaf",
+        "state": {
+          "type": "all-properties",
+          "state": {
+            "sortOrder": "frequency",
+            "showSearch": false,
+            "searchQuery": ""
+          },
+          "icon": "lucide-archive",
+          "title": "모든 속성"
+        }
+      },
+      {
+        "id": "2f617172bb69bfaa",
+        "type": "leaf",
+        "state": {
+          "type": "bookmarks",
+          "state": {},
+          "icon": "lucide-bookmark",
+          "title": "북마크"
+        }
+      }
+    ],
+    "currentTab": 0
+  },
+  "right": {
+    "id": "2b04d43fa5cfa6f8",
+    "type": "mobile-drawer",
+    "children": [
+      {
+        "id": "9c6a516aa29abf52",
+        "type": "leaf",
+        "state": {
+          "type": "backlink",
+          "state": {
+            "file": "vault/파이프라인/활성/DG-2026-0001 받아쓰기 시험만 보면 우는 아이, 어떻게 다독일까.md",
+            "collapseAll": false,
+            "extraContext": false,
+            "sortOrder": "alphabetical",
+            "showSearch": false,
+            "searchQuery": "",
+            "backlinkCollapsed": false,
+            "unlinkedCollapsed": true
+          },
+          "icon": "links-coming-in",
+          "title": "백링크"
+        }
+      },
+      {
+        "id": "d3ad6d46901b4036",
+        "type": "leaf",
+        "state": {
+          "type": "outgoing-link",
+          "state": {
+            "linksCollapsed": false,
+            "unlinkedCollapsed": true
+          },
+          "icon": "links-going-out",
+          "title": "나가는 링크"
+        }
+      },
+      {
+        "id": "995d6bbded460fec",
+        "type": "leaf",
+        "state": {
+          "type": "outline",
+          "state": {
+            "followCursor": false,
+            "showSearch": false,
+            "searchQuery": ""
+          },
+          "icon": "lucide-list",
+          "title": "개요"
+        }
+      }
+    ],
+    "currentTab": 0
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:빠른 전환기 열기": false,
+      "graph:그래프 뷰 열기": false,
+      "canvas:새 캔버스 만들기": false,
+      "daily-notes:오늘의 일일 노트 열기": false,
+      "templates:템플릿 삽입": false,
+      "command-palette:명령어 팔레트 열기": false,
+      "bases:새 베이스 생성하기": false
+    }
+  },
+  "active": "0d23b1aa4af72303",
+  "lastOpenFiles": [
+    "vault/_system/review_queue.md",
+    "vault/파이프라인/활성/DG-2026-0001 받아쓰기 시험만 보면 우는 아이, 어떻게 다독일까.md",
+    "vault/파이프라인/활성/DG-2026-0003 3년내내 전교1등이 말아주는 시험 공부법   이대로만 하면 올백 맞는다!   암기법, 시험팁, 실수 안하는 .md",
+    "vault/파이프라인/활성/DG-2026-0002 큐시트  프롬프트 개선안 DG-2026-0002.md",
+    "agents/skill-updater.md",
+    "vault/SNS 콘텐츠 제작 시스템/05 리뷰/대기/스레드_갈등해결_싸움이+났을+때+벌이+아니라+회복이+필요한+이유+회복적+정의.md",
+    "claude_client.py",
+    "sync_wiki.py",
+    "vault/제텔카스텐/6. 사례은행/_inbox/구_일간노트/2022년/2022-11-25/창의성.md",
+    "vault/제텔카스텐/6. 사례은행/_inbox/구_일간노트/2022년/2022-11-14/글.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/2022-11-25/창의성.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/2022-11-14/글.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 진리는 연구한 결과를 글로 표현하는 것이다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 특정한 맥락속에서 새로운 지식을 받아들이고 편집해야 원하는 결과를 얻으.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/K - 비판적 사고.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 비판적 사고는 글쓰기로부터 시작된다.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 맥락에 맞게 편집하여 사용할 때 메모는 큰 영향력일 발휘한다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 지식 관리의 시작은 선입견으로부터 시작한다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 세상을 이롭게 하려는 마음이 있을 때 위대한 글을 쓰게 된다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 책을 읽고 저자의 주장에 대한 자신의 생각을 정리해야 진정한 나의 지식이 된다.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 단절되었던 정보가 연결이 되며 새로운 아이디어를 만들어내고 혁신을 만든다.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 책은 콘텐츠를 계속해서 생산할 수 있게 도와준다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 맥락이 없는 메모는 다른 메모와 연결할 수 없다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 글쓰기는 더 좋은 세상을 만든다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/Pasted image 20220216103245.png.md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 남의 말을 자신의 언어로 바꿀 때 더 잘 이해할 수 있다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 메모를 통해 자료가 축척된 사람은 주제와 관심사에 집중할 수 있다..md",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자/P - 상향식으로 메모를 정리할 때 생각의 주제가 자동적으로 조립된다..md",
+    "vault/제텔카스텐/6. 사례은행/_inbox/구_일간노트/2022년/2022-11-25",
+    "vault/제텔카스텐/6. 사례은행/_inbox/구_일간노트/2022년/2022-11-14",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/2022-11-25",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/2022-11-14",
+    "vault/_archive/예시_제레미/예시_제텔카스텐/1단계 - 메모/_제레미의 메모상자",
+    "vault/SNS 콘텐츠 제작 시스템/03 라이브러리/38 주제별 콘텐츠/미디어/AI",
+    "vault/SNS 콘텐츠 제작 시스템/03 라이브러리/38 주제별 콘텐츠/감정/심리",
+    "vault/제텔카스텐/_검토대기/미분류/제텔카스텐/Pasted image 20220115182645.png",
+    "vault/제텔카스텐/_검토대기/미분류/제텔카스텐/Pasted image 20220115182825.png",
+    "vault/제텔카스텐/6. 사례은행/_inbox/구_일간노트/2022년",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/08.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/09.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/10.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/04.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/05.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/07.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/06.png",
+    "vault/SNS 콘텐츠 제작 시스템/06 제작/카드뉴스_학생자치연수_20260529/02.png"
+  ]
+}
