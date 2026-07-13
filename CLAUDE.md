@@ -107,7 +107,25 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 원고 수정·보완 핑퐁 오케스트레이터 쪽 완성 (2026-07-10, 브랜치 `claude/claude-md-telegram-pingpong-hfb443`) — ⬅️ 이번 세션 작업
+### 에이전트 OS 점검 + 텔레그램 핑퐁 전면 확장 (2026-07-13, main 머지 완료) — ⬅️ 이번 세션 작업
+
+- **daily-intake 7일 연속 실패 수리** (#58): 워크플로우가 미설정 시크릿을 빈 문자열로 넘겨
+  `int('')` 크래시(2026-07-07~12 전건 실패). `daily_intake.py` env 파싱을 `or` 폴백으로 교체.
+- **새 카드 접수 텔레그램 통지** (#59): `handle_intake`가 `🆕 새 카드 접수`(ID+주제)를 notify —
+  매일 발제·사이트 발제 모두 커버. 생성→초안→발행 전 과정이 폰 알림으로 이어진다.
+- **핑퐁 전면 확장 — 파이프라인 카드도 답장 수정** : `script_feedback.py`가 피드백 target의
+  카드 ID(DG-YYYY-NNNN)를 인식, 활성 카드에 `📝 수정 요청` 섹션 기록 + `approval_status:
+  revision_requested`로 디큐(여기선 LLM 안 부름 — run.py `handle_revision_requested`가 재초안).
+  yt_research 웹훅도 카드 ID 추출 추가(그쪽 PR#15). 즉 **스레드/뉴스레터 카드(→카드뉴스),
+  유튜브 롱폼·스레드·릴스 원고 파일 전부 텔레그램 답장으로 수정**된다.
+- **알림 대상 확대**: `05 리뷰/대기` 알림을 youtube-script 한정 → 전 형식으로. 폭주 방지로
+  비-youtube는 frontmatter 생성일 `DG_ANNOUNCE_MAX_AGE_DAYS`(기본 7일) 이내만, `상태: 발행완료`
+  등은 제외. 빈 YAML 값(`검수상태:`)이 None으로 파싱돼 걸러지던 버그도 수리(`or ""`).
+- 사용자가 `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` 시크릿 설정 완료(2026-07-13) — 알림 라이브.
+- 테스트 51종 통과(신규: intake 통지 1, 카드 핑퐁 2, 알림 확대 2).
+- 미결: DG-2026-0001 발행 승인 대기(사용자), DG-2026-0002 큐시트 승인 대기.
+
+### 원고 수정·보완 핑퐁 오케스트레이터 쪽 완성 (2026-07-10, 브랜치 `claude/claude-md-telegram-pingpong-hfb443`)
 
 yt_research 사이트가 만든 롱폼 원고(`vault/SNS 콘텐츠 제작 시스템/05 리뷰/대기/원고_*.md`)와
 사용자의 텔레그램 답장을 잇는 핑퐁의 **오케스트레이터 쪽 나머지 절반**을 구현했다.

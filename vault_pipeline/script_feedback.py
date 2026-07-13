@@ -53,6 +53,21 @@ DEFAULT_MAX = 10
 
 # 검수 대기 상태로 인정하는 값(사이트는 새 원고에 "대기"를 넣는다). 완료/승인은 제외.
 PENDING_REVIEW = {"", "대기", "검토대기", "리뷰대기"}
+# 이 상태의 원고는 이미 끝난 것으로 보고 알리지 않는다.
+DONE_STATES = {"발행완료", "발행됨", "완료", "보류", "폐기"}
+# youtube-script 외 형식(스레드/릴스/뉴스레터 등)은 생성일이 이 일수 안일 때만 알린다 —
+# 폴더에 수백 건 쌓인 옛 백로그가 확대 적용 첫날 알림으로 쏟아지는 것을 막는다.
+ANNOUNCE_MAX_AGE_DAYS = int(os.getenv("DG_ANNOUNCE_MAX_AGE_DAYS") or "7")
+
+# 파이프라인 카드(스레드/뉴스레터 → 카드뉴스) 피드백 — target이 카드 ID면 원고 파일 대신
+# 카드의 수정 요청 경로(재초안)로 보낸다. 섹션 이름은 orchestrator run.py와 같아야
+# handle_revision_requested가 지시를 읽는다.
+CARD_ID_RE = re.compile(r"DG-\d{4}-\d{4}")
+REVISION_SECTION = "📝 수정 요청"
+
+
+def _active_cards_dir() -> Path:
+    return vault_root() / "파이프라인" / "활성"
 
 
 def _script_dir() -> Path:
@@ -143,12 +158,37 @@ def find_new_scripts() -> list[dict]:
         if p.name == "README.md" or p.name in announced:
             continue
         meta, _ = parse_frontmatter(p.read_text(encoding="utf-8", errors="ignore"))
-        if str(meta.get("type", "")).strip() != "youtube-script":
+        # 빈 값은 YAML이 None으로 파싱하므로 `or ""`로 받는다 (스레드 파일 다수가 빈 검수상태).
+        if str(meta.get("상태") or "").strip() in DONE_STATES:
             continue
-        if str(meta.get("검수상태", "")).strip() not in PENDING_REVIEW:
+        if str(meta.get("검수상태") or "").strip() not in PENDING_REVIEW:
+            continue
+        # youtube-script 외 형식(스레드/릴스 등)은 생성일이 최근일 때만 알린다.
+        if (str(meta.get("type", "")).strip() != "youtube-script"
+                and not _created_recently(meta)):
             continue
         out.append({"name": p.name, "path": p, "meta": meta})
     return out
+
+
+def _created_recently(meta: dict) -> bool:
+    """frontmatter 생성일 기준 최근 여부.
+
+    Actions 체크아웃은 파일 mtime을 매번 초기화하므로 mtime은 신뢰할 수 없다 —
+    생성일이 없거나 파싱이 안 되면 옛 백로그로 보고 알리지 않는다.
+    """
+    raw = str(meta.get("생성일") or meta.get("created") or "").strip()
+    m = re.search(r"(\d{4})-(\d{1,2})-(\d{1,2})", raw)
+    if not m:
+        return False
+    now = now_kst()
+    try:
+        created = now.replace(year=int(m.group(1)), month=int(m.group(2)),
+                              day=int(m.group(3)), hour=0, minute=0,
+                              second=0, microsecond=0)
+    except ValueError:
+        return False
+    return (now - created).days <= ANNOUNCE_MAX_AGE_DAYS
 
 
 def announce_new_scripts(dry_run: bool, max_items: int = DEFAULT_MAX) -> list[str]:
@@ -250,8 +290,54 @@ def _mark_feedback(fb: dict, status: str, note: str, dry_run: bool) -> None:
     path.write_text(raw_fm + body, encoding="utf-8")
 
 
+def _resolve_card(target: str) -> Path | None:
+    """피드백 target에서 카드 ID(DG-YYYY-NNNN)를 찾아 활성 카드 파일로 푼다."""
+    m = CARD_ID_RE.search(target or "")
+    if not m:
+        return None
+    matches = sorted(_active_cards_dir().glob(f"{m.group(0)}*.md"))
+    return matches[0] if matches else None
+
+
+def _apply_card_revision(fb: dict, card_path: Path, dry_run: bool) -> str:
+    """파이프라인 카드에 수정 요청을 기록하고 재초안 경로로 되돌린다.
+
+    원고 파일과 달리 여기서 LLM을 부르지 않는다 — approval_status를
+    revision_requested로 바꿔두면 오케스트레이터 handle_revision_requested가
+    REVISION_SECTION의 지시를 작가에게 되먹여 재초안한다.
+    """
+    if not fb["instruction"]:
+        _mark_feedback(fb, "error", "수정 지시 없음", dry_run)
+        return "empty"
+    if dry_run:
+        log_line(f"[계획] 카드 수정 요청: {card_path.name} ← {fb['path'].name}",
+                 dry_run=True)
+        return "planned"
+    stamp = now_kst().strftime("%Y-%m-%d %H:%M")
+    with card_path.open("a", encoding="utf-8") as f:
+        f.write(f"\n## {REVISION_SECTION} — {stamp}\n\n"
+                f"{fb['instruction'].rstrip()}\n")
+    text = card_path.read_text(encoding="utf-8")
+    if re.search(r"^approval_status:", text, flags=re.MULTILINE):
+        text = re.sub(r"^approval_status:.*$",
+                      "approval_status: revision_requested",
+                      text, count=1, flags=re.MULTILINE)
+        card_path.write_text(text, encoding="utf-8")
+    card_id = CARD_ID_RE.search(card_path.name).group(0)
+    _mark_feedback(fb, "applied", f"카드 수정 요청 기록: {card_path.name}",
+                   dry_run=False)
+    log_line(f"카드 수정 요청 접수: {card_path.name} ← {fb['path'].name}")
+    telegram_notify.send(
+        f"📝 [{card_id}] 수정 요청 접수 — 다음 실행에서 재초안하고, "
+        f"완성되면 다시 알립니다.\n요청: {fb['instruction'][:200]}")
+    return "applied"
+
+
 def apply_one(fb: dict, dry_run: bool) -> str:
-    """피드백 1건을 대상 원고에 반영한다. 결과 상태 문자열을 반환한다."""
+    """피드백 1건을 대상(원고 파일 또는 파이프라인 카드)에 반영한다."""
+    card_path = _resolve_card(fb["target"])
+    if card_path is not None:
+        return _apply_card_revision(fb, card_path, dry_run)
     target_path = _resolve_target(fb["target"])
     if target_path is None:
         _mark_feedback(fb, "error", f"대상 원고 없음: {fb['target']}", dry_run)
