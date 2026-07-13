@@ -19,8 +19,9 @@ from orchestrator import llm, prompts
 from orchestrator import state as store
 
 # 하루에 만들 주제 수 (기본 1개 = 매일 글 1편)
-DAILY_TOPIC_COUNT = int(os.getenv("DG_DAILY_TOPIC_COUNT", "1"))
-DEFAULT_AUDIENCE = os.getenv("DG_DEFAULT_AUDIENCE", "초등 저학년 학부모")
+# 워크플로우가 미설정 시크릿을 빈 문자열로 넘기므로 or로 기본값 처리
+DAILY_TOPIC_COUNT = int(os.getenv("DG_DAILY_TOPIC_COUNT") or "1")
+DEFAULT_AUDIENCE = os.getenv("DG_DEFAULT_AUDIENCE") or "초등 저학년 학부모"
 
 
 def log(msg: str):
