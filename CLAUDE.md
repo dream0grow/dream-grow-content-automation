@@ -90,7 +90,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 (옵시디언/텔레그램). 사람이 바꾼 frontmatter를 cron이 감지해 다음 단계를 돌린다.
 
 - **새 글 만들기**: `vault/파이프라인/활성/`에 카드 생성 (frontmatter `stage: intake`, `status: queued`,
-  `format: thread`(또는 newsletter), `audience` 입력). 매일 발제(`daily-intake`)가 자동 생성하기도 한다.
+  `format: thread`/`newsletter`/`youtube`(유튜브 롱폼 원고, 콤마 혼합 가능), `audience` 입력).
+  매일 발제(`daily-intake`)와 yt_research 사이트 「파이프라인 발제 🚀」도 카드를 만든다.
 - **키워드 승인**: 키워드 섹션 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status: approved`
 - **발행 승인**: 초안/검수 확인 → `review_status: approved`이면 `approval_status: approved` → 자동 발행
 - **수정 요청**: 카드 `📝 수정 요청` 섹션에 지시 적고 `approval_status: revision_requested` → 재초안
@@ -124,6 +125,22 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - 사용자가 `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` 시크릿 설정 완료(2026-07-13) — 알림 라이브.
 - 테스트 51종 통과(신규: intake 통지 1, 카드 핑퐁 2, 알림 확대 2).
 - 미결: DG-2026-0001 발행 승인 대기(사용자), DG-2026-0002 큐시트 승인 대기.
+
+### 유튜브 롱폼 원고 자동화 (2026-07-13, 병렬 세션, main 머지 완료)
+
+`format: youtube` 카드가 들어오면 리서치→키워드→브리프는 기존 그대로 타고, 초안 단계에서
+**유튜브 롱폼 원고**(제목·썸네일 문구 + 30초 도입부 + 타임스탬프 본문 + 제작 메모)를 자동으로 쓴다.
+신규 `orchestrator/youtube_script.py` + `prompts.YOUTUBE_SCRIPT`(HUMANIZE_RULES 주입) + 테스트 6종(전체 52종 통과).
+- **인계 경로**: 원고를 `05 리뷰/대기`에 사이트와 동일한 frontmatter(`type: youtube-script`,
+  `검수상태: 대기`)로 저장 → 기존 `script_feedback`(같은 orchestrator.yml 실행)이 파일명 포함
+  텔레그램 알림 → 답장하면 수정 반영 핑퐁. **발행 게이트 없음** — 유튜브 원고의 종착지는 촬영.
+- **유튜브 전용 카드**: 원고 인계 후 `stage: published, status: done`으로 완료 + 통지.
+  혼합(`thread, youtube`)이면 유튜브 원고는 별도 저장하고 thread/newsletter는 기존 승인 게이트 진행
+  (유튜브 생성 실패 시 통지 후 thread 흐름 계속).
+- **발제 입구**: yt_research 사이트 「파이프라인 발제 🚀」에 "유튜브 원고 🎬" 옵션 추가
+  (`lib/pipeline.ts` format: youtube). 카드 직접 생성 시에도 `format: youtube`면 동일 동작.
+- 원고 길이는 `DG_YT_SCRIPT_MINUTES`(기본 10분, 분당 300자 환산).
+- **남은 사용자 액션**: 유튜브 발제 1건으로 라이브 확인.
 
 ### 원고 수정·보완 핑퐁 오케스트레이터 쪽 완성 (2026-07-10, 브랜치 `claude/claude-md-telegram-pingpong-hfb443`)
 

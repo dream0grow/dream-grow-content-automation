@@ -20,7 +20,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, prompts,
+    agent_dialogue, llm, manus_research, naver_keywords, prompts, youtube_script,
 )
 from orchestrator import state as store
 from orchestrator.config import (
@@ -291,7 +291,47 @@ def handle_keyword_approved(card: dict):
     store.append_formatted_section(page_id, "📝 브리프", _fmt_brief(brief))
 
     formats = [f.strip() for f in card["format"].split(",") if f.strip()]
-    supported = [f for f in formats if f in ("thread", "newsletter")] or ["thread"]
+    supported = [f for f in formats if f in ("thread", "newsletter")]
+    wants_yt = youtube_script.wants_youtube(card["format"])
+    if not supported and not wants_yt:
+        supported = ["thread"]
+
+    # 유튜브 롱폼 원고 — 05 리뷰/대기에 저장하면 script_feedback이 텔레그램 알림·
+    # 수정 핑퐁을 잇는다. 발행 게이트(Threads/스티비)와는 별개 경로.
+    yt_name = ""
+    if wants_yt:
+        try:
+            yt_name = youtube_script.deliver(card, brief, revision_note)
+            store.append_section(
+                page_id, "🎬 유튜브 원고",
+                f"`05 리뷰/대기/{yt_name}` 에 저장했습니다. 곧 텔레그램으로 원고 알림이 "
+                "오면, 그 메시지에 답장으로 수정 지시를 보내면 다음 실행에서 반영됩니다(핑퐁).",
+            )
+            log(f"{card['content_id']} 유튜브 원고 저장 → 05 리뷰/대기/{yt_name}")
+        except Exception as e:
+            if not supported:
+                raise  # 유튜브 전용 카드면 실패를 재시도/통지 경로로 올린다(A3)
+            store.notify(
+                page_id,
+                f"⚠️ [{card['content_id']}] 유튜브 원고 생성에 실패했습니다: {str(e)[:200]} "
+                "— thread/newsletter 초안은 계속 진행합니다.",
+            )
+            log(f"{card['content_id']} 유튜브 원고 실패 (계속 진행): {e}")
+
+    if not supported:
+        # 유튜브 전용 카드 — 자동 발행이 없으므로 여기서 사이클 완료.
+        store.update_card(
+            page_id, stage="published", status="done", approval_status="",
+        )
+        store.notify(
+            page_id,
+            f"🎬 [{card['content_id']}] 유튜브 원고가 완성됐습니다 — "
+            f"05 리뷰/대기/{yt_name} 저장. 원고 알림 메시지에 답장하면 수정 지시가 "
+            "반영됩니다(핑퐁). 촬영에 쓰실 최종본은 옵시디언에서 확인하세요.",
+        )
+        log(f"{card['content_id']} 유튜브 전용 카드 완료 ✅ (원고 인계)")
+        return
+
     store.update_card(page_id, stage="draft", status="running")
 
     rank = {"approved": 0, "revise": 1, "hold": 2, "risk": 3}
