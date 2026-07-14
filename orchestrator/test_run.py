@@ -232,3 +232,23 @@ def test_intake_notifies_new_card(monkeypatch):
         "idempotency_key": "", "topic": "받아쓰기 우는 아이", "audience": "학부모",
     })
     assert any("🆕" in msg and "받아쓰기 우는 아이" in msg for _, msg in state.notes)
+
+
+# ---------- 열람 사본 내보내기 ----------
+
+def test_review_copy_export_writes_named_file(tmp_path, monkeypatch):
+    from orchestrator import review_copy
+    monkeypatch.setenv("DG_VAULT_ROOT", str(tmp_path))
+    monkeypatch.delenv("VAULT_SCRIPT_PATH", raising=False)
+    card = {"topic": "받아쓰기 시험만 보면 우는 아이", "content_id": "DG-2026-0001",
+            "approved_keyword": "받아쓰기 불안"}
+    name = review_copy.export(card, "thread", "초안 본문입니다.")
+    assert name.startswith("스레드_") and name.endswith(".md")
+    saved = (tmp_path / "SNS 콘텐츠 제작 시스템/05 리뷰/대기" / name).read_text(
+        encoding="utf-8")
+    # content_id로 카드와 연결되고, 검수상태 대기라 script_feedback이 알림을 보낸다.
+    assert "content_id: DG-2026-0001" in saved
+    assert "검수상태: 대기" in saved
+    assert "초안 본문입니다." in saved
+    # 재초안 시 같은 이름으로 덮어써 최신 초안을 비춘다.
+    assert review_copy.export(card, "thread", "수정된 본문") == name

@@ -258,3 +258,36 @@ def test_announce_skips_old_backlog_and_published(vault):
     names = [s["name"] for s in sf.find_new_scripts()]
     assert "스레드_옛글.md" not in names
     assert "릴스_발행끝.md" not in names
+
+
+# ---------- 열람 사본(스레드_/뉴스레터_) 피드백 → 카드 라우팅 ----------
+
+def test_review_copy_feedback_routes_to_card(vault):
+    active = vault["root"] / "파이프라인" / "활성"
+    active.mkdir(parents=True)
+    card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
+    card.write_text(CARD_FM, encoding="utf-8")
+    # 열람 사본 — content_id로 원본 카드를 가리킨다
+    (vault["script_dir"] / "스레드_받아쓰기시험만보면우는아이.md").write_text(
+        "---\n주제: 받아쓰기\ncontent_id: DG-2026-0001\n채널: thread\n"
+        "상태: 리뷰대기\n생성일: 2026-07-13\n검수상태: 대기\n---\n\n초안 사본\n",
+        encoding="utf-8")
+    for p in vault["fb_dir"].glob("*.md"):
+        p.unlink()
+    fb = vault["fb_dir"] / "2026-07-13 1300 스레드 피드백.md"
+    fb.write_text(
+        CARD_FEEDBACK_FM.replace('"DG-2026-0001"',
+                                 '"스레드_받아쓰기시험만보면우는아이.md"'),
+        encoding="utf-8")
+
+    counts = sf.apply_pending_feedback(dry_run=False)
+
+    assert counts.get("applied") == 1
+    text = card.read_text(encoding="utf-8")
+    # 사본이 아니라 원본 카드에 수정 요청이 기록되고 재초안으로 디큐된다.
+    assert "## 📝 수정 요청" in text
+    assert "approval_status: revision_requested" in text
+    # 사본 본문은 건드리지 않는다 (재초안이 새 사본으로 덮어쓴다).
+    copy_text = (vault["script_dir"] / "스레드_받아쓰기시험만보면우는아이.md").read_text(
+        encoding="utf-8")
+    assert "초안 사본" in copy_text
