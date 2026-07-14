@@ -123,7 +123,17 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   비-youtube는 frontmatter 생성일 `DG_ANNOUNCE_MAX_AGE_DAYS`(기본 7일) 이내만, `상태: 발행완료`
   등은 제외. 빈 YAML 값(`검수상태:`)이 None으로 파싱돼 걸러지던 버그도 수리(`or ""`).
 - 사용자가 `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` 시크릿 설정 완료(2026-07-13) — 알림 라이브.
-- 테스트 51종 통과(신규: intake 통지 1, 카드 핑퐁 2, 알림 확대 2).
+- **알림에서 바로 읽기**: `obsidian_state.notify()`가 카드 GitHub blob 링크를 항상 첨부 —
+  텔레그램에서 누르면 카드가 열린다.
+- **초안 열람 사본**(`orchestrator/review_copy.py`): thread/newsletter 초안 완성 시
+  `05 리뷰/대기/{스레드|뉴스레터}_{주제}.md`(기존 파일명 규칙)로 사본 저장 → script_feedback이
+  링크 포함 알림. frontmatter `content_id`로 원본 카드를 가리켜, 이 파일명으로 온 피드백은
+  **카드 재초안으로 라우팅**(사본 직접 수정은 발행에 반영 안 됨 — 파일 상단에 경고 주석).
+  재초안 시 같은 파일명으로 덮어써 항상 최신 초안을 비춘다. 발행 원본은 여전히 카드다.
+- **소크라테스 질문 맥락 고정**(`vault_pipeline/socrates.py`, `.claude/agents/zk-socrates.md`):
+  "교실 0.1x/제도 10x" 강제 프레임 제거. 노트의 주제 영역(비즈니스/교육/방법론)을 먼저 파악해
+  **그 주제 안에서** 전제 검증·반례와 경계·재정의/다음 단계를 묻는다(맥락 갈아끼우기 금지).
+- 테스트 59종 통과(신규: intake 통지 1, 카드 핑퐁 2, 알림 확대 2, 사본 라우팅 1, 사본 내보내기 1 등).
 - 미결: DG-2026-0001 발행 승인 대기(사용자), DG-2026-0002 큐시트 승인 대기.
 
 ### 유튜브 롱폼 원고 자동화 (2026-07-13, 병렬 세션, main 머지 완료)
