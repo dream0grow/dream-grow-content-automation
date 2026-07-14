@@ -343,6 +343,13 @@ def apply_one(fb: dict, dry_run: bool) -> str:
         _mark_feedback(fb, "error", f"대상 원고 없음: {fb['target']}", dry_run)
         log_line(f"피드백 반영 실패(대상 없음): {fb['target']}", dry_run=dry_run)
         return "unresolved"
+    # 열람 사본(스레드_/뉴스레터_ — frontmatter content_id 보유)이면 원본 카드의
+    # 수정 요청으로 라우팅한다 — 사본을 고쳐 봐야 발행에 반영되지 않기 때문.
+    meta, _ = parse_frontmatter(
+        target_path.read_text(encoding="utf-8", errors="ignore"))
+    linked_card = _resolve_card(str(meta.get("content_id") or ""))
+    if linked_card is not None:
+        return _apply_card_revision(fb, linked_card, dry_run)
     if not fb["instruction"]:
         _mark_feedback(fb, "error", "수정 지시 없음", dry_run)
         return "empty"

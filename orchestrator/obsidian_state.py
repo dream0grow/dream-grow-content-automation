@@ -243,11 +243,17 @@ def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
 # ---------- 알림 ----------
 
 def notify(page_id: str, message: str) -> None:
-    """텔레그램 폰 알림 + 결재함 기록."""
+    """텔레그램 폰 알림 + 결재함 기록. 알림에서 바로 카드를 열 수 있게 링크를 붙인다."""
     card_name = Path(page_id).stem
     try:
         from vault_pipeline import telegram_notify
-        telegram_notify.send(f"📱[콘텐츠] {card_name}\n{message[:1500]}")
+        link = ""
+        try:
+            rel = _resolve(page_id).relative_to(_vault()).as_posix()
+            link = f"\n🔗 {telegram_notify.note_url(rel)}"
+        except Exception:  # noqa: BLE001 — 링크는 부가 정보, 못 만들면 생략
+            pass
+        telegram_notify.send(f"📱[콘텐츠] {card_name}\n{message[:1500]}{link}")
     except Exception as e:  # noqa: BLE001 — 알림 실패가 파이프라인을 멈추면 안 됨
         print(f"텔레그램 알림 실패 (계속 진행): {e}")
     try:

@@ -20,7 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, prompts, youtube_script,
+    agent_dialogue, llm, manus_research, naver_keywords, prompts, review_copy,
+    youtube_script,
 )
 from orchestrator import state as store
 from orchestrator.config import (
@@ -352,6 +353,14 @@ def handle_keyword_approved(card: dict):
             page_id, f"🗄️ AI 원본 ({fmt}) - 수정 금지", result["draft"],
         )
         store.append_section(page_id, f"✍️ 초안 ({fmt})", result["draft"])
+
+        # 열람 사본 — 05 리뷰/대기에 파일명 규칙(스레드_/뉴스레터_)대로 저장.
+        # script_feedback이 링크 포함 알림을 보내고, 답장은 카드 재초안으로 라우팅된다.
+        try:
+            copy_name = review_copy.export(card, fmt, result["draft"])
+            log(f"{card['content_id']} 열람 사본 저장 → 05 리뷰/대기/{copy_name}")
+        except Exception as e:  # noqa: BLE001 — 사본은 부가 기능, 실패해도 계속
+            log(f"{card['content_id']} 열람 사본 저장 실패 (계속 진행): {e}")
 
         review = result["review"]
         store.append_formatted_section(
