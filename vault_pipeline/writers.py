@@ -140,9 +140,17 @@ def write_cases(rec: Recording, cases: list[dict], dry_run: bool) -> dict:
 
 # -------------------------------------------------- 2) 제텔카스텐 1→2→3단계
 
-def write_memos(rec: Recording, memos: list[dict], dry_run: bool) -> dict[str, str]:
-    """1단계 메모 생성. {메모 제목: 파일 stem} 반환 (키워드 링크용)."""
-    created: dict[str, str] = {}
+def write_memos(rec: Recording, memos: list[dict], dry_run: bool) -> dict:
+    """1단계 메모 생성 — 재사용 테스트 "확실"만 자동 입고, "검토"는 _검토대기로.
+
+    반환: {"stems": {제목: 파일 stem} (확실+검토 모두 — 키워드 링크용),
+          "entries": [{제목, 경로}] (확실만 — 알림용),
+          "review": 검토대기 건수, "artifacts": [파일명]}
+    """
+    stems: dict[str, str] = {}
+    entries: list[dict] = []
+    artifacts: list[str] = []
+    review = 0
     for memo in memos:
         title = str(memo.get("제목", "")).strip()
         excerpt = str(memo.get("발췌", "")).strip()
@@ -157,9 +165,24 @@ def write_memos(rec: Recording, memos: list[dict], dry_run: bool) -> dict[str, s
             "tags": [str(memo.get("주제", "")).strip()] if memo.get("주제") else [],
         }
         body = f"> \"{excerpt}\"\n"
-        path = write_note("제텔카스텐/1. 메모", title, meta, body, dry_run=dry_run)
-        created[title] = path.stem
-    return created
+        verdict = str(memo.get("판정", "확실")).strip()
+        if verdict == "검토":
+            review += 1
+            meta["status"] = "검토대기"
+            reason = str(memo.get("판정사유", "")).strip()
+            if reason:
+                meta["판정사유"] = reason
+            path = write_note("제텔카스텐/1. 메모/_검토대기", title, meta, body,
+                              dry_run=dry_run)
+        else:
+            path = write_note("제텔카스텐/1. 메모", title, meta, body,
+                              dry_run=dry_run)
+            entries.append({"제목": title,
+                            "경로": f"제텔카스텐/1. 메모/{path.stem}.md"})
+        stems[title] = path.stem
+        artifacts.append(path.name)
+    return {"stems": stems, "entries": entries, "review": review,
+            "artifacts": artifacts}
 
 
 def write_keywords(rec: Recording, keywords: list[dict],

@@ -95,7 +95,8 @@ def _detail_block(detail: dict) -> list[str]:
 
 def briefing(drafts: list[str], yellows: int, cases: int, memos: int,
              failures: int, pending: int = 0,
-             details: list[dict] | None = None) -> str:
+             details: list[dict] | None = None,
+             review_memos: int = 0) -> str:
     """파이프라인 실행 결과 요약 메시지(텔레그램 HTML)를 만든다."""
     lines = ["🌙 플라우드 파이프라인 결과"]
     if drafts:
@@ -106,6 +107,11 @@ def briefing(drafts: list[str], yellows: int, cases: int, memos: int,
         lines.append(f"📋 사례 노랑 결재 대기 {yellows}건")
     if cases or memos:
         lines.append(f"🧠 자동 입고: 사례 {cases}건, 메모 {memos}건")
+    if review_memos:
+        folder = note_url("제텔카스텐/1. 메모/_검토대기").replace(
+            "/blob/", "/tree/", 1)
+        lines.append(f'🗂 메모 검토대기 {review_memos}건 — '
+                     f'<a href="{folder}">_검토대기</a>에서 승격/삭제')
     for detail in details or []:
         lines += _detail_block(detail)
     if failures:

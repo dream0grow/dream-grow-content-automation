@@ -35,7 +35,8 @@ def process_recording(rec: Recording, dry_run: bool) -> dict:
     """녹음 1건을 3종 시스템으로 가공한다.
 
     반환: {"artifacts": [파일명들], "drafts": [교사 초안명], "green": n,
-          "yellow": n, "memos": n, "detail": 녹음별 산출물 제목(알림용)}
+          "yellow": n, "memos": n, "review_memos": n,
+          "detail": 녹음별 산출물 제목(알림용)}
     """
     transcript = rec.transcript[:MAX_TRANSCRIPT_CHARS]
     triage = llm.call_json(
@@ -46,10 +47,10 @@ def process_recording(rec: Recording, dry_run: bool) -> dict:
     )
     case_result = writers.write_cases(rec, triage.get("사례") or [], dry_run)
     artifacts: list[str] = list(case_result["artifacts"])
-    memo_stems = writers.write_memos(rec, triage.get("메모") or [], dry_run)
-    artifacts += list(memo_stems.values())
+    memo_result = writers.write_memos(rec, triage.get("메모") or [], dry_run)
+    artifacts += memo_result["artifacts"]
     keyword_files = writers.write_keywords(rec, triage.get("키워드") or [],
-                                           memo_stems, dry_run)
+                                           memo_result["stems"], dry_run)
     artifacts += keyword_files
     opinion_files = writers.write_opinions(rec, triage.get("의견") or [], dry_run)
     artifacts += opinion_files
@@ -59,8 +60,7 @@ def process_recording(rec: Recording, dry_run: bool) -> dict:
     artifacts += drafts
     detail = {
         "녹음": rec.name,
-        "메모": [{"제목": title, "경로": f"제텔카스텐/1. 메모/{stem}.md"}
-                for title, stem in memo_stems.items()],
+        "메모": memo_result["entries"],
         "키워드": [{"제목": f.removesuffix(".md").removeprefix("K_ai - "),
                    "경로": f"제텔카스텐/2. 키워드/{f}"}
                   for f in keyword_files],
@@ -70,7 +70,8 @@ def process_recording(rec: Recording, dry_run: bool) -> dict:
     }
     return {"artifacts": artifacts, "drafts": drafts,
             "green": case_result["green"], "yellow": case_result["yellow"],
-            "memos": len(memo_stems), "detail": detail}
+            "memos": len(memo_result["entries"]),
+            "review_memos": memo_result["review"], "detail": detail}
 
 
 def main() -> None:
@@ -108,7 +109,8 @@ def main() -> None:
         return
 
     failures = 0
-    total = {"drafts": [], "green": 0, "yellow": 0, "memos": 0}
+    total = {"drafts": [], "green": 0, "yellow": 0, "memos": 0,
+             "review_memos": 0}
     details: list[dict] = []
     for rec in todo:
         if len(rec.transcript) < MIN_TRANSCRIPT_CHARS:
@@ -122,8 +124,8 @@ def main() -> None:
             archive_inbox_file(rec)
             log_line(f"완료: {rec.name} → 산출물 {len(result['artifacts'])}건")
             total["drafts"] += result["drafts"]
-            for k in ("green", "yellow", "memos"):
-                total[k] += result[k]
+            for k in ("green", "yellow", "memos", "review_memos"):
+                total[k] += result.get(k, 0)
             details.append(result["detail"])
         except Exception as e:  # noqa: BLE001 — 한 건 실패가 전체를 죽이면 안 됨
             failures += 1
@@ -136,7 +138,8 @@ def main() -> None:
                        for p in total["drafts"]]
         sent = telegram_notify.send(telegram_notify.briefing(
             draft_links, total["yellow"], total["green"], total["memos"],
-            failures, pending=len(pending), details=details), html=True)
+            failures, pending=len(pending), details=details,
+            review_memos=total["review_memos"]), html=True)
         if sent:
             log_line("텔레그램 알림 발송 완료")
 

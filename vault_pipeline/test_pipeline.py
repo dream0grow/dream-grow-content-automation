@@ -29,7 +29,11 @@ TRIAGE_FIXTURE = {
     ],
     "메모": [
         {"제목": "오답 공유가 수학 불안을 줄인다",
-         "발췌": "오답을 같이 보는 순간 아이들 표정이 풀린다.", "주제": "수학교육"},
+         "발췌": "오답을 같이 보는 순간 아이들 표정이 풀린다.", "주제": "수학교육",
+         "판정": "확실", "판정사유": "다른 수업·글에도 적용되는 원리"},
+        {"제목": "다음 공개수업은 오답 공유로 연다",
+         "발췌": "다음 공개수업 때 오답 공유부터 해 볼까 싶다.", "주제": "수업",
+         "판정": "검토", "판정사유": "1회성 계획인지 원리인지 애매"},
     ],
     "의견": [
         {"제목": "평가는 서열이 아니라 피드백이어야 한다",
@@ -116,10 +120,16 @@ def test_full_pipeline(vault):
                      for p in (vault / "_system/logs").glob("*.log"))
     assert "빨강 차단 1건" in logs
 
-    # ② 제텔카스텐 1→2→3단계
+    # ② 제텔카스텐 1→2→3단계 — "확실"만 자동 입고, "검토"는 _검토대기로
     memos = list((vault / "제텔카스텐/1. 메모").glob("*.md"))
     assert len(memos) == 1 and "오답 공유가 수학 불안을 줄인다" in memos[0].stem
     assert "verbatim: true" in memos[0].read_text(encoding="utf-8")
+
+    review = list((vault / "제텔카스텐/1. 메모/_검토대기").glob("*.md"))
+    assert len(review) == 1 and "다음 공개수업은 오답 공유로 연다" in review[0].stem
+    review_text = review[0].read_text(encoding="utf-8")
+    assert "status: 검토대기" in review_text
+    assert "1회성 계획인지 원리인지 애매" in review_text     # 판정사유 보존
 
     kws = list((vault / "제텔카스텐/2. 키워드").glob("K_ai - *.md"))
     assert len(kws) == 1
@@ -155,6 +165,18 @@ def test_dedup_second_run(vault):
     assert second == []
     memos = list((vault / "제텔카스텐/1. 메모").glob("*.md"))
     assert len(memos) == 1
+
+
+def test_memo_default_verdict_is_auto_ingest(vault):
+    """판정 필드가 없는 메모(구 형식 응답)는 기존대로 자동 입고된다."""
+    from vault_pipeline import writers
+    from vault_pipeline.plaud_client import Recording
+    rec = Recording(id="r-legacy", name="구형식", recorded="2026-07-20",
+                    transcript="t", source="mcp")
+    result = writers.write_memos(
+        rec, [{"제목": "판정 없는 메모", "발췌": "발췌문"}], dry_run=False)
+    assert result["review"] == 0
+    assert list((vault / "제텔카스텐/1. 메모").glob("판정 없는 메모.md"))
 
 
 def test_processed_ids_survives_ledger_loss(vault):
@@ -282,6 +304,18 @@ def test_briefing_pending_line():
     assert "처리할 새 녹음 없음" not in msg
     msg2 = telegram_notify.briefing([], 0, 0, 0, 0, pending=0)
     assert "새로 처리한 녹음 없음" in msg2
+
+
+def test_briefing_review_memos(monkeypatch):
+    """검토대기 메모가 있으면 건수 + _검토대기 폴더 링크(tree URL)가 표시된다."""
+    from vault_pipeline import telegram_notify
+    monkeypatch.setenv("GITHUB_REPOSITORY", "dream0grow/dream-grow-content-automation")
+    monkeypatch.setenv("GITHUB_REF_NAME", "main")
+    msg = telegram_notify.briefing([], 0, 0, 1, 0, review_memos=2)
+    assert "메모 검토대기 2건" in msg
+    assert "/tree/main/vault/" in msg                 # 폴더는 blob이 아닌 tree
+    msg2 = telegram_notify.briefing([], 0, 0, 1, 0, review_memos=0)
+    assert "검토대기" not in msg2
 
 
 def test_briefing_details_block():
