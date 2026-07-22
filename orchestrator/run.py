@@ -20,8 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, prompts, review_copy,
-    youtube_script,
+    agent_dialogue, llm, manus_research, naver_keywords, prompts, reels_script,
+    review_copy, source_ingest, youtube_script,
 )
 from orchestrator import state as store
 from orchestrator.config import (
@@ -115,13 +115,27 @@ def _fmt_score(s: dict) -> str:
 # ---------- stage 핸들러 ----------
 
 def handle_intake(card: dict):
-    """intake/queued → 리서치 시작. Manus 우선, 없으면 Claude 폴백."""
+    """intake/queued → (소스 인제스트) → 리서치 시작. Manus 우선, 없으면 Claude 폴백."""
     page_id = card["page_id"]
     content_id = card["content_id"] or store.next_content_id()
     idem = f"{content_id}:research"
     if card["idempotency_key"] == idem:
         log(f"{content_id} 중복 실행 차단 (idempotency)")
         return
+    # 벤치마킹 소스(source_url 또는 📎 소스 원문 섹션)가 있으면 원문·분석을 먼저 채운다.
+    # 주제가 자리표시면 여기서 자동 발제된다. 실패해도 주제가 있으면 일반 경로로 계속,
+    # 주제조차 없으면 진행 불가 → 예외를 올려 A3 재시도/통지 경로에 태운다.
+    try:
+        source_ingest.ingest(card)
+    except Exception as e:  # noqa: BLE001 — 소스 수집 실패의 처리 분기
+        if not card["topic"].strip() or source_ingest._is_placeholder_topic(card["topic"]):
+            raise
+        store.notify(
+            page_id,
+            f"⚠️ [{content_id}] 벤치마킹 소스 수집에 실패했습니다: {str(e)[:200]} "
+            "— 카드 주제만으로 일반 파이프라인을 계속 진행합니다.",
+        )
+        log(f"{content_id} 소스 수집 실패 (주제로 계속 진행): {e}")
     store.update_card(
         page_id, content_id=content_id, idempotency_key=idem,
         stage="research", status="running", last_error="",
@@ -203,8 +217,9 @@ def _save_research(page_id: str, results: list[dict]):
 def handle_keyword(card: dict):
     """keyword/queued → Claude 점수화 → 사람 승인 대기."""
     # 키워드 점수화엔 리서치 산출물만 필요하다(누적 초안·검수 제외로 토큰 절감, B3).
+    # 📎 = 벤치마킹 소스(원문·분석) — 소스 카드는 이 재료가 키워드의 근거다.
     research = store.read_sections_by_prefix(
-        card["page_id"], "🔍 리서치", "📋 상세", "⚠️ Manus",
+        card["page_id"], "🔍 리서치", "📋 상세", "⚠️ Manus", "📎",
     )
     scored = llm.call_json(
         prompts.KEYWORD_SCORE.format(
@@ -280,7 +295,7 @@ def handle_keyword_approved(card: dict):
     # 브리프엔 리서치+키워드만 필요하다. 재초안 시 누적된 옛 초안/검수/평가를
     # 통째로 다시 싣지 않도록 관련 섹션만 고른다(B3, A1 재초안 경로와 시너지).
     context = store.read_sections_by_prefix(
-        page_id, "🔍 리서치", "📋 상세", "🏷️ 키워드", "📝 수정 요청",
+        page_id, "🔍 리서치", "📋 상세", "🏷️ 키워드", "📝 수정 요청", "📎",
     )
     brief = llm.call_json(
         prompts.BRIEF.format(
@@ -293,47 +308,61 @@ def handle_keyword_approved(card: dict):
 
     formats = [f.strip() for f in card["format"].split(",") if f.strip()]
     supported = [f for f in formats if f in ("thread", "newsletter")]
-    wants_yt = youtube_script.wants_youtube(card["format"])
-    if not supported and not wants_yt:
+
+    # 원고형 채널(유튜브 롱폼/릴스) — 05 리뷰/대기에 저장하면 script_feedback이
+    # 텔레그램 알림·수정 핑퐁을 잇는다. 발행 게이트(Threads/스티비)와는 별개 경로.
+    script_jobs = []
+    if youtube_script.wants_youtube(card["format"]):
+        script_jobs.append(("유튜브", "🎬 유튜브 원고", youtube_script))
+    if reels_script.wants_reels(card["format"]):
+        script_jobs.append(("릴스", "🎞️ 릴스 원고", reels_script))
+    if not supported and not script_jobs:
         supported = ["thread"]
 
-    # 유튜브 롱폼 원고 — 05 리뷰/대기에 저장하면 script_feedback이 텔레그램 알림·
-    # 수정 핑퐁을 잇는다. 발행 게이트(Threads/스티비)와는 별개 경로.
-    yt_name = ""
-    if wants_yt:
+    delivered: list[tuple[str, str]] = []  # (라벨, 파일명)
+    for label, heading, module in script_jobs:
         try:
-            yt_name = youtube_script.deliver(card, brief, revision_note)
-            store.append_section(
-                page_id, "🎬 유튜브 원고",
-                f"`05 리뷰/대기/{yt_name}` 에 저장했습니다. 곧 텔레그램으로 원고 알림이 "
-                "오면, 그 메시지에 답장으로 수정 지시를 보내면 다음 실행에서 반영됩니다(핑퐁).",
-            )
-            log(f"{card['content_id']} 유튜브 원고 저장 → 05 리뷰/대기/{yt_name}")
-        except Exception as e:
-            if not supported:
-                raise  # 유튜브 전용 카드면 실패를 재시도/통지 경로로 올린다(A3)
+            name = module.deliver(card, brief, revision_note)
+        except Exception as e:  # noqa: BLE001 — 한 채널 실패가 나머지를 막으면 안 됨
+            if not supported and len(script_jobs) == 1:
+                raise  # 원고 전용 단일 채널 카드면 실패를 재시도/통지 경로로(A3)
             store.notify(
                 page_id,
-                f"⚠️ [{card['content_id']}] 유튜브 원고 생성에 실패했습니다: {str(e)[:200]} "
-                "— thread/newsletter 초안은 계속 진행합니다.",
+                f"⚠️ [{card['content_id']}] {label} 원고 생성에 실패했습니다: "
+                f"{str(e)[:200]} — 나머지 채널은 계속 진행합니다.",
             )
-            log(f"{card['content_id']} 유튜브 원고 실패 (계속 진행): {e}")
+            log(f"{card['content_id']} {label} 원고 실패 (계속 진행): {e}")
+            continue
+        delivered.append((label, name))
+        store.append_section(
+            page_id, heading,
+            f"`05 리뷰/대기/{name}` 에 저장했습니다. 곧 텔레그램으로 원고 알림이 "
+            "오면, 그 메시지에 답장으로 수정 지시를 보내면 다음 실행에서 반영됩니다(핑퐁).",
+        )
+        log(f"{card['content_id']} {label} 원고 저장 → 05 리뷰/대기/{name}")
 
     if not supported:
-        # 유튜브 전용 카드 — 자동 발행이 없으므로 여기서 사이클 완료.
+        # 원고 전용 카드(유튜브/릴스) — 자동 발행이 없으므로 여기서 사이클 완료.
+        if not delivered:
+            raise RuntimeError("원고 생성이 모두 실패했습니다")  # A3 재시도/통지
+        files = "\n".join(f"- 05 리뷰/대기/{n} ({label} 원고)" for label, n in delivered)
         store.update_card(
             page_id, stage="published", status="done", approval_status="",
         )
         store.notify(
             page_id,
-            f"🎬 [{card['content_id']}] 유튜브 원고가 완성됐습니다 — "
-            f"05 리뷰/대기/{yt_name} 저장. 원고 알림 메시지에 답장하면 수정 지시가 "
+            f"🎬 [{card['content_id']}] {', '.join(l for l, _ in delivered)} 원고가 "
+            f"완성됐습니다 —\n{files}\n원고 알림 메시지에 답장하면 수정 지시가 "
             "반영됩니다(핑퐁). 촬영에 쓰실 최종본은 옵시디언에서 확인하세요.",
         )
-        log(f"{card['content_id']} 유튜브 전용 카드 완료 ✅ (원고 인계)")
+        log(f"{card['content_id']} 원고 전용 카드 완료 ✅ ({len(delivered)}종 인계)")
         return
 
     store.update_card(page_id, stage="draft", status="running")
+
+    # 벤치마킹 소스(📎 원문·분석)가 있으면 첫 집필에 재료로 주입한다 —
+    # 구조·후킹은 배우고, 사실·수치는 출처와 함께만 쓰게 한다(source_ingest).
+    source_material = store.read_sections_by_prefix(page_id, "📎")[:12000]
 
     rank = {"approved": 0, "revise": 1, "hold": 2, "risk": 3}
     worst_review = "approved"
@@ -343,6 +372,7 @@ def handle_keyword_approved(card: dict):
             hook_examples=agent_dialogue.load_hooks(),
             benchmark=agent_dialogue.load_benchmark(fmt),
             extra_directive=revision_note,
+            source_material=source_material,
         )
         store.append_section(
             page_id, f"💬 에이전트 토론 ({fmt}, {result['rounds']}라운드)",

@@ -44,6 +44,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `style_learn.py` | AI 원본 vs 사람 수정본 diff → Honcho 문체 학습 |
 | `self_improve.py` | 주간 회고 → 프롬프트 개선 큐시트(사람 승인 후 반영) |
 | `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
+| `source_ingest.py` | 벤치마킹 소스(기사/스레드/블로그) 인제스트 — URL fetch·원문 저장·분석·주제 자동 발제 + 카드 생성 CLI |
+| `reels_script.py` | `format: reels` 릴스/숏폼 대본 생성 → `05 리뷰/대기` 저장(텔레그램 핑퐁, youtube_script와 동일 경로) |
 | `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
 | `cardnews.py` | 초안 → 실사진 오버레이 카드뉴스 PNG (Pretendard, Playwright/Chromium) |
 | `stock.py` | 실물 스톡 사진 검색 (Pexels/Unsplash, 상업 라이선스) |
@@ -82,7 +84,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 `MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
 `DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DAILY_TOPIC_COUNT`(기본 1),
-`DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모")
+`DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모"),
+`DG_REELS_SECONDS`(릴스 대본 길이, 기본 45), `DG_SOURCE_MAX_CHARS`(소스 원문 상한, 기본 15000)
 
 ## 운영 — 자주 하는 작업
 
@@ -90,8 +93,13 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 (옵시디언/텔레그램). 사람이 바꾼 frontmatter를 cron이 감지해 다음 단계를 돌린다.
 
 - **새 글 만들기**: `vault/파이프라인/활성/`에 카드 생성 (frontmatter `stage: intake`, `status: queued`,
-  `format: thread`/`newsletter`/`youtube`(유튜브 롱폼 원고, 콤마 혼합 가능), `audience` 입력).
+  `format: thread`/`newsletter`/`youtube`(유튜브 롱폼)/`reels`(릴스·숏폼 대본, 콤마 혼합 가능), `audience` 입력).
   매일 발제(`daily-intake`)와 yt_research 사이트 「파이프라인 발제 🚀」도 카드를 만든다.
+- **벤치마킹 소스로 글 만들기**: 기사/벤치마킹 스레드/블로그를 주면 그 글을 분석해 내 주제로 재창작한다.
+  카드 frontmatter `source_url:`에 URL을 넣거나, 본문에 `## 📎 소스 원문` 섹션으로 글을 붙여넣으면 끝
+  (topic을 비우거나 `(소스`로 시작하게 두면 분석이 주제를 자동 발제). intake 때 원문 수집 →
+  `📎 벤치마킹 분석`(후킹/구조/사실·수치+출처/드림그로우 각도) → 키워드·브리프·작가에 주입되어
+  구조는 배우되 표절 없이, 수치는 출처와 함께만 쓴다. CLI: `python3 -m orchestrator.source_ingest --url … --format "thread, newsletter, reels"`
 - **키워드 승인**: 키워드 섹션 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status: approved`
 - **발행 승인**: 초안/검수 확인 → `review_status: approved`이면 `approval_status: approved` → 자동 발행
 - **수정 요청**: 카드 `📝 수정 요청` 섹션에 지시 적고 `approval_status: revision_requested` → 재초안
@@ -108,7 +116,28 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 에이전트 OS 점검 + 텔레그램 핑퐁 전면 확장 (2026-07-13, main 머지 완료) — ⬅️ 이번 세션 작업
+### 벤치마킹 소스 파이프라인 + 릴스 포맷 (2026-07-22, 브랜치 `claude/article-content-generation-9ahffh`) — ⬅️ 이번 세션 작업
+
+"기사/벤치마킹 스레드/블로그를 주면 내 주제로 재창작"하는 프로세스를 파이프라인에 상시 배선했다.
+전체 테스트 73종 통과(신규 14종: source_ingest 7, reels 7).
+- **소스 인제스트**(`orchestrator/source_ingest.py`): 카드 `source_url` frontmatter 또는
+  `## 📎 소스 원문` 붙여넣기 → intake 때 원문 수집(네이버 뉴스 전용+일반 추출기, bs4 없이 regex)
+  → `SOURCE_BENCHMARK` 프롬프트로 벤치마킹 분석(`📎 벤치마킹 분석`: 사실·수치+출처, 후킹/구조 패턴,
+  드림그로우 각도, 주의점) → topic이 자리표시(`(소스`…)면 suggested_topic으로 자동 발제.
+  idempotent(재시도 시 재수집/재분석 안 함). 실패 시: 주제 있으면 통지 후 일반 경로 계속, 없으면 A3 재시도.
+- **단계 주입**: 키워드·브리프 컨텍스트에 `📎` 접두사 섹션 포함, 작가 첫 집필에
+  `run_draft_dialogue(source_material=…)`로 [벤치마킹 소스] 블록 주입(표절 금지·출처 명시 지시).
+- **릴스 포맷**(`orchestrator/reels_script.py` + `prompts.REELS_SCRIPT`): `format: reels`(릴스/숏폼/쇼츠)
+  카드가 브리프 후 45초(`DG_REELS_SECONDS`) 대본(훅 2안·구간 대본·자막 오버레이·CTA·촬영 메모)을
+  `05 리뷰/대기/원고_릴스_*.md`(`type: reels-script`)로 저장 → script_feedback 텔레그램 알림·답장 핑퐁.
+  유튜브와 원고형 채널 공통 처리로 리팩터링(`script_jobs`) — 혼합 카드에서 한 채널 실패해도 나머지 진행.
+- **경향신문 기사 카드 생성**: `DG-2026-0014` (source_url=n.news.naver.com/article/032/0003459521,
+  format: thread, newsletter, reels). Claude 세션은 네이버 도메인이 막혀 기사를 직접 못 읽음 —
+  인터넷 열린 GitHub Actions에서 orchestrator가 수집·분석·3종 초안 생성.
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② orchestrator Run workflow 실행(또는 cron 대기) →
+  DG-2026-0014가 기사 기반 스레드·뉴스레터(발행 승인 게이트)+릴스 대본(텔레그램 핑퐁)으로 완성.
+
+### 에이전트 OS 점검 + 텔레그램 핑퐁 전면 확장 (2026-07-13, main 머지 완료)
 
 - **daily-intake 7일 연속 실패 수리** (#58): 워크플로우가 미설정 시크릿을 빈 문자열로 넘겨
   `int('')` 크래시(2026-07-07~12 전건 실패). `daily_intake.py` env 파싱을 `or` 폴백으로 교체.

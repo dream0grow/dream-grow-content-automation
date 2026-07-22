@@ -5,7 +5,7 @@
 """
 import types
 
-from orchestrator import publish, run
+from orchestrator import publish, run, source_ingest
 
 
 class FakeState:
@@ -49,6 +49,7 @@ class FakeState:
 def _patch(monkey_state):
     run.store = monkey_state
     publish.store = monkey_state
+    source_ingest.store = monkey_state
 
 
 def _last_update(state, page_id):

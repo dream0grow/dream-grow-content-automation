@@ -38,12 +38,14 @@ def load_hooks(limit: int = 4000) -> str:
 
 def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
                        hook_examples: str = "", extra_directive: str = "",
-                       benchmark: str = "") -> dict:
+                       benchmark: str = "", source_material: str = "") -> dict:
     """브리프 → 토론을 거친 초안을 생성한다.
 
     hook_examples/benchmark: 후킹 패턴·고성과 벤치마킹(수 KB). 첫 집필에만 주입하고
       비평/윤리 재작성 호출에서는 뺀다 — 재작성엔 직전 초안+피드백이면 충분하고,
       매 라운드 13KB+를 다시 실어 보내는 토큰 낭비를 없앤다(B5).
+    source_material: 벤치마킹 소스(기사/스레드/블로그 원문+분석, source_ingest 산출).
+      역시 첫 집필에만 주입한다 — 재작성엔 직전 초안에 이미 반영돼 있다.
     extra_directive: 사람이 남긴 수정 지시(재초안 시). 첫 집필부터 반드시 반영한다.
     Returns: {"draft": str, "review": dict, "transcript": str, "rounds": int}
     """
@@ -61,6 +63,13 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
         first_draft_parts.append(f"[후킹 예시 - 첫 글 작성 시 참고]\n{hook_examples}")
     if benchmark:
         first_draft_parts.append(f"[고성과 벤치마킹 - 첫 글 작성 시 참고]\n{benchmark}")
+    if source_material:
+        first_draft_parts.append(
+            "[벤치마킹 소스 - 이 콘텐츠의 재료가 되는 기사/원문과 분석]\n"
+            "구조·후킹·전개 방식은 배우되 문장을 그대로 옮기지 마세요(표절 금지).\n"
+            "사실·수치·인용은 이 소스에 실제로 있는 것만, 출처(매체·기관명)를 밝혀 쓰세요.\n"
+            + source_material
+        )
     first_draft_block = "\n\n".join(first_draft_parts)
     # 뉴스레터는 3,000~6,000자 심화 콘텐츠라 토큰 예산을 크게 잡는다
     write_tokens = 16000 if fmt == "newsletter" else 8000

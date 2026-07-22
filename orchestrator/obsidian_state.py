@@ -20,10 +20,11 @@ KST = timezone(timedelta(hours=9))
 
 SELECT_FIELDS = {"stage", "status", "priority", "approval_status", "review_status"}
 TEXT_FIELDS = {
-    "content_id", "audience", "approved_keyword",
+    "content_id", "audience", "approved_keyword", "source_url",
     "manus_task_ids", "idempotency_key", "last_error",
 }
-ALL_FIELDS = SELECT_FIELDS | TEXT_FIELDS | {"published_url"}
+# topic은 소스 카드의 '자동 발제'(source_ingest가 분석 후 제목 확정) 때만 갱신된다.
+ALL_FIELDS = SELECT_FIELDS | TEXT_FIELDS | {"published_url", "topic"}
 
 
 def _vault() -> Path:
@@ -102,6 +103,7 @@ def _card_from_file(path: Path) -> dict:
         "approval_status": get("approval_status"),
         "review_status": get("review_status"),
         "approved_keyword": get("approved_keyword"),
+        "source_url": get("source_url"),
         "manus_task_ids": get("manus_task_ids"),
         "idempotency_key": get("idempotency_key"),
         "published_url": get("published_url"),
@@ -171,7 +173,8 @@ def next_content_id() -> str:
 
 
 def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
-                audience: str = "", body: str = "") -> str:
+                audience: str = "", body: str = "", format: str = "",
+                source_url: str = "") -> str:
     """새 콘텐츠 카드를 생성하고 page_id(상대경로)를 반환한다."""
     require_backend()
     content_id = next_content_id()
@@ -180,7 +183,8 @@ def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
     meta = {
         "topic": topic, "content_id": content_id,
         "stage": stage, "status": status,
-        "format": "", "audience": audience, "priority": "",
+        "format": format, "audience": audience, "priority": "",
+        "source_url": source_url,
         "approval_status": "", "review_status": "",
         "approved_keyword": "", "manus_task_ids": "", "idempotency_key": "",
         "last_error": "", "published_url": "",
