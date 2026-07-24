@@ -45,3 +45,6 @@ tokens-mcp.json
 
 # 스레드 아카이브 CSV는 본인 공개 글 모음이라 커밋 허용 (전역 *.csv 무시의 예외)
 !vault/raw/스레드_아카이브/*.csv
+
+# im-not-strange-ai 윤문 스킬 실행 작업물 (임시)
+_workspace/
