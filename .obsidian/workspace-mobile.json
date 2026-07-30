@@ -23,12 +23,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "vault/_system/dialogues/2026-07-12.md",
+                "file": "vault/제텔카스텐/2. 키워드/O - 형제갈등 판사질문의 역효과.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2026-07-12"
+              "title": "O - 형제갈등 판사질문의 역효과"
             }
           }
         ],
@@ -177,8 +177,10 @@
       "bases:새 베이스 생성하기": false
     }
   },
-  "active": "f0ad6d785dabecd3",
+  "active": "0d23b1aa4af72303",
   "lastOpenFiles": [
+    "vault/_system/dialogues/2026-07-15.md",
+    "vault/_system/dialogues/2026-07-12.md",
     "vault/제텔카스텐/1. 메모/3-2단계는 확실한 반의어에 부정어를 결합해 문장을 확장하는 것이다.md",
     "vault/제텔카스텐/2. 키워드/K_ai - 콘텐츠 디벨롭 7단계.md",
     "vault/제텔카스텐/1. 메모/영상 검색으로 결이 맞는 채널을 찾으려 하지 말고 문제-타겟을 거꾸로 설계해서 결을 맞춰가야 한다.md",
@@ -205,8 +207,6 @@
     "vault/제텔카스텐/2. 키워드/K_ai - 기획 우선 원칙.md",
     "vault/제텔카스텐/3. 의견/O - O - 일상어 변환도 검색량이 더 낮아지면 적용하지 말아야 한다.md",
     "vault/_system/logs/plaud_2026-07-15.log",
-    "vault/제텔카스텐/3. 의견/O - O - 비즈니스 PT는 키 콘텐츠보다 이전 단계부터 설득하는 방식을 지향한다.md",
-    "vault/_system/dialogues/2026-07-15.md",
     "orchestrator/review_copy.py",
     "claude_client.py",
     "sync_wiki.py",
