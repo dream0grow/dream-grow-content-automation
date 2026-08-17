@@ -20,8 +20,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, prompts, review_copy,
-    youtube_script,
+    agent_dialogue, copy_edits, llm, manus_research, naver_keywords, prompts,
+    review_copy, youtube_script,
 )
 from orchestrator import state as store
 from orchestrator.config import (
@@ -401,8 +401,10 @@ def handle_keyword_approved(card: dict):
     store.append_section(
         page_id, "⏸️ 발행 승인 요청",
         "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안 본문.\n"
-        "초안을 직접 수정해도 됩니다 ('✍️ 초안' 토글 안에서만, AI 원본은 그대로 두세요). "
-        "수정분은 발행 시 자동으로 문체 학습에 반영됩니다.\n"
+        "초안을 직접 수정해도 됩니다 — 카드의 '✍️ 초안' 토글 안에서, 또는 "
+        "05 리뷰/대기의 열람 사본(GitHub Edit·옵시디언)에서요. 사본을 고치면 다음 "
+        "실행에 카드 초안으로 옮겨오고 AI 원본과 비교해 문체를 학습합니다 "
+        "(AI 원본 토글은 학습 기준이니 그대로 두세요).\n"
         "approval_status를 approved로 바꾸면 thread는 Threads에, "
         "newsletter는 스티비로 자동 발행됩니다 (STIBEE_AUTO_SEND가 꺼져 있으면 "
         "스티비에 초안만 생성되니 대시보드에서 확인 후 발송하세요). "
@@ -596,6 +598,14 @@ def run(only_stage: str | None = None):
             _sweep_stale_running()
         except Exception as e:  # noqa: BLE001 — 청소 실패가 본 처리를 막으면 안 됨
             log(f"고아 카드 청소 실패(계속 진행): {e}")
+        try:
+            # 05 리뷰/대기 열람 사본을 사람이 직접 고쳤으면 카드 초안에 되먹이고
+            # AI 원본과 비교해 문체를 학습한다(copy_edits). 발행 게이트는 그대로.
+            counts = copy_edits.apply_edits()
+            if counts.get("applied"):
+                log(f"열람 사본 사람 수정 {counts['applied']}건 반영 (문체 학습 포함)")
+        except Exception as e:  # noqa: BLE001 — 사본 반영 실패가 본 처리를 막으면 안 됨
+            log(f"열람 사본 수정 반영 실패(계속 진행): {e}")
     processed = 0
     for stage, status, approval, handler in DISPATCH:
         if only_stage and stage != only_stage:

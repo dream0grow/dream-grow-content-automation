@@ -42,6 +42,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `publish.py` | publish_ready 카드 발행 (Threads 체인 / 스티비 뉴스레터) |
 | `stibee.py` | 스티비 3단계 발행: POST /emails → POST /emails/{id}/content(text/html) → /send |
 | `style_learn.py` | AI 원본 vs 사람 수정본 diff → Honcho 문체 학습 |
+| `review_copy.py` | thread/newsletter 초안 열람 사본을 `05 리뷰/대기`에 저장(수정 감지용 `draft_hash` 포함) |
+| `copy_edits.py` | 열람 사본을 사람이 직접 고쳤는지 감지 → 카드 초안 반영 + 문체 학습 |
 | `self_improve.py` | 주간 회고 → 프롬프트 개선 큐시트(사람 승인 후 반영) |
 | `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
 | `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
@@ -94,6 +96,9 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   매일 발제(`daily-intake`)와 yt_research 사이트 「파이프라인 발제 🚀」도 카드를 만든다.
 - **키워드 승인**: 키워드 섹션 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status: approved`
 - **발행 승인**: 초안/검수 확인 → `review_status: approved`이면 `approval_status: approved` → 자동 발행
+- **초안 직접 고치기**: `vault/SNS 콘텐츠 제작 시스템/05 리뷰/대기/{스레드|뉴스레터}_*.md`를
+  GitHub Edit(연필 아이콘, main에 커밋)이나 옵시디언에서 그냥 고치면 된다. 다음 orchestrator 실행이
+  카드의 `✍️ 초안`으로 옮기고 AI 원본과 비교해 문체를 학습한다 (`copy_edits.py`). 발행은 여전히 승인 필요.
 - **수정 요청**: 카드 `📝 수정 요청` 섹션에 지시 적고 `approval_status: revision_requested` → 재초안
 - **orchestrator 수동 실행**: GitHub Actions 탭 → orchestrator → Run workflow (Claude는 권한상 직접 실행 불가, 사용자가 클릭)
 - **대량 검토 생성**: `DG_AUTO_APPROVE_KEYWORD=true` → 키워드 자동 채택 → 초안까지 자동 (발행만 사람)
@@ -108,7 +113,27 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 에이전트 OS 점검 + 텔레그램 핑퐁 전면 확장 (2026-07-13, main 머지 완료) — ⬅️ 이번 세션 작업
+### 열람 사본 직접 수정 → 카드 반영 + 문체 학습 (2026-08-17, 브랜치 `claude/github-edit-style-learning-419pik`) — ⬅️ 이번 세션 작업
+
+`05 리뷰/대기`의 초안 열람 사본은 "고쳐 봐야 발행에 반영 안 됨"이었다. 폰·웹에서 손이 제일
+잘 닿는 파일이 거기라 **GitHub Edit으로 고친 걸 그대로 주워 담도록** 경로를 열었다.
+신규 `orchestrator/copy_edits.py` + 테스트 7종(전체 66종 통과).
+- **감지**: `review_copy.export`가 frontmatter에 `draft_hash`(본문 지문)를 남긴다. 사본 본문의
+  지문이 달라지고 카드 최신 `✍️ 초안 (채널)`과도 다르면 사람 수정으로 본다. 지문이 없는 옛
+  사본도 카드 초안과 직접 비교하므로 첫 실행부터 잡힌다(안내문·HTML 주석은 본문에서 제외).
+- **반영**: 수정본을 카드에 `✍️ 초안 (채널) 🧑 사람 수정본`으로 덧붙인다 — 발행은 최신 초안
+  섹션을 읽으므로 승인만 하면 사람 손이 간 원고가 나간다. 발행 게이트는 그대로.
+- **학습**: 이어서 `style_learn.learn_from_edits`가 `🗄️ AI 원본`과 비교해 패턴을 뽑아 Honcho
+  `{채널}-corrections`에 쌓는다 → 다음 초안부터 작가 프롬프트에 자동 주입.
+- **안전장치**: 수정본이 200자 미만이거나 카드 초안의 50% 미만이면 반영하지 않고 통지만 한다.
+  처리 후 지문을 갱신해 재처리를 막고, 결과(반영/보류/학습 패턴 수)를 텔레그램으로 알린다.
+- **배선**: `orchestrator.run.run()` 시작 시 고아 청소 다음에 실행(수동 stage 실행은 건너뜀).
+  단독 실행은 `python3 -m orchestrator.copy_edits [--dry-run]`.
+- 기존 사본 35건의 안내문을 "직접 고쳐도 됩니다"로 교체하고 기준 지문을 심어뒀다.
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지(머지돼야 GitHub 수정이 반영된다) ② 사본을 고쳐본 뒤
+  orchestrator Run workflow로 라이브 확인.
+
+### 에이전트 OS 점검 + 텔레그램 핑퐁 전면 확장 (2026-07-13, main 머지 완료)
 
 - **daily-intake 7일 연속 실패 수리** (#58): 워크플로우가 미설정 시크릿을 빈 문자열로 넘겨
   `int('')` 크래시(2026-07-07~12 전건 실패). `daily_intake.py` env 파싱을 `or` 폴백으로 교체.
