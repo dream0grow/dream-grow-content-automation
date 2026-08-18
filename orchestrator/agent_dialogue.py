@@ -38,13 +38,15 @@ def load_hooks(limit: int = 4000) -> str:
 
 def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
                        hook_examples: str = "", extra_directive: str = "",
-                       benchmark: str = "") -> dict:
+                       benchmark: str = "", source_material: str = "") -> dict:
     """브리프 → 토론을 거친 초안을 생성한다.
 
     hook_examples/benchmark: 후킹 패턴·고성과 벤치마킹(수 KB). 첫 집필에만 주입하고
       비평/윤리 재작성 호출에서는 뺀다 — 재작성엔 직전 초안+피드백이면 충분하고,
       매 라운드 13KB+를 다시 실어 보내는 토큰 낭비를 없앤다(B5).
     extra_directive: 사람이 남긴 수정 지시(재초안 시). 첫 집필부터 반드시 반영한다.
+    source_material: 사람이 준 글감 원문('📄 글감' 카드). 핵심 주장·논리·대사를
+      보존한 채 채널 형식만 재구성해야 하므로, 재작성 라운드에도 계속 주입한다.
     Returns: {"draft": str, "review": dict, "transcript": str, "rounds": int}
     """
     transcript: list[str] = []
@@ -55,6 +57,17 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
     directive_block = (
         f"[사람의 수정 지시 - 최우선 반영]\n{extra_directive}" if extra_directive.strip() else ""
     )
+    # 글감 원문은 초안의 뼈대라 크기가 작고(보통 1~2KB) 재작성에서도 원문 보존
+    # 기준이 되므로, 벤치마킹과 달리 모든 작가 호출에 유지한다.
+    source_block = ""
+    if source_material.strip():
+        source_block = (
+            "[글감 - 사람이 준 원문, 이 글이 초안의 토대]\n"
+            "아래 글감의 핵심 주장·논리 흐름·대사 예시·표현의 결을 그대로 살리되, "
+            "형식 규칙(분량·분할·줄바꿈)에 맞게 재구성하세요. 글감에 없는 사례·수치를 "
+            "새로 지어내지 말고, 글감과 어긋나는 주장을 더하지 마세요.\n\n"
+            f"{source_material.strip()}"
+        )
     # 첫 집필에만 붙이는 무거운 참고 자료(후킹 예시 + 벤치마킹).
     first_draft_parts = []
     if hook_examples:
@@ -67,7 +80,8 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
 
     draft = llm.call_writing(
         prompts.WRITER.format(
-            format=fmt, brief=brief_text, style_context=style_block,
+            format=fmt, brief=brief_text, source_block=source_block,
+            style_context=style_block,
             hook_examples=first_draft_block, feedback_block=directive_block,
         ),
         system=prompts.get_system(),
@@ -92,7 +106,8 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
         )
         draft = llm.call_writing(
             prompts.WRITER.format(
-                format=fmt, brief=brief_text, style_context=style_block,
+                format=fmt, brief=brief_text, source_block=source_block,
+                style_context=style_block,
                 hook_examples="",  # 재작성엔 무거운 후킹·벤치마킹 재주입 안 함(B5)
                 feedback_block=(
                     "[비평가 피드백 - 반드시 반영하되 브리프의 핵심 메시지는 유지]\n"
@@ -128,7 +143,8 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
             break  # 되먹일 구체적 피드백이 없으면 재작성 불가 → 사람에게
         draft = llm.call_writing(
             prompts.WRITER.format(
-                format=fmt, brief=brief_text, style_context=style_block,
+                format=fmt, brief=brief_text, source_block=source_block,
+                style_context=style_block,
                 hook_examples="",  # 재작성엔 무거운 후킹·벤치마킹 재주입 안 함(B5)
                 feedback_block=(
                     "[교육윤리 검수 피드백 - 반드시 반영. 부모 죄책감/공포 유발, "

@@ -33,6 +33,12 @@ from orchestrator.config import (
 # 이 섹션을 읽어 작가에게 되먹인다(없으면 일반 재작성).
 REVISION_SECTION = "📝 수정 요청"
 
+# 사람이 완성된 글감(소스 원문)을 붙여넣는 섹션. 이 섹션이 있는 카드는
+# 외부 리서치(Manus/Claude)를 생략하고 글감을 근거 자료 삼아
+# 키워드→브리프→초안을 진행하며, 작가는 글감의 핵심 주장·구조를 보존한 채
+# 채널 형식(스레드 분할·줄바꿈 등)에 맞게 재구성한다.
+SOURCE_SECTION = "📄 글감"
+
 # 다음 실행에서 1회 자동 재시도를 표시하는 last_error 접두사(A3).
 _RETRY_MARK = "[자동재시도]"
 
@@ -126,6 +132,19 @@ def handle_intake(card: dict):
         page_id, content_id=content_id, idempotency_key=idem,
         stage="research", status="running", last_error="",
     )
+    # 글감 카드: 사람이 '📄 글감' 섹션에 원문을 붙여넣었으면 외부 리서치를 생략하고
+    # 글감을 근거 자료로 키워드 단계로 직행한다.
+    source = store.read_latest_section(page_id, SOURCE_SECTION).strip()
+    if source:
+        store.notify(
+            page_id,
+            f"🆕 [{content_id}] 글감 카드 접수 — {card['topic']}\n"
+            "'📄 글감' 원문을 토대로 리서치 없이 초안까지 진행하고, "
+            "초안이 완성되면 다시 알립니다.",
+        )
+        store.update_card(page_id, stage="keyword", status="queued")
+        log(f"{content_id} 글감 감지 → 리서치 생략, keyword 직행")
+        return
     store.notify(
         page_id,
         f"🆕 [{content_id}] 새 카드 접수 — {card['topic']}\n"
@@ -203,8 +222,9 @@ def _save_research(page_id: str, results: list[dict]):
 def handle_keyword(card: dict):
     """keyword/queued → Claude 점수화 → 사람 승인 대기."""
     # 키워드 점수화엔 리서치 산출물만 필요하다(누적 초안·검수 제외로 토큰 절감, B3).
+    # 글감 카드는 리서치가 없는 대신 '📄 글감' 원문이 근거 자료가 된다.
     research = store.read_sections_by_prefix(
-        card["page_id"], "🔍 리서치", "📋 상세", "⚠️ Manus",
+        card["page_id"], "🔍 리서치", "📋 상세", "⚠️ Manus", SOURCE_SECTION,
     )
     scored = llm.call_json(
         prompts.KEYWORD_SCORE.format(
@@ -277,10 +297,12 @@ def handle_keyword_approved(card: dict):
     revision_note = store.read_latest_section(page_id, REVISION_SECTION).strip()
     if revision_note:
         log(f"{card['content_id']} 수정 지시 반영해 재초안")
+    # 글감 카드면 원문을 작가에게 그대로 넘겨 형식만 재구성하게 한다.
+    source_material = store.read_latest_section(page_id, SOURCE_SECTION).strip()
     # 브리프엔 리서치+키워드만 필요하다. 재초안 시 누적된 옛 초안/검수/평가를
     # 통째로 다시 싣지 않도록 관련 섹션만 고른다(B3, A1 재초안 경로와 시너지).
     context = store.read_sections_by_prefix(
-        page_id, "🔍 리서치", "📋 상세", "🏷️ 키워드", "📝 수정 요청",
+        page_id, "🔍 리서치", "📋 상세", "🏷️ 키워드", "📝 수정 요청", SOURCE_SECTION,
     )
     brief = llm.call_json(
         prompts.BRIEF.format(
@@ -343,6 +365,7 @@ def handle_keyword_approved(card: dict):
             hook_examples=agent_dialogue.load_hooks(),
             benchmark=agent_dialogue.load_benchmark(fmt),
             extra_directive=revision_note,
+            source_material=source_material,
         )
         store.append_section(
             page_id, f"💬 에이전트 토론 ({fmt}, {result['rounds']}라운드)",

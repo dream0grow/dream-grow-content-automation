@@ -92,6 +92,10 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - **새 글 만들기**: `vault/파이프라인/활성/`에 카드 생성 (frontmatter `stage: intake`, `status: queued`,
   `format: thread`/`newsletter`/`youtube`(유튜브 롱폼 원고, 콤마 혼합 가능), `audience` 입력).
   매일 발제(`daily-intake`)와 yt_research 사이트 「파이프라인 발제 🚀」도 카드를 만든다.
+- **글감 카드 (완성 원고 기반)**: 카드 본문에 `## 📄 글감` 섹션으로 원문을 붙여넣으면
+  외부 리서치(Manus/Claude)를 **생략**하고 글감을 근거 자료 삼아 키워드→브리프→초안 진행.
+  작가는 글감의 핵심 주장·논리·대사를 보존한 채 채널 형식(스레드 분할·줄바꿈)만 재구성한다
+  (모든 재작성 라운드에 글감 유지). 이후 승인·발행 게이트는 일반 카드와 동일.
 - **키워드 승인**: 키워드 섹션 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status: approved`
 - **발행 승인**: 초안/검수 확인 → `review_status: approved`이면 `approval_status: approved` → 자동 발행
 - **수정 요청**: 카드 `📝 수정 요청` 섹션에 지시 적고 `approval_status: revision_requested` → 재초안
@@ -107,6 +111,20 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 글감 카드 — 완성 원고를 스레드로 재구성하는 입구 (2026-08-19, 브랜치 `claude/child-sharing-behavior-wzu82g`) — ⬅️ 이번 세션 작업
+
+사용자가 완성 원고(글감)를 주면 그걸 **토대로** 스레드를 뽑는 파이프라인 입구를 추가했다.
+- **동작**: 카드 본문 `## 📄 글감` 섹션이 있으면 `handle_intake`가 리서치를 생략하고 keyword로 직행.
+  키워드 점수화·브리프 컨텍스트에 글감 포함(`read_sections_by_prefix`에 `📄 글감` 추가).
+  `run_draft_dialogue(source_material=...)`가 작가 프롬프트에 `[글감 - 이 글이 초안의 토대]`
+  블록을 **모든 작가 호출**(첫 집필+비평/윤리 재작성)에 주입 — 핵심 주장·대사 보존, 새 사례 창작 금지.
+  `prompts.WRITER`에 `{source_block}` 플레이스홀더 추가.
+- **첫 글감 카드**: DG-2026-0047 (달라고 하기 전에 물건 나눠주는 아이 — 물건 말고 마음으로 관계 맺기,
+  `format: thread`). 글감은 이번 세션에서 윤문(im-not-strange-ai 등급 A)까지 마친 원고.
+- 테스트 61종 통과(신규 2: intake 리서치 생략, 재작성 라운드 글감 유지).
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② orchestrator Run workflow 실행(또는 cron 대기)
+  → DG-2026-0047이 글감 기반으로 초안 생성 → 발행 승인만 하면 Threads 발행.
 
 ### 에이전트 OS 점검 + 텔레그램 핑퐁 전면 확장 (2026-07-13, main 머지 완료) — ⬅️ 이번 세션 작업
 

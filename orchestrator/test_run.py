@@ -252,3 +252,59 @@ def test_review_copy_export_writes_named_file(tmp_path, monkeypatch):
     assert "초안 본문입니다." in saved
     # 재초안 시 같은 이름으로 덮어써 최신 초안을 비춘다.
     assert review_copy.export(card, "thread", "수정된 본문") == name
+
+
+# ---------- 글감 카드: 리서치 생략 + 작가에 원문 주입 ----------
+
+def test_intake_with_source_material_skips_research(monkeypatch):
+    st = FakeState(sections={("p1", run.SOURCE_SECTION): "완성된 글감 원문"})
+    _patch(st)
+
+    def _fail(*a, **k):
+        raise AssertionError("글감 카드는 리서치를 호출하면 안 됨")
+
+    monkeypatch.setattr(run, "manus_research", types.SimpleNamespace(
+        available=_fail, create_research_tasks=_fail, claude_research_fallback=_fail,
+    ))
+    run.handle_intake({
+        "page_id": "p1", "content_id": "DG-2026-0047",
+        "idempotency_key": "", "topic": "물건으로 관계 맺는 아이", "audience": "학부모",
+    })
+    merged = _last_update(st, "p1")
+    assert merged.get("stage") == "keyword"
+    assert merged.get("status") == "queued"
+    assert any("글감" in msg for _, msg in st.notes)
+
+
+def test_dialogue_source_material_kept_across_rewrites(monkeypatch):
+    from orchestrator import agent_dialogue as ad
+
+    writer_prompts = []
+
+    class FakeLLM:
+        calls = {"json": 0}
+
+        @staticmethod
+        def call_writing(prompt, system="", max_tokens=8000):
+            writer_prompts.append(prompt)
+            return "초안 본문"
+
+        @staticmethod
+        def call_json(prompt, system="", **kw):
+            FakeLLM.calls["json"] += 1
+            if FakeLLM.calls["json"] == 1:
+                return {"verdict": "revise", "issues": ["수정"], "suggestions": []}
+            if FakeLLM.calls["json"] == 2:
+                return {"verdict": "pass"}
+            return {"review_status": "approved", "risk_level": "low"}
+
+    monkeypatch.setattr(ad, "llm", FakeLLM)
+    ad.run_draft_dialogue(
+        {"core_message": "핵심", "cta": "행동"}, "thread",
+        benchmark="벤치마킹ABC", source_material="글감원문QRS",
+    )
+    assert len(writer_prompts) >= 2
+    # 글감은 첫 집필과 재작성 모두에 유지된다(원문 보존 기준).
+    for p in writer_prompts:
+        assert "글감원문QRS" in p
+    assert "벤치마킹ABC" not in writer_prompts[1]  # 벤치마킹은 여전히 첫 집필만
