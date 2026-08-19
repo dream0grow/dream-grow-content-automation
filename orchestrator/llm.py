@@ -49,6 +49,37 @@ def call(prompt: str, system: str = "", model: str = "", max_tokens: int = 4096)
     return claude_call(prompt, model=model, system=system or None)
 
 
+def call_vision(prompt: str, image_bytes: bytes, media_type: str = "image/jpeg",
+                model: str = "", max_tokens: int = 2048) -> str:
+    """이미지 + 프롬프트 호출 (썸네일 OCR·그림 분석). API 키 없으면 빈 문자열.
+
+    로컬 Claude Max CLI 폴백은 이미지 입력을 못 받으므로, 호출부는 빈 반환을
+    "비전 불가"로 보고 텍스트 정보만으로 진행해야 한다.
+    """
+    import base64
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        return ""
+    body = {
+        "model": model or MODEL_UTILITY,
+        "max_tokens": max_tokens,
+        "messages": [{"role": "user", "content": [
+            {"type": "image", "source": {
+                "type": "base64", "media_type": media_type,
+                "data": base64.b64encode(image_bytes).decode()}},
+            {"type": "text", "text": prompt},
+        ]}],
+    }
+    resp = requests.post(
+        API_URL,
+        headers={"x-api-key": api_key, "anthropic-version": "2023-06-01",
+                 "content-type": "application/json"},
+        json=body, timeout=300)
+    resp.raise_for_status()
+    data = resp.json()
+    return "".join(b.get("text", "") for b in data["content"] if b["type"] == "text")
+
+
 def call_writing(prompt: str, system: str = "", max_tokens: int = 8000) -> str:
     """글쓰기 품질이 중요한 호출 (작가/브리프)."""
     return call(prompt, system=system, model=MODEL_WRITING, max_tokens=max_tokens)

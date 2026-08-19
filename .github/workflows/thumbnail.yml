@@ -1,0 +1,120 @@
+# 유튜브 썸네일 자동화 (벤치마킹 6단계)
+# ① cron/수동(빈 입력): 구글 시트(분석 탭)에서 "내가 만들 영상 키워드"가 있고
+#    "문구 디벨롭"이 빈 행을 찾아 → 벤치 썸네일 비전 OCR → 1~6단계 분석·디벨롭·검증 →
+#    같은 행에 결과 써넣기 + 확장 키워드 새 행 추가 (GSHEET_SA_JSON 서비스 계정 필요)
+# ② 수동(topic 입력): 시트 없이 해당 주제만 처리
+# 공통: 1280×720 PNG/JPG 아티팩트 + 기획 md를 볼트 05 리뷰/대기에 커밋 → 텔레그램 핑퐁
+name: thumbnail
+
+on:
+  schedule:
+    - cron: "41 */2 * * *"   # 2시간마다 시트 폴링 (처리할 행 없으면 바로 종료)
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "내가 만들 영상 키워드 (비우면 구글 시트에서 대기 행을 찾아 처리)"
+        required: false
+      benchmark_url:
+        description: "벤치마킹 영상 URL (topic 입력 시 — 썸네일 비전 OCR)"
+        required: false
+      benchmark_copy:
+        description: "벤치마킹 썸네일 문구 (OCR 대신 직접 입력)"
+        required: false
+      benchmark_title:
+        description: "벤치마킹 영상 제목"
+        required: false
+      expand:
+        description: "5단계 확장 키워드 수 (기본 3, 0=생략)"
+        required: false
+        default: "3"
+      audience:
+        description: "타겟 (기본: 초등 저학년 학부모)"
+        required: false
+        default: "초등 저학년 학부모"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: thumbnail
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      GSHEET_SA_JSON: ${{ secrets.GSHEET_SA_JSON }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      DG_IMAGE_PROVIDER: ${{ secrets.DG_IMAGE_PROVIDER }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      DG_STOCK_PROVIDER: ${{ secrets.DG_STOCK_PROVIDER }}
+      DG_PHOTO_ORDER: ${{ secrets.DG_PHOTO_ORDER }}
+      HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          pip install requests python-dotenv honcho-ai pyyaml playwright google-auth
+          python -m playwright install --with-deps chromium
+
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run thumbnail pipeline
+        env:
+          DG_CHROME_PATH: ""
+        run: |
+          TOPIC="${{ github.event.inputs.topic }}"
+          if [ -n "$TOPIC" ]; then
+            python3 -m orchestrator.thumbnail \
+              --topic "$TOPIC" \
+              --audience "${{ github.event.inputs.audience || '초등 저학년 학부모' }}" \
+              --benchmark-url "${{ github.event.inputs.benchmark_url }}" \
+              --benchmark-copy "${{ github.event.inputs.benchmark_copy }}" \
+              --benchmark-title "${{ github.event.inputs.benchmark_title }}" \
+              --expand "${{ github.event.inputs.expand || '3' }}" \
+              --out thumbnail_out
+          else
+            python3 -m orchestrator.thumbnail --sheet \
+              --audience "${{ github.event.inputs.audience || '초등 저학년 학부모' }}" \
+              --expand "${{ github.event.inputs.expand || '3' }}" \
+              --out thumbnail_out
+          fi
+
+      - name: Upload thumbnails
+        uses: actions/upload-artifact@v4
+        if: ${{ hashFiles('thumbnail_out/*') != '' }}
+        with:
+          name: thumbnails
+          path: |
+            thumbnail_out/*.png
+            thumbnail_out/*.jpg
+            thumbnail_out/*.md
+            thumbnail_out/thumbnail_plan.json
+
+      - name: Commit vault (기획 md → 텔레그램 핑퐁)
+        run: |
+          git config user.name "dreamgrow-bot"
+          git config user.email "bot@dreamgrow.local"
+          git add vault/
+          git diff --cached --quiet && exit 0
+          git commit -m "썸네일 기획 자동 생성 $(date +%Y-%m-%dT%H:%M)"
+          # 여러 워크플로우가 같은 브랜치에 동시 push하면 non-fast-forward로 거부된다(A8 패턴).
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

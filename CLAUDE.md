@@ -46,6 +46,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
 | `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
 | `cardnews.py` | 초안 → 실사진 오버레이 카드뉴스 PNG (Pretendard, Playwright/Chromium) |
+| `thumbnail.py` | 유튜브 썸네일 자동화: 주제 → 문구(기대/증거/의문/공감) 생성·구조분석·디벨롭 → 1280×720 PNG. `data/thumbnail_patterns.md` 주입 |
 | `stock.py` | 실물 스톡 사진 검색 (Pexels/Unsplash, 상업 라이선스) |
 | `image_gen.py` | AI 배경 이미지 생성 (OpenAI gpt-image-1 / Google Imagen, 한국인 중심) |
 | `cardnews_benchmark.py` | 최근 뜬 카드뉴스 벤치마킹 리서치(Manus/Claude) → `data/cardnews_benchmark.md`, 카드 생성 시 주입 |
@@ -111,6 +112,33 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
+
+사용자의 벤치마킹 6단계 방법론(사용자 교정 반영)을 파이프라인으로 이관. **벤치마킹 썸네일에서 출발**한다.
+- **방법론(`data/thumbnail_patterns.md`)**: ①썸네일 보는 사람 분석(상황/고민/욕구/계획)
+  ②감정 분석(기대/의문/증거/공감 — 문구+그림 합쳐 10점 배분, 예: 문구 기대9+그림 기대1)
+  ③문구+제목 **세트** 구조분석((변수) 분해 + 주의할 점) ④구조에 내 키워드 대입 — **같은 감정을
+  증폭**하는 방향으로 변주 6~10개 + 이미지 디벨롭(감정 카테고리별, 효과 없으면 제외 사유)
+  ⑤타겟이 '방법'을 원하는 키워드 확장 ⑥검증(상황/고민/욕구/계획 연결+욕구 강도 1~10점,
+  근거 없으면 '모델 추정' 표기). 구조 공식 45종(연습 시트에서 실측·주의할 점 포함).
+- **구글 시트 연동(`orchestrator/gsheet.py`)**: 서비스 계정(`GSHEET_SA_JSON` 시크릿)으로 분석 탭을
+  직접 읽고 쓴다. 설정 가이드 `docs/thumbnail-sheet-setup.md` (사용자 1회 작업 필요).
+- **파이프라인(`orchestrator/thumbnail.py`)**: 시트 모드(`--sheet`) — K열 키워드 있고 N열 문구
+  디벨롭 빈 행 탐지 → 벤치 썸네일 **비전 OCR**(`llm.call_vision`) → 1~6단계
+  (`prompts.THUMBNAIL_ANALYZE/DEVELOP/EXPAND`) → 같은 행 **빈 칸에만** 결과 기입(E~H,I,J,N,O,Q)
+  + 확장 키워드 `(자동 확장)` 새 행 추가. 수동 모드(`--topic --benchmark-*`)도 유지.
+  최종 픽 1280×720 PNG/JPG 렌더(cardnews 사진 소스 재사용).
+- **워크플로우(`thumbnail.yml`)**: 2시간 cron 시트 폴링 + 수동 실행. 아티팩트 + 볼트
+  `05 리뷰/대기/썸네일_{주제}.md` 커밋(텔레그램 알림·답장 핑퐁).
+- **샘플(교정판)**: 시트 12행(영어공부 벤치마크 "영어 문장 한글처럼 읽는 법") → 초등 고전 독서.
+  구조 "(원하는 A)을 (쉬운 B)처럼 하는 방법" 대입, 기대 9 증폭 변주 7개("고전을 만화책처럼 읽는
+  방법" 등) + 확장 3키워드 + 검증(모델 추정 표기). 볼트 md 교체 + 렌더 검증 완료.
+- 테스트 75종 통과(test_thumbnail.py 14종).
+- **남은 사용자 액션**: ① 브랜치 검토/머지 ② `docs/thumbnail-sheet-setup.md` 따라 서비스 계정
+  만들고 `GSHEET_SA_JSON` 시크릿 등록 + 시트를 서비스 계정 이메일에 편집자 공유
+  ③ 이후 시트에 키워드만 적으면 2시간 내 자동 처리 (또는 Run workflow 즉시 실행).
+- **다음 예정**: 썸네일 이미지 만들기 고도화 후 → **도입부 문장 생성** 단계 추가 (사용자 지시).
 
 ### 글감 카드 — 완성 원고를 스레드로 재구성하는 입구 (2026-08-19, 브랜치 `claude/child-sharing-behavior-wzu82g`) — ⬅️ 이번 세션 작업
 
