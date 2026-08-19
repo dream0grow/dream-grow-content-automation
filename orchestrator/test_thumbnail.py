@@ -83,13 +83,13 @@ VALIDATION = [{"keyword": "초등 고전 독서", "copy": "고전을 만화책�
                "desire_intensity": 8, "evidence": "모델 추정"}]
 
 
-def test_develop_cell_contains_structure_variants_validation():
-    cell = thumbnail.develop_cell(ANALYSIS, DEV, VALIDATION)
-    assert "구조: (원하는 A)을 (쉬운 B)처럼 하는 방법" in cell
-    assert "*주의: A는 어렵다고 느끼는 것" in cell
+def test_develop_cell_variants_and_validation():
+    cell = thumbnail.develop_cell(DEV, VALIDATION)
+    assert cell.startswith("대입: (A) = 초등 고전 독서")
     assert "1. 고전을 만화책처럼 읽는 방법" in cell
     assert "(이 방법으로 하니 푹 빠집니다)" in cell
     assert "8/8/9/7/8 — 모델 추정" in cell
+    assert "구조" not in cell.split("\n")[0]  # 구조분석은 J열 몫 — M에 반복하지 않음
 
 
 def test_emotion_and_image_cells():
@@ -98,15 +98,50 @@ def test_emotion_and_image_cells():
     assert "(기대) 데미안 들고 편안하게 읽는 아이 — 우리 아이도 기대" in img
 
 
+# ---------- 열 해석 (헤더 이름 기반) ----------
+
+HEADER = ["날짜 및 키워드", "영상 URL", "썸네일 이미지", "영상 제목", "상황", "고민", "욕구",
+          "계획", "썸네일 문구  (기대, 증거, 의문, 공감)", "영상 문구 분석",
+          "그림  (기대, 증거, 의문, 공감)", "내가 만들 영상 키워드", "키워드로 문구 디벨롭",
+          "핫비디오 썸네일", "핫비디오 썸네일 분석", "핫비디오로 문구 디벨롭",
+          "이미지 디벨롭", "만든 썸네일", "만든 제목", "", "영상요약", "핫비디오 영상 도입부"]
+
+
+def test_resolve_columns_by_header_names():
+    cols = thumbnail.resolve_columns(HEADER)
+    assert cols["structure"] == 9          # J 영상 문구 분석
+    assert cols["my_keyword"] == 11        # L
+    assert cols["kw_develop"] == 12        # M 키워드로 문구 디벨롭
+    assert cols["hot_thumb"] == 13 and cols["hot_analysis"] == 14
+    assert cols["hot_develop"] == 15       # P
+    assert cols["image_develop"] == 16 and cols["made_title"] == 18
+    # 열이 한 칸 밀려도 이름으로 따라간다
+    shifted = ["메모"] + HEADER
+    assert thumbnail.resolve_columns(shifted)["structure"] == 10
+
+
+def test_col_letter():
+    assert thumbnail.col_letter(0) == "A"
+    assert thumbnail.col_letter(12) == "M"
+    assert thumbnail.col_letter(18) == "S"
+    assert thumbnail.col_letter(26) == "AA"
+
+
 # ---------- 시트 모드: 대기 행 탐지 + 빈 칸만 채우기 ----------
 
-def _row(k="", n="", url="", title="", situation=""):
-    row = [""] * 17
-    row[thumbnail.COL["my_keyword"]] = k
-    row[thumbnail.COL["copy_develop"]] = n
-    row[thumbnail.COL["url"]] = url
-    row[thumbnail.COL["title"]] = title
-    row[thumbnail.COL["situation"]] = situation
+COLS = thumbnail.resolve_columns(HEADER)
+
+
+def _row(k="", m="", url="", title="", situation="", j="", i_="", hot_a=""):
+    row = [""] * 19
+    row[COLS["my_keyword"]] = k
+    row[COLS["kw_develop"]] = m
+    row[COLS["url"]] = url
+    row[COLS["title"]] = title
+    row[COLS["situation"]] = situation
+    row[COLS["structure"]] = j
+    row[COLS["copy_emotion"]] = i_
+    row[COLS["hot_analysis"]] = hot_a
     return row
 
 
@@ -114,43 +149,79 @@ def test_find_pending_rules():
     rows = [
         _row(k="초등 고전 독서", url="https://youtu.be/x"),   # 처리 대상
         _row(k="키워드만 있고 단서 없음"),                     # URL·제목 없음 → 제외
-        _row(k="이미 처리", n="구조: ...", url="u"),           # N 채워짐 → 제외
+        _row(k="이미 처리", m="1. ...", url="u"),              # M 채워짐 → 제외
         _row(url="https://youtu.be/y"),                        # 키워드 없음 → 제외
         _row(k="제목만 있는 행", title="벤치 제목"),           # 처리 대상
     ]
-    assert thumbnail.find_pending(rows) == [0, 4]
+    assert thumbnail.find_pending(rows, COLS) == [0, 4]
+
+
+def test_find_structure_backfill_skips_duplicates_and_filled():
+    rows = [
+        _row(url="u1", title="t1", i_="(기대 9) ..."),         # 대상
+        _row(url="u1", title="t1", i_="(기대 9) ..."),         # 위와 같은 영상(묶임) → 패스
+        _row(url="u2", title="t2", j="구조 : ...", i_="x"),    # J 이미 있음 → 패스
+        _row(title="t3", i_="(기대 10) ..."),                  # 대상 (제목만)
+        _row(),                                                # 단서 없음 → 패스
+    ]
+    assert thumbnail.find_structure_backfill(rows, COLS, skip=set()) == [0, 3]
+    # 전체 처리 예정(skip) 행은 백필에서 제외
+    assert thumbnail.find_structure_backfill(rows, COLS, skip={0}) == [3]
 
 
 def test_row_updates_fills_only_empty_cells():
     row = _row(k="초등 고전 독서", url="u", situation="사람이 이미 쓴 상황")
     result = {"analysis": ANALYSIS, "develop": DEV, "expand": {"validation": VALIDATION}}
-    upd = thumbnail._row_updates(row, result, {"copy": "벤치 문구", "image": "벤치 그림"})
-    assert "E" not in upd                      # 이미 채워진 상황 칸은 건드리지 않음
+    hot = {"hot_structure": "(A) 구조", "develops": [{"copy": "핫문구", "title": "핫제목", "note": "욕구 연결"}]}
+    upd = thumbnail._row_updates(row, COLS, result, {"copy": "벤치 문구", "image": "벤치 그림"}, hot)
+    assert "E" not in upd                        # 이미 채워진 상황 칸은 건드리지 않음
     assert upd["F"] == "고민B" and upd["G"] == "욕구C" and upd["H"] == "계획D"
     assert upd["I"].startswith("(기대 9) 벤치 문구")
-    assert upd["J"].startswith("(기대 1)")
-    assert "구조:" in upd["N"] and "검증" in upd["N"]
-    assert "(기대) 데미안" in upd["O"]
-    assert upd["Q"] == "최종 제목1"
+    assert upd["J"].startswith("구조 : (원하는 A)을 (쉬운 B)처럼 하는 방법")
+    assert upd["K"].startswith("(기대 1)")
+    assert upd["M"].startswith("대입:") and "검증" in upd["M"]  # M: 키워드로 문구 디벨롭
+    assert "핫문구" in upd["P"] and "핫비디오 구조" in upd["P"]  # P: 핫비디오로 문구 디벨롭
+    assert "(기대) 데미안" in upd["Q"]
+    assert upd["S"] == "최종 제목1"
 
 
-def test_expansion_rows_layout():
+def test_expansion_values_inherit_parent_and_set_keyword():
+    parent = _row(k="초등 고전 독서", url="https://youtu.be/x", title="벤치 제목",
+                  situation="부모 상황", j="구조 : ...", i_="(기대 9) ...")
     expand = {
         "expansions": [{"keyword": "초등 영어 원서", "why": "학부모가 방법을 원함",
-                        "viewer": {"situation": "s", "worry": "w", "desire": "d", "plan": "p"},
+                        "viewer": {"situation": "원서 상황", "worry": "w", "desire": "d", "plan": "p"},
                         "develops": [{"copy": "원서를 동화책처럼 읽는 법", "title": "제목"}]}],
         "validation": [{"keyword": "초등 영어 원서", "copy": "원서를 동화책처럼 읽는 법",
                         "situation": 7, "worry": 7, "desire": 8, "plan": 6,
                         "desire_intensity": 7, "evidence": "모델 추정"}],
     }
-    rows = thumbnail.expansion_rows(expand, "2026-08-19")
+    rows = thumbnail.expansion_values(expand, parent, COLS)
     assert len(rows) == 1
     r = rows[0]
-    assert r[thumbnail.COL["date_kw"]] == "2026-08-19 초등 영어 원서 (자동 확장)"
-    assert r[thumbnail.COL["my_keyword"]] == "초등 영어 원서"
-    assert "원서를 동화책처럼 읽는 법" in r[thumbnail.COL["copy_develop"]]
-    assert "검증" in r[thumbnail.COL["copy_develop"]]
-    assert r[thumbnail.COL["situation"]] == "s"
+    assert r[COLS["url"]] == "https://youtu.be/x"        # 벤치마크 상속
+    assert r[COLS["title"]] == "벤치 제목"
+    assert r[COLS["structure"]] == "구조 : ..."
+    assert r[COLS["situation"]] == "원서 상황"           # 확장 키워드 시청자 분석이 우선
+    assert r[COLS["my_keyword"]] == "초등 영어 원서"      # 3) L열 키워드가 핵심
+    m = r[COLS["kw_develop"]]                            # 4) M열 디벨롭
+    assert m.startswith("(자동 확장") and "원서를 동화책처럼 읽는 법" in m and "검증" in m
+
+
+def test_hot_develop_cell_and_structure_cell():
+    hot = {"hot_structure": "(A)의 폭로 구조 *주의: ...",
+           "develops": [{"copy": "문구1", "title": "제목1", "note": "고민 연결"}]}
+    cell = thumbnail.hot_develop_cell(hot)
+    assert cell.startswith("핫비디오 구조 :") and "1. 문구1" in cell and "→ 고민 연결" in cell
+    s = thumbnail.structure_cell(ANALYSIS)
+    assert s.startswith("구조 : (원하는 A)") and "(제목:" in s and "*주의:" in s
+
+
+def test_hot_video_develop_returns_none_without_material(monkeypatch):
+    called = []
+    monkeypatch.setattr(thumbnail.llm, "call_json", lambda *a, **k: called.append(1) or {})
+    assert thumbnail.hot_video_develop("주제", _row(), COLS) is None
+    assert not called                                     # 재료 없으면 LLM 호출도 없음
 
 
 # ---------- md 산출물 ----------

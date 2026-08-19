@@ -37,12 +37,62 @@ PATTERNS_FILE = Path(__file__).resolve().parent.parent / "data" / "thumbnail_pat
 # 원고 핑퐁과 같은 폴더 — script_feedback이 `검수상태: 대기` + 최근 생성일이면 알림을 보낸다
 REVIEW_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/05 리뷰/대기"
 
-# 분석 탭 열 배치 (A1 표기). 시트 구조가 바뀌면 여기만 고친다.
-COL = {"date_kw": 0, "url": 1, "thumb_img": 2, "title": 3,
-       "situation": 4, "worry": 5, "desire": 6, "plan": 7,          # E~H
-       "copy_emotion": 8, "image_emotion": 9, "my_keyword": 10,     # I,J,K
-       "copy_develop": 13, "image_develop": 14, "made_title": 16}   # N,O,Q
-LAST_COL = "Q"
+# 분석 탭 기본 열 배치 (2026-08-19 개편: J 영상 문구 분석 신설, M 키워드 디벨롭,
+# P 핫비디오 디벨롭). 실행 시 헤더 행을 읽어 이름으로 재해석하므로(resolve_columns)
+# 열이 옮겨져도 따라간다 — 여기 값은 헤더를 못 읽었을 때의 폴백이다.
+COL_DEFAULT = {"date_kw": 0, "url": 1, "thumb_img": 2, "title": 3,
+               "situation": 4, "worry": 5, "desire": 6, "plan": 7,        # E~H
+               "copy_emotion": 8, "structure": 9, "image_emotion": 10,    # I,J,K
+               "my_keyword": 11, "kw_develop": 12,                        # L,M
+               "hot_thumb": 13, "hot_analysis": 14, "hot_develop": 15,    # N,O,P
+               "image_develop": 16, "made_title": 18}                     # Q,S
+LAST_COL = "S"
+
+# 헤더 이름 → 열 키 매핑 (공백 제거 후 startswith 비교, 위에서부터 우선)
+_HEADER_PATTERNS = [
+    ("hot_analysis", "핫비디오썸네일분석"),
+    ("hot_develop", "핫비디오로문구디벨롭"),
+    ("hot_thumb", "핫비디오썸네일"),
+    ("kw_develop", "키워드로문구디벨롭"),
+    ("kw_develop", "문구디벨롭"),
+    ("structure", "영상문구분석"),
+    ("copy_emotion", "썸네일문구"),
+    ("image_develop", "이미지디벨롭"),
+    ("image_emotion", "그림"),
+    ("my_keyword", "내가만들"),
+    ("made_title", "만든제목"),
+    ("thumb_img", "썸네일이미지"),
+    ("title", "영상제목"),
+    ("url", "영상URL"),
+    ("date_kw", "날짜"),
+    ("situation", "상황"), ("worry", "고민"), ("desire", "욕구"), ("plan", "계획"),
+]
+
+
+def resolve_columns(header: list[str]) -> dict[str, int]:
+    """헤더 행에서 열 이름을 찾아 {키: 인덱스}를 만든다. 못 찾은 키는 기본값."""
+    cols = dict(COL_DEFAULT)
+    found: set[str] = set()
+    for idx, cell in enumerate(header):
+        name = re.sub(r"\s+", "", str(cell or ""))
+        if not name:
+            continue
+        for key, pat in _HEADER_PATTERNS:
+            if key not in found and name.startswith(pat):
+                cols[key] = idx
+                found.add(key)
+                break
+    return cols
+
+
+def col_letter(idx: int) -> str:
+    """0-base 열 인덱스 → A1 열 문자 (0→A, 18→S)."""
+    s = ""
+    idx += 1
+    while idx:
+        idx, r = divmod(idx - 1, 26)
+        s = chr(65 + r) + s
+    return s
 
 
 def log(msg: str):
@@ -235,17 +285,26 @@ def emotion_cell(cat: str, score, reason: str) -> str:
     return f"({cat} {score}) {reason}".strip()
 
 
-def develop_cell(analysis: dict, dev: dict, validation: list[dict] | None = None) -> str:
-    """시트 '문구 디벨롭'(N) 셀 텍스트 — 구조분석 + 변주 + 검증."""
+def structure_cell(analysis: dict) -> str:
+    """시트 '영상 문구 분석'(J) 셀 텍스트 — 문구+제목 세트 구조분석."""
     st = analysis.get("structure", {})
-    lines = [f"구조: {st.get('copy_structure', '')}"]
+    lines = [f"구조 : {st.get('copy_structure', '')}"]
     if st.get("title_structure"):
         lines.append(f"(제목: {st['title_structure']})")
     if st.get("caution"):
         lines.append(f"*주의: {st['caution']}")
+    return "\n".join(lines).strip()
+
+
+def develop_cell(dev: dict, validation: list[dict] | None = None) -> str:
+    """시트 '키워드로 문구 디벨롭'(M) 셀 텍스트 — 대입 선언 + 변주 + 검증.
+
+    구조분석은 J열(structure_cell)에 따로 들어가므로 여기선 반복하지 않는다.
+    """
+    lines = []
     if dev.get("variable_mapping"):
         lines.append(f"대입: {dev['variable_mapping']}")
-    lines.append("")
+        lines.append("")
     for i, d in enumerate(dev.get("develops", []), 1):
         lines.append(f"{i}. {d.get('copy', '')}")
         if d.get("title"):
@@ -257,6 +316,20 @@ def develop_cell(analysis: dict, dev: dict, validation: list[dict] | None = None
                 f"- {v.get('copy', '')}: {v.get('situation', '')}/{v.get('worry', '')}"
                 f"/{v.get('desire', '')}/{v.get('plan', '')}/{v.get('desire_intensity', '')}"
                 f" — {v.get('evidence', '')}")
+    return "\n".join(lines).strip()
+
+
+def hot_develop_cell(hot: dict) -> str:
+    """시트 '핫비디오로 문구 디벨롭'(P) 셀 텍스트 — 핫비디오 구조 + 같은 주제 변주."""
+    lines = []
+    if hot.get("hot_structure"):
+        lines += [f"핫비디오 구조 : {hot['hot_structure']}", ""]
+    for i, d in enumerate(hot.get("develops", []), 1):
+        lines.append(f"{i}. {d.get('copy', '')}")
+        if d.get("title"):
+            lines.append(f"   ({d['title']})")
+        if d.get("note"):
+            lines.append(f"   → {d['note']}")
     return "\n".join(lines).strip()
 
 
@@ -390,58 +463,112 @@ def run_one(topic: str, audience: str, bench: dict, expand_count: int,
 
 # ---------- 시트 모드 ----------
 
-def find_pending(rows: list[list[str]]) -> list[int]:
-    """처리할 행 인덱스(0-base, 데이터 기준): K(키워드) 있고 N(문구 디벨롭) 비어 있고
+def _cell(row: list[str], c: int) -> str:
+    return (str(row[c]).strip() if c < len(row) and row[c] else "")
+
+
+def find_pending(rows: list[list[str]], cols: dict[str, int]) -> list[int]:
+    """전체 처리 대상(0-base): L(키워드) 있고 M(키워드로 문구 디벨롭) 비어 있고
     벤치마크 단서(B URL / D 제목)가 하나라도 있는 행."""
     todo = []
     for i, row in enumerate(rows):
-        def cell(c):
-            return (row[c].strip() if c < len(row) and row[c] else "")
-        if not cell(COL["my_keyword"]) or cell(COL["copy_develop"]):
+        if not _cell(row, cols["my_keyword"]) or _cell(row, cols["kw_develop"]):
             continue
-        if cell(COL["url"]) or cell(COL["title"]):
+        if _cell(row, cols["url"]) or _cell(row, cols["title"]):
             todo.append(i)
     return todo
 
 
-def _row_updates(row: list[str], result: dict, bench: dict) -> dict[str, str]:
+def find_structure_backfill(rows: list[list[str]], cols: dict[str, int],
+                            skip: set[int]) -> list[int]:
+    """J(영상 문구 분석) 백필 대상: J 비어 있고 단서(I 문구 분석 / D 제목) 있는 행.
+    바로 위 행과 같은 영상(URL+제목)인 묶임 행은 건너뛴다."""
+    todo = []
+    prev_key = None
+    for i, row in enumerate(rows):
+        key = (_cell(row, cols["url"]), _cell(row, cols["title"]))
+        dup = key != ("", "") and key == prev_key
+        prev_key = key if key != ("", "") else prev_key
+        if i in skip or dup:
+            continue
+        if _cell(row, cols["structure"]):
+            continue
+        if _cell(row, cols["copy_emotion"]) or _cell(row, cols["title"]):
+            todo.append(i)
+    return todo
+
+
+def hot_video_develop(topic: str, row: list[str], cols: dict[str, int],
+                      analysis_hint: dict | None = None) -> dict | None:
+    """5) 주제는 그대로, 문구 구조를 핫비디오 것으로 — P열 텍스트용 결과. 재료 없으면 None."""
+    hot_thumb = _cell(row, cols["hot_thumb"])
+    hot_analysis = _cell(row, cols["hot_analysis"])
+    hot_copy = ""
+    if hot_thumb.startswith("http"):
+        hot_copy = (ocr_benchmark(hot_thumb) or {}).get("copy", "")
+    elif hot_thumb:
+        hot_copy = hot_thumb  # 문구를 직접 적어둔 경우
+    if not (hot_copy or hot_analysis):
+        return None
+    viewer = (analysis_hint or {}).get("viewer", {})
+    data = llm.call_json(
+        prompts.THUMBNAIL_HOTVIDEO.format(
+            topic=topic,
+            situation=viewer.get("situation") or _cell(row, cols["situation"]),
+            worry=viewer.get("worry") or _cell(row, cols["worry"]),
+            desire=viewer.get("desire") or _cell(row, cols["desire"]),
+            plan=viewer.get("plan") or _cell(row, cols["plan"]),
+            copy_emotion=_cell(row, cols["copy_emotion"]),
+            hot_copy=hot_copy or "(없음 — 분석 메모에서 추정)",
+            hot_analysis=hot_analysis or "(없음)"),
+        system=prompts.get_system(), max_tokens=4000)
+    return data if data.get("develops") else None
+
+
+def _row_updates(row: list[str], cols: dict[str, int], result: dict,
+                 bench: dict, hot: dict | None = None) -> dict[str, str]:
     """빈 칸만 채우는 {열문자: 값} 목록을 만든다."""
     analysis, dev = result["analysis"], result["develop"]
     v, e = analysis.get("viewer", {}), analysis.get("emotion", {})
     validation = (result.get("expand") or {}).get("validation", [])
 
-    def empty(c):
-        return not (c < len(row) and (row[c] or "").strip())
-
+    items = [
+        ("situation", v.get("situation", "")),
+        ("worry", v.get("worry", "")),
+        ("desire", v.get("desire", "")),
+        ("plan", v.get("plan", "")),
+        ("copy_emotion", emotion_cell(e.get("copy_category", ""), e.get("copy_score", ""),
+                                      f"{bench.get('copy', '')} — {e.get('reason', '')}")),
+        ("structure", structure_cell(analysis)),
+        ("image_emotion", emotion_cell(e.get("image_category", ""), e.get("image_score", ""),
+                                       bench.get("image", ""))),
+        ("kw_develop", develop_cell(dev, validation)),
+        ("image_develop", image_cell(dev)),
+        ("made_title", "\n".join(p.get("title", "") for p in dev.get("picks", [])
+                                 if p.get("title"))),
+    ]
+    if hot:
+        items.append(("hot_develop", hot_develop_cell(hot)))
     upd: dict[str, str] = {}
-    for col_idx, letter, value in (
-        (COL["situation"], "E", v.get("situation", "")),
-        (COL["worry"], "F", v.get("worry", "")),
-        (COL["desire"], "G", v.get("desire", "")),
-        (COL["plan"], "H", v.get("plan", "")),
-        (COL["copy_emotion"], "I",
-         emotion_cell(e.get("copy_category", ""), e.get("copy_score", ""),
-                      f"{bench.get('copy', '')} — {e.get('reason', '')}")),
-        (COL["image_emotion"], "J",
-         emotion_cell(e.get("image_category", ""), e.get("image_score", ""),
-                      bench.get("image", ""))),
-        (COL["copy_develop"], "N", develop_cell(analysis, dev, validation)),
-        (COL["image_develop"], "O", image_cell(dev)),
-        (COL["made_title"], "Q",
-         "\n".join(p.get("title", "") for p in dev.get("picks", []) if p.get("title"))),
-    ):
-        if value and empty(col_idx):
-            upd[letter] = value
+    for key, value in items:
+        if value and not _cell(row, cols[key]):
+            upd[col_letter(cols[key])] = value
     return upd
 
 
-def expansion_rows(expand: dict, date: str) -> list[list[str]]:
-    """5단계 확장 키워드를 시트 새 행(A~Q)으로 만든다."""
+def expansion_values(expand: dict, parent_row: list[str],
+                     cols: dict[str, int]) -> list[list[str]]:
+    """5단계 확장 키워드를 벤치마크 '하위 행' 값으로 만든다 (A~M 범위).
+
+    연습 시트 방식대로 벤치마크 정보(A,B,D,E~K)를 물려받고,
+    L에 새 키워드, M에 그 키워드의 문구 디벨롭(+검증)을 담는다.
+    """
     out_rows = []
     vals = {v.get("keyword", ""): v for v in expand.get("validation", [])}
+    width = max(cols["kw_develop"], cols["my_keyword"]) + 1
     for x in expand.get("expansions", []):
         kw = x.get("keyword", "")
-        dev_lines = [f"({x.get('why', '')})", ""]
+        dev_lines = [f"(자동 확장 — {x.get('why', '')})", ""]
         dev_lines += [f"{i}. {d.get('copy', '')}\n   ({d.get('title', '')})"
                       for i, d in enumerate(x.get("develops", []), 1)]
         vv = vals.get(kw)
@@ -449,61 +576,116 @@ def expansion_rows(expand: dict, date: str) -> list[list[str]]:
             dev_lines += ["", f"검증: 상황{vv.get('situation', '')}/고민{vv.get('worry', '')}"
                               f"/욕구{vv.get('desire', '')}/계획{vv.get('plan', '')}"
                               f"/강도{vv.get('desire_intensity', '')} — {vv.get('evidence', '')}"]
+        row = [""] * width
+        # 벤치마크 정보 상속 (C 썸네일 이미지는 셀 위 이미지라 API로 복사 불가)
+        for key in ("date_kw", "url", "title", "situation", "worry", "desire", "plan",
+                    "copy_emotion", "structure", "image_emotion"):
+            if cols[key] < width:
+                row[cols[key]] = _cell(parent_row, cols[key])
         viewer = x.get("viewer", {})
-        row = [""] * 17  # A~Q
-        row[COL["date_kw"]] = f"{date} {kw} (자동 확장)"
-        row[COL["situation"]] = viewer.get("situation", "")
-        row[COL["worry"]] = viewer.get("worry", "")
-        row[COL["desire"]] = viewer.get("desire", "")
-        row[COL["plan"]] = viewer.get("plan", "")
-        row[COL["my_keyword"]] = kw
-        row[COL["copy_develop"]] = "\n".join(dev_lines).strip()
+        for key, val in (("situation", viewer.get("situation")),
+                         ("worry", viewer.get("worry")),
+                         ("desire", viewer.get("desire")),
+                         ("plan", viewer.get("plan"))):
+            if val:  # 확장 키워드의 시청자 분석이 있으면 그걸 우선
+                row[cols[key]] = val
+        row[cols["my_keyword"]] = kw
+        row[cols["kw_develop"]] = "\n".join(dev_lines).strip()
         out_rows.append(row)
     return out_rows
 
 
+def insert_expansions(rownum: int, values: list[list[str]], sheet_title: str):
+    """벤치마크 행(rownum) 바로 아래에 확장 행을 삽입하고 그룹으로 묶는다."""
+    n = len(values)
+    gsheet.insert_rows(rownum, n)
+    width = max(len(v) for v in values)
+    gsheet.update(f"A{rownum + 1}:{col_letter(width - 1)}{rownum + n}", values, sheet_title)
+    gsheet.group_rows(rownum + 1, rownum + n)
+
+
 def run_sheet(audience: str, expand_count: int, out: Path,
-              local_imgs: list[str], max_rows: int = 3, save_vault: bool = True):
-    """시트에서 대기 행을 찾아 처리하고 결과를 되써넣는다."""
-    from vault_pipeline.vault_io import now_kst
+              local_imgs: list[str], max_rows: int = 3, save_vault: bool = True,
+              backfill_max: int = 8):
+    """시트를 읽어 ①J 구조분석 백필 ②대기 행 전체 처리(하위 확장 행 삽입 포함)."""
     if not gsheet.available():
         log("GSHEET_SA_JSON 미설정 — 시트 모드를 건너뜁니다 (서비스 계정 키 필요)")
         return
-    title = gsheet.resolve_title()
-    rows = gsheet.read(f"A2:{LAST_COL}1000", title)
-    todo = find_pending(rows)
-    if not todo:
-        log("처리할 행 없음 (K 키워드 있고 N 문구 디벨롭 빈 행이 없음)")
+    sheet_title = gsheet.resolve_title()
+    header = (gsheet.read(f"A1:{LAST_COL}1", sheet_title) or [[]])[0]
+    cols = resolve_columns(header)
+    rows = gsheet.read(f"A2:{LAST_COL}1000", sheet_title)
+
+    pending = find_pending(rows, cols)
+    backfill = find_structure_backfill(rows, cols, skip=set(pending))
+    if not pending and not backfill:
+        log("처리할 행 없음 (L 키워드+M 빈 행 없음, J 백필 대상도 없음)")
         return
-    log(f"대기 행 {len(todo)}개 → 최대 {max_rows}개 처리")
-    for i in todo[:max_rows]:
-        row = rows[i]
-        rownum = i + 2  # 헤더 1행 + 1-base
 
-        def cell(c):
-            return (row[c].strip() if c < len(row) and row[c] else "")
+    # ① J(영상 문구 분석) 백필 — 구조분석만 가볍게. 빈 E~H·I·K도 이때 함께 채운다.
+    for i in backfill[:backfill_max]:
+        row, rownum = rows[i], i + 2
+        bench = {"url": _cell(row, cols["url"]), "title": _cell(row, cols["title"])}
+        ocr = ocr_benchmark(bench["url"]) if bench["url"] else {}
+        bench["copy"] = ocr.get("copy", "") or _cell(row, cols["copy_emotion"])
+        bench["image"] = ocr.get("image", "") or _cell(row, cols["image_emotion"])
+        topic = _cell(row, cols["my_keyword"]) or _cell(row, cols["date_kw"]) or "(키워드 미정)"
+        log(f"행{rownum} J 백필: {bench['title'][:30] or bench['url']}")
+        try:
+            analysis = analyze(topic, audience, bench)
+        except Exception as e:
+            log(f"  행{rownum} 백필 실패: {e}")
+            continue
+        v, e = analysis.get("viewer", {}), analysis.get("emotion", {})
+        upd = {}
+        for key, value in (
+            ("structure", structure_cell(analysis)),
+            ("situation", v.get("situation", "")), ("worry", v.get("worry", "")),
+            ("desire", v.get("desire", "")), ("plan", v.get("plan", "")),
+            ("copy_emotion", emotion_cell(e.get("copy_category", ""), e.get("copy_score", ""),
+                                          f"{bench.get('copy', '')} — {e.get('reason', '')}")),
+            ("image_emotion", emotion_cell(e.get("image_category", ""),
+                                           e.get("image_score", ""), bench.get("image", ""))),
+        ):
+            if value and not _cell(row, cols[key]):
+                upd[col_letter(cols[key])] = value
+        # 핫비디오 재료가 있으면 P(핫비디오로 문구 디벨롭)도 채운다
+        if not _cell(row, cols["hot_develop"]):
+            hot = hot_video_develop(topic, row, cols, analysis)
+            if hot:
+                upd[col_letter(cols["hot_develop"])] = hot_develop_cell(hot)
+        for letter, value in upd.items():
+            gsheet.update(f"{letter}{rownum}", [[value]], sheet_title)
+        log(f"  행{rownum} J 백필 완료 ({', '.join(sorted(upd))})")
 
-        topic = cell(COL["my_keyword"])
-        bench = {"url": cell(COL["url"]), "title": cell(COL["title"])}
+    # ② 전체 처리 — 아래 행부터(확장 행 삽입이 위쪽 행 번호를 건드리지 않게)
+    if pending:
+        log(f"대기 행 {len(pending)}개 → 최대 {max_rows}개 처리 (아래부터)")
+    for i in sorted(pending, reverse=True)[:max_rows]:
+        row, rownum = rows[i], i + 2
+        topic = _cell(row, cols["my_keyword"])
+        bench = {"url": _cell(row, cols["url"]), "title": _cell(row, cols["title"])}
         ocr = ocr_benchmark(bench["url"]) if bench["url"] else {}
         bench["copy"] = ocr.get("copy", "")
         bench["image"] = ocr.get("image", "")
         if not bench["copy"]:
             log(f"  행{rownum}: 썸네일 OCR 불가 — 제목·기존 분석 텍스트로 진행")
-            bench["copy"] = ""
-            bench["image"] = bench.get("image") or cell(COL["image_emotion"])
+            bench["image"] = bench.get("image") or _cell(row, cols["image_emotion"])
         log(f"행{rownum} 처리: 키워드={topic}")
         result = run_one(topic, audience, bench, expand_count, out, local_imgs,
                          save_vault=save_vault)
-        for letter, value in _row_updates(row, result, bench).items():
-            gsheet.update(f"{letter}{rownum}", [[value]], title)
+        hot = None
+        if not _cell(row, cols["hot_develop"]):
+            hot = hot_video_develop(topic, row, cols, result["analysis"])
+        for letter, value in _row_updates(row, cols, result, bench, hot).items():
+            gsheet.update(f"{letter}{rownum}", [[value]], sheet_title)
         log(f"  행{rownum} 시트 기록 완료")
         expand = result.get("expand")
         if expand and expand.get("expansions"):
-            new_rows = expansion_rows(expand, now_kst().strftime("%Y-%m-%d"))
-            if new_rows:
-                gsheet.append(f"A2:{LAST_COL}", new_rows, title)
-                log(f"  확장 키워드 {len(new_rows)}행 추가")
+            values = expansion_values(expand, row, cols)
+            if values:
+                insert_expansions(rownum, values, sheet_title)
+                log(f"  확장 키워드 {len(values)}행을 행{rownum} 아래에 삽입·그룹")
 
 
 def main():

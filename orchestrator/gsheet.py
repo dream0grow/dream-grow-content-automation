@@ -88,6 +88,42 @@ def update(a1: str, values: list[list], title: str | None = None):
     return r.json()
 
 
+def batch_update(requests_body: list[dict]):
+    """spreadsheets.batchUpdate — 행 삽입/그룹 등 구조 변경."""
+    r = requests.post(f"{API}/{sheet_id()}:batchUpdate", headers=_headers(),
+                      json={"requests": requests_body}, timeout=60)
+    r.raise_for_status()
+    return r.json()
+
+
+def insert_rows(row_1based: int, count: int, gid: int | None = None):
+    """row_1based 행 아래에 count개 행을 삽입한다 (서식은 위 행에서 상속)."""
+    gid = sheet_gid() if gid is None else gid
+    return batch_update([{
+        "insertDimension": {
+            "range": {"sheetId": gid, "dimension": "ROWS",
+                      "startIndex": row_1based, "endIndex": row_1based + count},
+            "inheritFromBefore": True,
+        }
+    }])
+
+
+def group_rows(start_1based: int, end_1based: int, gid: int | None = None):
+    """start~end 행(포함)을 접을 수 있는 그룹으로 묶는다 (벤치마크 하위 확장 행 묶기)."""
+    gid = sheet_gid() if gid is None else gid
+    try:
+        return batch_update([{
+            "addDimensionGroup": {
+                "range": {"sheetId": gid, "dimension": "ROWS",
+                          "startIndex": start_1based - 1, "endIndex": end_1based},
+            }
+        }])
+    except requests.HTTPError as e:
+        # 이미 같은 범위 그룹이 있으면 400 — 그룹은 편의 기능이라 실패해도 계속 간다
+        print(f"[gsheet] 행 그룹 생략: {e}", flush=True)
+        return None
+
+
 def append(a1: str, values: list[list], title: str | None = None):
     """표 아래에 행을 추가한다 (기존 데이터 다음 빈 행부터)."""
     title = title or resolve_title()
