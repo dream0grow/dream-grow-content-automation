@@ -1,6 +1,7 @@
 """옵시디언 볼트 카드 저장소 — 파이프라인의 유일한 저장소 (노션 철수 완료)
 
-카드 = `vault/파이프라인/활성/<content_id> <topic>.md`
+카드 = `vault/파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<content_id>.md`
+(SNS 콘텐츠 제작 시스템 `00 시스템/03 파일명 규칙.md`을 따른다 — 형식·카테고리로 정렬돼 분류가 쉽다)
 - frontmatter = 라우팅 속성 (stage, status, approval_status …)
 - 본문 `## 제목 — 타임스탬프` 섹션 = 단계 산출물
 - page_id = 저장소 루트 기준 카드 파일 상대경로 문자열
@@ -170,17 +171,69 @@ def next_content_id() -> str:
     return f"DG-{year}-{max_n + 1:04d}"
 
 
+# ---------- 파일명 규칙 (SNS 콘텐츠 제작 시스템 `00 시스템/03 파일명 규칙.md`) ----------
+# 원고_<형식>_<카테고리>_<키워드+키워드+키워드>_<DG-YYYY-NNNN>.md
+# `_`=카테고리 분류, `+`=키워드 연결. ID를 뒤로 보내 형식·카테고리로 정렬/분류된다.
+
+FORMAT_LABELS = {"thread": "스레드", "newsletter": "뉴스레터",
+                 "youtube": "YT롱폼", "cardnews": "카드뉴스"}
+
+# 주제 카테고리 판별 키워드 — 점수(매칭 수) 최고인 카테고리, 동점이면 앞선 것.
+CATEGORY_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
+    ("수학", ("수학", "연산", "구구단", "분수", "나눗셈", "덧셈", "뺄셈", "수감각")),
+    ("독서", ("독서", "만화책", "그림책", "문해력", "도서관", "고전", " 책", "책 ", "글쓰기", "일기")),
+    ("미디어", ("유튜브", "스마트폰", "핸드폰", "미디어", "디지털", "게임기")),
+    ("놀이", ("놀이", "보드게임", "장난감", "놀아", "심심", "승부욕")),
+    ("학습", ("공부", "학습", "숙제", "학원", "시험", "받아쓰기", "성적", "문제집",
+              "암기", "메타인지", "자기주도")),
+    ("학교", ("학교", "등교", "개학", "교실", "담임", "알림장", "급식", "통지표",
+              "반장", "짝꿍", "수업", "발표", "선생님", "입학", "방학", "준비물")),
+    ("훈육", ("훈육", "거짓말", "떼쓰", "드러눕", "정리", "실랑이", "싸우", "다툼",
+              "잔소리", "혼내", "버릇", "말대꾸", "경계", "조르", "승강이", "재우")),
+    ("감정", ("감정", "우는", "울고", "짜증", "화내", "자존감", "자신감", "마음",
+              "위로", "시무룩", "불안", "무서워", "어리광", "속상", "다독", "얼어붙")),
+    ("크리에이터", ("크리에이터", "구독자", "콘텐츠", "채널", "수익화", "스레드")),
+]
+
+
+def topic_category(topic: str) -> str:
+    """주제 문장 → 파일명 규칙의 주제 카테고리. 못 정하면 '기타'."""
+    text = str(topic or "")
+    best, best_score = "기타", 0
+    for name, words in CATEGORY_KEYWORDS:
+        score = sum(1 for w in words if w in text)
+        if score > best_score:
+            best, best_score = name, score
+    return best
+
+
+def _keyword_slug(topic: str, count: int = 3) -> str:
+    """주제 첫 어절들을 `+`로 잇는다 (예: 받아쓰기+시험만+보면) — 볼트 관례."""
+    clean = re.sub(r'[\\/:*?"<>|#^\[\]\n\r\t_+]', " ", str(topic or ""))
+    words = [w.strip(",.·…!?~'\"()") for w in clean.split()]
+    words = [w for w in words if w][:count]
+    return "+".join(words)[:40] or "무제"
+
+
+def card_filename(content_id: str, topic: str, fmt: str = "") -> str:
+    """파일명 규칙에 맞는 카드 파일명. 큐시트(시스템 결재) 카드는 별도 패턴."""
+    if str(topic or "").lstrip(" [『「").startswith("큐시트"):
+        return f"큐시트_프롬프트개선_{content_id}.md"
+    first = (str(fmt or "").split(",")[0].strip() or "thread")
+    label = FORMAT_LABELS.get(first, FORMAT_LABELS["thread"])
+    return f"원고_{label}_{topic_category(topic)}_{_keyword_slug(topic)}_{content_id}.md"
+
+
 def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
-                audience: str = "", body: str = "") -> str:
+                audience: str = "", body: str = "", format: str = "") -> str:
     """새 콘텐츠 카드를 생성하고 page_id(상대경로)를 반환한다."""
     require_backend()
     content_id = next_content_id()
-    safe_topic = re.sub(r'[\\/:*?"<>|#^\[\]\n\r\t]', " ", topic).strip()[:60]
-    path = _active_dir() / f"{content_id} {safe_topic}.md"
+    path = _active_dir() / card_filename(content_id, topic, format)
     meta = {
         "topic": topic, "content_id": content_id,
         "stage": stage, "status": status,
-        "format": "", "audience": audience, "priority": "",
+        "format": format, "audience": audience, "priority": "",
         "approval_status": "", "review_status": "",
         "approved_keyword": "", "manus_task_ids": "", "idempotency_key": "",
         "last_error": "", "published_url": "",

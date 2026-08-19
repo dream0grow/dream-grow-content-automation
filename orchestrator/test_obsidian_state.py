@@ -83,7 +83,34 @@ def test_notify_writes_review_queue(vault, monkeypatch):
     pid = st.create_card("알림 테스트")
     st.notify(pid, "발행 승인 대기")
     queue = (vault / "_system/review_queue.md").read_text(encoding="utf-8")
-    assert "발행 승인 대기" in queue and "알림 테스트" in queue
+    assert "발행 승인 대기" in queue and "알림+테스트" in queue
+
+
+def test_card_filename_follows_naming_rule(vault):
+    """SNS `03 파일명 규칙`: 원고_형식_카테고리_키워드+키워드_DG-ID.md"""
+    name = st.card_filename("DG-2026-0042", "수학 문제집 앞에서 모르겠다며 미루는 아이")
+    assert name == "원고_스레드_수학_수학+문제집+앞에서_DG-2026-0042.md"
+    # 형식은 format 필드를 따르고, 혼합(comma)이면 첫 형식
+    assert st.card_filename("DG-2026-0001", "책 읽기 싫어하는 아이",
+                            "newsletter").startswith("원고_뉴스레터_독서_")
+    assert st.card_filename("DG-2026-0001", "주제", "youtube,thread").startswith("원고_YT롱폼_")
+    # 큐시트(시스템 결재) 카드는 별도 패턴
+    assert st.card_filename("DG-2026-0002", "[큐시트] 프롬프트 개선안 DG-2026-0002") \
+        == "큐시트_프롬프트개선_DG-2026-0002.md"
+
+
+def test_topic_category_fallback(vault):
+    assert st.topic_category("유튜브 그만 보라고 하면 짜증내는 아이") == "미디어"
+    assert st.topic_category("전혀 무관한 주제") == "기타"
+
+
+def test_create_card_new_naming_keeps_pipeline_working(vault):
+    """새 파일명에서도 채번·ID 검색(피드백 라우팅)이 돈다."""
+    pid = st.create_card("받아쓰기 시험만 보면 우는 아이", format="thread")
+    assert pid.endswith("_DG-2026-0001.md")
+    assert st.next_content_id().endswith("-0002")      # 끝에 있는 ID로도 채번
+    card = st.query_cards(stage="intake")[0]
+    assert card["format"] == "thread"                  # format이 frontmatter에 반영
 
 
 def test_state_facade_is_obsidian(vault):
