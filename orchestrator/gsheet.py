@@ -88,6 +88,38 @@ def update(a1: str, values: list[list], title: str | None = None):
     return r.json()
 
 
+def read_backgrounds(a1: str, title: str | None = None) -> list[list[tuple | None]]:
+    """범위의 셀 배경색을 (r,g,b) 0~1 튜플 2차원 리스트로 읽는다. 기본(무색)은 None.
+
+    사용자가 셀에 색을 칠하는 것을 '수정·확인 완료' 신호로 쓰기 위한 것.
+    """
+    title = title or resolve_title()
+    r = requests.get(
+        f"{API}/{sheet_id()}", headers=_headers(),
+        params={"ranges": f"'{title}'!{a1}", "includeGridData": "true",
+                "fields": "sheets.data.rowData.values.effectiveFormat.backgroundColor"},
+        timeout=60)
+    r.raise_for_status()
+    sheets = r.json().get("sheets", [])
+    data = (sheets[0].get("data", [{}])[0] if sheets else {})
+    out: list[list[tuple | None]] = []
+    for row in data.get("rowData", []):
+        cells = []
+        for val in row.get("values", []):
+            bg = (val.get("effectiveFormat") or {}).get("backgroundColor")
+            cells.append(None if bg is None else
+                         (bg.get("red", 0), bg.get("green", 0), bg.get("blue", 0)))
+        out.append(cells)
+    return out
+
+
+def is_colored(bg: tuple | None) -> bool:
+    """칠해진 셀인가 — 기본(None)과 흰색은 False."""
+    if bg is None:
+        return False
+    return not all(c >= 0.985 for c in bg)
+
+
 def batch_update(requests_body: list[dict]):
     """spreadsheets.batchUpdate — 행 삽입/그룹 등 구조 변경."""
     r = requests.post(f"{API}/{sheet_id()}:batchUpdate", headers=_headers(),
