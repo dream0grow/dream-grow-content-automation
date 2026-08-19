@@ -46,6 +46,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
 | `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
 | `cardnews.py` | 초안 → 실사진 오버레이 카드뉴스 PNG (Pretendard, Playwright/Chromium) |
+| `thumbnail.py` | 유튜브 썸네일 자동화: 주제 → 문구(기대/증거/의문/공감) 생성·구조분석·디벨롭 → 1280×720 PNG. `data/thumbnail_patterns.md` 주입 |
 | `stock.py` | 실물 스톡 사진 검색 (Pexels/Unsplash, 상업 라이선스) |
 | `image_gen.py` | AI 배경 이미지 생성 (OpenAI gpt-image-1 / Google Imagen, 한국인 중심) |
 | `cardnews_benchmark.py` | 최근 뜬 카드뉴스 벤치마킹 리서치(Manus/Claude) → `data/cardnews_benchmark.md`, 카드 생성 시 주입 |
@@ -111,6 +112,26 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 유튜브 썸네일 자동화 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
+
+사용자의 벤치마킹 구글 시트(분석 시트 + 썸네일 문구 구조 시트) 워크플로우를 파이프라인으로 이관.
+- **사전 작업(캡쳐 시트 이관)**: `data/thumbnail_patterns.md` — 분석 프레임(상황/고민/욕구/계획),
+  문구 4분류(기대/증거/의문/공감, 실측 예시+시청자 심리), 구조 공식 27종(문구→구조분석→디벨롭 실례),
+  디벨롭 규칙, 그림 연출 체크리스트. 시트에 새 분석이 쌓이면 이 파일에 추가.
+- **파이프라인(`orchestrator/thumbnail.py`)**: 주제 입력 → ①분석 ②카테고리별 후보 8개(구조 공식 치환,
+  `prompts.THUMBNAIL`) ③비평·디벨롭 최종 4개(`prompts.THUMBNAIL_DEVELOP`, 두 줄 타이포+==강조==+신뢰 칩)
+  ④1280×720 PNG/JPG 렌더(cardnews 사진 소스 재사용: owned→stock→generate→그라데이션).
+  `--benchmark-copy/--benchmark-url`로 특정 벤치마킹 문구의 구조를 최우선 분해·치환.
+- **산출물**: PNG/JPG + `thumbnail_plan.json` + 시트에 붙여넣기 좋은 표 형식 md.
+  md는 볼트 `05 리뷰/대기/썸네일_{주제}.md`(`type: thumbnail`, `검수상태: 대기`)로 저장 →
+  기존 script_feedback이 텔레그램 알림·답장 수정 핑퐁을 그대로 잇는다.
+- **워크플로우**: `.github/workflows/thumbnail.yml` (수동 실행, topic 입력 → 아티팩트 + 볼트 커밋 push 재시도).
+- **첫 샘플**: "초등 고전 독서" 기획 md를 볼트에 저장(문구 4종: 기대/의문/증거/공감), 렌더러 로컬 검증 완료.
+- 테스트 69종 통과(신규 test_thumbnail.py 8종).
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② Actions 탭 → thumbnail → Run workflow에 주제 입력
+  (사진 시크릿 PEXELS/OPENAI/GOOGLE 있으면 실사진 배경) ③ 시트에 새 벤치마킹이 쌓이면
+  `data/thumbnail_patterns.md`에 구조 공식·예시 추가.
 
 ### 글감 카드 — 완성 원고를 스레드로 재구성하는 입구 (2026-08-19, 브랜치 `claude/child-sharing-behavior-wzu82g`) — ⬅️ 이번 세션 작업
 

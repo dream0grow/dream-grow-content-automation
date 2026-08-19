@@ -1,0 +1,92 @@
+# 유튜브 썸네일 자동 생성 (수동 실행)
+# 주제 입력 → 문구(기대/증거/의문/공감) 생성·구조분석·디벨롭 → 1280×720 PNG/JPG 아티팩트
+# + 기획 md를 볼트 05 리뷰/대기에 커밋 → 텔레그램 알림·답장 핑퐁 (orchestrator cron)
+name: thumbnail
+
+on:
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "내가 만들 영상 키워드/주제 (예: 초등 고전 독서)"
+        required: true
+      benchmark_copy:
+        description: "벤치마킹할 썸네일 문구 (시트의 '썸네일 문구' 칸 — 선택)"
+        required: false
+      benchmark_url:
+        description: "벤치마킹 영상 URL (선택)"
+        required: false
+      audience:
+        description: "타겟 (기본: 초등 저학년 학부모)"
+        required: false
+        default: "초등 저학년 학부모"
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      DG_IMAGE_PROVIDER: ${{ secrets.DG_IMAGE_PROVIDER }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      DG_STOCK_PROVIDER: ${{ secrets.DG_STOCK_PROVIDER }}
+      DG_PHOTO_ORDER: ${{ secrets.DG_PHOTO_ORDER }}
+      HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          pip install requests python-dotenv honcho-ai pyyaml playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Generate thumbnails
+        env:
+          DG_CHROME_PATH: ""
+        run: |
+          python3 -m orchestrator.thumbnail \
+            --topic "${{ github.event.inputs.topic }}" \
+            --audience "${{ github.event.inputs.audience || '초등 저학년 학부모' }}" \
+            --benchmark-copy "${{ github.event.inputs.benchmark_copy }}" \
+            --benchmark-url "${{ github.event.inputs.benchmark_url }}" \
+            --out thumbnail_out
+
+      - name: Upload thumbnails
+        uses: actions/upload-artifact@v4
+        with:
+          name: thumbnails
+          path: |
+            thumbnail_out/*.png
+            thumbnail_out/*.jpg
+            thumbnail_out/*.md
+            thumbnail_out/thumbnail_plan.json
+
+      - name: Commit vault (기획 md → 텔레그램 핑퐁)
+        run: |
+          git config user.name "dreamgrow-bot"
+          git config user.email "bot@dreamgrow.local"
+          git add vault/
+          git diff --cached --quiet && exit 0
+          git commit -m "썸네일 기획: ${{ github.event.inputs.topic }}"
+          # 여러 워크플로우가 같은 브랜치에 동시 push하면 non-fast-forward로 거부된다(A8 패턴).
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]
