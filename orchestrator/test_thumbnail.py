@@ -319,3 +319,19 @@ def test_save_render_to_vault(tmp_path, monkeypatch):
     # 같은 날 같은 주제 재렌더 → -1 파일로 보존
     rel2 = thumbnail.save_render_to_vault("초등 고전 독서", png, jpg)
     assert rel2 != rel and rel2.endswith("-1.png")
+
+
+def test_color_cells_builds_repeat_cell_requests(monkeypatch):
+    from orchestrator import gsheet
+    captured = {}
+    monkeypatch.setattr(gsheet, "batch_update", lambda reqs: captured.setdefault("reqs", reqs))
+    monkeypatch.setenv("DG_THUMB_SHEET_GID", "787785781")
+    gsheet.color_cells(13, [16, 18], thumbnail.DONE_BLUE)
+    reqs = captured["reqs"]
+    assert len(reqs) == 2
+    rng = reqs[0]["repeatCell"]["range"]
+    assert rng["startRowIndex"] == 12 and rng["endRowIndex"] == 13   # 13행
+    assert rng["startColumnIndex"] == 16 and rng["endColumnIndex"] == 17  # Q열
+    bg = reqs[1]["repeatCell"]["cell"]["userEnteredFormat"]["backgroundColor"]
+    assert abs(bg["blue"] - 0.973) < 1e-6                            # 파랑(작업 완료)
+    assert reqs[0]["repeatCell"]["fields"] == "userEnteredFormat.backgroundColor"
