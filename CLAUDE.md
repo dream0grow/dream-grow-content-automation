@@ -115,6 +115,37 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
+### 유튜브 도입부→본문 자동화 + 고전 독서 원고 (2026-08-19, 브랜치 `claude/youtube-script-automation-yqbb4m`, main 머지 완료) — ⬅️ 이번 세션 작업
+
+**문체 학습**: Roam 원고(`vault/raw/Roam-Export-1773035150854/유튜브 만들기_내용포함.md`)의 롱폼
+원고 30여 편에서 보이스 프로필 실측 추출 → **`data/youtube_voice.md`** (어미 빈도·도입부 4유형·
+전개 패턴·인용 15개+·대표 발췌). 자동 파이프라인 프롬프트에 주입된다.
+
+**도입부→본문 자동화 (`orchestrator/youtube_body.py` + `youtube-body.yml`)**:
+- 벤치마킹 시트(분석 탭) **X열 「만든 도입부」에 도입부를 쓰면** 2시간 cron이 감지 →
+  행 맥락(S 만든 제목, L 키워드, E~H 시청자 분석, M 디벨롭) 수집 → ①필수 메시지 정리(T08,
+  `prompts.YOUTUBE_BODY_MESSAGES`) ②본문·마무리·제작 메모 집필(`prompts.YOUTUBE_BODY`,
+  보이스 프로필+HUMANIZE_RULES 주입). **도입부는 사용자 원문 그대로 보존**(코드로 조립).
+- 완성 원고는 `vault/파이프라인/활성/` 카드(stage: draft, status: needs_human, format: youtube —
+  DISPATCH에 안 걸려 재처리 없음) + `05 리뷰/대기` 사본(script_feedback 텔레그램 핑퐁) 저장.
+  카드 파일명은 main의 통일 규칙 그대로(`card_filename` — `원고_YT롱폼_<카테고리>_<키워드>_<DG-ID>.md`).
+  시트 되써넣기: 「완성 원고」열(Y)=카드 링크, **「본문」열(Z)=낭독분(본문+마무리, 제작 메모 제외)**.
+- 재처리 규칙: `_system/logs/youtube_body_ledger.json`에 행별 `{hash, card}` — **X열을 고치면
+  해시가 바뀌어 다음 폴링에 다시 생성**된다. 열은 헤더 이름으로 추적(resolve_columns).
+  처리 완료 행의 Y/Z가 비어 있으면(열을 나중에 만든 경우) 카드에서 **백필**(sync_ledger_rows).
+- 테스트 12종 신규(`test_youtube_body.py`).
+
+**고전 독서 원고 1건 수동 완성** (시트 13행, 키워드 "초등 고전 독서"):
+- T07 → `SNS…/02 분석/24 핵심 내용 및 댓글 분석/초등 고전 독서_핵심 내용 및 댓글 추출.md`
+  (영상 9편+커뮤니티 반응 17건 딥리서치. 유튜브 댓글 직접 수집은 프록시 차단 → Threads/Q&A 대체 명시)
+- T08 → `SNS…/06 제작/52 원고/초등 고전 독서_필수 메시지 정리.md` (사용자 핵심 메시지:
+  '책을 즐기는 사람' 정체성 형성 → 재미 사다리 → 쉬운 고전·소설 중심)
+- 완성 원고(도입부 수정본+본문) → `vault/파이프라인/활성/원고_YT롱폼_독서_초등+고전+독서를_DG-2026-0049.md`
+  (윤문 스킬 통과). 장부에 카드 참조 시드 완료 — 다음 워크플로우 실행 때 시트 Y13(링크)·Z13(본문) 백필.
+- 사용자 완료(2026-08-19): `GSHEET_SA_JSON` 시크릿 등록, 시트에 Z열 「본문」 생성, main 머지.
+- **남은 사용자 액션**: Actions → youtube-body Run workflow 1회 실행(또는 2시간 cron 대기)
+  → 13행 Y/Z 백필 확인. 이후 X열에 도입부만 쓰면 2시간 내 본문 자동 완성.
+
 ### 카드 파일명 규칙 통일 — SNS 파일명 규칙 적용 (2026-08-19, 브랜치 `claude/file-naming-convention-5kv87o`)
 
 `DG-2026-NNNN 제목.md`가 ID순으로만 정렬돼 분류가 안 되던 것을, 볼트의
@@ -133,7 +164,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - yt_research 사이트(`lib/pipeline.ts`)도 같은 규칙 적용 완료(그쪽 PR#18 머지,
   `cardFilename` — 파이썬 구현과 출력 일치 검증). 이 저장소는 PR#74로 main 머지 완료.
 
-### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
+### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`)
 
 사용자의 벤치마킹 6단계 방법론(사용자 교정 반영)을 파이프라인으로 이관. **벤치마킹 썸네일에서 출발**한다.
 - **방법론(`data/thumbnail_patterns.md`)**: ①썸네일 보는 사람 분석(상황/고민/욕구/계획)

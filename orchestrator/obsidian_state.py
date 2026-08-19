@@ -21,7 +21,7 @@ KST = timezone(timedelta(hours=9))
 
 SELECT_FIELDS = {"stage", "status", "priority", "approval_status", "review_status"}
 TEXT_FIELDS = {
-    "content_id", "audience", "approved_keyword",
+    "content_id", "audience", "format", "approved_keyword",
     "manus_task_ids", "idempotency_key", "last_error",
 }
 ALL_FIELDS = SELECT_FIELDS | TEXT_FIELDS | {"published_url"}
