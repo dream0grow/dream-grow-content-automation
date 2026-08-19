@@ -63,17 +63,25 @@ jobs:
           python-version: "3.12"
 
       - name: Install deps
+        run: pip install requests python-dotenv honcho-ai pyyaml playwright google-auth
+
+      # 러너에 이미 설치된 시스템 Chrome을 쓴다. playwright install --with-deps는
+      # apt 미러 지연으로 10분+ 멈추는 일이 잦아(azure 미러 Ign 재시도) 쓰지 않는다.
+      - name: Locate browser
         run: |
-          pip install requests python-dotenv honcho-ai pyyaml playwright google-auth
-          python -m playwright install --with-deps chromium
+          CHROME="$(command -v google-chrome || command -v chromium-browser || true)"
+          if [ -z "$CHROME" ]; then
+            echo "시스템 Chrome 없음 → playwright chromium만 설치 (apt 의존성 설치 없이)"
+            python -m playwright install chromium
+          fi
+          echo "DG_CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          echo "사용 브라우저: ${CHROME:-playwright chromium}"
 
       - name: Install Claude Code CLI (Max 구독 인증용)
         if: ${{ env.ANTHROPIC_API_KEY == '' }}
         run: npm install -g @anthropic-ai/claude-code
 
       - name: Run thumbnail pipeline
-        env:
-          DG_CHROME_PATH: ""
         run: |
           TOPIC="${{ github.event.inputs.topic }}"
           if [ -n "$TOPIC" ]; then
