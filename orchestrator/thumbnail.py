@@ -33,6 +33,8 @@ from orchestrator import gsheet, llm, prompts
 from orchestrator.cardnews import chrome_path, ensure_fonts, resolve_photo
 
 W, H = 1280, 720
+# 셀 상태색: 노랑 = 사람 컨펌 완료(사람이 칠함), 파랑 = 작업(렌더) 완료(파이프라인이 칠함)
+DONE_BLUE = (0.788, 0.854, 0.973)  # #c9daf8
 PATTERNS_FILE = Path(__file__).resolve().parent.parent / "data" / "thumbnail_patterns.md"
 # 원고 핑퐁과 같은 폴더 — script_feedback이 `검수상태: 대기` + 최근 생성일이면 알림을 보낸다
 REVIEW_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/05 리뷰/대기"
@@ -800,9 +802,14 @@ def run_sheet(audience: str, expand_count: int, out: Path,
                    f"{quote(rel)}")
         gsheet.update(f"{col_letter(cols['made_thumb'])}{rownum}",
                       [[f'=IMAGE("{raw_url}")']], sheet_title)
+        # 작업 완료 표시: 사람이 칠한 노랑 → 파랑 (노랑=컨펌 완료, 파랑=렌더 완료)
+        try:
+            gsheet.color_cells(rownum, [cols["image_develop"], cols["made_title"]], DONE_BLUE)
+        except Exception as e:
+            log(f"  행{rownum} 완료색(파랑) 표시 실패(렌더는 정상): {e}")
         sent = telegram_notify.send_photo(
             str(jpg), caption=f"🖼 썸네일 렌더: {topic}\n{copy}\n{telegram_notify.note_url(rel)}")
-        log(f"  행{rownum} 렌더 완료 → R열 =IMAGE 기록{' + 텔레그램 전송' if sent else ''}")
+        log(f"  행{rownum} 렌더 완료 → R열 =IMAGE + Q·S 파랑 표시{' + 텔레그램 전송' if sent else ''}")
 
     # ③ 전체 처리 — 아래 행부터(확장 행 삽입이 위쪽 행 번호를 건드리지 않게)
     if pending:

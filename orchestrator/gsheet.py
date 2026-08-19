@@ -120,6 +120,24 @@ def is_colored(bg: tuple | None) -> bool:
     return not all(c >= 0.985 for c in bg)
 
 
+def color_cells(row_1based: int, col_indices: list[int], rgb: tuple,
+                gid: int | None = None):
+    """한 행의 특정 셀들 배경색을 바꾼다 (작업 상태 표시용 — 예: 렌더 완료 = 파랑)."""
+    gid = sheet_gid() if gid is None else gid
+    red, green, blue = rgb
+    reqs = [{
+        "repeatCell": {
+            "range": {"sheetId": gid,
+                      "startRowIndex": row_1based - 1, "endRowIndex": row_1based,
+                      "startColumnIndex": c, "endColumnIndex": c + 1},
+            "cell": {"userEnteredFormat": {
+                "backgroundColor": {"red": red, "green": green, "blue": blue}}},
+            "fields": "userEnteredFormat.backgroundColor",
+        }
+    } for c in col_indices]
+    return batch_update(reqs)
+
+
 def batch_update(requests_body: list[dict]):
     """spreadsheets.batchUpdate — 행 삽입/그룹 등 구조 변경."""
     r = requests.post(f"{API}/{sheet_id()}:batchUpdate", headers=_headers(),
