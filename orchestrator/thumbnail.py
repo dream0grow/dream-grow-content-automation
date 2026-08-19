@@ -45,7 +45,7 @@ COL_DEFAULT = {"date_kw": 0, "url": 1, "thumb_img": 2, "title": 3,
                "copy_emotion": 8, "structure": 9, "image_emotion": 10,    # I,J,K
                "my_keyword": 11, "kw_develop": 12,                        # L,M
                "hot_thumb": 13, "hot_analysis": 14, "hot_develop": 15,    # N,O,P
-               "image_develop": 16, "made_title": 18}                     # Q,S
+               "image_develop": 16, "made_thumb": 17, "made_title": 18}   # Q,R,S
 LAST_COL = "S"
 
 # 헤더 이름 → 열 키 매핑 (공백 제거 후 startswith 비교, 위에서부터 우선)
@@ -60,6 +60,7 @@ _HEADER_PATTERNS = [
     ("image_develop", "이미지디벨롭"),
     ("image_emotion", "그림"),
     ("my_keyword", "내가만들"),
+    ("made_thumb", "만든썸네일"),
     ("made_title", "만든제목"),
     ("thumb_img", "썸네일이미지"),
     ("title", "영상제목"),
@@ -97,6 +98,30 @@ def col_letter(idx: int) -> str:
 
 def log(msg: str):
     print(f"[thumbnail] {msg}", flush=True)
+
+
+def ensure_dohyeon():
+    """배달의민족 도현체(구글 폰트 'Do Hyeon')가 없으면 받아 설치한다."""
+    import subprocess
+    import urllib.request
+    try:
+        out = subprocess.run(["fc-list"], capture_output=True, text=True, timeout=20).stdout
+        if "Do Hyeon" in out or "DoHyeon" in out:
+            return
+    except Exception:
+        pass
+    dest = Path("/usr/share/fonts/dohyeon")
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+        fp = dest / "DoHyeon-Regular.ttf"
+        if not fp.exists():
+            urllib.request.urlretrieve(
+                "https://raw.githubusercontent.com/google/fonts/main/ofl/dohyeon/DoHyeon-Regular.ttf",
+                fp)
+        subprocess.run(["fc-cache", "-f"], capture_output=True, timeout=60)
+        log("도현체(Do Hyeon) 폰트 설치 완료")
+    except Exception as e:
+        log(f"도현체 설치 실패(Pretendard로 진행): {e}")
 
 
 def load_patterns() -> str:
@@ -216,7 +241,9 @@ html,body { width:1280px; height:720px; }
 .chip { position:absolute; top:44px; left:52px; background:#ffd21e; color:#14110f;
   font-weight:800; font-size:34px; letter-spacing:-1px; padding:10px 24px; border-radius:10px; }
 .wrap { position:absolute; left:52px; bottom:56px; right:340px; }
-.line { font-weight:900; font-size:96px; letter-spacing:-4px; line-height:1.16;
+.line { font-family:'Do Hyeon','BM DoHyeon','Pretendard','Noto Sans KR',sans-serif;
+  font-weight:900; font-size:96px; letter-spacing:-1px; line-height:1.18;
+  -webkit-text-stroke:3px currentColor; paint-order:stroke fill;  /* 도현체 단일 굵기 → 강제 진하게 */
   text-shadow:0 4px 30px rgba(0,0,0,.65); word-break:keep-all; }
 .line.small { font-size:80px; }
 .hl { color:#ffd21e; }
@@ -461,6 +488,74 @@ def run_one(topic: str, audience: str, bench: dict, expand_count: int,
     return {"analysis": analysis, "develop": dev, "expand": expand}
 
 
+# ---------- 렌더 확정 (색칠 = 수정·확인 완료 신호) ----------
+
+def parse_made_title(text: str) -> tuple[str, str]:
+    """S열 '만든 제목' 텍스트 → (썸네일 문구, 영상 제목).
+
+    관례: 문구 다음 줄에 괄호로 제목. 예)
+      "고전을 만화책처럼 읽는 법\\n(이 방법으로 읽으니 아이가 고전을 다 읽었습니다)"
+    괄호가 없으면 전체를 문구로, 제목은 빈 문자열.
+    """
+    text = (text or "").strip()
+    m = re.search(r"\(([^()]+)\)\s*$", text, re.S)
+    if m:
+        title = " ".join(m.group(1).split())
+        copy = " ".join(text[:m.start()].split())
+        return copy, title
+    return " ".join(text.split()), ""
+
+
+def render_spec(topic: str, copy: str, title: str, image_direction: str) -> dict:
+    """확정 문구·이미지 지시 → 렌더 사양(두 줄 분할·강조·칩·사진 지시)."""
+    spec = llm.call_json(
+        prompts.THUMBNAIL_RENDER_SPEC.format(
+            topic=topic, copy=copy, title=title or "(없음)",
+            image_direction=image_direction or "(없음 — 문구에 맞는 장면을 보수적으로)"),
+        system=prompts.get_system(), max_tokens=1500)
+    spec.setdefault("copy", copy)
+    spec.setdefault("title", title)
+    if not spec.get("line1"):
+        spec["line1"] = copy
+    return spec
+
+
+def find_render_ready(rows: list[list[str]], cols: dict[str, int],
+                      bgs: list[list]) -> list[int]:
+    """렌더 대상: Q(이미지 디벨롭)·S(만든 제목) 둘 다 색칠됐고 R(만든 썸네일) 빈 행.
+
+    bgs는 데이터 행 기준(rows와 같은 인덱스)의 배경색 2차원 리스트 —
+    각 행에서 [이미지 디벨롭, 만든 제목] 순서 2칸.
+    """
+    ready = []
+    for i, row in enumerate(rows):
+        if _cell(row, cols["made_thumb"]) or not _cell(row, cols["made_title"]):
+            continue
+        bg_row = bgs[i] if i < len(bgs) else []
+        q_bg = bg_row[0] if len(bg_row) > 0 else None
+        s_bg = bg_row[1] if len(bg_row) > 1 else None
+        if gsheet.is_colored(q_bg) and gsheet.is_colored(s_bg):
+            ready.append(i)
+        elif gsheet.is_colored(q_bg) or gsheet.is_colored(s_bg):
+            log(f"  행{i + 2}: 이미지 디벨롭/만든 제목 중 한쪽만 색칠 — 둘 다 칠해지면 렌더")
+    return ready
+
+
+def save_render_to_vault(topic: str, png: Path, jpg: Path) -> str:
+    """렌더 결과를 볼트 파이프라인/썸네일/에 저장하고 상대 경로(png)를 반환."""
+    from vault_pipeline.vault_io import now_kst, vault_root
+    folder = vault_root() / "파이프라인" / "썸네일"
+    folder.mkdir(parents=True, exist_ok=True)
+    stem = f"{now_kst().strftime('%Y%m%d')}_{_file_token(topic)[:30] or '무제'}"
+    n, name = 0, stem
+    while (folder / f"{name}.png").exists():
+        n += 1
+        name = f"{stem}-{n}"
+    (folder / f"{name}.png").write_bytes(png.read_bytes())
+    (folder / f"{name}.jpg").write_bytes(jpg.read_bytes())
+    return f"파이프라인/썸네일/{name}.png"
+
+
 # ---------- 시트 모드 ----------
 
 def _cell(row: list[str], c: int) -> str:
@@ -618,8 +713,22 @@ def run_sheet(audience: str, expand_count: int, out: Path,
 
     pending = find_pending(rows, cols)
     backfill = find_structure_backfill(rows, cols, skip=set(pending))
-    if not pending and not backfill:
-        log("처리할 행 없음 (L 키워드+M 빈 행 없음, J 백필 대상도 없음)")
+
+    # 색칠(=수정·확인 완료) 신호 읽기 — 이미지 디벨롭(Q)·만든 제목(S) 배경색
+    q_idx, s_idx = cols["image_develop"], cols["made_title"]
+    lo, hi = min(q_idx, s_idx), max(q_idx, s_idx)
+    try:
+        raw_bgs = gsheet.read_backgrounds(
+            f"{col_letter(lo)}2:{col_letter(hi)}{len(rows) + 1}", sheet_title)
+    except Exception as e:
+        log(f"배경색 읽기 실패(렌더 단계 건너뜀): {e}")
+        raw_bgs = []
+    bg_pairs = [[(r[q_idx - lo] if q_idx - lo < len(r) else None),
+                 (r[s_idx - lo] if s_idx - lo < len(r) else None)] for r in raw_bgs]
+    render_ready = find_render_ready(rows, cols, bg_pairs)
+
+    if not pending and not backfill and not render_ready:
+        log("처리할 행 없음 (L+M 대기 없음, J 백필 없음, 색칠 완료 렌더 대상 없음)")
         return
 
     # ① J(영상 문구 분석) 백필 — 구조분석만 가볍게. 빈 E~H·I·K도 이때 함께 채운다.
@@ -658,7 +767,44 @@ def run_sheet(audience: str, expand_count: int, out: Path,
             gsheet.update(f"{letter}{rownum}", [[value]], sheet_title)
         log(f"  행{rownum} J 백필 완료 ({', '.join(sorted(upd))})")
 
-    # ② 전체 처리 — 아래 행부터(확장 행 삽입이 위쪽 행 번호를 건드리지 않게)
+    # ② 색칠 완료 행 렌더 — Q·S 둘 다 색칠 + R 비면 확정 사양으로 썸네일 생성
+    for i in render_ready:
+        row, rownum = rows[i], i + 2
+        topic = _cell(row, cols["my_keyword"]) or _cell(row, cols["date_kw"]) or "썸네일"
+        copy, title = parse_made_title(_cell(row, cols["made_title"]))
+        log(f"행{rownum} 렌더 (색칠 확인): {copy[:30]}")
+        import os
+        from urllib.parse import quote
+        # 확정 렌더는 Q열 지시대로 AI 생성 우선 (사용자가 DG_PHOTO_ORDER를 정했으면 존중)
+        prev_order = os.environ.get("DG_PHOTO_ORDER")
+        if not prev_order:
+            os.environ["DG_PHOTO_ORDER"] = "generate,stock,owned"
+        try:
+            spec = render_spec(topic, copy, title, _cell(row, cols["image_develop"]))
+            paths = render([spec], out, local_imgs,
+                           prefix=f"final_{_file_token(topic)[:16] or 'x'}")
+            png = paths[0]
+            jpg = png.with_suffix(".jpg")
+            rel = save_render_to_vault(topic, png, jpg)
+        except Exception as e:
+            log(f"  행{rownum} 렌더 실패: {e}")
+            continue
+        finally:
+            if not prev_order:
+                os.environ.pop("DG_PHOTO_ORDER", None)
+        from vault_pipeline import telegram_notify
+        # 저장소가 공개라 raw URL이 열린다 → R열 셀 안에 이미지 자체를 표시
+        repo = os.getenv("GITHUB_REPOSITORY", "dream0grow/dream-grow-content-automation")
+        branch = os.getenv("GITHUB_REF_NAME", "main")
+        raw_url = (f"https://raw.githubusercontent.com/{repo}/{quote(branch)}/vault/"
+                   f"{quote(rel)}")
+        gsheet.update(f"{col_letter(cols['made_thumb'])}{rownum}",
+                      [[f'=IMAGE("{raw_url}")']], sheet_title)
+        sent = telegram_notify.send_photo(
+            str(jpg), caption=f"🖼 썸네일 렌더: {topic}\n{copy}\n{telegram_notify.note_url(rel)}")
+        log(f"  행{rownum} 렌더 완료 → R열 =IMAGE 기록{' + 텔레그램 전송' if sent else ''}")
+
+    # ③ 전체 처리 — 아래 행부터(확장 행 삽입이 위쪽 행 번호를 건드리지 않게)
     if pending:
         log(f"대기 행 {len(pending)}개 → 최대 {max_rows}개 처리 (아래부터)")
     for i in sorted(pending, reverse=True)[:max_rows]:
@@ -708,6 +854,7 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     ensure_fonts()
+    ensure_dohyeon()
     local_imgs = []
     if args.photos_dir:
         import glob as _glob

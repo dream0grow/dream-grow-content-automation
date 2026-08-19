@@ -273,3 +273,49 @@ def test_run_sheet_skips_without_credentials(monkeypatch, capsys, tmp_path):
     monkeypatch.delenv("GSHEET_SA_JSON", raising=False)
     thumbnail.run_sheet("타겟", 0, tmp_path, [])
     assert "GSHEET_SA_JSON 미설정" in capsys.readouterr().out
+
+
+# ---------- 렌더 확정 (색칠 = 수정·확인 완료) ----------
+
+def test_parse_made_title():
+    copy, title = thumbnail.parse_made_title(
+        "고전을 만화책처럼\n읽는 법\n(이 방법으로 읽으니 아이가 고전을 다 읽었습니다)")
+    assert copy == "고전을 만화책처럼 읽는 법"
+    assert title == "이 방법으로 읽으니 아이가 고전을 다 읽었습니다"
+    # 괄호 없으면 전체가 문구
+    assert thumbnail.parse_made_title("문구만 있음") == ("문구만 있음", "")
+    assert thumbnail.parse_made_title("") == ("", "")
+
+
+def test_is_colored():
+    from orchestrator import gsheet
+    assert not gsheet.is_colored(None)              # 기본(무색)
+    assert not gsheet.is_colored((1.0, 1.0, 1.0))   # 흰색
+    assert gsheet.is_colored((1.0, 0.95, 0.8))      # 연노랑 (스크린샷 색)
+    assert gsheet.is_colored((0.85, 0.92, 0.83))    # 연녹색
+
+
+def test_find_render_ready_requires_both_colors_and_empty_r():
+    yellow, none = (1.0, 0.95, 0.8), None
+    r0 = _row(k="초등 고전 독서")
+    r0[COLS["made_title"]] = "고전을 만화책처럼 읽는 법\n(제목)"
+    r1 = [c for c in r0]                       # 한쪽만 색칠 → 제외
+    r2 = [c for c in r0]                       # 둘 다 색칠 + R 채워짐 → 제외
+    r2 = list(r2); r2[COLS["made_thumb"]] = "https://..."
+    r3 = _row()                                # S 비어 있음 → 제외
+    rows = [list(r0), r1, r2, r3]
+    bgs = [[yellow, yellow], [yellow, none], [yellow, yellow], [yellow, yellow]]
+    assert thumbnail.find_render_ready(rows, COLS, bgs) == [0]
+
+
+def test_save_render_to_vault(tmp_path, monkeypatch):
+    monkeypatch.setenv("DG_VAULT_ROOT", str(tmp_path / "vault"))
+    png = tmp_path / "a.png"; png.write_bytes(b"png")
+    jpg = tmp_path / "a.jpg"; jpg.write_bytes(b"jpg")
+    rel = thumbnail.save_render_to_vault("초등 고전 독서", png, jpg)
+    assert rel.startswith("파이프라인/썸네일/") and rel.endswith(".png")
+    assert (tmp_path / "vault" / rel).read_bytes() == b"png"
+    assert (tmp_path / "vault" / rel.replace(".png", ".jpg")).read_bytes() == b"jpg"
+    # 같은 날 같은 주제 재렌더 → -1 파일로 보존
+    rel2 = thumbnail.save_render_to_vault("초등 고전 독서", png, jpg)
+    assert rel2 != rel and rel2.endswith("-1.png")

@@ -51,6 +51,25 @@ def send(text: str, html: bool = False) -> bool:
         return False
 
 
+def send_photo(path: str, caption: str = "") -> bool:
+    """텔레그램으로 사진 발송 (썸네일 렌더 결과 등). 성공 여부 반환, 예외 없음."""
+    token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    chat_id = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+    if not token or not chat_id:
+        return False
+    try:
+        with open(path, "rb") as f:
+            resp = requests.post(
+                f"https://api.telegram.org/bot{token}/sendPhoto",
+                data={"chat_id": chat_id, "caption": caption[:1000]},
+                files={"photo": f},
+                timeout=60,
+            )
+        return resp.ok
+    except (requests.RequestException, OSError):
+        return False
+
+
 MAX_TITLES_PER_KIND = 5      # 녹음당 종류별 제목 표시 상한 (폰 화면 보호)
 
 
