@@ -49,6 +49,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
 | `cardnews.py` | 초안 → 실사진 오버레이 카드뉴스 PNG (Pretendard, Playwright/Chromium) |
 | `thumbnail.py` | 유튜브 썸네일 자동화: 주제 → 문구(기대/증거/의문/공감) 생성·구조분석·디벨롭 → 1280×720 PNG. `data/thumbnail_patterns.md` 주입 |
+| `reels_video.py` | 릴스(숏폼) 영상: 릴스 원고 B-roll → Muapi.ai(Open Generative AI 게이트웨이) 장면별 9:16 클립 → ffmpeg 합본 |
 | `stock.py` | 실물 스톡 사진 검색 (Pexels/Unsplash, 상업 라이선스) |
 | `image_gen.py` | AI 배경 이미지 생성 (OpenAI gpt-image-1 / Google Imagen, 한국인 중심) |
 | `cardnews_benchmark.py` | 최근 뜬 카드뉴스 벤치마킹 리서치(Manus/Claude) → `data/cardnews_benchmark.md`, 카드 생성 시 주입 |
@@ -56,7 +57,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 데이터: `data/benchmark_posts.md`(스레드 7구조·12훅·변주, CSV 분석), `data/hook_patterns.md`(후킹 패턴).
 워크플로우: `.github/workflows/orchestrator.yml`(30분 cron), `daily-intake.yml`(매일 07:10 KST 새 주제 발제),
-`self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트), `test-cardnews.yml`(카드뉴스 실제 생성 테스트).
+`self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트), `test-cardnews.yml`(카드뉴스 실제 생성 테스트),
+`test-reels-video.yml`(릴스 영상 실제 생성 테스트).
 
 ## 카드뉴스 / 발행 미리보기 (2026-07-01)
 
@@ -85,7 +87,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 `MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
 `DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DAILY_TOPIC_COUNT`(기본 1),
-`DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모")
+`DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모"),
+`MUAPI_API_KEY`(릴스 영상 생성 — muapi.ai)/`DG_REELS_VIDEO_MODEL`(기본 `seedance-lite-t2v`)/`DG_REELS_VIDEO_RESOLUTION`(기본 720p)/`DG_REELS_MAX_SCENES`(기본 7)
 
 ## 운영 — 자주 하는 작업
 
@@ -114,6 +117,29 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### Open Generative AI 설치 + 릴스(숏폼) 영상 자동 생성 (2026-08-19, 브랜치 `claude/open-generative-ai-setup-jsd2hd`) — ⬅️ 이번 세션 작업
+
+사용자가 요청한 https://github.com/Anil-matcha/Open-Generative-AI (오픈소스 AI 영상 스튜디오,
+백엔드=Muapi.ai 통합 게이트웨이)를 파이프라인에 연동했다. **릴스 원고 → 장면별 AI 영상 → 초벌 릴스 MP4**.
+- **`orchestrator/reels_video.py`**: 릴스 원고(`05 리뷰/대기/원고_릴스_*.md`)의 B-roll 표
+  (타임코드/장면/영어 키워드, `(자체 제작)` 행 제외)를 파싱 → LLM이 장면별 영어 t2v 프롬프트 생성
+  (실패 시 키워드 폴백, `--no-llm` 지원) → Muapi API(`POST /api/v1/{model}` → request_id 폴링,
+  Open Generative AI와 동일 프로토콜)로 9:16 클립 생성 → ffmpeg로 1080×1920 합본(`reel_draft.mp4`).
+  `notes.md`(장면표+내레이션 — 캡컷 마무리 재료)와 `reels_plan.json`도 산출.
+  B-roll 표 없는 원고는 `(화면: …)` 지시로 폴백, `--topic`이면 원고 없이 장면 설계부터.
+  `--dry-run`은 키/과금 없이 프롬프트만 검증.
+- **워크플로우 `test-reels-video.yml`**: 수동 실행 — script(부분 일치)/topic/max_scenes/dry_run 입력
+  → MP4·notes·plan 아티팩트 업로드.
+- **설치**: GUI 스튜디오는 `bash tools/setup_open_generative_ai.sh`(Mac 로컬 클론+npm setup) 또는
+  릴리스 인스톨러. 가이드 `docs/open-generative-ai-setup.md` (Muapi 키 발급→`MUAPI_API_KEY` 시크릿).
+- config: `MUAPI_API_KEY`, `DG_REELS_VIDEO_MODEL`(기본 `seedance-lite-t2v` — 비용 낮음, 9:16 지원),
+  `DG_REELS_VIDEO_RESOLUTION`(720p), `DG_REELS_SCENE_SECONDS`(5), `DG_REELS_MAX_SCENES`(7 — 과금 상한).
+- 테스트 12종 신규(`test_reels_video.py`) — 표 파싱("장면" 단어 포함 행 헤더 오인 버그 수정 포함),
+  프롬프트 폴백, Muapi 제출/폴링(mock), ffmpeg 명령, dry-run e2e. 전체 100종 통과.
+- **남은 사용자 액션**: ① 브랜치 검토/머지 ② https://muapi.ai 가입 → `MUAPI_API_KEY` 시크릿 등록
+  ③ Actions → test-reels-video → 릴스 원고 파일명으로 Run workflow → 아티팩트 MP4 확인
+  ④ (선택) Mac에서 `bash tools/setup_open_generative_ai.sh`로 GUI 스튜디오 설치.
 
 ### 카드 파일명 규칙 통일 — SNS 파일명 규칙 적용 (2026-08-19, 브랜치 `claude/file-naming-convention-5kv87o`)
 

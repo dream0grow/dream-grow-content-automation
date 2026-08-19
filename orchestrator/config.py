@@ -44,3 +44,11 @@ AUTO_APPROVE_KEYWORD = (
     os.getenv("DG_AUTO_APPROVE_KEYWORD", "").strip().lower()
     not in ("0", "false", "no", "off")
 )
+
+# 릴스(숏폼) 영상 생성 — Open Generative AI의 백엔드 게이트웨이 Muapi.ai 사용
+# (설치/키 발급: docs/open-generative-ai-setup.md). 키가 없으면 --dry-run만 가능.
+MUAPI_API_KEY = os.getenv("MUAPI_API_KEY", "")
+REELS_VIDEO_MODEL = os.getenv("DG_REELS_VIDEO_MODEL", "seedance-lite-t2v")
+REELS_VIDEO_RESOLUTION = os.getenv("DG_REELS_VIDEO_RESOLUTION", "720p")
+REELS_SCENE_SECONDS = int(os.getenv("DG_REELS_SCENE_SECONDS", "5") or "5")
+REELS_MAX_SCENES = int(os.getenv("DG_REELS_MAX_SCENES", "7") or "7")
