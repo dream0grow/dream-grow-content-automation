@@ -278,6 +278,8 @@ WRITER = """당신은 드림그로우의 콘텐츠 작가 에이전트입니다.
 브리프:
 {brief}
 
+{source_block}
+
 {style_context}
 
 {hook_examples}
