@@ -6,7 +6,7 @@ type: youtube-script
 길이: 10분
 카테고리: 초등 고전 독서를 만화책처럼 읽는 방법
 키워드: 초등 고전 독서
-원본: ["파이프라인 DG-2026-0049"]
+원본: ["파이프라인 DG-2026-0050"]
 검수상태: 대기
 발행시간:
 generator: dreamgrow-orchestrator
