@@ -57,8 +57,10 @@ def test_find_pending_requires_intro_and_skips_ledger():
     cols = youtube_body.resolve_columns(HEADER)
     # 장부 없음 → 도입부가 실제로 긴 행(1, 3)만
     assert youtube_body.find_pending(rows, cols, 0, {}) == [1, 3]
-    # 행2(rownum=2)가 장부에 같은 해시로 기록되면 제외
+    # 행2(rownum=2)가 장부에 같은 해시로 기록되면 제외 (구형 문자열·신형 dict 모두)
     ledger = {"2": youtube_body.intro_hash(INTRO)}
+    assert youtube_body.find_pending(rows, cols, 0, ledger) == [3]
+    ledger = {"2": {"hash": youtube_body.intro_hash(INTRO), "card": "DG-x.md"}}
     assert youtube_body.find_pending(rows, cols, 0, ledger) == [3]
     # 도입부를 고치면 해시가 달라져 다시 잡힌다
     rows[1] = _row(intro=INTRO + " 수정했습니다. 완전히 새로운 접근이 필요해요.")
@@ -86,6 +88,28 @@ def test_assemble_script_keeps_intro_verbatim():
     script = youtube_body.assemble_script(ctx, "## 📄 본문\n본문 내용")
     assert INTRO in script  # 사용자 도입부는 한 글자도 안 바뀐다
     assert script.index(INTRO) < script.index("## 📄 본문")
+
+
+def test_extract_body_returns_body_and_closing_without_memo():
+    script = ("# 영상 원고 -- t\n\n## 🎬 도입부 (0:00~0:30) — 사용자 원문\n\n도입\n\n"
+              "## 📄 본문\n\n[00:30] 섹션 내용\n\n## 🏁 마무리\n\n요약 문장\n\n"
+              "## 📋 제작 메모\n\n- B롤 아이디어\n")
+    body = youtube_body.extract_body(script)
+    assert body.startswith("## 📄 본문")
+    assert "요약 문장" in body       # 마무리 포함
+    assert "도입" not in body        # 도입부 제외 (X열에 이미 있음)
+    assert "제작 메모" not in body   # 내부 메모 제외
+    assert youtube_body.extract_body("본문 헤딩 없는 텍스트") == ""
+
+
+def test_rule_file_title_follows_naming_convention():
+    # 볼트 「03 파일명 규칙」: 원고_[형식]_[카테고리]_[키워드+키워드]
+    ctx = {"keyword": "초등 고전 독서", "title": "초등 고전 독서를 만화책처럼 읽는 방법"}
+    assert youtube_body.rule_file_title(ctx) == "원고_YT롱폼_독서_초등+고전+독서"
+    ctx = {"keyword": "구구단 수감각", "title": ""}
+    assert youtube_body.rule_file_title(ctx) == "원고_YT롱폼_수학_구구단+수감각"
+    assert youtube_body.rule_file_title({"keyword": "알수없는주제", "title": ""}).startswith(
+        "원고_YT롱폼_기타")
 
 
 # ---------- 생성 가드 ----------
@@ -119,9 +143,11 @@ def test_process_row_creates_card_and_review_copy(tmp_path, monkeypatch):
     cols = youtube_body.resolve_columns(HEADER)
     result = youtube_body.process_row(_row(), cols, rownum=13, audience="초등 학부모")
 
-    # ① 활성 카드 생성 — 오케스트레이터가 재처리하지 않는 상태여야 한다
+    # ① 활성 카드 생성 — 파일명은 「03 파일명 규칙」, 오케스트레이터가 재처리하지 않는 상태
     cards = list((tmp_path / "파이프라인" / "활성").glob("DG-*.md"))
     assert len(cards) == 1
+    assert cards[0].name.endswith("원고_YT롱폼_독서_초등+고전+독서.md")
+    assert result["body_text"].startswith("## 📄 본문")
     text = cards[0].read_text(encoding="utf-8")
     assert "stage: draft" in text
     assert "status: needs_human" in text
@@ -134,6 +160,38 @@ def test_process_row_creates_card_and_review_copy(tmp_path, monkeypatch):
     review = list((tmp_path / "SNS 콘텐츠 제작 시스템" / "05 리뷰" / "대기").glob("원고_YT롱폼_*.md"))
     assert len(review) == 1
     assert result["review"] == review[0].name
+
+
+def test_sync_ledger_rows_backfills_empty_link_and_body(tmp_path, monkeypatch):
+    """Z열(본문)을 나중에 만든 경우 — 처리 완료 행의 빈 칸을 카드에서 백필한다."""
+    monkeypatch.setenv("DG_VAULT_ROOT", str(tmp_path))
+    card_name = "DG-2026-0049 원고_YT롱폼_독서_초등+고전+독서.md"
+    card_dir = tmp_path / "파이프라인" / "활성"
+    card_dir.mkdir(parents=True)
+    (card_dir / card_name).write_text(
+        "---\ntopic: t\n---\n\n## ✍️ 영상 원고\n\n# 영상 원고 -- t\n\n"
+        "## 🎬 도입부\n\n도입\n\n## 📄 본문\n\n[00:30] 백필될 본문\n\n"
+        "## 🏁 마무리\n\n요약\n\n## 📋 제작 메모\n\n- 메모\n", encoding="utf-8")
+
+    cols = youtube_body.resolve_columns(HEADER)
+    rows = [HEADER, _row()]  # 행2: Y·Z 비어 있음
+    ledger = {"2": {"hash": youtube_body.intro_hash(INTRO), "card": card_name}}
+    written = {}
+    monkeypatch.setattr(youtube_body.gsheet, "update",
+                        lambda a1, values, title=None: written.update({a1: values[0][0]}))
+
+    youtube_body.sync_ledger_rows(rows, cols, ledger, "분석")
+    y = youtube_body.col_letter(cols["result"])
+    z = youtube_body.col_letter(cols["body"])
+    assert card_name.split(" ")[0] in written[f"{y}2"]  # 카드 링크
+    assert written[f"{z}2"].startswith("## 📄 본문")
+    assert "제작 메모" not in written[f"{z}2"]
+
+    # 도입부가 바뀐 행은 백필하지 않는다 (재생성 대상)
+    written.clear()
+    rows[1] = _row(intro=INTRO + " 완전히 새로 고친 도입부입니다. 다시 생성돼야 해요.")
+    youtube_body.sync_ledger_rows(rows, cols, ledger, "분석")
+    assert not written
 
 
 def test_run_sheet_skips_without_service_account(monkeypatch, capsys):

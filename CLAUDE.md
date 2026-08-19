@@ -126,21 +126,25 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   보이스 프로필+HUMANIZE_RULES 주입). **도입부는 사용자 원문 그대로 보존**(코드로 조립).
 - 완성 원고는 `vault/파이프라인/활성/` 카드(stage: draft, status: needs_human, format: youtube —
   DISPATCH에 안 걸려 재처리 없음) + `05 리뷰/대기` 사본(script_feedback 텔레그램 핑퐁) 저장.
-  시트 「완성 원고」열(Y, 없으면 X 오른쪽)에 카드 GitHub 링크 되써넣기.
-- 재처리 규칙: `_system/logs/youtube_body_ledger.json`에 행별 도입부 해시 — **X열을 고치면
+  카드 파일명은 볼트 「03 파일명 규칙」의 원고 규칙 — `DG-ID 원고_YT롱폼_[카테고리]_[키워드+키워드]`
+  (rename_card, DG-ID는 채번용 유지). 시트 되써넣기: 「완성 원고」열(Y)=카드 링크,
+  **「본문」열(Z)=낭독분(본문+마무리, 제작 메모 제외)**.
+- 재처리 규칙: `_system/logs/youtube_body_ledger.json`에 행별 `{hash, card}` — **X열을 고치면
   해시가 바뀌어 다음 폴링에 다시 생성**된다. 열은 헤더 이름으로 추적(resolve_columns).
-- `obsidian_state` TEXT_FIELDS에 `format` 추가(update_card로 형식 지정 가능).
-- 테스트 10종 신규(`test_youtube_body.py`), 전체 94종 통과.
+  처리 완료 행의 Y/Z가 비어 있으면(열을 나중에 만든 경우) 카드에서 **백필**(sync_ledger_rows).
+- `obsidian_state`에 `rename_card` 추가, TEXT_FIELDS에 `format` 추가.
+- 테스트 13종 신규(`test_youtube_body.py`), 전체 97종 통과.
 
 **고전 독서 원고 1건 수동 완성** (시트 13행, 키워드 "초등 고전 독서"):
 - T07 → `SNS…/02 분석/24 핵심 내용 및 댓글 분석/초등 고전 독서_핵심 내용 및 댓글 추출.md`
   (영상 9편+커뮤니티 반응 17건 딥리서치. 유튜브 댓글 직접 수집은 프록시 차단 → Threads/Q&A 대체 명시)
 - T08 → `SNS…/06 제작/52 원고/초등 고전 독서_필수 메시지 정리.md` (사용자 핵심 메시지:
   '책을 즐기는 사람' 정체성 형성 → 재미 사다리 → 쉬운 고전·소설 중심)
-- 완성 원고(도입부 수정본+본문) → `vault/파이프라인/활성/DG-2026-0049` 카드 (윤문 스킬 통과)
-- **남은 사용자 액션**: ① 브랜치 검토/머지 ② 시트에 「완성 원고」 헤더(Y2)를 만들어두면 링크가
-  그 열에 기록됨(없어도 X 오른쪽에 씀) ③ 이후 X열에 도입부만 쓰면 2시간 내 본문 자동 완성
-  (또는 Actions → youtube-body Run workflow 즉시 실행).
+- 완성 원고(도입부 수정본+본문) → `vault/파이프라인/활성/DG-2026-0049 원고_YT롱폼_독서_초등+고전+독서.md`
+  (윤문 스킬 통과). 장부에 카드 참조 시드 완료 — 다음 워크플로우 실행 때 시트 Y13(링크)·Z13(본문) 백필.
+- 사용자 완료(2026-08-19): `GSHEET_SA_JSON` 시크릿 등록, 시트에 Z열 「본문」 생성, main 머지.
+- **남은 사용자 액션**: Actions → youtube-body Run workflow 1회 실행(또는 2시간 cron 대기)
+  → 13행 Y/Z 백필 확인. 이후 X열에 도입부만 쓰면 2시간 내 본문 자동 완성.
 
 ### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`)
 

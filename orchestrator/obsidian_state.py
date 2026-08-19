@@ -193,6 +193,23 @@ def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
     return page_id
 
 
+def rename_card(page_id: str, new_title: str) -> str:
+    """카드 파일명의 제목부를 바꾼다 — 'DG-ID {new_title}.md'. 새 page_id 반환.
+
+    content_id 접두사는 채번(next_content_id가 파일명을 스캔)에 필요하므로 유지한다.
+    """
+    path = _resolve(page_id)
+    m = re.match(r"(DG-\d{4}-\d{4})", path.name)
+    prefix = f"{m.group(1)} " if m else ""
+    safe = re.sub(r'[\\/:*?"<>|#^\[\]\n\r\t]', " ", new_title).strip()[:80]
+    if not safe:
+        return _rel(path)
+    new_path = path.with_name(f"{prefix}{safe}.md")
+    if new_path != path:
+        path.rename(new_path)
+    return _rel(new_path)
+
+
 # ---------- 본문 섹션 (단계 산출물) ----------
 
 def append_section(page_id: str, heading: str, body: str) -> None:

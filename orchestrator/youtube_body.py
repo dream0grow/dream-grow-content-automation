@@ -35,7 +35,7 @@ LAST_COL = "AZ"  # 열 개편에 대비해 넉넉히 읽는다 (resolve가 이�
 # 기본 열 배치 (2026-08-19 분석 탭). 헤더 행을 이름으로 재해석하므로 폴백일 뿐이다.
 COL_DEFAULT = {"date_kw": 0, "situation": 4, "worry": 5, "desire": 6, "plan": 7,
                "my_keyword": 11, "kw_develop": 12, "made_title": 18,
-               "intro": 23, "result": 24}
+               "intro": 23, "result": 24, "body": 25}
 
 _HEADER_PATTERNS = [
     ("intro", "만든도입부"),
@@ -46,6 +46,20 @@ _HEADER_PATTERNS = [
     ("kw_develop", "문구디벨롭"),
     ("date_kw", "날짜"),
     ("situation", "상황"), ("worry", "고민"), ("desire", "욕구"), ("plan", "계획"),
+    ("body", "본문"),
+]
+
+# 볼트 「03 파일명 규칙」의 주제 카테고리 코드표 — 카드 파일명에 쓴다
+_CATEGORY_KEYWORDS = [
+    ("독서", ["독서", "고전", "그림책", "책", "문해력", "국어"]),
+    ("수학", ["수학", "연산", "구구단", "분수", "나눗셈", "수감각"]),
+    ("훈육", ["훈육", "떼", "경계", "버릇", "훈계", "비폭력"]),
+    ("감정", ["자존감", "감정", "칭찬", "비교", "스트레스", "불안"]),
+    ("학습", ["공부", "성적", "학원", "숙제", "자기주도", "메타인지", "시험"]),
+    ("미디어", ["스마트폰", "미디어", "디지털", "게임", "유해"]),
+    ("학교", ["학교", "개학", "입학", "발표", "교실", "친구"]),
+    ("놀이", ["놀이", "장난감", "창의", "체험"]),
+    ("크리에이터", ["크리에이터", "콘텐츠", "구독자", "수익화"]),
 ]
 
 
@@ -111,6 +125,13 @@ def save_ledger(ledger: dict) -> None:
     p.write_text(json.dumps(ledger, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def _ledger_hash(entry) -> str:
+    """장부 값에서 해시 — 구형(문자열)·신형({hash, card}) 모두 지원."""
+    if isinstance(entry, dict):
+        return entry.get("hash", "")
+    return entry or ""
+
+
 def find_pending(rows: list[list[str]], cols: dict[str, int], header_i: int,
                  ledger: dict) -> list[int]:
     """도입부(X)가 있고, 장부에 같은 해시가 없는 행 인덱스(0-base) 목록."""
@@ -121,7 +142,7 @@ def find_pending(rows: list[list[str]], cols: dict[str, int], header_i: int,
         intro = _cell(row, cols["intro"])
         if len(intro) < 50:  # 도입부라기엔 짧은 메모/빈 칸은 건너뜀
             continue
-        if ledger.get(str(i + 1)) == intro_hash(intro):
+        if _ledger_hash(ledger.get(str(i + 1))) == intro_hash(intro):
             continue
         out.append(i)
     return out
@@ -184,6 +205,36 @@ def assemble_script(ctx: dict, body: str) -> str:
             f"## 🎬 도입부 (0:00~0:30) — 사용자 원문\n\n{ctx['intro']}\n\n{body}\n")
 
 
+def extract_body(script: str) -> str:
+    """완성 원고에서 시트 「본문」칸에 넣을 낭독분(본문+마무리)을 추출한다.
+
+    도입부(X열에 이미 있음)와 제작 메모(내부 참고)는 제외한다.
+    """
+    m = re.search(r"^## 📄 본문\s*$", script, re.M)
+    if not m:
+        return ""
+    out = script[m.start():]
+    cut = re.search(r"^## 📋 제작 메모\s*$", out, re.M)
+    return (out[:cut.start()] if cut else out).strip()
+
+
+def infer_category(text: str) -> str:
+    """「03 파일명 규칙」 주제 카테고리 추정 — 못 찾으면 '기타'."""
+    for cat, words in _CATEGORY_KEYWORDS:
+        if any(w in text for w in words):
+            return cat
+    return "기타"
+
+
+def rule_file_title(ctx: dict) -> str:
+    """볼트 「03 파일명 규칙」의 원고 규칙 — 원고_YT롱폼_[카테고리]_[키워드+키워드]."""
+    kw_src = ctx.get("keyword") or ctx.get("title") or ""
+    category = infer_category(f"{kw_src} {ctx.get('title', '')}")
+    words = [re.sub(r'[\\/:*?"<>|#^\[\]]', "", w) for w in kw_src.split()]
+    kw = "+".join(w for w in words if w)[:40]
+    return f"원고_YT롱폼_{category}" + (f"_{kw}" if kw else "")
+
+
 def save_card(ctx: dict, messages: str, script: str, audience: str) -> str:
     """완성 원고를 파이프라인 활성 카드로 저장. page_id 반환.
 
@@ -192,6 +243,8 @@ def save_card(ctx: dict, messages: str, script: str, audience: str) -> str:
     """
     page_id = store.create_card(ctx["title"], stage="draft", status="needs_human",
                                 audience=audience)
+    # 파일명은 볼트 「03 파일명 규칙」의 원고 규칙을 따른다 (DG-ID 접두사는 채번용 유지)
+    page_id = store.rename_card(page_id, rule_file_title(ctx))
     store.update_card(page_id, format="youtube", approved_keyword=ctx["keyword"])
     store.append_section(page_id, "🧭 필수 메시지 정리 (자동)", messages)
     store.append_section(page_id, "✍️ 영상 원고 (도입부 사용자 원문 + 본문 자동)", script)
@@ -221,13 +274,54 @@ def process_row(row: list[str], cols: dict[str, int], rownum: int,
                  f"🎬 도입부→본문 완성: {ctx['title'][:60]}\n"
                  f"시트 행{rownum} 도입부를 받아 본문까지 썼습니다. 검토 후 촬영하세요."
                  + (f"\n리뷰 사본: {review_name}" if review_name else ""))
-    return {"page_id": page_id, "content_id": cid, "review": review_name, "ctx": ctx}
+    return {"page_id": page_id, "content_id": cid, "review": review_name,
+            "ctx": ctx, "body_text": extract_body(script)}
 
 
 def card_link(page_id: str) -> str:
     """카드 GitHub blob URL — 이 모듈이 만드는 카드는 항상 활성 폴더에 있다."""
     from vault_pipeline import telegram_notify
     return telegram_notify.note_url(f"파이프라인/활성/{Path(page_id).name}")
+
+
+def read_card_body(card_name: str) -> str:
+    """활성 카드 파일에서 낭독분(본문+마무리)을 읽는다 — 백필용."""
+    path = vault_root() / "파이프라인" / "활성" / card_name
+    try:
+        return extract_body(path.read_text(encoding="utf-8"))
+    except OSError:
+        return ""
+
+
+def sync_ledger_rows(rows: list[list[str]], cols: dict[str, int],
+                     ledger: dict, sheet_title: str):
+    """처리 완료 행의 빈 「완성 원고」(링크)·「본문」칸을 카드에서 백필한다.
+
+    Z열(본문)을 나중에 만든 경우처럼, 카드가 이미 있는데 시트 칸이 빈 행을 채운다.
+    도입부가 그새 바뀐 행은 건너뛴다 (find_pending이 재생성하며 새로 쓴다).
+    """
+    for rownum_s, entry in ledger.items():
+        if not (isinstance(entry, dict) and entry.get("card")):
+            continue
+        i = int(rownum_s) - 1
+        if not (0 <= i < len(rows)):
+            continue
+        row = rows[i]
+        if _ledger_hash(entry) != intro_hash(_cell(row, cols["intro"])):
+            continue
+        updates = {}
+        if not _cell(row, cols["result"]):
+            updates[cols["result"]] = card_link(entry["card"])
+        if not _cell(row, cols["body"]):
+            body = read_card_body(entry["card"])
+            if body:
+                updates[cols["body"]] = body
+        for cidx, value in updates.items():
+            try:
+                gsheet.update(f"{col_letter(cidx)}{rownum_s}", [[value]], sheet_title)
+                log(f"행{rownum_s} 백필: {col_letter(cidx)}열 ← {entry['card'][:40]}")
+            except Exception as e:  # noqa: BLE001 — 백필은 부가 경로
+                log(f"행{rownum_s} 백필 실패(계속): {e}")
 
 
 def run_sheet(audience: str, max_rows: int = 2, dry_run: bool = False):
@@ -242,6 +336,8 @@ def run_sheet(audience: str, max_rows: int = 2, dry_run: bool = False):
     ledger = load_ledger()
 
     pending = find_pending(rows, cols, header_i, ledger)
+    if not dry_run:
+        sync_ledger_rows(rows, cols, ledger, sheet_title)
     if not pending:
         log("처리할 행 없음 (새 도입부 없음)")
         return
@@ -257,14 +353,18 @@ def run_sheet(audience: str, max_rows: int = 2, dry_run: bool = False):
         except Exception as e:  # noqa: BLE001 — 한 행 실패가 다음 행을 막지 않게
             log(f"  행{rownum} 실패: {e}")
             continue
-        ledger[str(rownum)] = intro_hash(_cell(row, cols["intro"]))
+        ledger[str(rownum)] = {"hash": intro_hash(_cell(row, cols["intro"])),
+                               "card": Path(result["page_id"]).name}
         save_ledger(ledger)
-        # 「완성 원고」열에 카드 링크 되써넣기 (실패해도 카드는 이미 볼트에 있다)
-        try:
-            gsheet.update(f"{col_letter(cols['result'])}{rownum}",
-                          [[card_link(result["page_id"])]], sheet_title)
-        except Exception as e:  # noqa: BLE001
-            log(f"  행{rownum} 시트 되써넣기 실패(계속): {e}")
+        # 「완성 원고」열 카드 링크 + 「본문」열 낭독분 되써넣기 (실패해도 카드는 볼트에 있다)
+        writes = {cols["result"]: card_link(result["page_id"])}
+        if result["body_text"]:
+            writes[cols["body"]] = result["body_text"]
+        for cidx, value in writes.items():
+            try:
+                gsheet.update(f"{col_letter(cidx)}{rownum}", [[value]], sheet_title)
+            except Exception as e:  # noqa: BLE001
+                log(f"  행{rownum} {col_letter(cidx)}열 되써넣기 실패(계속): {e}")
         log(f"  행{rownum} 완료 → {result['content_id']}")
 
 
