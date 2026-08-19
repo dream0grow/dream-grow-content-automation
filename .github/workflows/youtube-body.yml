@@ -1,0 +1,75 @@
+# 유튜브 도입부 → 본문 자동 완성
+# 사용자가 벤치마킹 시트(분석 탭) X열 「만든 도입부」에 도입부를 써넣으면
+# cron 폴링이 그 행을 찾아 필수 메시지 설계 → 본문·마무리·제작 메모를 이어 쓰고
+# 완성 원고를 vault/파이프라인/활성/ 카드 + 05 리뷰/대기 사본(텔레그램 핑퐁)으로 저장,
+# 시트 「완성 원고」열에 카드 링크를 되써넣는다. (GSHEET_SA_JSON 서비스 계정 필요)
+name: youtube-body
+
+on:
+  schedule:
+    - cron: "17 */2 * * *"   # 2시간마다 시트 폴링 (thumbnail cron과 시간대 분산)
+  workflow_dispatch:
+    inputs:
+      audience:
+        description: "타겟 (기본: 초등 저학년 학부모)"
+        required: false
+        default: "초등 저학년 학부모"
+      max_rows:
+        description: "한 번에 처리할 행 수 (기본 2)"
+        required: false
+        default: "2"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-body
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      GSHEET_SA_JSON: ${{ secrets.GSHEET_SA_JSON }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+      DG_YT_SCRIPT_MINUTES: ${{ secrets.DG_YT_SCRIPT_MINUTES }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai pyyaml google-auth
+
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run youtube-body pipeline
+        run: |
+          python3 -m orchestrator.youtube_body \
+            --audience "${{ github.event.inputs.audience || '초등 저학년 학부모' }}" \
+            --max-rows "${{ github.event.inputs.max_rows || '2' }}"
+
+      - name: Commit vault (카드 + 리뷰 사본 + 장부)
+        run: |
+          git config user.name "dreamgrow-bot"
+          git config user.email "bot@dreamgrow.local"
+          git add vault/
+          git diff --cached --quiet && exit 0
+          git commit -m "유튜브 도입부→본문 자동 완성 $(date +%Y-%m-%dT%H:%M)"
+          # 여러 워크플로우가 같은 브랜치에 동시 push하면 non-fast-forward로 거부된다(A8 패턴).
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

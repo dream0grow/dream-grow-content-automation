@@ -113,7 +113,36 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
+### 유튜브 도입부→본문 자동화 + 고전 독서 원고 (2026-08-19, 브랜치 `claude/youtube-script-automation-yqbb4m`) — ⬅️ 이번 세션 작업
+
+**문체 학습**: Roam 원고(`vault/raw/Roam-Export-1773035150854/유튜브 만들기_내용포함.md`)의 롱폼
+원고 30여 편에서 보이스 프로필 실측 추출 → **`data/youtube_voice.md`** (어미 빈도·도입부 4유형·
+전개 패턴·인용 15개+·대표 발췌). 자동 파이프라인 프롬프트에 주입된다.
+
+**도입부→본문 자동화 (`orchestrator/youtube_body.py` + `youtube-body.yml`)**:
+- 벤치마킹 시트(분석 탭) **X열 「만든 도입부」에 도입부를 쓰면** 2시간 cron이 감지 →
+  행 맥락(S 만든 제목, L 키워드, E~H 시청자 분석, M 디벨롭) 수집 → ①필수 메시지 정리(T08,
+  `prompts.YOUTUBE_BODY_MESSAGES`) ②본문·마무리·제작 메모 집필(`prompts.YOUTUBE_BODY`,
+  보이스 프로필+HUMANIZE_RULES 주입). **도입부는 사용자 원문 그대로 보존**(코드로 조립).
+- 완성 원고는 `vault/파이프라인/활성/` 카드(stage: draft, status: needs_human, format: youtube —
+  DISPATCH에 안 걸려 재처리 없음) + `05 리뷰/대기` 사본(script_feedback 텔레그램 핑퐁) 저장.
+  시트 「완성 원고」열(Y, 없으면 X 오른쪽)에 카드 GitHub 링크 되써넣기.
+- 재처리 규칙: `_system/logs/youtube_body_ledger.json`에 행별 도입부 해시 — **X열을 고치면
+  해시가 바뀌어 다음 폴링에 다시 생성**된다. 열은 헤더 이름으로 추적(resolve_columns).
+- `obsidian_state` TEXT_FIELDS에 `format` 추가(update_card로 형식 지정 가능).
+- 테스트 10종 신규(`test_youtube_body.py`), 전체 94종 통과.
+
+**고전 독서 원고 1건 수동 완성** (시트 13행, 키워드 "초등 고전 독서"):
+- T07 → `SNS…/02 분석/24 핵심 내용 및 댓글 분석/초등 고전 독서_핵심 내용 및 댓글 추출.md`
+  (영상 9편+커뮤니티 반응 17건 딥리서치. 유튜브 댓글 직접 수집은 프록시 차단 → Threads/Q&A 대체 명시)
+- T08 → `SNS…/06 제작/52 원고/초등 고전 독서_필수 메시지 정리.md` (사용자 핵심 메시지:
+  '책을 즐기는 사람' 정체성 형성 → 재미 사다리 → 쉬운 고전·소설 중심)
+- 완성 원고(도입부 수정본+본문) → `vault/파이프라인/활성/DG-2026-0049` 카드 (윤문 스킬 통과)
+- **남은 사용자 액션**: ① 브랜치 검토/머지 ② 시트에 「완성 원고」 헤더(Y2)를 만들어두면 링크가
+  그 열에 기록됨(없어도 X 오른쪽에 씀) ③ 이후 X열에 도입부만 쓰면 2시간 내 본문 자동 완성
+  (또는 Actions → youtube-body Run workflow 즉시 실행).
+
+### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`)
 
 사용자의 벤치마킹 6단계 방법론(사용자 교정 반영)을 파이프라인으로 이관. **벤치마킹 썸네일에서 출발**한다.
 - **방법론(`data/thumbnail_patterns.md`)**: ①썸네일 보는 사람 분석(상황/고민/욕구/계획)
