@@ -130,8 +130,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   라우팅은 frontmatter 기준이라 개명은 파이프라인 동작에 영향 없음.
   단, 과거 텔레그램 알림의 카드 링크(blob URL)는 개명으로 끊어짐(새 알림부터 정상).
 - 파일명 규칙 문서에 「파이프라인/활성」 절 추가.
-- 주의: yt_research 사이트(`lib/pipeline.ts`)가 직접 만드는 카드는 아직 옛 이름 —
-  그쪽 저장소에서 같은 규칙 적용 필요(파이프라인 동작에는 문제 없음).
+- yt_research 사이트(`lib/pipeline.ts`)도 같은 규칙 적용 완료(그쪽 PR#18 머지,
+  `cardFilename` — 파이썬 구현과 출력 일치 검증). 이 저장소는 PR#74로 main 머지 완료.
 
 ### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
 
