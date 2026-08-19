@@ -295,7 +295,8 @@ def _resolve_card(target: str) -> Path | None:
     m = CARD_ID_RE.search(target or "")
     if not m:
         return None
-    matches = sorted(_active_cards_dir().glob(f"{m.group(0)}*.md"))
+    # 파일명 규칙이 `원고_..._DG-ID.md`라 ID가 뒤에 온다 (옛 `DG-ID 제목.md`도 잡는다).
+    matches = sorted(_active_cards_dir().glob(f"*{m.group(0)}*.md"))
     return matches[0] if matches else None
 
 

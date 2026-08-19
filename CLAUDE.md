@@ -11,7 +11,9 @@ GitHub Actions가 cron으로 카드 저장소를 폴링하고, 사람은 모바�
 
 흐름: `intake → 리서치 → 키워드 점수화 → ⏸️키워드 승인(자동승인 기본 ON) → 브리프 → 작가↔비평가↔검수 토론 초안 → 검수/평가 → ⏸️발행 승인 → 발행(Threads/스티비)`
 
-**저장소 = 옵시디언 볼트 하나** (노션 철수 완료). 카드는 `vault/파이프라인/활성/<id> <제목>.md`,
+**저장소 = 옵시디언 볼트 하나** (노션 철수 완료). 카드는
+`vault/파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<DG-ID>.md`
+(파일명 규칙: 볼트 `SNS 콘텐츠 제작 시스템/00 시스템/03 파일명 규칙.md`, 생성은 `card_filename`),
 frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹션`이 단계 산출물이다
 (`orchestrator/obsidian_state.py`, 볼트 경로 `DG_VAULT_ROOT` 기본 `vault/`). 호출부는 파사드
 `orchestrator/state.py`(`from orchestrator import state as store`)만 본다.
@@ -112,6 +114,24 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 카드 파일명 규칙 통일 — SNS 파일명 규칙 적용 (2026-08-19, 브랜치 `claude/file-naming-convention-5kv87o`)
+
+`DG-2026-NNNN 제목.md`가 ID순으로만 정렬돼 분류가 안 되던 것을, 볼트의
+`SNS 콘텐츠 제작 시스템/00 시스템/03 파일명 규칙.md`에 맞춰
+**`원고_<형식>_<카테고리>_<키워드+키워드>_<DG-ID>.md`**로 통일했다.
+- `obsidian_state.card_filename` 신설: 형식 라벨(thread→스레드 등), 주제 카테고리
+  자동 판별(`topic_category` — 9개 카테고리 키워드 점수, 못 정하면 `기타`),
+  키워드는 주제 첫 3어절 `+` 연결. 큐시트 카드는 `큐시트_프롬프트개선_<DG-ID>.md`.
+- `create_card(format=...)` 인자 추가(파일명·frontmatter에 반영), ID는 파일명 **끝** —
+  채번(`next_content_id`)은 파일명 안의 ID를 어디서든 찾으므로 무영향.
+- `script_feedback._resolve_card` glob을 `*DG-ID*.md`로 완화(옛/새 이름 모두 인식).
+- 기존 활성 카드 48건 일괄 개명(`tools/rename_cards.py`, `--dry-run` 지원, 재실행 무해).
+  라우팅은 frontmatter 기준이라 개명은 파이프라인 동작에 영향 없음.
+  단, 과거 텔레그램 알림의 카드 링크(blob URL)는 개명으로 끊어짐(새 알림부터 정상).
+- 파일명 규칙 문서에 「파이프라인/활성」 절 추가.
+- 주의: yt_research 사이트(`lib/pipeline.ts`)가 직접 만드는 카드는 아직 옛 이름 —
+  그쪽 저장소에서 같은 규칙 적용 필요(파이프라인 동작에는 문제 없음).
 
 ### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
 
