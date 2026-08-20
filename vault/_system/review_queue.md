@@ -236,3 +236,5 @@
 - [ ] 2026-08-20 14:01 [[원고_YT롱폼_독서_초등+고전+독후감_DG-2026-0054]] — 🎬 도입부→본문 완성: 초등 고전 독후감 쓰는 법
 시트 행13 도입부를 받아 본문까지 썼습니다. 검토 후 촬영하세요.
 리뷰 사본: 원고_YT롱폼_초등고전독후감쓰는법.md
+
+- [ ] 2026-08-20 15:58 [[원고_스레드_미디어_저녁마다+유튜브+그만_DG-2026-0008]] — ⚠️ [DG-2026-0008] 'publish_ready' 처리가 실패해 멈췄습니다: RuntimeError: 발행 실패 [1]: {"error":{"message":"An unexpected error has occurred. Please retry your request later.","type":"OAuthException","is_transient":true,"code":2,"fbtrace_id":"A40dsnDFExup2S_v8MeUY0h"}} — 확인이 필요합니다.
