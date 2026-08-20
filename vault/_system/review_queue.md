@@ -238,3 +238,5 @@
 리뷰 사본: 원고_YT롱폼_초등고전독후감쓰는법.md
 
 - [ ] 2026-08-20 15:58 [[원고_스레드_미디어_저녁마다+유튜브+그만_DG-2026-0008]] — ⚠️ [DG-2026-0008] 'publish_ready' 처리가 실패해 멈췄습니다: RuntimeError: 발행 실패 [1]: {"error":{"message":"An unexpected error has occurred. Please retry your request later.","type":"OAuthException","is_transient":true,"code":2,"fbtrace_id":"A40dsnDFExup2S_v8MeUY0h"}} — 확인이 필요합니다.
+
+- [ ] 2026-08-20 19:49 [[원고_스레드_미디어_저녁마다+유튜브+그만_DG-2026-0008]] — ⚠️ [DG-2026-0008] 'publish_ready' 처리가 실패해 멈췄습니다: RuntimeError: 발행 실패 [3]: {"error":{"message":"The requested resource does not exist","type":"OAuthException","code":24,"error_subcode":4279009,"is_transient":false,"error_user_title":"Media Not Found","error_user_msg":"The media with id 17943798519271
