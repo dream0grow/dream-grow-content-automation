@@ -23,6 +23,7 @@ SELECT_FIELDS = {"stage", "status", "priority", "approval_status", "review_statu
 TEXT_FIELDS = {
     "content_id", "audience", "format", "approved_keyword",
     "manus_task_ids", "idempotency_key", "last_error",
+    "publish_progress",  # 부분 발행 진행분(media_id CSV) — 재실행 시 이어서 발행
 }
 ALL_FIELDS = SELECT_FIELDS | TEXT_FIELDS | {"published_url"}
 
@@ -106,6 +107,7 @@ def _card_from_file(path: Path) -> dict:
         "manus_task_ids": get("manus_task_ids"),
         "idempotency_key": get("idempotency_key"),
         "published_url": get("published_url"),
+        "publish_progress": get("publish_progress"),
     }
 
 
