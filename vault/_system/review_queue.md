@@ -218,3 +218,5 @@
 리서치부터 초안까지 자동으로 진행하고, 초안이 완성되면 다시 알립니다.
 
 - [ ] 2026-08-20 08:40 [[원고_스레드_감정_쟤네+엄마는+이런_DG-2026-0049]] — ✍️ [DG-2026-0049] 초안 완성, 발행 승인이 필요합니다. '쟤네 엄마는 이런 것도 해준대, 자꾸 다른 집이랑 비교하는 아이 서운한 마음 어떻게 다뤄야 할까' — 글 평가/검수와 초안을 확인하고 approval_status를 approved로 바꾸면 자동 발행됩니다.
+
+- [ ] 2026-08-20 10:43 [[원고_스레드_미디어_저녁마다+유튜브+그만_DG-2026-0008]] — ⚠️ [DG-2026-0008] 'publish_ready' 처리가 실패해 멈췄습니다: RuntimeError: 컨테이너 생성 실패 [1]: {"error":{"message":"Error validating access token: Session has expired on Thursday, 11-Jun-26 05:15:34 PDT. The current time is Wednesday, 19-Aug-26 18:43:48 PDT.","type":"OAuthException","code":190,"error_subcode":0,"fb
