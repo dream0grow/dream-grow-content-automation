@@ -474,11 +474,13 @@ def handle_final_approved(card: dict):
 
 
 def handle_revision_requested(card: dict):
-    """approval + revision_requested → 재초안 경로로 되돌린다(A1).
+    """approval/publish_ready + revision_requested → 재초안 경로로 되돌린다(A1).
 
     예전엔 이 상태를 처리하는 핸들러가 없어 '수정 요청'이 영구 방치됐다. 이제는
     keyword_approval/approved로 되돌려 handle_keyword_approved가 '{REVISION_SECTION}'의
     사람 지시를 반영해 브리프→초안을 다시 만들고 발행 승인 대기로 재진입시킨다.
+    publish_ready에서 발행이 실패한 뒤 텔레그램 답장으로 수정 요청이 접수되면
+    approval_status만 revision_requested로 바뀌는데, 그 조합도 여기로 라우팅된다.
     """
     page_id = card["page_id"]
     if not card["approved_keyword"].strip():
@@ -545,6 +547,8 @@ DISPATCH = [
     ("keyword_approval", None, "approved", handle_keyword_approved),
     ("approval", None, "approved", handle_final_approved),
     ("approval", None, "revision_requested", handle_revision_requested),
+    # 발행 실패 후 텔레그램 답장 등으로 수정 요청이 오면 이 조합이 된다 — 발행보다 먼저 집는다.
+    ("publish_ready", None, "revision_requested", handle_revision_requested),
     ("publish_ready", "queued", None, handle_publish),
 ]
 
@@ -552,19 +556,24 @@ DISPATCH = [
 _STATUS_AGNOSTIC = {"keyword_approval", "approval"}
 
 
-def _handle_failure(card: dict, stage: str, exc: Exception):
+def _handle_failure(card: dict, stage: str, exc: Exception, approval: str | None = None):
     """핸들러 예외를 처리한다: 안전한 stage는 1회 자동 재시도, 이후 실패는 사람 통지(A3).
 
     - intake/research/keyword: status를 되돌려 다음 실행에 1회 재시도.
-    - keyword_approval/approval: 쿼리가 status 무시라 그대로 두면 다음 실행에 재시도됨.
+    - approval_status로 집는 항목(keyword_approval/approval, publish_ready+revision_requested):
+      쿼리가 status 무시라 그대로 두면 다음 실행에 재시도됨. `approval` 인자는 DISPATCH의
+      approval_status 키 — 넘어오면 그 항목이 approval_status로 집는다는 뜻이다.
     - 재시도 표식(last_error 접두사)이 이미 있으면 포기하고 needs_human + 통지.
-    - publish_ready는 여기 오지 않는다(부분발행 중복 위험 → 재시도 대상 제외).
+    - publish_ready 발행(handle_publish)은 여기서 재시도하지 않는다(부분발행 중복 위험 →
+      즉시 통지). 같은 stage라도 수정 요청 라우팅(handle_revision_requested)은 발행을
+      안 하므로 재시도해도 안전하다.
     """
     page_id = card["page_id"]
     cid = card.get("content_id") or page_id
     err = f"{type(exc).__name__}: {exc}"
     already_retried = card.get("last_error", "").startswith(_RETRY_MARK)
-    can_retry = (stage in _REQUEUE_STATUS or stage in _STATUS_AGNOSTIC)
+    approval_keyed = approval is not None or stage in _STATUS_AGNOSTIC
+    can_retry = (stage in _REQUEUE_STATUS or approval_keyed)
 
     if can_retry and not already_retried:
         fields = {"last_error": f"{_RETRY_MARK} {err}"[:1500]}
@@ -575,7 +584,7 @@ def _handle_failure(card: dict, stage: str, exc: Exception):
         return
 
     fields = {"status": "failed", "last_error": err[:1500]}
-    if stage in _STATUS_AGNOSTIC:
+    if approval_keyed:
         fields["approval_status"] = "failed"  # status 무시 쿼리에서 빼내 무한 재시도 방지
     store.update_card(page_id, **fields)
     store.notify(
@@ -635,7 +644,7 @@ def run(only_stage: str | None = None):
                 processed += 1
             except Exception as e:
                 traceback.print_exc()
-                _handle_failure(card, stage, e)
+                _handle_failure(card, stage, e, approval)
     log(f"완료: {processed}개 카드 처리")
 
 
