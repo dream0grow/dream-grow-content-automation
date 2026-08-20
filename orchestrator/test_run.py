@@ -142,6 +142,64 @@ def test_failure_status_agnostic_dequeues_on_final():
     assert merged.get("approval_status") == "failed"  # 무한 재시도 방지
 
 
+def test_failure_publish_ready_revision_retries_then_dequeues():
+    """publish_ready+revision_requested 항목은 발행이 아니라 재시도해도 안전 —
+    1회 재시도 후에도 실패하면 approval_status=failed로 디큐해 무한 재시도를 막는다."""
+    st = FakeState()
+    _patch(st)
+    card = {"page_id": "p1", "content_id": "DG-1", "last_error": ""}
+    run._handle_failure(card, "publish_ready", RuntimeError("boom"),
+                        approval="revision_requested")
+    merged = _last_update(st, "p1")
+    assert "status" not in merged  # 쿼리가 status 무시 → 그대로 두면 재시도됨
+    assert merged.get("last_error", "").startswith(run._RETRY_MARK)
+    assert not st.notes
+
+    st2 = FakeState()
+    _patch(st2)
+    card2 = {"page_id": "p1", "content_id": "DG-1",
+             "last_error": f"{run._RETRY_MARK} boom"}
+    run._handle_failure(card2, "publish_ready", RuntimeError("boom again"),
+                        approval="revision_requested")
+    merged2 = _last_update(st2, "p1")
+    assert merged2.get("status") == "failed"
+    assert merged2.get("approval_status") == "failed"
+    assert st2.notes
+
+
+# ---------- 사각지대 해소: publish_ready + revision_requested도 재초안 경로 ----------
+
+def test_dispatch_covers_publish_ready_revision_before_publish():
+    """발행 실패 후 수정 요청이 접수된 카드(publish_ready+revision_requested)를
+    handle_publish보다 먼저 handle_revision_requested가 집어야 한다."""
+    entry = ("publish_ready", None, "revision_requested", run.handle_revision_requested)
+    publish_entry = ("publish_ready", "queued", None, run.handle_publish)
+    assert entry in run.DISPATCH
+    assert run.DISPATCH.index(entry) < run.DISPATCH.index(publish_entry)
+
+
+class MutatingState(FakeState):
+    """update_card가 카드 dict에도 반영되는 가짜 백엔드 — run() 통합 경로용."""
+
+    def update_card(self, page_id, **fields):
+        super().update_card(page_id, **fields)
+        for c in self._cards:
+            if c.get("page_id") == page_id:
+                c.update(fields)
+
+
+def test_run_reroutes_failed_publish_ready_revision():
+    card = {"page_id": "p1", "content_id": "DG-1", "stage": "publish_ready",
+            "status": "failed", "approval_status": "revision_requested",
+            "approved_keyword": "유튜브 그만"}
+    st = MutatingState(cards=[card])
+    _patch(st)
+    run.run(only_stage="publish_ready")
+    assert card["stage"] == "keyword_approval"  # 재초안 경로로 복귀
+    assert card["status"] == "running"
+    assert card["approval_status"] == "approved"
+
+
 # ---------- A4: 오래 멈춘 draft/brief 는 재큐 ----------
 
 def test_sweep_stale_running_requeues():
