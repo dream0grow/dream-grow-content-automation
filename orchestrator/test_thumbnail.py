@@ -346,3 +346,23 @@ def test_find_assets(tmp_path, monkeypatch):
     (d / "note.txt").write_bytes(b"x")           # 이미지 아닌 파일은 제외
     assert thumbnail.find_assets("초등 고전 독서") == [str(d / "demian.jpg")]
     assert thumbnail.find_assets("없는 키워드") == []
+
+
+def test_thumb_html_v2_style():
+    pick = dict(PICK, style="v2")
+    html = thumbnail.thumb_html(pick, bg="")
+    assert "class='wrapv2'" in html and "Black Han Sans" in html
+    assert "==" not in html and "고전을 만화책처럼" in html   # v2는 강조 마커 없이 평문
+    assert 'class="linev2 yellow"' in html                    # 2줄은 노란색 전체
+    assert 'class="kicker"' not in html                       # v2는 킥커 없음
+    assert f"font-size:{thumbnail.V2_LINE_PX}px" in html
+
+
+def test_find_assets_flat_file(tmp_path, monkeypatch):
+    monkeypatch.setattr(thumbnail, "ASSETS_DIR", tmp_path)
+    (tmp_path / "초등고전독서.png").write_bytes(b"x")         # 폴더 없이 낱개 업로드
+    d = tmp_path / "초등고전독서"; d.mkdir()
+    (d / "cover2.jpg").write_bytes(b"x")
+    hits = thumbnail.find_assets("초등 고전 독서")
+    assert str(tmp_path / "초등고전독서.png") in hits
+    assert str(d / "cover2.jpg") in hits
