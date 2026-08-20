@@ -43,6 +43,12 @@ KICKER_PX = 46         # 좌상단 킥커("현직 초등 교사가 알려주는"
 KICKER_COLOR = "#a8e063"  # 킥커 연두색 (벤치마크 "뇌과학이 알려주는" 톤)
 KICKER_DEFAULT = "현직 초등 교사가 알려주는"  # env DG_THUMB_KICKER로 변경 가능
 
+# v2 스타일 (가독성 비교용): 검은고딕(Black Han Sans) 중앙 정렬, 1줄 흰색·2줄 노란색,
+# 두꺼운 검은 외곽선 — 벤치마크 "공부, 게임, 운동 / 남보다 못하는 이유" 톤
+V2_LINE_PX = 118
+V2_LINE_PX_SMALL = 100
+V2_YELLOW = "#ffd400"
+
 # 실제 사람 피부처럼 — 사용자 지정 리얼리즘 프롬프트 (확정 렌더의 photo_prompt에 항상 덧붙임)
 REALISM = ("visible pores, skin texture, fine wrinkles, slight skin imperfections, "
            "vellus hair, peach fuzz, natural skin blemishes, slight freckles, no makeup, "
@@ -117,6 +123,30 @@ def col_letter(idx: int) -> str:
 
 def log(msg: str):
     print(f"[thumbnail] {msg}", flush=True)
+
+
+def ensure_blackhansans():
+    """검은고딕(Black Han Sans — v2 스타일)이 없으면 받아 설치한다."""
+    import subprocess
+    import urllib.request
+    try:
+        out = subprocess.run(["fc-list"], capture_output=True, text=True, timeout=20).stdout
+        if "Black Han Sans" in out:
+            return
+    except Exception:
+        pass
+    dest = Path("/usr/share/fonts/blackhansans")
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+        fp = dest / "BlackHanSans-Regular.ttf"
+        if not fp.exists():
+            urllib.request.urlretrieve(
+                "https://raw.githubusercontent.com/google/fonts/main/ofl/blackhansans/BlackHanSans-Regular.ttf",
+                fp)
+        subprocess.run(["fc-cache", "-f"], capture_output=True, timeout=60)
+        log("검은고딕(Black Han Sans) 폰트 설치 완료")
+    except Exception as e:
+        log(f"검은고딕 설치 실패(도현체로 진행): {e}")
 
 
 def ensure_dohyeon():
@@ -268,7 +298,15 @@ html,body { width:1280px; height:720px; }
   text-shadow:0 4px 30px rgba(0,0,0,.7); word-break:keep-all; }
 .line.small { font-size:LINE_PX_SMALLpx; }
 .hl { color:#ffd21e; }
+.wrapv2 { position:absolute; left:36px; right:36px; bottom:28px; text-align:center; }
+.linev2 { font-family:'Black Han Sans','Do Hyeon','Pretendard','Noto Sans KR',sans-serif;
+  font-size:V2_LINE_PXpx; color:#fff; letter-spacing:0; line-height:1.18;
+  -webkit-text-stroke:9px #000; paint-order:stroke fill; word-break:keep-all; }
+.linev2.small { font-size:V2_LINE_PX_SMALLpx; }
+.linev2.yellow { color:V2_YELLOW; }
 """.replace("KICKER_PX", str(KICKER_PX)).replace("KICKER_COLOR", KICKER_COLOR) \
+   .replace("V2_LINE_PX_SMALL", str(V2_LINE_PX_SMALL)).replace("V2_LINE_PX", str(V2_LINE_PX)) \
+   .replace("V2_YELLOW", V2_YELLOW) \
    .replace("LINE_PX_SMALL", str(LINE_PX_SMALL)).replace("LINE_PX", str(LINE_PX))
 
 
@@ -281,6 +319,20 @@ def thumb_html(pick: dict, bg: str) -> str:
     line1, line2 = (pick.get("line1") or "").strip(), (pick.get("line2") or "").strip()
     if not line1:  # 폴백: copy를 통째로 한 줄에
         line1 = (pick.get("copy") or "").strip()
+    photo_div = (f'<div class="photo" style="background-image:{bg}"></div>'
+                 if bg else '<div class="nophoto"></div>')
+    if (pick.get("style") or "").strip() == "v2":
+        # v2: 검은고딕 중앙 정렬, 1줄 흰색 + 2줄 노란색 전체, 두꺼운 검은 외곽선 (킥커 없음)
+        def plain(t):
+            return re.sub(r"==(.+?)==", r"\1", (t or "").strip()).replace("**", "")
+        p1, p2 = plain(line1), plain(line2)
+        size_cls = " small" if max(len(p1), len(p2)) > 11 else ""
+        lines = f'<div class="linev2{size_cls}">{_html.escape(p1)}</div>'
+        if p2:
+            lines += f'<div class="linev2 yellow{size_cls}">{_html.escape(p2)}</div>'
+        return (f"<!DOCTYPE html><html><head><meta charset='utf-8'><style>{_css()}</style>"
+                f"</head><body><div class='thumb'>{photo_div}<div class='scrim'></div>"
+                f"<div class='wrapv2'>{lines}</div></div></body></html>")
     # 긴 줄은 한 단계 줄여 화면 폭 안에 앉힌다 (확정 크기: LINE_PX/LINE_PX_SMALL)
     size_cls = " small" if max(len(line1), len(line2)) > 12 else ""
     lines = f'<div class="line{size_cls}">{_rich(line1)}</div>'
@@ -566,12 +618,28 @@ def find_render_ready(rows: list[list[str]], cols: dict[str, int],
 
 
 def find_assets(topic: str) -> list[str]:
-    """키워드의 참조 이미지들(실제 책 표지 등)을 찾는다 — data/thumbnail_assets/<키워드>/."""
-    folder = ASSETS_DIR / (_file_token(topic)[:40] or "무제")
-    if not folder.is_dir():
-        return []
-    return sorted(str(p) for p in folder.iterdir()
-                  if p.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp"))
+    """키워드의 참조 이미지들(실제 책 표지 등)을 찾는다.
+
+    ① data/thumbnail_assets/<키워드>/ 폴더 안 이미지
+    ② data/thumbnail_assets/<키워드>*.jpg 처럼 폴더 없이 낱개로 올린 파일
+    (GitHub 웹 업로드는 폴더 만들기가 번거로워 둘 다 인식한다)
+    """
+    import unicodedata
+
+    def nfc(s: str) -> str:
+        # 맥/GitHub 웹 업로드 파일명은 NFD(자모 분해)로 올 수 있다 → NFC로 맞춰 비교
+        return unicodedata.normalize("NFC", s)
+
+    token = nfc(_file_token(topic)[:40] or "무제")
+    exts = (".jpg", ".jpeg", ".png", ".webp")
+    hits: list[str] = []
+    if ASSETS_DIR.is_dir():
+        for p in ASSETS_DIR.iterdir():
+            if p.is_dir() and nfc(p.name) == token:
+                hits += [str(f) for f in p.iterdir() if f.suffix.lower() in exts]
+            elif p.is_file() and p.suffix.lower() in exts and nfc(p.stem).startswith(token):
+                hits.append(str(p))
+    return sorted(set(hits))
 
 
 def save_render_to_vault(topic: str, png: Path, jpg: Path) -> str:
@@ -835,11 +903,13 @@ def run_sheet(audience: str, expand_count: int, out: Path,
                     log(f"  참조 이미지 {len(assets)}장 반영 (data/thumbnail_assets)")
                 else:
                     log("  참조 이미지 편집 실패 — 일반 생성으로 진행")
-            paths = render([spec], out, local_imgs,
+            # v1(도현체 확정 스타일) + v2(검은고딕 중앙, 가독성 비교) 두 버전 렌더
+            spec_v2 = dict(spec, style="v2")
+            paths = render([spec, spec_v2], out, local_imgs,
                            prefix=f"final_{_file_token(topic)[:16] or 'x'}")
-            png = paths[0]
-            jpg = png.with_suffix(".jpg")
-            rel = save_render_to_vault(topic, png, jpg)
+            rels = [save_render_to_vault(topic if i == 0 else f"{topic} v{i + 1}",
+                                         p, p.with_suffix(".jpg"))
+                    for i, p in enumerate(paths)]
         except Exception as e:
             log(f"  행{rownum} 렌더 실패: {e}")
             continue
@@ -847,11 +917,11 @@ def run_sheet(audience: str, expand_count: int, out: Path,
             if not prev_order:
                 os.environ.pop("DG_PHOTO_ORDER", None)
         from vault_pipeline import telegram_notify
-        # 저장소가 공개라 raw URL이 열린다 → R열 셀 안에 이미지 자체를 표시
+        # 저장소가 공개라 raw URL이 열린다 → R열 셀 안에 이미지 자체를 표시 (v1 기준)
         repo = os.getenv("GITHUB_REPOSITORY", "dream0grow/dream-grow-content-automation")
         branch = os.getenv("GITHUB_REF_NAME", "main")
         raw_url = (f"https://raw.githubusercontent.com/{repo}/{quote(branch)}/vault/"
-                   f"{quote(rel)}")
+                   f"{quote(rels[0])}")
         gsheet.update(f"{col_letter(cols['made_thumb'])}{rownum}",
                       [[f'=IMAGE("{raw_url}")']], sheet_title)
         # 작업 완료 표시: 사람이 칠한 노랑 → 파랑 (노랑=컨펌 완료, 파랑=렌더 완료)
@@ -859,9 +929,13 @@ def run_sheet(audience: str, expand_count: int, out: Path,
             gsheet.color_cells(rownum, [cols["image_develop"], cols["made_title"]], DONE_BLUE)
         except Exception as e:
             log(f"  행{rownum} 완료색(파랑) 표시 실패(렌더는 정상): {e}")
-        sent = telegram_notify.send_photo(
-            str(jpg), caption=f"🖼 썸네일 렌더: {topic}\n{copy}\n{telegram_notify.note_url(rel)}")
-        log(f"  행{rownum} 렌더 완료 → R열 =IMAGE + Q·S 파랑 표시{' + 텔레그램 전송' if sent else ''}")
+        labels = ("v1 도현체", "v2 검은고딕")
+        sent = 0
+        for p, rel, lab in zip(paths, rels, labels):
+            sent += telegram_notify.send_photo(
+                str(p.with_suffix(".jpg")),
+                caption=f"🖼 썸네일 {lab}: {topic}\n{copy}\n{telegram_notify.note_url(rel)}")
+        log(f"  행{rownum} 렌더 완료 → R열 =IMAGE(v1) + Q·S 파랑 + 텔레그램 {sent}장")
 
     # ③ 전체 처리 — 아래 행부터(확장 행 삽입이 위쪽 행 번호를 건드리지 않게)
     if pending:
@@ -914,6 +988,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     ensure_fonts()
     ensure_dohyeon()
+    ensure_blackhansans()
     local_imgs = []
     if args.photos_dir:
         import glob as _glob
