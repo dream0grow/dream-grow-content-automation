@@ -30,11 +30,28 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import gsheet, llm, prompts
-from orchestrator.cardnews import chrome_path, ensure_fonts, resolve_photo
+from orchestrator.cardnews import _file_to_bg, chrome_path, ensure_fonts, resolve_photo
 
 W, H = 1280, 720
 # 셀 상태색: 노랑 = 사람 컨펌 완료(사람이 칠함), 파랑 = 작업(렌더) 완료(파이프라인이 칠함)
 DONE_BLUE = (0.788, 0.854, 0.973)  # #c9daf8
+
+# ── 사용자 확정 렌더 스타일 (2026-08-19 확정 — 이 크기를 기억하고 유지할 것) ──
+LINE_PX = 112          # 하단 2줄 본문 문구 크기 (벤치마크 "같은 책을 3번 읽으면" 급)
+LINE_PX_SMALL = 96     # 한 줄 12자 초과 시 축소 크기
+KICKER_PX = 46         # 좌상단 킥커("현직 초등 교사가 알려주는") 크기
+KICKER_COLOR = "#a8e063"  # 킥커 연두색 (벤치마크 "뇌과학이 알려주는" 톤)
+KICKER_DEFAULT = "현직 초등 교사가 알려주는"  # env DG_THUMB_KICKER로 변경 가능
+
+# 실제 사람 피부처럼 — 사용자 지정 리얼리즘 프롬프트 (확정 렌더의 photo_prompt에 항상 덧붙임)
+REALISM = ("visible pores, skin texture, fine wrinkles, slight skin imperfections, "
+           "vellus hair, peach fuzz, natural skin blemishes, slight freckles, no makeup, "
+           "candid shot, snapshot, unfiltered, amateur photography, natural daylight, "
+           "soft ambient light, shot on 35mm lens, iPhone photo")
+
+# 참조 이미지(실제 책 표지 등): data/thumbnail_assets/<키워드(공백 제거)>/ 에 넣으면
+# 확정 렌더가 그 이미지를 참조해 장면을 생성한다 (gpt-image-1 edits / Gemini 이미지 입력)
+ASSETS_DIR = Path(__file__).resolve().parent.parent / "data" / "thumbnail_assets"
 PATTERNS_FILE = Path(__file__).resolve().parent.parent / "data" / "thumbnail_patterns.md"
 # 원고 핑퐁과 같은 폴더 — script_feedback이 `검수상태: 대기` + 최근 생성일이면 알림을 보낸다
 REVIEW_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/05 리뷰/대기"
@@ -238,18 +255,21 @@ html,body { width:1280px; height:720px; }
 .photo { position:absolute; inset:0; background-size:cover; background-position:center; }
 .nophoto { position:absolute; inset:0;
   background:radial-gradient(130% 100% at 75% 20%, #4a4038 0%, #211c18 55%, #100d0b 100%); }
-.scrim { position:absolute; inset:0; background:linear-gradient(78deg,
-  rgba(0,0,0,.88) 0%, rgba(0,0,0,.62) 34%, rgba(0,0,0,.12) 62%, rgba(0,0,0,0) 80%); }
-.chip { position:absolute; top:44px; left:52px; background:#ffd21e; color:#14110f;
-  font-weight:800; font-size:34px; letter-spacing:-1px; padding:10px 24px; border-radius:10px; }
-.wrap { position:absolute; left:52px; bottom:56px; right:340px; }
+.scrim { position:absolute; inset:0; background:linear-gradient(to top,
+  rgba(0,0,0,.94) 0%, rgba(0,0,0,.80) 20%, rgba(0,0,0,.35) 46%, rgba(0,0,0,0) 62%); }
+.wrap { position:absolute; left:52px; bottom:44px; right:60px; }
+.kicker { font-family:'Do Hyeon','BM DoHyeon','Pretendard','Noto Sans KR',sans-serif;
+  font-size:KICKER_PXpx; color:KICKER_COLOR; margin-bottom:14px;
+  -webkit-text-stroke:1.5px currentColor; paint-order:stroke fill;
+  text-shadow:0 3px 18px rgba(0,0,0,.7); }
 .line { font-family:'Do Hyeon','BM DoHyeon','Pretendard','Noto Sans KR',sans-serif;
-  font-weight:900; font-size:96px; letter-spacing:-1px; line-height:1.18;
+  font-weight:900; font-size:LINE_PXpx; letter-spacing:-2px; line-height:1.14;
   -webkit-text-stroke:3px currentColor; paint-order:stroke fill;  /* 도현체 단일 굵기 → 강제 진하게 */
-  text-shadow:0 4px 30px rgba(0,0,0,.65); word-break:keep-all; }
-.line.small { font-size:80px; }
+  text-shadow:0 4px 30px rgba(0,0,0,.7); word-break:keep-all; }
+.line.small { font-size:LINE_PX_SMALLpx; }
 .hl { color:#ffd21e; }
-"""
+""".replace("KICKER_PX", str(KICKER_PX)).replace("KICKER_COLOR", KICKER_COLOR) \
+   .replace("LINE_PX_SMALL", str(LINE_PX_SMALL)).replace("LINE_PX", str(LINE_PX))
 
 
 def _rich(text: str) -> str:
@@ -261,18 +281,18 @@ def thumb_html(pick: dict, bg: str) -> str:
     line1, line2 = (pick.get("line1") or "").strip(), (pick.get("line2") or "").strip()
     if not line1:  # 폴백: copy를 통째로 한 줄에
         line1 = (pick.get("copy") or "").strip()
-    # 두 줄이면 글자를 조금 줄여 좌측 안전영역 안에 안정적으로 앉힌다
-    size_cls = " small" if line2 and max(len(line1), len(line2)) > 9 else ""
+    # 긴 줄은 한 단계 줄여 화면 폭 안에 앉힌다 (확정 크기: LINE_PX/LINE_PX_SMALL)
+    size_cls = " small" if max(len(line1), len(line2)) > 12 else ""
     lines = f'<div class="line{size_cls}">{_rich(line1)}</div>'
     if line2:
         lines += f'<div class="line{size_cls}">{_rich(line2)}</div>'
     label = (pick.get("label") or "").strip()
-    chip = f'<div class="chip">{_html.escape(label)}</div>' if label else ""
+    kicker = f'<div class="kicker">{_html.escape(label)}</div>' if label else ""
     photo = (f'<div class="photo" style="background-image:{bg}"></div>'
              if bg else '<div class="nophoto"></div>')
     return (f"<!DOCTYPE html><html><head><meta charset='utf-8'><style>{_css()}</style></head>"
-            f"<body><div class='thumb'>{photo}<div class='scrim'></div>{chip}"
-            f"<div class='wrap'>{lines}</div></div></body></html>")
+            f"<body><div class='thumb'>{photo}<div class='scrim'></div>"
+            f"<div class='wrap'>{kicker}{lines}</div></div></body></html>")
 
 
 def render(picks: list[dict], out: Path, local_imgs: list[str] | None = None,
@@ -291,8 +311,10 @@ def render(picks: list[dict], out: Path, local_imgs: list[str] | None = None,
         browser = p.chromium.launch(**launch_kw)
         page = browser.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
         for i, pick in enumerate(picks, 1):
-            # cardnews와 같은 사진 소스 우선순위 (owned → stock → generate → 그라데이션)
-            bg = resolve_photo(pick, local_imgs, i - 1, cache_dir)
+            if pick.get("_bg_file"):  # 참조 이미지 편집 등으로 이미 만든 배경
+                bg = _file_to_bg(pick["_bg_file"])
+            else:  # cardnews와 같은 사진 소스 우선순위 (owned → stock → generate → 그라데이션)
+                bg = resolve_photo(pick, local_imgs, i - 1, cache_dir)
             page.set_content(thumb_html(pick, bg))
             page.wait_for_timeout(150)
             png = out / f"{prefix}_{i:02d}.png"
@@ -543,6 +565,15 @@ def find_render_ready(rows: list[list[str]], cols: dict[str, int],
     return ready
 
 
+def find_assets(topic: str) -> list[str]:
+    """키워드의 참조 이미지들(실제 책 표지 등)을 찾는다 — data/thumbnail_assets/<키워드>/."""
+    folder = ASSETS_DIR / (_file_token(topic)[:40] or "무제")
+    if not folder.is_dir():
+        return []
+    return sorted(str(p) for p in folder.iterdir()
+                  if p.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp"))
+
+
 def save_render_to_vault(topic: str, png: Path, jpg: Path) -> str:
     """렌더 결과를 볼트 파이프라인/썸네일/에 저장하고 상대 경로(png)를 반환."""
     from vault_pipeline.vault_io import now_kst, vault_root
@@ -783,6 +814,27 @@ def run_sheet(audience: str, expand_count: int, out: Path,
             os.environ["DG_PHOTO_ORDER"] = "generate,stock,owned"
         try:
             spec = render_spec(topic, copy, title, _cell(row, cols["image_develop"]))
+            # 킥커(좌상단 문구)는 브랜딩 고정 — "현직 초등 교사가 알려주는"
+            spec["label"] = os.getenv("DG_THUMB_KICKER", "").strip() or KICKER_DEFAULT
+            # 실제 피부·스냅샷 질감 프롬프트를 항상 덧붙인다 (사용자 지정 리얼리즘)
+            if spec.get("photo_prompt"):
+                spec["photo_prompt"] = f"{spec['photo_prompt']}, {REALISM}"
+            # 참조 이미지(실제 책 표지 등)가 있으면 그걸 반영해 장면 생성
+            assets = find_assets(topic)
+            if assets:
+                from orchestrator import image_gen
+                edit_prompt = (
+                    f"{spec.get('photo_prompt') or spec.get('image_desc', '')}. "
+                    "The child is holding and reading the exact book shown in the "
+                    "reference image — reproduce the book cover design faithfully "
+                    f"(do not redesign it). {REALISM}")
+                bg_file = image_gen.edit_with_refs(edit_prompt, assets,
+                                                   str(out / ".imgcache"))
+                if bg_file:
+                    spec["_bg_file"] = bg_file
+                    log(f"  참조 이미지 {len(assets)}장 반영 (data/thumbnail_assets)")
+                else:
+                    log("  참조 이미지 편집 실패 — 일반 생성으로 진행")
             paths = render([spec], out, local_imgs,
                            prefix=f"final_{_file_token(topic)[:16] or 'x'}")
             png = paths[0]

@@ -42,7 +42,9 @@ def test_thumb_html_layout_and_highlight():
     html = thumbnail.thumb_html(PICK, bg="")
     assert "1280px" in html and "720px" in html
     assert '<span class="hl">고전</span>' in html          # ==강조== 변환
-    assert "16년차 초등교사" in html                        # 신뢰 칩
+    assert "16년차 초등교사" in html                        # 킥커(좌상단 문구)
+    assert 'class="kicker"' in html
+    assert f"font-size:{thumbnail.LINE_PX}px" in html       # 확정 폰트 크기 유지
     assert 'class="nophoto"' in html                        # bg 없으면 그라데이션 폴백
 
 
@@ -51,7 +53,7 @@ def test_thumb_html_fallback_and_escape():
     html = thumbnail.thumb_html(pick, bg="url('x')")
     assert "&lt;b&gt;" in html
     assert 'class="photo"' in html
-    assert 'class="chip"' not in html                       # label 없으면 칩 생략
+    assert 'class="kicker"' not in html                     # label 없으면 킥커 생략
 
 
 # ---------- 시트 셀 생성 ----------
@@ -335,3 +337,12 @@ def test_color_cells_builds_repeat_cell_requests(monkeypatch):
     bg = reqs[1]["repeatCell"]["cell"]["userEnteredFormat"]["backgroundColor"]
     assert abs(bg["blue"] - 0.973) < 1e-6                            # 파랑(작업 완료)
     assert reqs[0]["repeatCell"]["fields"] == "userEnteredFormat.backgroundColor"
+
+
+def test_find_assets(tmp_path, monkeypatch):
+    monkeypatch.setattr(thumbnail, "ASSETS_DIR", tmp_path)
+    d = tmp_path / "초등고전독서"; d.mkdir()
+    (d / "demian.jpg").write_bytes(b"x")
+    (d / "note.txt").write_bytes(b"x")           # 이미지 아닌 파일은 제외
+    assert thumbnail.find_assets("초등 고전 독서") == [str(d / "demian.jpg")]
+    assert thumbnail.find_assets("없는 키워드") == []

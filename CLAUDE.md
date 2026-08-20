@@ -191,7 +191,12 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - **샘플(교정판)**: 시트 12행(영어공부 벤치마크 "영어 문장 한글처럼 읽는 법") → 초등 고전 독서.
   구조 "(원하는 A)을 (쉬운 B)처럼 하는 방법" 대입, 기대 9 증폭 변주 7개("고전을 만화책처럼 읽는
   방법" 등) + 확장 3키워드 + 검증(모델 추정 표기). 볼트 md 교체 + 렌더 검증 완료.
-- 테스트 75종 통과(test_thumbnail.py 14종).
+- **확정 렌더 스타일(2026-08-19, 사용자 확정 — 기억)**: 하단 2줄 본문 112px(12자 초과 시 96px),
+  좌상단 킥커 46px 연두(#a8e063) "현직 초등 교사가 알려주는"(`DG_THUMB_KICKER`), 도현체+스트로크 진하게,
+  하단 스크림. 피부 리얼리즘 프롬프트(REALISM 상수 — pores/vellus hair/candid/iPhone photo 등) 항상 덧붙임.
+  참조 이미지: `data/thumbnail_assets/<키워드>/`에 실제 책 표지 등을 넣으면 gpt-image-1 edits/Gemini로
+  그 이미지를 반영해 장면 생성 (README 참고).
+- 테스트 86종 통과(test_thumbnail.py).
 - **남은 사용자 액션**: ① 브랜치 검토/머지 ② `docs/thumbnail-sheet-setup.md` 따라 서비스 계정
   만들고 `GSHEET_SA_JSON` 시크릿 등록 + 시트를 서비스 계정 이메일에 편집자 공유
   ③ 이후 시트에 키워드만 적으면 2시간 내 자동 처리 (또는 Run workflow 즉시 실행).
