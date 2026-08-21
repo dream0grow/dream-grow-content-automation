@@ -95,6 +95,79 @@ def _google(prompt: str, size: str) -> bytes:
     raise RuntimeError(f"Gemini 이미지 응답에 inlineData 없음: {str(data)[:200]}")
 
 
+def edit_with_refs(prompt: str, ref_paths: list[str], cache_dir: str,
+                   size: str = "1536x1024") -> str | None:
+    """참조 이미지(실제 책 표지 등)를 반영해 장면을 생성한다. 실패/키없음이면 None.
+
+    - OpenAI gpt-image-1: images/edits (참조 이미지 + 프롬프트)
+    - Google gemini-2.5-flash-image: generateContent에 이미지 파트로 입력
+    """
+    if not available() or not ref_paths:
+        return None
+    p = provider()
+    cache = Path(cache_dir)
+    cache.mkdir(parents=True, exist_ok=True)
+    sig = hashlib.sha1(
+        (p + prompt + "".join(sorted(ref_paths)) + size).encode()).hexdigest()[:16]
+    fp = cache / f"edit_{sig}.png"
+    if fp.exists() and fp.stat().st_size > 0:
+        return str(fp)
+    try:
+        if p == "openai":
+            import requests
+            model = os.getenv("DG_IMAGE_MODEL", "gpt-image-1")
+            files = [("image[]", (Path(rp).name, open(rp, "rb"),
+                                  "image/png" if rp.endswith(".png") else "image/jpeg"))
+                     for rp in ref_paths[:4]]
+            try:
+                resp = requests.post(
+                    "https://api.openai.com/v1/images/edits",
+                    headers={"Authorization": f"Bearer {OPENAI_KEY}"},
+                    data={"model": model, "prompt": prompt, "n": "1",
+                          "size": size if size in ("1024x1024", "1536x1024", "1024x1536")
+                          else "1536x1024"},
+                    files=files, timeout=180)
+            finally:
+                for _, (_, fh, _) in files:
+                    fh.close()
+            resp.raise_for_status()
+            raw = base64.b64decode(resp.json()["data"][0]["b64_json"])
+        else:
+            import mimetypes
+            parts = []
+            for rp in ref_paths[:4]:
+                mime = mimetypes.guess_type(rp)[0] or "image/jpeg"
+                parts.append({"inlineData": {
+                    "mimeType": mime,
+                    "data": base64.b64encode(Path(rp).read_bytes()).decode()}})
+            parts.append({"text": prompt})
+            model = os.getenv("DG_IMAGE_MODEL", "gemini-2.5-flash-image")
+            if model.startswith("imagen"):  # Imagen predict는 이미지 입력 미지원
+                model = "gemini-2.5-flash-image"
+            body = json.dumps({"contents": [{"parts": parts}],
+                               "generationConfig": {"responseModalities": ["IMAGE"]}}).encode()
+            req = urllib.request.Request(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{model}"
+                f":generateContent?key={GOOGLE_KEY}",
+                data=body, headers={"Content-Type": "application/json"})
+            with urllib.request.urlopen(req, timeout=180) as r:
+                data = json.loads(r.read())
+            raw = b""
+            for cand in data.get("candidates", []):
+                for part in (cand.get("content") or {}).get("parts", []):
+                    inline = part.get("inlineData") or part.get("inline_data") or {}
+                    if inline.get("data"):
+                        raw = base64.b64decode(inline["data"])
+                        break
+            if not raw:
+                raise RuntimeError(f"Gemini 이미지 응답에 inlineData 없음: {str(data)[:200]}")
+        fp.write_bytes(raw)
+        return str(fp)
+    except Exception as e:
+        print(f"[image_gen] 참조 편집 실패({p}): {type(e).__name__}: {e}", flush=True)
+        return None
+
+
 def generate(prompt: str, cache_dir: str, size: str = "1024x1024") -> str | None:
     """prompt로 이미지를 생성해 PNG 경로를 반환. 실패/키없음이면 None."""
     if not available():

@@ -141,6 +141,37 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   ③ Actions → test-reels-video → 릴스 원고 파일명으로 Run workflow → 아티팩트 MP4 확인
   ④ (선택) Mac에서 `bash tools/setup_open_generative_ai.sh`로 GUI 스튜디오 설치.
 
+### 유튜브 도입부→본문 자동화 + 고전 독서 원고 (2026-08-19, 브랜치 `claude/youtube-script-automation-yqbb4m`, main 머지 완료) — ⬅️ 이번 세션 작업
+
+**문체 학습**: Roam 원고(`vault/raw/Roam-Export-1773035150854/유튜브 만들기_내용포함.md`)의 롱폼
+원고 30여 편에서 보이스 프로필 실측 추출 → **`data/youtube_voice.md`** (어미 빈도·도입부 4유형·
+전개 패턴·인용 15개+·대표 발췌). 자동 파이프라인 프롬프트에 주입된다.
+
+**도입부→본문 자동화 (`orchestrator/youtube_body.py` + `youtube-body.yml`)**:
+- 벤치마킹 시트(분석 탭) **X열 「만든 도입부」에 도입부를 쓰면** 2시간 cron이 감지 →
+  행 맥락(S 만든 제목, L 키워드, E~H 시청자 분석, M 디벨롭) 수집 → ①필수 메시지 정리(T08,
+  `prompts.YOUTUBE_BODY_MESSAGES`) ②본문·마무리·제작 메모 집필(`prompts.YOUTUBE_BODY`,
+  보이스 프로필+HUMANIZE_RULES 주입). **도입부는 사용자 원문 그대로 보존**(코드로 조립).
+- 완성 원고는 `vault/파이프라인/활성/` 카드(stage: draft, status: needs_human, format: youtube —
+  DISPATCH에 안 걸려 재처리 없음) + `05 리뷰/대기` 사본(script_feedback 텔레그램 핑퐁) 저장.
+  카드 파일명은 main의 통일 규칙 그대로(`card_filename` — `원고_YT롱폼_<카테고리>_<키워드>_<DG-ID>.md`).
+  시트 되써넣기: 「완성 원고」열(Y)=카드 링크, **「본문」열(Z)=낭독분(본문+마무리, 제작 메모 제외)**.
+- 재처리 규칙: `_system/logs/youtube_body_ledger.json`에 행별 `{hash, card}` — **X열을 고치면
+  해시가 바뀌어 다음 폴링에 다시 생성**된다. 열은 헤더 이름으로 추적(resolve_columns).
+  처리 완료 행의 Y/Z가 비어 있으면(열을 나중에 만든 경우) 카드에서 **백필**(sync_ledger_rows).
+- 테스트 12종 신규(`test_youtube_body.py`).
+
+**고전 독서 원고 1건 수동 완성** (시트 13행, 키워드 "초등 고전 독서"):
+- T07 → `SNS…/02 분석/24 핵심 내용 및 댓글 분석/초등 고전 독서_핵심 내용 및 댓글 추출.md`
+  (영상 9편+커뮤니티 반응 17건 딥리서치. 유튜브 댓글 직접 수집은 프록시 차단 → Threads/Q&A 대체 명시)
+- T08 → `SNS…/06 제작/52 원고/초등 고전 독서_필수 메시지 정리.md` (사용자 핵심 메시지:
+  '책을 즐기는 사람' 정체성 형성 → 재미 사다리 → 쉬운 고전·소설 중심)
+- 완성 원고(도입부 수정본+본문) → `vault/파이프라인/활성/원고_YT롱폼_독서_초등+고전+독서를_DG-2026-0050.md`
+  (윤문 스킬 통과). 장부에 카드 참조 시드 완료 — 다음 워크플로우 실행 때 시트 Y13(링크)·Z13(본문) 백필.
+- 사용자 완료(2026-08-19): `GSHEET_SA_JSON` 시크릿 등록, 시트에 Z열 「본문」 생성, main 머지.
+- **남은 사용자 액션**: Actions → youtube-body Run workflow 1회 실행(또는 2시간 cron 대기)
+  → 13행 Y/Z 백필 확인. 이후 X열에 도입부만 쓰면 2시간 내 본문 자동 완성.
+
 ### 카드 파일명 규칙 통일 — SNS 파일명 규칙 적용 (2026-08-19, 브랜치 `claude/file-naming-convention-5kv87o`)
 
 `DG-2026-NNNN 제목.md`가 ID순으로만 정렬돼 분류가 안 되던 것을, 볼트의
@@ -159,7 +190,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - yt_research 사이트(`lib/pipeline.ts`)도 같은 규칙 적용 완료(그쪽 PR#18 머지,
   `cardFilename` — 파이썬 구현과 출력 일치 검증). 이 저장소는 PR#74로 main 머지 완료.
 
-### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`) — ⬅️ 이번 세션 작업
+### 유튜브 썸네일 자동화 — 6단계 방법론 + 구글 시트 직접 읽기/쓰기 (2026-08-19, 브랜치 `claude/youtube-thumbnail-automation-sv47ii`)
 
 사용자의 벤치마킹 6단계 방법론(사용자 교정 반영)을 파이프라인으로 이관. **벤치마킹 썸네일에서 출발**한다.
 - **방법론(`data/thumbnail_patterns.md`)**: ①썸네일 보는 사람 분석(상황/고민/욕구/계획)
@@ -186,10 +217,18 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - **샘플(교정판)**: 시트 12행(영어공부 벤치마크 "영어 문장 한글처럼 읽는 법") → 초등 고전 독서.
   구조 "(원하는 A)을 (쉬운 B)처럼 하는 방법" 대입, 기대 9 증폭 변주 7개("고전을 만화책처럼 읽는
   방법" 등) + 확장 3키워드 + 검증(모델 추정 표기). 볼트 md 교체 + 렌더 검증 완료.
-- 테스트 75종 통과(test_thumbnail.py 14종).
+- **확정 렌더 스타일(2026-08-19, 사용자 확정 — 기억)**: 하단 2줄 본문 112px(12자 초과 시 96px),
+  좌상단 킥커 46px 연두(#a8e063) "현직 초등 교사가 알려주는"(`DG_THUMB_KICKER`), 도현체+스트로크 진하게,
+  하단 스크림. 피부 리얼리즘 프롬프트(REALISM 상수 — pores/vellus hair/candid/iPhone photo 등) 항상 덧붙임.
+  참조 이미지: `data/thumbnail_assets/<키워드>/`에 실제 책 표지 등을 넣으면 gpt-image-1 edits/Gemini로
+  그 이미지를 반영해 장면 생성 (README 참고).
+- 테스트 86종 통과(test_thumbnail.py).
 - **남은 사용자 액션**: ① 브랜치 검토/머지 ② `docs/thumbnail-sheet-setup.md` 따라 서비스 계정
   만들고 `GSHEET_SA_JSON` 시크릿 등록 + 시트를 서비스 계정 이메일에 편집자 공유
   ③ 이후 시트에 키워드만 적으면 2시간 내 자동 처리 (또는 Run workflow 즉시 실행).
+- **대화형 스킬**: `.claude/skills/dreamgrow-thumbnail` — "썸네일 만들어줘"로 호출.
+  ①참조 이미지 파일명 확인(data/thumbnail_assets, 없으면 업로드 안내) ②리얼리즘 프롬프트 필수
+  ③벤치마킹 이미지 요청 → 생성·렌더·전송 → 피드백 반영 반복. 파이프라인과 같은 엔진 사용.
 - **다음 예정**: 썸네일 이미지 만들기 고도화 후 → **도입부 문장 생성** 단계 추가 (사용자 지시).
 
 ### 글감 카드 — 완성 원고를 스레드로 재구성하는 입구 (2026-08-19, 브랜치 `claude/child-sharing-behavior-wzu82g`) — ⬅️ 이번 세션 작업

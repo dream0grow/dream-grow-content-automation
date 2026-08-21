@@ -19,6 +19,11 @@ THREADS_USER_ID = os.getenv("THREADS_USER_ID", "")
 
 POST_CHAR_LIMIT = 500
 
+# threads_publish 시도 횟수. 컨테이너 생성 직후엔 서버 전파가 안 끝나
+# "Media Not Found"(code 24)나 is_transient 오류가 나올 수 있어, 몇 초 기다렸다
+# 같은 creation_id로 재시도하면 대부분 성공한다.
+PUBLISH_ATTEMPTS = 3
+
 
 def available() -> bool:
     return bool(THREADS_ACCESS_TOKEN and THREADS_USER_ID)
@@ -80,14 +85,43 @@ def _split_sentences(text: str) -> list[str]:
     return [p for p in parts if p.strip()] or [text.strip()]
 
 
-def publish_chain(posts: list[str]) -> tuple[list[str], str]:
+def _publish_container(container_id: str, post_no: int) -> str:
+    """컨테이너 하나를 발행한다. 전파 지연·일시 오류는 기다렸다 재시도한다.
+
+    Threads는 컨테이너 생성 직후 발행하면 'Media Not Found'(code 24)나
+    is_transient 오류를 돌려주는 일이 있다 — creation_id는 유효하니
+    몇 초 간격으로 같은 id를 다시 발행하면 된다.
+    """
+    last_err = ""
+    for attempt in range(PUBLISH_ATTEMPTS):
+        if attempt:
+            time.sleep(4 * attempt)  # 4초, 8초
+        pub = requests.post(
+            f"{THREADS_API_BASE}/{THREADS_USER_ID}/threads_publish",
+            params={"creation_id": container_id, "access_token": THREADS_ACCESS_TOKEN},
+            timeout=60,
+        )
+        if pub.status_code == 200:
+            return pub.json().get("id")
+        last_err = pub.text[:300]
+    raise RuntimeError(f"발행 실패 [{post_no}]: {last_err}")
+
+
+def publish_chain(posts: list[str], done_ids: list[str] | None = None,
+                  on_progress=None) -> tuple[list[str], str]:
     """글 목록을 Threads 체인으로 발행한다.
+
+    done_ids: 이미 발행된 media_id 목록(부분 발행 재개) — 그 개수만큼 앞 글을
+    건너뛰고 이어서 발행한다. on_progress(media_ids)는 글 하나가 발행될 때마다
+    호출돼 진행분을 카드에 기록할 수 있다(재실행 시 중복 게시 방지).
 
     Returns: (발행된 media_id 목록, 첫 글 permalink)
     """
-    media_ids: list[str] = []
-    parent_id = None
+    media_ids: list[str] = list(done_ids or [])
+    parent_id = media_ids[0] if media_ids else None
     for i, text in enumerate(posts):
+        if i < len(media_ids):
+            continue  # 이미 발행된 글 — 재개 시 건너뛴다
         params = {
             "media_type": "TEXT",
             "text": text[:POST_CHAR_LIMIT],
@@ -103,17 +137,12 @@ def publish_chain(posts: list[str]) -> tuple[list[str], str]:
             raise RuntimeError(f"컨테이너 생성 실패 [{i + 1}]: {resp.text[:300]}")
         container_id = resp.json().get("id")
 
-        pub = requests.post(
-            f"{THREADS_API_BASE}/{THREADS_USER_ID}/threads_publish",
-            params={"creation_id": container_id, "access_token": THREADS_ACCESS_TOKEN},
-            timeout=60,
-        )
-        if pub.status_code != 200:
-            raise RuntimeError(f"발행 실패 [{i + 1}]: {pub.text[:300]}")
-        media_id = pub.json().get("id")
+        media_id = _publish_container(container_id, i + 1)
         media_ids.append(media_id)
         if i == 0:
             parent_id = media_id
+        if on_progress:
+            on_progress(media_ids)
         if i < len(posts) - 1:
             time.sleep(2)  # rate limit 준수
 
@@ -223,7 +252,18 @@ def handle_publish(card: dict):
         raise RuntimeError("카드에서 '✍️ 초안' 섹션을 찾지 못했습니다")
 
     posts = split_posts(draft)
-    media_ids, permalink = publish_chain(posts)
+
+    # 부분 발행 재개: 이전 실행이 중간에 실패했으면 진행분(publish_progress)이
+    # frontmatter에 남아 있다 — 그 지점부터 이어서 발행해 중복 게시를 막는다.
+    done_ids = [x.strip() for x in card.get("publish_progress", "").split(",") if x.strip()]
+    if done_ids:
+        print(f"부분 발행 재개: {len(done_ids)}개 기발행, {len(posts) - len(done_ids)}개 남음")
+
+    def _save_progress(ids: list[str]):
+        store.update_card(page_id, publish_progress=",".join(ids))
+
+    media_ids, permalink = publish_chain(posts, done_ids=done_ids,
+                                         on_progress=_save_progress)
 
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     store.append_section(
@@ -231,7 +271,7 @@ def handle_publish(card: dict):
         f"발행 시각: {timestamp}\n글 수: {len(media_ids)}개\n"
         f"media_ids: {', '.join(media_ids)}\npermalink: {permalink or '(조회 실패)'}",
     )
-    fields = {"stage": "published", "status": "done"}
+    fields = {"stage": "published", "status": "done", "publish_progress": ""}
     if permalink:
         fields["published_url"] = permalink
     store.update_card(page_id, **fields)

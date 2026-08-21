@@ -142,6 +142,64 @@ def test_failure_status_agnostic_dequeues_on_final():
     assert merged.get("approval_status") == "failed"  # 무한 재시도 방지
 
 
+def test_failure_publish_ready_revision_retries_then_dequeues():
+    """publish_ready+revision_requested 항목은 발행이 아니라 재시도해도 안전 —
+    1회 재시도 후에도 실패하면 approval_status=failed로 디큐해 무한 재시도를 막는다."""
+    st = FakeState()
+    _patch(st)
+    card = {"page_id": "p1", "content_id": "DG-1", "last_error": ""}
+    run._handle_failure(card, "publish_ready", RuntimeError("boom"),
+                        approval="revision_requested")
+    merged = _last_update(st, "p1")
+    assert "status" not in merged  # 쿼리가 status 무시 → 그대로 두면 재시도됨
+    assert merged.get("last_error", "").startswith(run._RETRY_MARK)
+    assert not st.notes
+
+    st2 = FakeState()
+    _patch(st2)
+    card2 = {"page_id": "p1", "content_id": "DG-1",
+             "last_error": f"{run._RETRY_MARK} boom"}
+    run._handle_failure(card2, "publish_ready", RuntimeError("boom again"),
+                        approval="revision_requested")
+    merged2 = _last_update(st2, "p1")
+    assert merged2.get("status") == "failed"
+    assert merged2.get("approval_status") == "failed"
+    assert st2.notes
+
+
+# ---------- 사각지대 해소: publish_ready + revision_requested도 재초안 경로 ----------
+
+def test_dispatch_covers_publish_ready_revision_before_publish():
+    """발행 실패 후 수정 요청이 접수된 카드(publish_ready+revision_requested)를
+    handle_publish보다 먼저 handle_revision_requested가 집어야 한다."""
+    entry = ("publish_ready", None, "revision_requested", run.handle_revision_requested)
+    publish_entry = ("publish_ready", "queued", None, run.handle_publish)
+    assert entry in run.DISPATCH
+    assert run.DISPATCH.index(entry) < run.DISPATCH.index(publish_entry)
+
+
+class MutatingState(FakeState):
+    """update_card가 카드 dict에도 반영되는 가짜 백엔드 — run() 통합 경로용."""
+
+    def update_card(self, page_id, **fields):
+        super().update_card(page_id, **fields)
+        for c in self._cards:
+            if c.get("page_id") == page_id:
+                c.update(fields)
+
+
+def test_run_reroutes_failed_publish_ready_revision():
+    card = {"page_id": "p1", "content_id": "DG-1", "stage": "publish_ready",
+            "status": "failed", "approval_status": "revision_requested",
+            "approved_keyword": "유튜브 그만"}
+    st = MutatingState(cards=[card])
+    _patch(st)
+    run.run(only_stage="publish_ready")
+    assert card["stage"] == "keyword_approval"  # 재초안 경로로 복귀
+    assert card["status"] == "running"
+    assert card["approval_status"] == "approved"
+
+
 # ---------- A4: 오래 멈춘 draft/brief 는 재큐 ----------
 
 def test_sweep_stale_running_requeues():
@@ -173,6 +231,84 @@ def test_split_posts_no_text_loss_on_long_paragraph():
 def test_split_posts_respects_separator():
     draft = "가나다\n---\n라마바"
     assert publish.split_posts(draft) == ["가나다", "라마바"]
+
+
+# ---------- 발행 회복력: threads_publish 재시도 + 부분 발행 재개 ----------
+
+class _FakeResp:
+    def __init__(self, status_code, payload):
+        self.status_code = status_code
+        self._payload = payload
+        self.text = str(payload)
+
+    def json(self):
+        return self._payload
+
+
+class _FakeRequests:
+    """publish가 부르는 requests.post/get을 흉내낸다. 큐에서 응답을 꺼내 준다."""
+
+    def __init__(self, publish_responses):
+        self.publish_responses = list(publish_responses)  # threads_publish 응답 큐
+        self.container_calls = []   # 컨테이너 생성 params 기록
+        self.publish_calls = 0
+        self._container_seq = 0
+
+    def post(self, url, params=None, timeout=None):
+        if url.endswith("/threads_publish"):
+            self.publish_calls += 1
+            return self.publish_responses.pop(0)
+        self._container_seq += 1
+        self.container_calls.append(dict(params or {}))
+        return _FakeResp(200, {"id": f"c{self._container_seq}"})
+
+    def get(self, url, params=None, timeout=None):
+        return _FakeResp(200, {"permalink": "https://threads.net/x"})
+
+
+def _patch_publish_io(fake):
+    publish.requests = fake
+    publish.time = types.SimpleNamespace(sleep=lambda s: None)
+
+
+def test_publish_container_retries_then_succeeds():
+    """전파 지연('Media Not Found' 등)으로 발행이 즉시 실패해도 재시도로 성공한다."""
+    fake = _FakeRequests([
+        _FakeResp(400, {"error": {"message": "Media Not Found", "code": 24}}),
+        _FakeResp(200, {"id": "m1"}),
+    ])
+    _patch_publish_io(fake)
+    media_ids, permalink = publish.publish_chain(["글 하나"])
+    assert media_ids == ["m1"]
+    assert fake.publish_calls == 2  # 1회 실패 후 재시도 성공
+
+
+def test_publish_container_gives_up_after_attempts():
+    fake = _FakeRequests([
+        _FakeResp(400, {"error": {"code": 24}})
+    ] * publish.PUBLISH_ATTEMPTS)
+    _patch_publish_io(fake)
+    try:
+        publish.publish_chain(["글 하나"])
+        assert False, "실패해야 한다"
+    except RuntimeError as e:
+        assert "발행 실패 [1]" in str(e)
+    assert fake.publish_calls == publish.PUBLISH_ATTEMPTS
+
+
+def test_publish_chain_resumes_from_done_ids():
+    """부분 발행 재개: 기발행 글은 건너뛰고 첫 글에 답글로 이어 붙인다."""
+    fake = _FakeRequests([_FakeResp(200, {"id": "m3"})])
+    _patch_publish_io(fake)
+    progress = []
+    media_ids, _ = publish.publish_chain(
+        ["글1", "글2", "글3"], done_ids=["m1", "m2"],
+        on_progress=lambda ids: progress.append(list(ids)),
+    )
+    assert media_ids == ["m1", "m2", "m3"]
+    assert len(fake.container_calls) == 1          # 남은 1개만 새로 만든다
+    assert fake.container_calls[0]["reply_to_id"] == "m1"  # 체인 부모 유지
+    assert progress == [["m1", "m2", "m3"]]         # 진행분 콜백 호출됨
 
 
 # ---------- B5: 벤치마킹·후킹은 첫 집필에만 주입 ----------
