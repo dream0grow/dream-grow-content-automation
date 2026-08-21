@@ -47,8 +47,10 @@ AUTO_APPROVE_KEYWORD = (
 
 # 릴스(숏폼) 영상 생성 — Open Generative AI의 백엔드 게이트웨이 Muapi.ai 사용
 # (설치/키 발급: docs/open-generative-ai-setup.md). 키가 없으면 --dry-run만 가능.
+# 워크플로우가 미설정 시크릿을 빈 문자열로 넘기므로 `or` 폴백 필수 (#58과 같은 패턴 —
+# 빈 모델명이면 POST /api/v1/ 로 나가 404 "Not Found"가 났다).
 MUAPI_API_KEY = os.getenv("MUAPI_API_KEY", "")
-REELS_VIDEO_MODEL = os.getenv("DG_REELS_VIDEO_MODEL", "seedance-lite-t2v")
-REELS_VIDEO_RESOLUTION = os.getenv("DG_REELS_VIDEO_RESOLUTION", "720p")
+REELS_VIDEO_MODEL = os.getenv("DG_REELS_VIDEO_MODEL") or "seedance-lite-t2v"
+REELS_VIDEO_RESOLUTION = os.getenv("DG_REELS_VIDEO_RESOLUTION") or "720p"
 REELS_SCENE_SECONDS = int(os.getenv("DG_REELS_SCENE_SECONDS", "5") or "5")
 REELS_MAX_SCENES = int(os.getenv("DG_REELS_MAX_SCENES", "7") or "7")

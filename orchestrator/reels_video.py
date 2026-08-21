@@ -363,6 +363,8 @@ def run(script: str = "", topic: str = "", out_dir: str = "reels_out",
     if dry_run:
         log("🧪 dry-run — 영상 생성 생략, 장면/프롬프트만 저장")
     else:
+        log(f"🎥 모델 {config.REELS_VIDEO_MODEL} / 9:16 / {config.REELS_VIDEO_RESOLUTION} "
+            f"/ 장면당 {config.REELS_SCENE_SECONDS}초")
         clips = []
         for i, s in enumerate(scenes):
             log(f"🎬 [{i+1}/{len(scenes)}] {s['scene'][:40]}")
