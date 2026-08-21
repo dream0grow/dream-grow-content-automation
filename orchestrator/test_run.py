@@ -297,7 +297,7 @@ def test_publish_container_gives_up_after_attempts():
 
 
 def test_publish_chain_resumes_from_done_ids():
-    """부분 발행 재개: 기발행 글은 건너뛰고 첫 글에 답글로 이어 붙인다."""
+    """부분 발행 재개: 기발행 글은 건너뛰고 마지막 발행 글에 답글로 이어 붙인다."""
     fake = _FakeRequests([_FakeResp(200, {"id": "m3"})])
     _patch_publish_io(fake)
     progress = []
@@ -307,8 +307,26 @@ def test_publish_chain_resumes_from_done_ids():
     )
     assert media_ids == ["m1", "m2", "m3"]
     assert len(fake.container_calls) == 1          # 남은 1개만 새로 만든다
-    assert fake.container_calls[0]["reply_to_id"] == "m1"  # 체인 부모 유지
+    assert fake.container_calls[0]["reply_to_id"] == "m2"  # 순차 체인 부모 유지
     assert progress == [["m1", "m2", "m3"]]         # 진행분 콜백 호출됨
+
+
+def test_publish_chain_replies_to_previous_post():
+    """연속 글은 직전 글에 답글로 달려야 피드에서 1/N…N/N으로 엮인다.
+
+    전부 첫 글에 달면 Threads가 1/2·2/2로만 묶고 나머지는 접힌 댓글이 된다.
+    """
+    fake = _FakeRequests([
+        _FakeResp(200, {"id": "m1"}),
+        _FakeResp(200, {"id": "m2"}),
+        _FakeResp(200, {"id": "m3"}),
+    ])
+    _patch_publish_io(fake)
+    media_ids, _ = publish.publish_chain(["글1", "글2", "글3"])
+    assert media_ids == ["m1", "m2", "m3"]
+    assert "reply_to_id" not in fake.container_calls[0]      # 첫 글은 루트
+    assert fake.container_calls[1]["reply_to_id"] == "m1"    # 2번째 → 1번째
+    assert fake.container_calls[2]["reply_to_id"] == "m2"    # 3번째 → 2번째
 
 
 # ---------- B5: 벤치마킹·후킹은 첫 집필에만 주입 ----------

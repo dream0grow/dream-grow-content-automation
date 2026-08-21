@@ -115,10 +115,14 @@ def publish_chain(posts: list[str], done_ids: list[str] | None = None,
     건너뛰고 이어서 발행한다. on_progress(media_ids)는 글 하나가 발행될 때마다
     호출돼 진행분을 카드에 기록할 수 있다(재실행 시 중복 게시 방지).
 
+    각 글은 **직전 글**에 답글로 단다(순차 체인). 전부 첫 글에 달면 Threads가
+    체인 깊이를 2로 보고 1/2·2/2로만 묶고 나머지는 접힌 댓글이 된다 —
+    순차 체인이어야 피드에서 1/N…N/N 연속 글로 엮인다.
+
     Returns: (발행된 media_id 목록, 첫 글 permalink)
     """
     media_ids: list[str] = list(done_ids or [])
-    parent_id = media_ids[0] if media_ids else None
+    parent_id = media_ids[-1] if media_ids else None
     for i, text in enumerate(posts):
         if i < len(media_ids):
             continue  # 이미 발행된 글 — 재개 시 건너뛴다
@@ -139,8 +143,7 @@ def publish_chain(posts: list[str], done_ids: list[str] | None = None,
 
         media_id = _publish_container(container_id, i + 1)
         media_ids.append(media_id)
-        if i == 0:
-            parent_id = media_id
+        parent_id = media_id
         if on_progress:
             on_progress(media_ids)
         if i < len(posts) - 1:
