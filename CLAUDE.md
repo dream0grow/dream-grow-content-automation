@@ -200,6 +200,9 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - **남은 사용자 액션**: ① 브랜치 검토/머지 ② `docs/thumbnail-sheet-setup.md` 따라 서비스 계정
   만들고 `GSHEET_SA_JSON` 시크릿 등록 + 시트를 서비스 계정 이메일에 편집자 공유
   ③ 이후 시트에 키워드만 적으면 2시간 내 자동 처리 (또는 Run workflow 즉시 실행).
+- **대화형 스킬**: `.claude/skills/dreamgrow-thumbnail` — "썸네일 만들어줘"로 호출.
+  ①참조 이미지 파일명 확인(data/thumbnail_assets, 없으면 업로드 안내) ②리얼리즘 프롬프트 필수
+  ③벤치마킹 이미지 요청 → 생성·렌더·전송 → 피드백 반영 반복. 파이프라인과 같은 엔진 사용.
 - **다음 예정**: 썸네일 이미지 만들기 고도화 후 → **도입부 문장 생성** 단계 추가 (사용자 지시).
 
 ### 글감 카드 — 완성 원고를 스레드로 재구성하는 입구 (2026-08-19, 브랜치 `claude/child-sharing-behavior-wzu82g`) — ⬅️ 이번 세션 작업
