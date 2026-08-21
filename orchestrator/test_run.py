@@ -233,6 +233,84 @@ def test_split_posts_respects_separator():
     assert publish.split_posts(draft) == ["가나다", "라마바"]
 
 
+# ---------- 발행 회복력: threads_publish 재시도 + 부분 발행 재개 ----------
+
+class _FakeResp:
+    def __init__(self, status_code, payload):
+        self.status_code = status_code
+        self._payload = payload
+        self.text = str(payload)
+
+    def json(self):
+        return self._payload
+
+
+class _FakeRequests:
+    """publish가 부르는 requests.post/get을 흉내낸다. 큐에서 응답을 꺼내 준다."""
+
+    def __init__(self, publish_responses):
+        self.publish_responses = list(publish_responses)  # threads_publish 응답 큐
+        self.container_calls = []   # 컨테이너 생성 params 기록
+        self.publish_calls = 0
+        self._container_seq = 0
+
+    def post(self, url, params=None, timeout=None):
+        if url.endswith("/threads_publish"):
+            self.publish_calls += 1
+            return self.publish_responses.pop(0)
+        self._container_seq += 1
+        self.container_calls.append(dict(params or {}))
+        return _FakeResp(200, {"id": f"c{self._container_seq}"})
+
+    def get(self, url, params=None, timeout=None):
+        return _FakeResp(200, {"permalink": "https://threads.net/x"})
+
+
+def _patch_publish_io(fake):
+    publish.requests = fake
+    publish.time = types.SimpleNamespace(sleep=lambda s: None)
+
+
+def test_publish_container_retries_then_succeeds():
+    """전파 지연('Media Not Found' 등)으로 발행이 즉시 실패해도 재시도로 성공한다."""
+    fake = _FakeRequests([
+        _FakeResp(400, {"error": {"message": "Media Not Found", "code": 24}}),
+        _FakeResp(200, {"id": "m1"}),
+    ])
+    _patch_publish_io(fake)
+    media_ids, permalink = publish.publish_chain(["글 하나"])
+    assert media_ids == ["m1"]
+    assert fake.publish_calls == 2  # 1회 실패 후 재시도 성공
+
+
+def test_publish_container_gives_up_after_attempts():
+    fake = _FakeRequests([
+        _FakeResp(400, {"error": {"code": 24}})
+    ] * publish.PUBLISH_ATTEMPTS)
+    _patch_publish_io(fake)
+    try:
+        publish.publish_chain(["글 하나"])
+        assert False, "실패해야 한다"
+    except RuntimeError as e:
+        assert "발행 실패 [1]" in str(e)
+    assert fake.publish_calls == publish.PUBLISH_ATTEMPTS
+
+
+def test_publish_chain_resumes_from_done_ids():
+    """부분 발행 재개: 기발행 글은 건너뛰고 첫 글에 답글로 이어 붙인다."""
+    fake = _FakeRequests([_FakeResp(200, {"id": "m3"})])
+    _patch_publish_io(fake)
+    progress = []
+    media_ids, _ = publish.publish_chain(
+        ["글1", "글2", "글3"], done_ids=["m1", "m2"],
+        on_progress=lambda ids: progress.append(list(ids)),
+    )
+    assert media_ids == ["m1", "m2", "m3"]
+    assert len(fake.container_calls) == 1          # 남은 1개만 새로 만든다
+    assert fake.container_calls[0]["reply_to_id"] == "m1"  # 체인 부모 유지
+    assert progress == [["m1", "m2", "m3"]]         # 진행분 콜백 호출됨
+
+
 # ---------- B5: 벤치마킹·후킹은 첫 집필에만 주입 ----------
 
 def test_benchmark_and_hooks_only_in_first_draft(monkeypatch):
