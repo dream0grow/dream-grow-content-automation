@@ -110,6 +110,23 @@ class TestMuapi(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 rv.submit_video("p", "m", "720p", 5)
 
+    def test_empty_env_falls_back_to_default_model(self):
+        # 워크플로우가 미설정 시크릿을 빈 문자열로 넘겨도 기본 모델을 써야 한다
+        # (빈 모델명 → POST /api/v1/ → 404 회귀 방지)
+        import importlib
+        with mock.patch.dict("os.environ", {
+            "DG_REELS_VIDEO_MODEL": "",
+            "DG_REELS_VIDEO_RESOLUTION": "",
+            "DG_REELS_SCENE_SECONDS": "",
+            "DG_REELS_MAX_SCENES": "",
+        }):
+            cfg = importlib.reload(rv.config)
+            self.assertEqual(cfg.REELS_VIDEO_MODEL, "seedance-lite-t2v")
+            self.assertEqual(cfg.REELS_VIDEO_RESOLUTION, "720p")
+            self.assertEqual(cfg.REELS_SCENE_SECONDS, 5)
+            self.assertEqual(cfg.REELS_MAX_SCENES, 7)
+        importlib.reload(rv.config)  # 원상 복구
+
 
 class TestMerge(unittest.TestCase):
     def test_merge_command(self):
