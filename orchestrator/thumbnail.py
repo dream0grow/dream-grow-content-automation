@@ -303,7 +303,7 @@ html,body { width:1280px; height:720px; }
   font-size:V2_LINE_PXpx; color:#fff; letter-spacing:0; line-height:1.18;
   -webkit-text-stroke:9px #000; paint-order:stroke fill; word-break:keep-all; }
 .linev2.small { font-size:V2_LINE_PX_SMALLpx; }
-.linev2.yellow { color:V2_YELLOW; }
+.linev2 .hl { color:V2_YELLOW; }
 """.replace("KICKER_PX", str(KICKER_PX)).replace("KICKER_COLOR", KICKER_COLOR) \
    .replace("V2_LINE_PX_SMALL", str(V2_LINE_PX_SMALL)).replace("V2_LINE_PX", str(V2_LINE_PX)) \
    .replace("V2_YELLOW", V2_YELLOW) \
@@ -322,14 +322,14 @@ def thumb_html(pick: dict, bg: str) -> str:
     photo_div = (f'<div class="photo" style="background-image:{bg}"></div>'
                  if bg else '<div class="nophoto"></div>')
     if (pick.get("style") or "").strip() == "v2":
-        # v2: 검은고딕 중앙 정렬, 1줄 흰색 + 2줄 노란색 전체, 두꺼운 검은 외곽선 (킥커 없음)
-        def plain(t):
-            return re.sub(r"==(.+?)==", r"\1", (t or "").strip()).replace("**", "")
-        p1, p2 = plain(line1), plain(line2)
-        size_cls = " small" if max(len(p1), len(p2)) > 11 else ""
-        lines = f'<div class="linev2{size_cls}">{_html.escape(p1)}</div>'
-        if p2:
-            lines += f'<div class="linev2 yellow{size_cls}">{_html.escape(p2)}</div>'
+        # v2(확정 기본): 검은고딕 중앙 정렬, 흰색 본문 + =="강조"==만 노란색(큰따옴표 포함),
+        # 두꺼운 검은 외곽선, 킥커 없음
+        def plain_len(t):
+            return len(re.sub(r"==(.+?)==", r"\1", (t or "").strip()))
+        size_cls = " small" if max(plain_len(line1), plain_len(line2)) > 11 else ""
+        lines = f'<div class="linev2{size_cls}">{_rich(line1)}</div>'
+        if line2:
+            lines += f'<div class="linev2{size_cls}">{_rich(line2)}</div>'
         return (f"<!DOCTYPE html><html><head><meta charset='utf-8'><style>{_css()}</style>"
                 f"</head><body><div class='thumb'>{photo_div}<div class='scrim'></div>"
                 f"<div class='wrapv2'>{lines}</div></div></body></html>")
@@ -903,9 +903,16 @@ def run_sheet(audience: str, expand_count: int, out: Path,
                     log(f"  참조 이미지 {len(assets)}장 반영 (data/thumbnail_assets)")
                 else:
                     log("  참조 이미지 편집 실패 — 일반 생성으로 진행")
-            # v1(도현체 확정 스타일) + v2(검은고딕 중앙, 가독성 비교) 두 버전 렌더
-            spec_v2 = dict(spec, style="v2")
-            paths = render([spec, spec_v2], out, local_imgs,
+            # 스타일: v2(검은고딕 중앙, =="강조"== 노란색) 확정 기본.
+            # DG_THUMB_STYLE=v1(도현체) 또는 both(비교 2장)로 변경 가능.
+            style = os.getenv("DG_THUMB_STYLE", "v2").strip().lower()
+            if style == "both":
+                specs = [dict(spec, style="v2"), spec]
+            elif style == "v1":
+                specs = [spec]
+            else:
+                specs = [dict(spec, style="v2")]
+            paths = render(specs, out, local_imgs,
                            prefix=f"final_{_file_token(topic)[:16] or 'x'}")
             rels = [save_render_to_vault(topic if i == 0 else f"{topic} v{i + 1}",
                                          p, p.with_suffix(".jpg"))
@@ -929,7 +936,7 @@ def run_sheet(audience: str, expand_count: int, out: Path,
             gsheet.color_cells(rownum, [cols["image_develop"], cols["made_title"]], DONE_BLUE)
         except Exception as e:
             log(f"  행{rownum} 완료색(파랑) 표시 실패(렌더는 정상): {e}")
-        labels = ("v1 도현체", "v2 검은고딕")
+        labels = [f"{s.get('style') or 'v1'}" for s in specs]
         sent = 0
         for p, rel, lab in zip(paths, rels, labels):
             sent += telegram_notify.send_photo(

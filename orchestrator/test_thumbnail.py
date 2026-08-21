@@ -349,13 +349,14 @@ def test_find_assets(tmp_path, monkeypatch):
 
 
 def test_thumb_html_v2_style():
-    pick = dict(PICK, style="v2")
+    pick = dict(PICK, style="v2", line1='=="고전"==을 만화책처럼')
     html = thumbnail.thumb_html(pick, bg="")
     assert "class='wrapv2'" in html and "Black Han Sans" in html
-    assert "==" not in html and "고전을 만화책처럼" in html   # v2는 강조 마커 없이 평문
-    assert 'class="linev2 yellow"' in html                    # 2줄은 노란색 전체
-    assert 'class="kicker"' not in html                       # v2는 킥커 없음
+    assert '<span class="hl">&quot;고전&quot;</span>' in html  # 큰따옴표 포함 노란 강조
+    assert 'class="linev2 yellow"' not in html                 # 전체 노란 줄 폐지
+    assert 'class="kicker"' not in html                        # v2는 킥커 없음
     assert f"font-size:{thumbnail.V2_LINE_PX}px" in html
+    assert ".linev2 .hl { color:#ffd400" in html               # 강조 노란색
 
 
 def test_find_assets_flat_file(tmp_path, monkeypatch):
