@@ -291,6 +291,21 @@ def read_latest_section(page_id: str, heading_prefix: str) -> str:
     return latest.strip()
 
 
+def read_final_draft(page_id: str, fmt: str) -> str:
+    """발행/문체학습이 쓸 최종 원고 — 2차안이 있으면 2차안, 없으면 초안.
+
+    rubric_review가 만든 '✍️ 2차안'(사람이 직접 고치는 최신본 포함)이
+    '✍️ 초안'보다 우선한다. DG-2026-0033이 2차안을 두고 1차 초안으로
+    발행된 실사례의 수리.
+    """
+    return (
+        read_latest_section(page_id, f"✍️ 2차안 ({fmt})")
+        or read_latest_section(page_id, "✍️ 2차안")
+        or read_latest_section(page_id, f"✍️ 초안 ({fmt})")
+        or read_latest_section(page_id, "✍️ 초안")
+    )
+
+
 def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
     """heading이 주어진 접두사 중 하나로 시작하는 섹션들만 골라 읽는다(B3).
 
