@@ -118,6 +118,22 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
+### 텔레그램 답장 대화/질문 감지 — 수정 지시 오인 방지 (2026-08-22, 브랜치 `claude/telegram-ai-conversation-uujj1k`) — ⬅️ 이번 세션 작업
+
+사용자가 봇을 대화형 AI로 알고 "이거 파이프라인으로 만들어줘"라고 답장 → 웹훅이 수정 지시
+피드백(pending)으로 저장 → 발행 승인 대기이던 DG-2026-0048이 불필요하게 재초안될 뻔한 것을 수리.
+- **정리**: 해당 피드백 노트를 `status: answered`로 마감(재초안 차단), 질문이 후보로 저장된
+  `_system/candidates/telegram/` 노트 삭제.
+- **재발 방지(`script_feedback.py`)**: 피드백 반영 전에 `_triage_feedback`(`prompts.FEEDBACK_TRIAGE`,
+  `llm.call_json`)이 메시지를 revise/chat으로 판정. chat(질문·인사·시스템 문의·이미 완료된 요청·모호한
+  요청 — 애매하면 chat)이면 원고를 고치지 않고 카드 상태를 근거로 텔레그램 답장(💬) 후 노트를
+  `answered`로 마감 + 답변을 노트 본문에 기록. 판정 실패 시 기존 동작(revise) 유지, dry-run은 LLM 미호출.
+- 테스트 4종 신규(대화 답장, 카드 디큐 방지, 판정 실패 폴백, dry-run). 전체 127종 통과.
+- 봇의 "후보 저장"(candidates) 쪽은 yt_research 저장소 웹훅 소관이라 이 저장소에선 못 고침 —
+  일반 메시지(답장 아님)는 여전히 후보로 저장된다.
+- **남은 사용자 액션**: ① 이 브랜치를 빨리 머지해야 다음 cron이 DG-2026-0048을 재초안하지 않음
+  ② DG-2026-0048 발행은 카드 frontmatter `approval_status: approved`로.
+
 ### Open Generative AI 설치 + 릴스(숏폼) 영상 자동 생성 (2026-08-19, 브랜치 `claude/open-generative-ai-setup-jsd2hd`) — ⬅️ 이번 세션 작업
 
 사용자가 요청한 https://github.com/Anil-matcha/Open-Generative-AI (오픈소스 AI 영상 스튜디오,

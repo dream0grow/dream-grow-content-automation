@@ -334,23 +334,79 @@ def _apply_card_revision(fb: dict, card_path: Path, dry_run: bool) -> str:
     return "applied"
 
 
+def _feedback_context(card_path: Path | None, target_path: Path | None) -> str:
+    """triage 프롬프트에 넣을 대상 요약 — 답장이 카드 상태를 근거로 답할 수 있게."""
+    if card_path is not None:
+        meta, _ = parse_frontmatter(
+            card_path.read_text(encoding="utf-8", errors="ignore"))
+        return (
+            f"파이프라인 카드: {card_path.name}\n"
+            f"- 주제: {meta.get('topic', '')}\n"
+            f"- stage: {meta.get('stage', '')}, status: {meta.get('status', '')}, "
+            f"approval_status: {meta.get('approval_status', '')}, "
+            f"review_status: {meta.get('review_status', '')}\n"
+            "- 이 카드는 자동 파이프라인(리서치→키워드→브리프→초안→검수)의 산출물이다. "
+            "stage가 approval이면 초안이 완성돼 사용자의 발행 승인만 남은 상태다."
+        )
+    if target_path is not None:
+        return f"원고 파일: {target_path.name} (05 리뷰/대기 폴더의 완성 원고)"
+    return "대상 정보 없음"
+
+
+def _triage_feedback(fb: dict, context: str) -> dict:
+    """메시지가 '수정 지시'인지 '대화/질문'인지 판정. 실패 시 revise(기존 동작 유지)."""
+    try:
+        data = llm.call_json(prompts.FEEDBACK_TRIAGE.format(
+            context=context, message=fb["instruction"][:2000]))
+        if (str(data.get("kind", "")).strip() == "chat"
+                and str(data.get("reply") or "").strip()):
+            return {"kind": "chat", "reply": str(data["reply"]).strip()}
+    except Exception as e:  # noqa: BLE001 — 판정 실패가 핑퐁을 막으면 안 됨
+        log_line(f"피드백 판정 실패(수정 지시로 간주): {type(e).__name__}: {e}")
+    return {"kind": "revise", "reply": ""}
+
+
+def _answer_feedback(fb: dict, reply: str, dry_run: bool) -> str:
+    """대화/질문 피드백 — 원고를 고치는 대신 텔레그램으로 답하고 노트를 마감한다."""
+    if dry_run:
+        log_line(f"[계획] 대화 답장: {fb['path'].name}", dry_run=True)
+        return "planned"
+    _mark_feedback(fb, "answered",
+                   "수정 지시가 아닌 대화 메시지 — 텔레그램으로 답변", dry_run=False)
+    # 답변을 노트 본문에도 남겨 나중에 무엇이라 답했는지 추적할 수 있게 한다.
+    with fb["path"].open("a", encoding="utf-8") as f:
+        f.write(f"\n## 🤖 답변 — {now_kst().strftime('%Y-%m-%d %H:%M')}\n\n"
+                f"{reply}\n")
+    telegram_notify.send(f"💬 {reply}")
+    log_line(f"피드백 대화 답장: {fb['path'].name}")
+    return "answered"
+
+
 def apply_one(fb: dict, dry_run: bool) -> str:
     """피드백 1건을 대상(원고 파일 또는 파이프라인 카드)에 반영한다."""
     card_path = _resolve_card(fb["target"])
+    target_path = None
+    if card_path is None:
+        target_path = _resolve_target(fb["target"])
+        if target_path is None:
+            _mark_feedback(fb, "error", f"대상 원고 없음: {fb['target']}", dry_run)
+            log_line(f"피드백 반영 실패(대상 없음): {fb['target']}", dry_run=dry_run)
+            return "unresolved"
+        # 열람 사본(스레드_/뉴스레터_ — frontmatter content_id 보유)이면 원본 카드의
+        # 수정 요청으로 라우팅한다 — 사본을 고쳐 봐야 발행에 반영되지 않기 때문.
+        meta, _ = parse_frontmatter(
+            target_path.read_text(encoding="utf-8", errors="ignore"))
+        linked_card = _resolve_card(str(meta.get("content_id") or ""))
+        if linked_card is not None:
+            card_path = linked_card
+    # 대상 확인 후, 반영 전에 메시지 종류부터 판정한다 — 질문·대화를 수정 지시로
+    # 오인해 멀쩡한 원고를 재초안하는 것을 막는다. (dry-run은 LLM을 부르지 않는다)
+    if fb["instruction"] and not dry_run:
+        triage = _triage_feedback(fb, _feedback_context(card_path, target_path))
+        if triage["kind"] == "chat":
+            return _answer_feedback(fb, triage["reply"], dry_run)
     if card_path is not None:
         return _apply_card_revision(fb, card_path, dry_run)
-    target_path = _resolve_target(fb["target"])
-    if target_path is None:
-        _mark_feedback(fb, "error", f"대상 원고 없음: {fb['target']}", dry_run)
-        log_line(f"피드백 반영 실패(대상 없음): {fb['target']}", dry_run=dry_run)
-        return "unresolved"
-    # 열람 사본(스레드_/뉴스레터_ — frontmatter content_id 보유)이면 원본 카드의
-    # 수정 요청으로 라우팅한다 — 사본을 고쳐 봐야 발행에 반영되지 않기 때문.
-    meta, _ = parse_frontmatter(
-        target_path.read_text(encoding="utf-8", errors="ignore"))
-    linked_card = _resolve_card(str(meta.get("content_id") or ""))
-    if linked_card is not None:
-        return _apply_card_revision(fb, linked_card, dry_run)
     if not fb["instruction"]:
         _mark_feedback(fb, "error", "수정 지시 없음", dry_run)
         return "empty"
