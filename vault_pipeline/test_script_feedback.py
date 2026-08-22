@@ -76,6 +76,9 @@ def vault(tmp_path, monkeypatch):
     monkeypatch.setattr(sf.telegram_notify, "send",
                         lambda text: sent.append(text) or True)
     monkeypatch.setattr(llm, "call_writing", lambda *a, **k: REVISED)
+    # 기본은 '수정 지시' 판정 — 기존 반영 동작을 그대로 검증한다.
+    monkeypatch.setattr(llm, "call_json",
+                        lambda *a, **k: {"kind": "revise", "reply": ""})
     return {"root": tmp_path, "script_dir": script_dir, "fb_dir": fb_dir,
             "sent": sent}
 
@@ -235,6 +238,73 @@ def test_apply_card_target_not_found_falls_to_error(vault):
     counts = sf.apply_pending_feedback(dry_run=False)
     assert counts.get("unresolved") == 1
     assert "status: error" in fb.read_text(encoding="utf-8")
+
+
+# ---------- 대화/질문 답장 — 수정 지시 오인 방지 ----------
+
+CHAT = {"kind": "chat", "reply": "이 원고는 이미 파이프라인이 만든 초안이라 발행 승인만 남았습니다."}
+
+
+def test_chat_feedback_answers_instead_of_revising(vault, monkeypatch):
+    # 봇을 대화 상대로 알고 보낸 메시지는 원고를 고치지 않고 텔레그램으로 답한다.
+    monkeypatch.setattr(llm, "call_json", lambda *a, **k: CHAT)
+    monkeypatch.setattr(llm, "call_writing",
+                        lambda *a, **k: (_ for _ in ()).throw(
+                            AssertionError("대화 메시지에 수정 LLM을 불렀다")))
+    counts = sf.apply_pending_feedback(dry_run=False)
+    assert counts.get("answered") == 1
+    # 원고는 원문 그대로.
+    script = (vault["script_dir"] / "원고_YT롱폼_수학_초등수학.md").read_text(
+        encoding="utf-8")
+    assert "구독과 좋아요" in script
+    # 노트는 answered로 마감되고(재처리 방지) 답변이 본문에 남는다.
+    fb = list(vault["fb_dir"].glob("*.md"))[0].read_text(encoding="utf-8")
+    assert "status: answered" in fb
+    assert "발행 승인만 남았습니다" in fb
+    # 텔레그램으로 답장이 나간다.
+    assert any(m.startswith("💬") for m in vault["sent"])
+    # 두 번째 실행은 pending이 없어 아무것도 안 한다.
+    assert sf.apply_pending_feedback(dry_run=False) == {}
+
+
+def test_chat_feedback_on_card_does_not_requeue(vault, monkeypatch):
+    # 발행 승인 대기 카드에 온 대화 메시지가 revision_requested로 디큐되면 안 된다.
+    active = vault["root"] / "파이프라인" / "활성"
+    active.mkdir(parents=True)
+    card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
+    card.write_text(CARD_FM, encoding="utf-8")
+    for p in vault["fb_dir"].glob("*.md"):
+        p.unlink()
+    fb = vault["fb_dir"] / "2026-08-22 1133 DG-2026-0001 피드백.md"
+    fb.write_text(CARD_FEEDBACK_FM.replace(
+        "도입을 질문으로 시작하고 교실 사례를 하나 넣어주세요.",
+        "이거 파이프라인으로 만들어줘"), encoding="utf-8")
+    monkeypatch.setattr(llm, "call_json", lambda *a, **k: CHAT)
+
+    counts = sf.apply_pending_feedback(dry_run=False)
+
+    assert counts.get("answered") == 1
+    text = card.read_text(encoding="utf-8")
+    assert "approval_status: requested" in text      # 카드 상태 보존
+    assert "📝 수정 요청" not in text
+    assert "status: answered" in fb.read_text(encoding="utf-8")
+
+
+def test_triage_failure_falls_back_to_revise(vault, monkeypatch):
+    # 판정 LLM이 죽어도 핑퐁은 기존 동작(수정 반영)으로 계속된다.
+    monkeypatch.setattr(llm, "call_json",
+                        lambda *a, **k: (_ for _ in ()).throw(ValueError("죽음")))
+    counts = sf.apply_pending_feedback(dry_run=False)
+    assert counts.get("applied") == 1
+
+
+def test_dry_run_skips_triage_llm(vault, monkeypatch):
+    # dry-run은 판정 LLM조차 부르지 않는다(키·과금 없이 동작 확인).
+    monkeypatch.setattr(llm, "call_json",
+                        lambda *a, **k: (_ for _ in ()).throw(
+                            AssertionError("dry-run에서 LLM 호출")))
+    counts = sf.apply_pending_feedback(dry_run=True)
+    assert counts.get("planned") == 1
 
 
 # ---------- 알림 확대: 스레드/릴스 등 전 형식 + 백로그 폭주 방지 ----------
