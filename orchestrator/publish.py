@@ -170,7 +170,7 @@ def _publish_newsletter(page_id: str) -> bool:
     AUTO_SEND가 꺼져 초안만 생성된 경우도 sent=False라 False를 반환한다.
     """
     from orchestrator import stibee
-    draft = store.read_latest_section(page_id, "✍️ 초안 (newsletter)")
+    draft = store.read_final_draft(page_id, "newsletter")
     if not draft.strip():
         return False
     if not stibee.available():
@@ -247,10 +247,7 @@ def handle_publish(card: dict):
         store.update_card(page_id, status="needs_human")
         return
 
-    draft = (
-        store.read_latest_section(page_id, "✍️ 초안 (thread)")
-        or store.read_latest_section(page_id, "✍️ 초안")
-    )
+    draft = store.read_final_draft(page_id, "thread")
     if not draft.strip():
         raise RuntimeError("카드에서 '✍️ 초안' 섹션을 찾지 못했습니다")
 

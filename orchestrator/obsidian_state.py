@@ -291,6 +291,35 @@ def read_latest_section(page_id: str, heading_prefix: str) -> str:
     return latest.strip()
 
 
+def read_final_draft(page_id: str, fmt: str) -> str:
+    """발행/문체학습이 쓸 최종 원고 — 차수가 가장 높은 원고 섹션.
+
+    '✍️ 초안'(=1차) < '✍️ 2차안' < '3차 수정' … 처럼 헤딩의 'N차' 숫자가
+    큰 섹션이 항상 이긴다. 사람이 손으로 추가한 'N차 수정' 류 섹션도
+    (✍️ 없이도) 원고로 인식한다. 같은 차수면 뒤에 적힌 섹션이 최신.
+    DG-2026-0033이 2차안을 두고 1차 초안으로 발행된 실사례의 수리.
+    """
+    other_fmts = {"thread", "newsletter"} - {fmt}
+    best_key, best_text = None, ""
+    for idx, sec in enumerate(
+        re.split(r"^## ", read_sections(page_id), flags=re.MULTILINE)
+    ):
+        sec = sec.strip()
+        if not sec:
+            continue
+        head, _, text = sec.partition("\n")
+        # 원고 섹션 판별: ✍️로 시작하거나 'N차안'/'N차 수정' 표기가 있는 헤딩
+        if not (head.startswith("✍️") or re.search(r"\d+\s*차\s*(수정|안)", head)):
+            continue
+        if any(f"({o}" in head for o in other_fmts):
+            continue  # 다른 채널 전용 원고는 제외
+        m = re.search(r"(\d+)\s*차", head)
+        key = (int(m.group(1)) if m else 1, idx)   # '초안'은 1차로 취급
+        if best_key is None or key > best_key:
+            best_key, best_text = key, text.strip()
+    return best_text
+
+
 def read_sections_by_prefix(page_id: str, *prefixes: str) -> str:
     """heading이 주어진 접두사 중 하나로 시작하는 섹션들만 골라 읽는다(B3).
 

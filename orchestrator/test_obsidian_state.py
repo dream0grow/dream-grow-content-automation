@@ -129,6 +129,25 @@ def test_format_aliases_normalized_on_read(vault):
     assert youtube_script.wants_youtube(read())
 
 
+def test_read_final_draft_prefers_2nd_draft(vault):
+    """발행 원고는 '✍️ 2차안'이 있으면 2차안이다.
+
+    DG-2026-0033이 사람이 고친 2차안을 두고 1차 초안으로 발행된 실사례 회귀 테스트.
+    """
+    pid = st.create_card("그림일기 주제", format="thread")
+    st.append_section(pid, "✍️ 초안 (thread)", "1차 초안 본문")
+    assert st.read_final_draft(pid, "thread") == "1차 초안 본문"
+    st.append_section(pid, "✍️ 2차안 (thread)", "2차안 본문 (사람 수정본)")
+    assert st.read_final_draft(pid, "thread") == "2차안 본문 (사람 수정본)"
+    # 사람이 손으로 추가한 3차 섹션(✍️ 없이도)이 최우선 — 문체 학습도 이걸 본다
+    st.append_section(pid, "3차 수정", "3차 최종 본문")
+    assert st.read_final_draft(pid, "thread") == "3차 최종 본문"
+    # 다른 채널 전용 원고는 끼어들지 않는다
+    st.append_section(pid, "✍️ 4차안 (newsletter)", "뉴스레터 원고")
+    assert st.read_final_draft(pid, "thread") == "3차 최종 본문"
+    assert st.read_final_draft(pid, "newsletter") == "뉴스레터 원고"
+
+
 def test_state_facade_is_obsidian(vault):
     """파사드는 옵시디언 볼트 백엔드 하나로 고정됐다 (노션 철수)."""
     from orchestrator import state

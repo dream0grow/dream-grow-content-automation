@@ -34,7 +34,7 @@ def learn_from_edits(page_id: str, channel: str) -> int:
     Returns: 저장된 패턴 수 (수정이 없거나 학습 불가면 0)
     """
     ai_original = store.read_latest_section(page_id, f"🗄️ AI 원본 ({channel})")
-    edited = store.read_latest_section(page_id, f"✍️ 초안 ({channel})")
+    edited = store.read_final_draft(page_id, channel)
     if not ai_original.strip() or not edited.strip():
         return 0
     if ai_original.strip() == edited.strip():
