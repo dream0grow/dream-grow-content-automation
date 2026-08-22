@@ -87,6 +87,19 @@ def _dump(meta: dict, body: str) -> str:
     return f"---\n{fm}\n---\n{body if body.startswith(chr(10)) else chr(10) + body}"
 
 
+# 사람이 손으로 적는 format 값의 흔한 변형 — 카드 읽기 시 정식 값으로 정규화한다.
+# (DG-2026-0033이 `threads`로 적혀 발행 분기에서 빠져 needs_human으로 멈춘 사례)
+_FORMAT_ALIASES = {
+    "threads": "thread", "스레드": "thread", "쓰레드": "thread",
+    "newsletters": "newsletter", "뉴스레터": "newsletter",
+}
+
+
+def _norm_format(raw: str) -> str:
+    toks = [t.strip().lower() for t in str(raw or "").split(",") if t.strip()]
+    return ", ".join(dict.fromkeys(_FORMAT_ALIASES.get(t, t) for t in toks))
+
+
 def _card_from_file(path: Path) -> dict:
     meta, _ = _split(path.read_text(encoding="utf-8", errors="ignore"))
     get = lambda k: str(meta.get(k, "") or "")
@@ -99,7 +112,7 @@ def _card_from_file(path: Path) -> dict:
         "stage": get("stage"),
         "status": get("status"),
         "audience": get("audience"),
-        "format": get("format"),
+        "format": _norm_format(get("format")),
         "priority": get("priority"),
         "approval_status": get("approval_status"),
         "review_status": get("review_status"),

@@ -113,6 +113,22 @@ def test_create_card_new_naming_keeps_pipeline_working(vault):
     assert card["format"] == "thread"                  # format이 frontmatter에 반영
 
 
+def test_format_aliases_normalized_on_read(vault):
+    """사람이 `threads`처럼 변형으로 적어도 카드 읽기에서 정식 값으로 정규화된다.
+
+    DG-2026-0033이 `format: threads`로 발행 분기에서 빠져 멈춘 실사례 회귀 테스트.
+    """
+    pid = st.create_card("그림일기 숙제 앞에서 멍한 아이", format="thread")
+    read = lambda: st._card_from_file(st._resolve(pid))["format"]
+    st.update_card(pid, format="threads")
+    assert read() == "thread"
+    st.update_card(pid, format="Threads, 뉴스레터")
+    assert read() == "thread, newsletter"
+    st.update_card(pid, format="유튜브")                # 유튜브 별칭은 그대로 통과
+    from orchestrator import youtube_script
+    assert youtube_script.wants_youtube(read())
+
+
 def test_state_facade_is_obsidian(vault):
     """파사드는 옵시디언 볼트 백엔드 하나로 고정됐다 (노션 철수)."""
     from orchestrator import state
