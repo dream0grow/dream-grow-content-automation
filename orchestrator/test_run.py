@@ -462,3 +462,103 @@ def test_dialogue_source_material_kept_across_rewrites(monkeypatch):
     for p in writer_prompts:
         assert "글감원문QRS" in p
     assert "벤치마킹ABC" not in writer_prompts[1]  # 벤치마킹은 여전히 첫 집필만
+
+
+# ---------- 발행 예약 (publish_at) ----------
+
+def _future_kst(minutes=90):
+    from datetime import datetime, timedelta
+    return (datetime.now(run.KST) + timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M")
+
+
+def _past_kst(minutes=90):
+    return _future_kst(-minutes)
+
+
+def test_publish_waits_until_scheduled_time(monkeypatch):
+    """publish_at이 미래면 발행하지 않고 상태도 건드리지 않는다(다음 cron에서 재시도)."""
+    st = FakeState()
+    _patch(st)
+    called = []
+    monkeypatch.setattr(publish, "handle_publish", lambda card: called.append(card))
+    card = {"page_id": "p1", "content_id": "DG-1", "stage": "publish_ready",
+            "status": "queued", "publish_at": _future_kst()}
+    run.handle_publish(card)
+    assert not called
+    assert not st.updates and not st.notes
+
+
+def test_publish_fires_after_scheduled_time(monkeypatch):
+    st = FakeState()
+    _patch(st)
+    called = []
+    monkeypatch.setattr(publish, "handle_publish", lambda card: called.append(card))
+    card = {"page_id": "p1", "content_id": "DG-1", "publish_at": _past_kst()}
+    run.handle_publish(card)
+    assert called
+
+
+def test_publish_without_schedule_fires_immediately(monkeypatch):
+    """publish_at이 비어 있으면 기존처럼 즉시 발행(회귀 방지)."""
+    st = FakeState()
+    _patch(st)
+    called = []
+    monkeypatch.setattr(publish, "handle_publish", lambda card: called.append(card))
+    run.handle_publish({"page_id": "p1", "content_id": "DG-1", "publish_at": ""})
+    assert called
+
+
+def test_publish_invalid_schedule_dequeues_and_notifies(monkeypatch):
+    """publish_at 형식 오류는 조용히 무한 보류하지 않고 needs_human + 통지."""
+    st = FakeState()
+    _patch(st)
+    called = []
+    monkeypatch.setattr(publish, "handle_publish", lambda card: called.append(card))
+    card = {"page_id": "p1", "content_id": "DG-1", "publish_at": "내일 아침"}
+    run.handle_publish(card)
+    assert not called
+    merged = _last_update(st, "p1")
+    assert merged.get("status") == "needs_human"
+    assert st.notes and "publish_at" in st.notes[-1][1]
+
+
+def test_final_approved_future_schedule_notifies():
+    st = FakeState()
+    _patch(st)
+    when = _future_kst()
+    card = {"page_id": "p1", "content_id": "DG-1", "review_status": "approved",
+            "publish_at": when}
+    run.handle_final_approved(card)
+    merged = _last_update(st, "p1")
+    assert merged.get("stage") == "publish_ready"
+    assert st.notes and when in st.notes[-1][1]  # 예약 안내 통지
+
+
+def test_final_approved_stamps_default_publish_time(monkeypatch):
+    """DG_DEFAULT_PUBLISH_TIME이 설정되면 publish_at이 빈 카드에 다음 도래 시각을 기입."""
+    st = FakeState()
+    _patch(st)
+    monkeypatch.setattr(run, "DEFAULT_PUBLISH_TIME", "08:00")
+    card = {"page_id": "p1", "content_id": "DG-1", "review_status": "approved",
+            "publish_at": ""}
+    run.handle_final_approved(card)
+    merged = _last_update(st, "p1")
+    assert merged.get("stage") == "publish_ready"
+    stamped = merged.get("publish_at", "")
+    assert stamped.endswith("08:00")
+    assert run._parse_publish_at(stamped) is not None
+
+
+def test_next_default_publish_at_rolls_to_tomorrow():
+    from datetime import datetime
+    now = datetime(2026, 8, 24, 9, 30, tzinfo=run.KST)
+    orig = run.DEFAULT_PUBLISH_TIME
+    try:
+        run.DEFAULT_PUBLISH_TIME = "08:00"
+        assert run._next_default_publish_at(now) == "2026-08-25 08:00"
+        run.DEFAULT_PUBLISH_TIME = "10:00"
+        assert run._next_default_publish_at(now) == "2026-08-24 10:00"
+        run.DEFAULT_PUBLISH_TIME = "잘못됨"
+        assert run._next_default_publish_at(now) == ""
+    finally:
+        run.DEFAULT_PUBLISH_TIME = orig

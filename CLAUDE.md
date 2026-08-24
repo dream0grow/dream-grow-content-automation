@@ -86,7 +86,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 선택: `DG_VAULT_ROOT`(기본 `vault/`), `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`(알림),
 `MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
-`DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DAILY_TOPIC_COUNT`(기본 1),
+`DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DEFAULT_PUBLISH_TIME`(HH:MM KST 발행 예약 기본값 — orchestrator.yml에서 기본 `21:00`),
+`DG_DAILY_TOPIC_COUNT`(기본 1),
 `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모"),
 `MUAPI_API_KEY`(릴스 영상 생성 — muapi.ai)/`DG_REELS_VIDEO_MODEL`(기본 `seedance-lite-t2v`)/`DG_REELS_VIDEO_RESOLUTION`(기본 720p)/`DG_REELS_MAX_SCENES`(기본 7)
 
@@ -104,6 +105,9 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   (모든 재작성 라운드에 글감 유지). 이후 승인·발행 게이트는 일반 카드와 동일.
 - **키워드 승인**: 키워드 섹션 확인 → `approved_keyword`에 키워드(또는 부모 고민 문장) 입력 + `approval_status: approved`
 - **발행 승인**: 초안/검수 확인 → `review_status: approved`이면 `approval_status: approved` → 자동 발행
+- **발행 예약**: 승인하면서 `publish_at`에 `YYYY-MM-DD HH:MM`(KST)을 적으면 그 시각 이후 첫
+  cron 실행(30분 주기)에서 발행. 비우면 즉시 발행. `DG_DEFAULT_PUBLISH_TIME`(HH:MM)을 설정하면
+  publish_at이 빈 카드 승인 시 다음 도래 시각을 자동 기입(카드에서 수정/삭제 가능).
 - **수정 요청**: 카드 `📝 수정 요청` 섹션에 지시 적고 `approval_status: revision_requested` → 재초안
 - **orchestrator 수동 실행**: GitHub Actions 탭 → orchestrator → Run workflow (Claude는 권한상 직접 실행 불가, 사용자가 클릭)
 - **대량 검토 생성**: `DG_AUTO_APPROVE_KEYWORD=true` → 키워드 자동 채택 → 초안까지 자동 (발행만 사람)
@@ -118,7 +122,26 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 텔레그램 답장 대화/질문 감지 — 수정 지시 오인 방지 (2026-08-22, 브랜치 `claude/telegram-ai-conversation-uujj1k`) — ⬅️ 이번 세션 작업
+### 발행 예약 시간 (2026-08-24, 브랜치 `claude/publish-schedule-time-abjf89`) — ⬅️ 이번 세션 작업
+
+발행 승인 후 **원하는 시각에 발행**되도록 예약 게이트를 추가했다.
+- **frontmatter `publish_at`** (KST, `YYYY-MM-DD HH:MM`): 승인 시 함께 적으면 `handle_publish`가
+  그 시각 전엔 발행을 보류(상태 무변경, 다음 cron 재확인). 시각 도래 후 첫 실행에서 발행.
+  형식 오류는 조용히 방치하지 않고 `needs_human` + 텔레그램 통지(고치고 status=queued로 복귀).
+- **`DG_DEFAULT_PUBLISH_TIME`**(HH:MM): 설정하면 승인 시 publish_at이 빈 카드에
+  다음 도래 시각을 자동 기입(카드에 보여 사람이 수정/삭제 가능).
+  **orchestrator.yml에 기본 `21:00`(저녁 9시)로 배선** — 시크릿 `DG_DEFAULT_PUBLISH_TIME`으로
+  바꾸고, 즉시 발행으로 되돌리려면 시크릿에 `off` 등 형식 밖 값을 넣는다.
+- 예약이 걸리면 승인 시점에 "⏰ 발행 예약 완료 — {시각} 이후 자동 발행" 텔레그램 통지.
+  승인 요청 안내문·초안 완성 알림에도 예약 방법 추가.
+- 코드: `run.py`(`_publish_due`/`_parse_publish_at`/`_next_default_publish_at`, `handle_final_approved`·
+  `handle_publish` 게이트), `obsidian_state.py`(publish_at 필드), `config.py`. 테스트 7종 신규, 전체 136종 통과.
+- 참고: DG-2026-0023은 사용자가 frontmatter 승인(approval_status/review_status=approved)으로
+  2026-08-24 정상 발행 완료(Threads). 승인 조작법이 맞음을 확인.
+- 사용자 확정(2026-08-24): 기본 발행 시각 **21:00** → orchestrator.yml env로 배선, main 머지.
+  이후 발행 승인만 하면 그날(지났으면 다음날) 21시에 자동 발행된다.
+
+### 텔레그램 답장 대화/질문 감지 — 수정 지시 오인 방지 (2026-08-22, 브랜치 `claude/telegram-ai-conversation-uujj1k`)
 
 사용자가 봇을 대화형 AI로 알고 "이거 파이프라인으로 만들어줘"라고 답장 → 웹훅이 수정 지시
 피드백(pending)으로 저장 → 발행 승인 대기이던 DG-2026-0048이 불필요하게 재초안될 뻔한 것을 수리.

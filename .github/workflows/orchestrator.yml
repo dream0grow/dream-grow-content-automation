@@ -37,6 +37,10 @@ jobs:
       STIBEE_SENDER_EMAIL: ${{ secrets.STIBEE_SENDER_EMAIL }}
       STIBEE_SENDER_NAME: ${{ secrets.STIBEE_SENDER_NAME }}
       STIBEE_AUTO_SEND: ${{ secrets.STIBEE_AUTO_SEND }}
+      # 발행 예약 기본 시각(KST HH:MM) — 승인 시 publish_at이 빈 카드에 자동 기입.
+      # 시크릿 DG_DEFAULT_PUBLISH_TIME으로 바꿀 수 있고, 미설정이면 21:00(저녁 9시).
+      # 즉시 발행으로 되돌리려면 시크릿에 'off' 등 형식 밖 값을 넣으면 된다.
+      DG_DEFAULT_PUBLISH_TIME: ${{ secrets.DG_DEFAULT_PUBLISH_TIME || '21:00' }}
       # 카드 저장소 = 옵시디언 볼트(vault/). 경로 바꾸려면 DG_VAULT_ROOT (기본 vault/).
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

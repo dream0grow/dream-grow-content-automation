@@ -15,6 +15,7 @@ import json
 import os
 import sys
 import traceback
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -25,9 +26,11 @@ from orchestrator import (
 )
 from orchestrator import state as store
 from orchestrator.config import (
-    AUTO_APPROVE_KEYWORD, MAX_CARDS_PER_RUN, RUBRIC_SKIP_QUALITY,
-    STALE_RUNNING_MINUTES,
+    AUTO_APPROVE_KEYWORD, DEFAULT_PUBLISH_TIME, MAX_CARDS_PER_RUN,
+    RUBRIC_SKIP_QUALITY, STALE_RUNNING_MINUTES,
 )
+
+KST = timezone(timedelta(hours=9))
 
 # 사람이 재초안을 원할 때 수정 지시를 적어두는 섹션. handle_revision_requested가
 # 이 섹션을 읽어 작가에게 되먹인다(없으면 일반 재작성).
@@ -431,6 +434,8 @@ def handle_keyword_approved(card: dict):
         "approval_status를 approved로 바꾸면 thread는 Threads에, "
         "newsletter는 스티비로 자동 발행됩니다 (STIBEE_AUTO_SEND가 꺼져 있으면 "
         "스티비에 초안만 생성되니 대시보드에서 확인 후 발송하세요). "
+        "특정 시각에 발행하려면 승인하면서 publish_at에 'YYYY-MM-DD HH:MM'(KST)을 "
+        "적으세요 — 그 시각 이후 첫 실행(30분 주기)에서 발행됩니다. "
         f"수정을 원하면 '{REVISION_SECTION}' 토글(섹션)에 고칠 점을 적고 "
         "approval_status=revision_requested로 바꾸세요 → 지시를 반영해 재초안합니다.",
     )
@@ -443,9 +448,75 @@ def handle_keyword_approved(card: dict):
         page_id,
         f"✍️ [{card['content_id']}] 초안 완성, 발행 승인이 필요합니다. "
         f"'{card['topic']}' — 글 평가/검수와 초안을 확인하고 approval_status를 "
-        "approved로 바꾸면 자동 발행됩니다.",
+        "approved로 바꾸면 자동 발행됩니다. 특정 시각에 발행하려면 publish_at에 "
+        "'YYYY-MM-DD HH:MM'(KST)도 함께 적으세요.",
     )
     log(f"{card['content_id']} 초안 {len(supported)}종 + 검수/평가 완료 → 발행 승인 대기 ⏸️")
+
+
+# ---------- 발행 예약 ----------
+
+def _parse_publish_at(raw: str) -> datetime | None:
+    """publish_at 문자열(KST) → datetime. 형식이 틀리면 None."""
+    raw = str(raw or "").strip()
+    if not raw:
+        return None
+    for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M",
+                "%Y-%m-%d"):
+        try:
+            return datetime.strptime(raw, fmt).replace(tzinfo=KST)
+        except ValueError:
+            continue
+    return None
+
+
+def _next_default_publish_at(now: datetime | None = None) -> str:
+    """DG_DEFAULT_PUBLISH_TIME('HH:MM' KST)의 다음 도래 시각 문자열. 미설정/오형식이면 ''."""
+    if not DEFAULT_PUBLISH_TIME:
+        return ""
+    try:
+        hh, mm = DEFAULT_PUBLISH_TIME.split(":")
+        hh, mm = int(hh), int(mm)
+        if not (0 <= hh <= 23 and 0 <= mm <= 59):
+            raise ValueError
+    except ValueError:
+        log(f"DG_DEFAULT_PUBLISH_TIME 형식 오류('{DEFAULT_PUBLISH_TIME}') → 예약 없이 진행")
+        return ""
+    now = now or datetime.now(KST)
+    cand = now.replace(hour=hh, minute=mm, second=0, microsecond=0)
+    if cand <= now:
+        cand += timedelta(days=1)
+    return cand.strftime("%Y-%m-%d %H:%M")
+
+
+def _publish_due(card: dict) -> bool:
+    """발행 예약 게이트. publish_at이 미래면 False(보류), 형식 오류면 디큐+통지 후 False.
+
+    cron이 30분 주기이므로 실제 발행은 예약 시각 이후 첫 실행에서 이뤄진다.
+    """
+    raw = str(card.get("publish_at", "") or "").strip()
+    if not raw:
+        return True
+    when = _parse_publish_at(raw)
+    if when is None:
+        store.update_card(
+            card["page_id"], status="needs_human",
+            last_error=f"publish_at 형식 오류: {raw}",
+        )
+        store.notify(
+            card["page_id"],
+            f"⚠️ [{card.get('content_id', '')}] publish_at('{raw}') 형식을 읽지 "
+            "못해 발행을 멈췄습니다. 'YYYY-MM-DD HH:MM'(KST)으로 고치거나 비운 뒤 "
+            "status를 queued로 되돌리면 발행됩니다.",
+        )
+        log(f"{card.get('content_id')} publish_at 형식 오류 → needs_human ⏸️")
+        return False
+    now = datetime.now(KST)
+    if when > now:
+        remain = (when - now).total_seconds() / 60
+        log(f"{card.get('content_id')} 발행 예약 대기 — {raw} KST (약 {remain:.0f}분 남음) ⏰")
+        return False
+    return True
 
 
 def handle_final_approved(card: dict):
@@ -471,7 +542,26 @@ def handle_final_approved(card: dict):
         )
         log(f"{card['content_id']} 검수 {rv} → 발행 차단, 사람 통지 ⏸️")
         return
-    store.update_card(page_id, stage="publish_ready", status="queued")
+    fields = {"stage": "publish_ready", "status": "queued"}
+    # 발행 예약: 카드의 publish_at이 비어 있고 기본 예약 시각이 설정돼 있으면
+    # 다음 도래 시각을 카드에 기입한다(사람이 보고 고치거나 지울 수 있게).
+    publish_at = str(card.get("publish_at", "") or "").strip()
+    if not publish_at:
+        stamped = _next_default_publish_at()
+        if stamped:
+            fields["publish_at"] = stamped
+            publish_at = stamped
+    store.update_card(page_id, **fields)
+    when = _parse_publish_at(publish_at)
+    if when and when > datetime.now(KST):
+        store.notify(
+            page_id,
+            f"⏰ [{card['content_id']}] 발행 예약 완료 — {publish_at} (KST) 이후 "
+            "자동 발행됩니다. 시각을 바꾸려면 카드 publish_at을 고치고, 바로 "
+            "발행하려면 비우세요.",
+        )
+        log(f"{card['content_id']} publish_ready → 발행 예약 {publish_at} ⏰")
+        return
     log(f"{card['content_id']} publish_ready → 발행 대기열")
 
 
@@ -505,7 +595,12 @@ def handle_revision_requested(card: dict):
 
 
 def handle_publish(card: dict):
-    """publish_ready/queued → Threads 자동 발행 (로드맵 2단계)."""
+    """publish_ready/queued → Threads 자동 발행 (로드맵 2단계).
+
+    publish_at(발행 예약 시각, KST)이 미래면 발행하지 않고 다음 실행으로 미룬다.
+    """
+    if not _publish_due(card):
+        return
     from orchestrator import publish
     publish.handle_publish(card)
     log(f"{card['content_id']} 발행 처리 완료")

@@ -24,6 +24,7 @@ TEXT_FIELDS = {
     "content_id", "audience", "format", "approved_keyword",
     "manus_task_ids", "idempotency_key", "last_error",
     "publish_progress",  # 부분 발행 진행분(media_id CSV) — 재실행 시 이어서 발행
+    "publish_at",  # 발행 예약 시각(KST, 'YYYY-MM-DD HH:MM') — 이 시각 전엔 발행 보류
 }
 ALL_FIELDS = SELECT_FIELDS | TEXT_FIELDS | {"published_url"}
 
@@ -121,6 +122,7 @@ def _card_from_file(path: Path) -> dict:
         "idempotency_key": get("idempotency_key"),
         "published_url": get("published_url"),
         "publish_progress": get("publish_progress"),
+        "publish_at": get("publish_at"),
     }
 
 
@@ -252,6 +254,7 @@ def create_card(topic: str, *, stage: str = "intake", status: str = "queued",
         "approval_status": "", "review_status": "",
         "approved_keyword": "", "manus_task_ids": "", "idempotency_key": "",
         "last_error": "", "published_url": "",
+        "publish_at": "",  # 발행 예약 시각(KST 'YYYY-MM-DD HH:MM') — 비우면 즉시 발행
         "created_time": _now(), "last_edited_time": _now(),
     }
     path.write_text(_dump(meta, ""), encoding="utf-8")

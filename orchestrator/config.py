@@ -45,6 +45,11 @@ AUTO_APPROVE_KEYWORD = (
     not in ("0", "false", "no", "off")
 )
 
+# 기본 발행 예약 시각(KST, 'HH:MM'). 설정하면 발행 승인 시 publish_at이 비어 있는
+# 카드에 다음 도래하는 그 시각을 자동 기입한다(카드에 남아 사람이 고치거나 지울 수 있음).
+# 비워두면(기본) 예전처럼 승인 직후 첫 실행에서 바로 발행한다.
+DEFAULT_PUBLISH_TIME = os.getenv("DG_DEFAULT_PUBLISH_TIME", "").strip()
+
 # 릴스(숏폼) 영상 생성 — Open Generative AI의 백엔드 게이트웨이 Muapi.ai 사용
 # (설치/키 발급: docs/open-generative-ai-setup.md). 키가 없으면 --dry-run만 가능.
 # 워크플로우가 미설정 시크릿을 빈 문자열로 넘기므로 `or` 폴백 필수 (#58과 같은 패턴 —
