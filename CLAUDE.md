@@ -86,7 +86,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 선택: `DG_VAULT_ROOT`(기본 `vault/`), `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`(알림),
 `MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
-`DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DEFAULT_PUBLISH_TIME`(기본 없음 — HH:MM KST 발행 예약 기본값),
+`DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DEFAULT_PUBLISH_TIME`(HH:MM KST 발행 예약 기본값 — orchestrator.yml에서 기본 `21:00`),
 `DG_DAILY_TOPIC_COUNT`(기본 1),
 `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모"),
 `MUAPI_API_KEY`(릴스 영상 생성 — muapi.ai)/`DG_REELS_VIDEO_MODEL`(기본 `seedance-lite-t2v`)/`DG_REELS_VIDEO_RESOLUTION`(기본 720p)/`DG_REELS_MAX_SCENES`(기본 7)
@@ -128,16 +128,18 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - **frontmatter `publish_at`** (KST, `YYYY-MM-DD HH:MM`): 승인 시 함께 적으면 `handle_publish`가
   그 시각 전엔 발행을 보류(상태 무변경, 다음 cron 재확인). 시각 도래 후 첫 실행에서 발행.
   형식 오류는 조용히 방치하지 않고 `needs_human` + 텔레그램 통지(고치고 status=queued로 복귀).
-- **`DG_DEFAULT_PUBLISH_TIME`**(HH:MM, 기본 없음): 설정하면 승인 시 publish_at이 빈 카드에
-  다음 도래 시각을 자동 기입(카드에 보여 사람이 수정/삭제 가능). 미설정이면 기존처럼 즉시 발행.
+- **`DG_DEFAULT_PUBLISH_TIME`**(HH:MM): 설정하면 승인 시 publish_at이 빈 카드에
+  다음 도래 시각을 자동 기입(카드에 보여 사람이 수정/삭제 가능).
+  **orchestrator.yml에 기본 `21:00`(저녁 9시)로 배선** — 시크릿 `DG_DEFAULT_PUBLISH_TIME`으로
+  바꾸고, 즉시 발행으로 되돌리려면 시크릿에 `off` 등 형식 밖 값을 넣는다.
 - 예약이 걸리면 승인 시점에 "⏰ 발행 예약 완료 — {시각} 이후 자동 발행" 텔레그램 통지.
   승인 요청 안내문·초안 완성 알림에도 예약 방법 추가.
 - 코드: `run.py`(`_publish_due`/`_parse_publish_at`/`_next_default_publish_at`, `handle_final_approved`·
   `handle_publish` 게이트), `obsidian_state.py`(publish_at 필드), `config.py`. 테스트 7종 신규, 전체 136종 통과.
 - 참고: DG-2026-0023은 사용자가 frontmatter 승인(approval_status/review_status=approved)으로
   2026-08-24 정상 발행 완료(Threads). 승인 조작법이 맞음을 확인.
-- **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② (선택) 기본 발행 시각을 원하면
-  `DG_DEFAULT_PUBLISH_TIME` 시크릿/변수 등록(예: `08:00`).
+- 사용자 확정(2026-08-24): 기본 발행 시각 **21:00** → orchestrator.yml env로 배선, main 머지.
+  이후 발행 승인만 하면 그날(지났으면 다음날) 21시에 자동 발행된다.
 
 ### 텔레그램 답장 대화/질문 감지 — 수정 지시 오인 방지 (2026-08-22, 브랜치 `claude/telegram-ai-conversation-uujj1k`)
 
