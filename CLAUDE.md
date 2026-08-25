@@ -122,7 +122,28 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 발행 예약 시간 (2026-08-24, 브랜치 `claude/publish-schedule-time-abjf89`) — ⬅️ 이번 세션 작업
+### 오즈모 나노 쇼츠 자동 편집 (2026-08-25, 브랜치 `claude/dji-osmo-nano-auto-edit-8m16fx`) — ⬅️ 이번 세션 작업
+
+DJI 오즈모 나노 촬영본을 **로컬(맥/윈도우)에서 초벌 쇼츠로 자동 편집**하는 2층 구조를 추가했다.
+실행은 전부 사용자 컴퓨터(원본을 클라우드에 안 올림), 저장소는 규칙 보관·기기 간 동기화 용도.
+- **`tools/shorts_edit.py`** (독립 실행, Claude 없이도 동작): 오디오 분석(순수 파이썬 RMS,
+  numpy 있으면 가속) → 무음 컷(`--min-silence` 0.9s, 앞뒤 `--pad` 0.3s 여유) →
+  **박수=NG 컷**(박수 직전 테이크 제거, `--no-clap`) → 9:16 변환(중앙 크롭 또는 `--fit blur`) →
+  ffmpeg 조각 렌더+합본 → **Whisper 자막**(faster-whisper→whisper CLI 폴백, 없으면 생략) →
+  자막 굽기(Pretendard 볼드 스타일). 색 보정 없음. 산출물 `<영상명>_shorts/`:
+  final.mp4/cut.mp4/subtitles.srt/edit_plan.json(손수정 가능)/notes.md(캡컷 재료).
+  `--mode analyze|render(--segment N)|concat|subs|burn|all` — Cowork 45초 제한은 조각 실행으로 대응.
+  폴더 입력 시 일괄 처리(SD카드 통째로).
+- **스킬 `.claude/skills/dreamgrow-shorts-editor`**: "쇼츠 편집해줘"로 호출 — 컷 계획을 먼저
+  보여주고 확인받은 뒤 렌더, srt 수정→burn 재실행 등 피드백 루프. 설치 가이드
+  `docs/shorts-edit-setup.md` (Mac: brew install ffmpeg / Win: winget, pip install faster-whisper).
+- 테스트 21종 신규(`tools/test_shorts_edit.py` — 컷 로직·박수 판정·크롭 계산·SRT·명령 빌더,
+  ffmpeg 불필요). 합성 영상 e2e 검증 완료(무음 제거+NG 컷+1080×1920+자막 굽기).
+- **남은 사용자 액션**: ① 브랜치 검토/머지 ② 맥북/윈도우에 ffmpeg + faster-whisper 설치
+  (docs/shorts-edit-setup.md) ③ 오즈모 나노 촬영본 하나로 "쇼츠 편집해줘" 라이브 테스트.
+  촬영 팁: 일반 색상 프로파일(D-Log 아님)·세로 촬영 권장, NG 나면 박수 한 번.
+
+### 발행 예약 시간 (2026-08-24, 브랜치 `claude/publish-schedule-time-abjf89`)
 
 발행 승인 후 **원하는 시각에 발행**되도록 예약 게이트를 추가했다.
 - **frontmatter `publish_at`** (KST, `YYYY-MM-DD HH:MM`): 승인 시 함께 적으면 `handle_publish`가
