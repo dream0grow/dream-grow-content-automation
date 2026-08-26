@@ -1,10 +1,10 @@
 # 릴스 원고 자동 추천 — 매일 아침 TOP 3를 텔레그램으로 (월~금, 주말 제외)
-# 07:38 KST = 22:38 UTC 전날 (일~목 UTC = 월~금 KST). 정시 cron 누락이 잦아 38분 사용.
+# 06:20 KST = 21:20 UTC 전날 (일~목 UTC = 월~금 KST). 정시 cron 누락이 잦아 20분 사용.
 name: reels-recommend
 
 on:
   schedule:
-    - cron: "38 22 * * 0-4"
+    - cron: "20 21 * * 0-4"
   workflow_dispatch:
     inputs:
       count:

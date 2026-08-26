@@ -131,8 +131,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
   (GitHub 원고 링크 첨부). **로테이션**: 장부 `_system/logs/reels_recommend_ledger.json`로 미추천
   원고 우선, 소진되면 가장 오래된 추천분부터 순환. LLM 실패 시 건너뛰고(다음 날 재시도),
   전송 성공 시에만 장부 기록. `--dry-run`/`--count` 지원.
-- **워크플로우 `reels-recommend.yml`**: cron `38 22 * * 0-4`(= 월~금 07:38 KST, 주말 제외) +
-  수동 실행(count/dry_run 입력). 장부 변경분은 볼트 커밋·push(경합 재시도).
+- **워크플로우 `reels-recommend.yml`**: cron `20 21 * * 0-4`(= 월~금 06:20 KST, 주말 제외 —
+  사용자 확정 2026-08-26) + 수동 실행(count/dry_run 입력). 장부 변경분은 볼트 커밋·push(경합 재시도).
 - **촬영 완료 처리(사용자 운영 규칙)**: 찍은 원고는 frontmatter `상태: 발행완료`로 바꾸고
   `05 리뷰/완료/`로 이동 — 알림·핑퐁·추천 후보에서 모두 빠진다(`영상상태` 필드는 자동화 미사용, 기록용).
 - 첫 수동 추천 3편(선생님에게 찍히는 아이 vs / 학교 가기 싫다는 아이 / 스마트폰 뺏을수록)은
@@ -146,9 +146,15 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - **`telegram-oneshot.yml`**: 세션에서 텔레그램을 즉시 보내는 범용 통로 —
   `.github/notify/telegram_oneshot.txt`에 메시지를 쓰고 `claude/*` 브랜치에 push하면 시크릿으로 전송
   (파일 변경 push에만 발동, main에선 미발동). 세션엔 텔레그램 시크릿이 없어서 이 경로를 쓴다.
-- **알려진 한계(미해결)**: 텔레그램 봇은 대화형 AI가 아님 — 답장=수정 지시(AI 판정 있음),
-  일반 메시지=후보 저장뿐. 일반 메시지도 AI가 판단·실행·답장하게 하려면 후보 폴더를
-  cron으로 처리하는 모듈(가칭 telegram_assistant) 신설 필요 — 사용자 결정 대기.
+- **텔레그램 비서(`vault_pipeline/telegram_assistant.py`)**: 일반 메시지(답장 아님 → 웹훅이
+  `_system/candidates/telegram/` 후보 노트로 저장)를 orchestrator cron이 AI 의도 판별
+  (`prompts.TELEGRAM_ASSISTANT` — 한 메시지 속 복수 요청을 액션 목록으로)해 실행+답장:
+  revise→`_system/feedback` pending 노트 생성(같은 실행의 script_feedback이 기존 안전장치로 반영,
+  target은 웹훅 「참고 후보」 안에서만·해석 실패 시 확인 질문 폴백), recommend→`reels_recommend.run`
+  즉시 호출, answer→텔레그램 답장, idea→후보 유지(승격 흐름 보존). 판정 완료는 장부
+  `_system/logs/telegram_assistant_ledger.json`으로 재처리 방지, LLM 실패 시 다음 실행 재시도.
+  orchestrator.yml에서 script_feedback **앞에** 배선. 한계: cron 주기(15~30분) 안에 응답 —
+  실시간 즉답은 yt_research 웹훅에 AI를 붙여야 함(미구현). 테스트 8종(`test_telegram_assistant.py`).
 
 ### 오즈모 나노 쇼츠 자동 편집 (2026-08-25, 브랜치 `claude/dji-osmo-nano-auto-edit-8m16fx`) — ⬅️ 이번 세션 작업
 
