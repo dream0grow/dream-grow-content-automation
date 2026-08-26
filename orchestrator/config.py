@@ -50,6 +50,34 @@ AUTO_APPROVE_KEYWORD = (
 # 비워두면(기본) 예전처럼 승인 직후 첫 실행에서 바로 발행한다.
 DEFAULT_PUBLISH_TIME = os.getenv("DG_DEFAULT_PUBLISH_TIME", "").strip()
 
+# 발행 심사관(verify.py) — 초안을 만든 대화와 분리된 fresh context에서
+# 루브릭·AI 티·사실 위험·보이스 일치를 검사해 승인 판단 근거를 만든다.
+# 승인 자체는 항상 사람이 한다(자동 발행 아님). 끄려면 DG_VERIFY_ENABLED=false.
+VERIFY_ENABLED = (
+    os.getenv("DG_VERIFY_ENABLED", "").strip().lower()
+    not in ("0", "false", "no", "off")
+)
+
+# 일일 추천 다이제스트(daily_digest.py) — 발행 대기 카드 중 예상 반응 상위 N개를
+# 매일 텔레그램으로 추천한다. 사람은 이 N개만 보고 승인하면 된다.
+DIGEST_COUNT = int(os.getenv("DG_DIGEST_COUNT", "5") or "5")
+
+# 3안 병렬 판정단(agent_dialogue) — 첫 초안을 Claude/OpenAI/Gemini 세 모델로
+# 병렬 생성해 심사로 1등을 뽑고 2등의 좋은 표현을 접붙인다. OPENAI/GOOGLE 키가
+# 없으면 그 후보만 빠지고, 둘 다 없으면 기존 단일 초안과 동일하게 동작한다.
+# 끄려면 DG_PANEL_ENABLED=false. (비용: 첫 초안 호출이 최대 3배)
+PANEL_ENABLED = (
+    os.getenv("DG_PANEL_ENABLED", "").strip().lower()
+    not in ("0", "false", "no", "off")
+)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "").strip()
+GOOGLE_API_KEY = (os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY") or "").strip()
+# 각사 최신 최상위 모델(2026-08 기준). 새 모델이 나오면 시크릿으로 갈아끼운다.
+# Claude는 비용·안정성 균형으로 opus-5 기본(최상위 fable-5는 DG_PANEL_MODEL_CLAUDE로).
+PANEL_MODEL_CLAUDE = os.getenv("DG_PANEL_MODEL_CLAUDE") or "claude-opus-5"
+PANEL_MODEL_OPENAI = os.getenv("DG_PANEL_MODEL_OPENAI") or "gpt-5.6-sol"
+PANEL_MODEL_GEMINI = os.getenv("DG_PANEL_MODEL_GEMINI") or "gemini-3.1-pro"
+
 # 릴스(숏폼) 영상 생성 — Open Generative AI의 백엔드 게이트웨이 Muapi.ai 사용
 # (설치/키 발급: docs/open-generative-ai-setup.md). 키가 없으면 --dry-run만 가능.
 # 워크플로우가 미설정 시크릿을 빈 문자열로 넘기므로 `or` 폴백 필수 (#58과 같은 패턴 —

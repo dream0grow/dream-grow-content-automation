@@ -424,9 +424,22 @@ def handle_keyword_approved(card: dict):
         except Exception as e:
             log(f"{card['content_id']} 평가표 검토/2차안 실패 ({fmt}): {e}")
 
+    # 발행 심사관(P1): 초안을 만든 토론과 분리된 fresh context에서 루브릭·AI 티·
+    # 사실 위험·보이스를 검사해 사람이 전문을 안 읽고도 결재할 근거를 만든다.
+    # 심사 실패는 승인 요청을 막지 않는다(심사 없이도 기존 흐름 유지).
+    verify_lines = []
+    try:
+        from orchestrator import verify
+        for r in verify.verify_card(card):
+            verify_lines.append(f"[{r.get('format')}] {verify.summary_line(r)}")
+    except Exception as e:
+        log(f"{card['content_id']} 발행 심사 실패 (계속 진행): {e}")
+    verify_note = ("\n".join(verify_lines) + "\n\n") if verify_lines else ""
+
     store.append_section(
         page_id, "⏸️ 발행 승인 요청",
-        "확인 순서: 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안/2차안 본문.\n"
+        f"{verify_note}"
+        "확인 순서: 🔍 발행 심사 → 📊 글 평가 점수 → ✅ 검수 결과 → ✍️ 초안/2차안 본문.\n"
         "**발행되는 원고는 차수가 가장 높은 안입니다** ('3차 수정' > '✍️ 2차안' > '✍️ 초안'). "
         "직접 고친 최종안을 'N차 수정' 섹션으로 추가해도 그게 발행·문체학습 대상이 됩니다 — "
         "직접 고칠 때도 그 섹션 안에서 고치세요 (AI 원본은 그대로 두세요). "
@@ -447,9 +460,11 @@ def handle_keyword_approved(card: dict):
     store.notify(
         page_id,
         f"✍️ [{card['content_id']}] 초안 완성, 발행 승인이 필요합니다. "
-        f"'{card['topic']}' — 글 평가/검수와 초안을 확인하고 approval_status를 "
-        "approved로 바꾸면 자동 발행됩니다. 특정 시각에 발행하려면 publish_at에 "
-        "'YYYY-MM-DD HH:MM'(KST)도 함께 적으세요.",
+        f"'{card['topic']}'\n"
+        + (f"{verify_note}" if verify_note else "")
+        + "approval_status를 approved로 바꾸면 자동 발행됩니다 "
+        f"(이 메시지에 '{card['content_id']} 승인'으로 답장해도 됩니다). "
+        "특정 시각에 발행하려면 publish_at에 'YYYY-MM-DD HH:MM'(KST)도 함께 적으세요.",
     )
     log(f"{card['content_id']} 초안 {len(supported)}종 + 검수/평가 완료 → 발행 승인 대기 ⏸️")
 

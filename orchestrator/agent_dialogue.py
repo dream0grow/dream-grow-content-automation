@@ -10,12 +10,90 @@
 - 모든 발언은 transcript로 반환되어 카드 본문에 기록된다
 """
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from orchestrator import llm, prompts
-from orchestrator.config import DIALOGUE_MAX_ROUNDS, ETHICS_MAX_ROUNDS
+from orchestrator.config import (
+    DIALOGUE_MAX_ROUNDS, ETHICS_MAX_ROUNDS, PANEL_ENABLED, PANEL_MODEL_CLAUDE,
+)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+
+# 판정단 후보 라벨 (심사 프롬프트의 A/B/C와 대응)
+_PANEL_LETTERS = "ABC"
+
+
+def _panel_first_draft(writer_prompt: str, system: str, write_tokens: int,
+                       fmt: str, brief_summary: str):
+    """첫 초안을 서로 다른 모델 3안 병렬 생성 → 판정단 선발 (P4).
+
+    Claude / OpenAI / Gemini가 같은 작가 프롬프트로 독립 초안을 쓰고,
+    심사(fresh 호출)가 1등을 뽑는다. 반환: (winner_draft, transcript_entries,
+    borrow_feedback) — borrow_feedback은 다른 후보에서 접붙일 지시(없으면 "").
+    타사 키가 하나도 없거나 성공 후보가 2개 미만이면 None(기존 단일 초안 경로).
+    """
+    if not PANEL_ENABLED:
+        return None
+    jobs = [("클로드", lambda: llm.call(
+        writer_prompt, system=system, model=PANEL_MODEL_CLAUDE,
+        max_tokens=write_tokens))]
+    # getattr 폴백: 테스트가 llm을 통째로 가짜 객체로 갈아끼워도 안전하게.
+    if getattr(llm, "openai_available", lambda: False)():
+        jobs.append(("GPT", lambda: llm.call_openai(
+            writer_prompt, system=system, max_tokens=write_tokens)))
+    if getattr(llm, "gemini_available", lambda: False)():
+        jobs.append(("제미나이", lambda: llm.call_gemini(
+            writer_prompt, system=system, max_tokens=write_tokens)))
+    if len(jobs) < 2:
+        return None  # 타사 키 없음 → 판정단 무의미, 기존 경로로
+
+    entries: list[str] = []
+    candidates: list[tuple[str, str]] = []  # (모델 라벨, 초안)
+    with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
+        futures = [(label, pool.submit(fn)) for label, fn in jobs]
+        for label, fut in futures:
+            try:
+                text = (fut.result() or "").strip()
+            except Exception as e:  # noqa: BLE001 — 한 모델 실패가 전체를 막으면 안 됨
+                entries.append(f"[판정단] {label} 후보 생성 실패: {type(e).__name__}: {e}")
+                continue
+            if len(text) < 200:
+                entries.append(f"[판정단] {label} 후보가 비정상적으로 짧아 제외")
+                continue
+            candidates.append((label, text))
+
+    if len(candidates) < 2:
+        # 후보가 하나뿐이면 심사 없이 그 초안을 쓴다 (그마저 없으면 기존 경로).
+        if candidates:
+            label, text = candidates[0]
+            entries.append(f"[작가 v1 - {label} 단독]\n{text}")
+            return text, entries, ""
+        return None
+
+    blocks = []
+    for (label, text), letter in zip(candidates, _PANEL_LETTERS):
+        entries.append(f"[작가 v1 후보 {letter} - {label}]\n{text}")
+        blocks.append(f"[후보 {letter} — 작가: {label}]\n{text[:7000]}")
+    judged = llm.call_json(
+        prompts.PANEL_JUDGE.format(
+            format=fmt, brief_summary=brief_summary,
+            candidates="\n\n".join(blocks),
+        ),
+        system=prompts.get_system(),
+    )
+    winner_letter = str(judged.get("winner", "A")).strip().upper()[:1]
+    idx = _PANEL_LETTERS.find(winner_letter)
+    if not (0 <= idx < len(candidates)):
+        idx = 0
+    label, draft = candidates[idx]
+    entries.append(
+        f"[판정단 심사] winner={winner_letter}({label}) "
+        f"scores={judged.get('scores')} — {judged.get('reason', '')}"
+    )
+    borrows = [str(b).strip() for b in (judged.get("borrow_suggestions") or [])
+               if str(b).strip()]
+    return draft, entries, "\n".join(borrows)
 
 
 def load_benchmark(channel: str, limit: int = 9000) -> str:
@@ -78,16 +156,44 @@ def run_draft_dialogue(brief: dict, fmt: str, style_context: str = "",
     # 뉴스레터는 3,000~6,000자 심화 콘텐츠라 토큰 예산을 크게 잡는다
     write_tokens = 16000 if fmt == "newsletter" else 8000
 
-    draft = llm.call_writing(
-        prompts.WRITER.format(
-            format=fmt, brief=brief_text, source_block=source_block,
-            style_context=style_block,
-            hook_examples=first_draft_block, feedback_block=directive_block,
-        ),
-        system=prompts.get_system(),
-        max_tokens=write_tokens,
+    first_prompt = prompts.WRITER.format(
+        format=fmt, brief=brief_text, source_block=source_block,
+        style_context=style_block,
+        hook_examples=first_draft_block, feedback_block=directive_block,
     )
-    transcript.append(f"[작가 v1]\n{draft}")
+    # 3안 병렬 판정단(P4): Claude/OpenAI/Gemini가 독립 초안을 쓰고 심사가 1등을
+    # 뽑는다. 2등의 좋은 표현이 있으면 접붙임 재작성 1회. 타사 키가 없으면 None →
+    # 기존 단일 초안 경로 그대로.
+    panel = _panel_first_draft(
+        first_prompt, system=prompts.get_system(), write_tokens=write_tokens,
+        fmt=fmt, brief_summary=brief_summary,
+    )
+    if panel is not None:
+        draft, panel_entries, borrow_feedback = panel
+        transcript.extend(panel_entries)
+        if borrow_feedback:
+            draft = llm.call_writing(
+                prompts.WRITER.format(
+                    format=fmt, brief=brief_text, source_block=source_block,
+                    style_context=style_block,
+                    hook_examples="",
+                    feedback_block=(
+                        "[판정단 접붙임 지시 - 아래 표현을 자연스럽게 반영하되 "
+                        "직전 초안의 구조와 나머지 문장은 유지]\n"
+                        f"{borrow_feedback}\n\n[직전 초안]\n{draft}"
+                    ),
+                ),
+                system=prompts.get_system(),
+                max_tokens=write_tokens,
+            )
+            transcript.append(f"[작가 v1 - 판정단 접붙임]\n{draft}")
+    else:
+        draft = llm.call_writing(
+            first_prompt,
+            system=prompts.get_system(),
+            max_tokens=write_tokens,
+        )
+        transcript.append(f"[작가 v1]\n{draft}")
 
     rounds = 0
     for rounds in range(1, DIALOGUE_MAX_ROUNDS + 1):

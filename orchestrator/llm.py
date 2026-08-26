@@ -85,6 +85,74 @@ def call_writing(prompt: str, system: str = "", max_tokens: int = 8000) -> str:
     return call(prompt, system=system, model=MODEL_WRITING, max_tokens=max_tokens)
 
 
+# ---------- 타사 모델 (3안 병렬 판정단 전용) ----------
+# 판정단(agent_dialogue)이 첫 초안을 Claude/OpenAI/Gemini로 병렬 생성할 때만 쓴다.
+# 파이프라인의 나머지 호출은 전부 Claude다. 키가 없으면 available()이 False를 내고
+# 그 후보만 조용히 빠진다.
+
+OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+
+
+def openai_available() -> bool:
+    from orchestrator.config import OPENAI_API_KEY
+    return bool(OPENAI_API_KEY)
+
+
+def gemini_available() -> bool:
+    from orchestrator.config import GOOGLE_API_KEY
+    return bool(GOOGLE_API_KEY)
+
+
+def call_openai(prompt: str, system: str = "", model: str = "",
+                max_tokens: int = 8000) -> str:
+    """OpenAI Chat Completions 호출. 키 없으면 RuntimeError."""
+    from orchestrator.config import OPENAI_API_KEY, PANEL_MODEL_OPENAI
+    if not OPENAI_API_KEY:
+        raise RuntimeError("OPENAI_API_KEY 미설정")
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+    resp = requests.post(
+        OPENAI_CHAT_URL,
+        headers={"Authorization": f"Bearer {OPENAI_API_KEY}",
+                 "Content-Type": "application/json"},
+        json={"model": model or PANEL_MODEL_OPENAI, "messages": messages,
+              # 최신(GPT-5 계열) 모델은 max_tokens 대신 max_completion_tokens를 받는다
+              "max_completion_tokens": max_tokens},
+        timeout=300,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    return (data.get("choices") or [{}])[0].get("message", {}).get("content", "") or ""
+
+
+def call_gemini(prompt: str, system: str = "", model: str = "",
+                max_tokens: int = 8000) -> str:
+    """Google Gemini generateContent 호출. 키 없으면 RuntimeError."""
+    from orchestrator.config import GOOGLE_API_KEY, PANEL_MODEL_GEMINI
+    if not GOOGLE_API_KEY:
+        raise RuntimeError("GOOGLE_API_KEY 미설정")
+    body = {
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+        "generationConfig": {"maxOutputTokens": max_tokens},
+    }
+    if system:
+        body["systemInstruction"] = {"parts": [{"text": system}]}
+    resp = requests.post(
+        GEMINI_URL.format(model=model or PANEL_MODEL_GEMINI),
+        headers={"x-goog-api-key": GOOGLE_API_KEY,
+                 "Content-Type": "application/json"},
+        json=body, timeout=300,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    parts = ((data.get("candidates") or [{}])[0]
+             .get("content", {}).get("parts", []))
+    return "".join(p.get("text", "") for p in parts)
+
+
 def _extract_balanced_json(text: str) -> str | None:
     """첫 '{'부터 중괄호 짝이 맞는 지점까지 잘라낸다 (JSON 뒤에 붙은 설명문 무시)."""
     start = text.find("{")

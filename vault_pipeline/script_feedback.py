@@ -65,6 +65,23 @@ ANNOUNCE_MAX_AGE_DAYS = int(os.getenv("DG_ANNOUNCE_MAX_AGE_DAYS") or "7")
 CARD_ID_RE = re.compile(r"DG-\d{4}-\d{4}")
 REVISION_SECTION = "📝 수정 요청"
 
+# 텔레그램 답장 승인 — 다이제스트/초안 알림에 "DG-YYYY-NNNN 승인"으로 답장하면
+# 카드를 발행 승인(approval_status: approved)한다. 수정 지시와 헷갈리지 않게
+# 카드 ID를 뺀 나머지가 짧은 승인 표현일 때만 인정한다 ("이 부분 고치고 승인해줘"는
+# 수정 지시로 흘러간다). 검수 미통과 카드는 기존 handle_final_approved 게이트가
+# 발행을 막고 사유를 통지하므로 여기서 검수를 다시 보지 않는다.
+_APPROVE_RE = re.compile(
+    r"^(발행\s*)?승인(합니다|해줘|해\s*주세요|이요|요)?$|^approved?$|^발행해\s*줘?$",
+    re.IGNORECASE,
+)
+
+
+def _is_approval(instruction: str) -> bool:
+    """메시지가 '승인' 답장인지 판정 — 카드 ID·구두점을 뺀 나머지로 본다."""
+    rest = CARD_ID_RE.sub("", instruction or "")
+    rest = re.sub(r"[\s!.~^ㅋㅎ👍✅]+", " ", rest).strip()
+    return bool(rest) and len(rest) <= 12 and bool(_APPROVE_RE.match(rest))
+
 
 def _active_cards_dir() -> Path:
     return vault_root() / "파이프라인" / "활성"
@@ -334,6 +351,38 @@ def _apply_card_revision(fb: dict, card_path: Path, dry_run: bool) -> str:
     return "applied"
 
 
+def _apply_card_approval(fb: dict, card_path: Path, dry_run: bool) -> str:
+    """텔레그램 답장 승인 — 카드 approval_status를 approved로 바꾼다.
+
+    다음 오케스트레이터 실행이 handle_final_approved를 태운다: 검수 통과면
+    발행 예약(기본 21:00), 검수 미통과면 발행을 막고 사유를 통지한다.
+    """
+    if dry_run:
+        log_line(f"[계획] 카드 승인: {card_path.name} ← {fb['path'].name}",
+                 dry_run=True)
+        return "planned"
+    text = card_path.read_text(encoding="utf-8")
+    card_id = CARD_ID_RE.search(card_path.name).group(0)
+    meta, _ = parse_frontmatter(text)
+    stage = str(meta.get("stage", "")).strip()
+    if stage not in ("approval", "publish_ready"):
+        _mark_feedback(fb, "error", f"승인 불가 stage: {stage}", dry_run=False)
+        telegram_notify.send(
+            f"⚠️ [{card_id}] 지금은 승인할 단계가 아닙니다 (stage: {stage}). "
+            "초안이 완성돼 발행 승인 대기일 때만 답장 승인이 됩니다.")
+        return "not_approvable"
+    if re.search(r"^approval_status:", text, flags=re.MULTILINE):
+        text = re.sub(r"^approval_status:.*$", "approval_status: approved",
+                      text, count=1, flags=re.MULTILINE)
+        card_path.write_text(text, encoding="utf-8")
+    _mark_feedback(fb, "applied", f"답장 승인: {card_path.name}", dry_run=False)
+    log_line(f"답장 승인 접수: {card_path.name} ← {fb['path'].name}")
+    telegram_notify.send(
+        f"✅ [{card_id}] 발행 승인 접수 — 다음 실행(30분 내)에서 발행 처리됩니다. "
+        "publish_at이 비어 있으면 기본 예약 시각(21:00)이 적용됩니다.")
+    return "approved"
+
+
 def _feedback_context(card_path: Path | None, target_path: Path | None) -> str:
     """triage 프롬프트에 넣을 대상 요약 — 답장이 카드 상태를 근거로 답할 수 있게."""
     if card_path is not None:
@@ -385,6 +434,14 @@ def _answer_feedback(fb: dict, reply: str, dry_run: bool) -> str:
 def apply_one(fb: dict, dry_run: bool) -> str:
     """피드백 1건을 대상(원고 파일 또는 파이프라인 카드)에 반영한다."""
     card_path = _resolve_card(fb["target"])
+    # 답장 승인: "DG-YYYY-NNNN 승인" 같은 짧은 승인 메시지는 LLM 판정 없이 바로
+    # 발행 승인으로 처리한다. target에 카드 ID가 없으면(다이제스트처럼 여러 카드를
+    # 나열한 메시지에 답장한 경우) 사용자가 쓴 메시지 본문에서 ID를 찾는다 —
+    # 이 본문 폴백은 오라우팅을 막기 위해 승인 메시지에만 적용한다.
+    if _is_approval(fb["instruction"]):
+        approve_target = card_path or _resolve_card(fb["instruction"])
+        if approve_target is not None:
+            return _apply_card_approval(fb, approve_target, dry_run)
     target_path = None
     if card_path is None:
         target_path = _resolve_target(fb["target"])

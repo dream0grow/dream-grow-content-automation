@@ -361,3 +361,73 @@ def test_review_copy_feedback_routes_to_card(vault):
     copy_text = (vault["script_dir"] / "스레드_받아쓰기시험만보면우는아이.md").read_text(
         encoding="utf-8")
     assert "초안 사본" in copy_text
+
+
+# ---------- 답장 승인 — "DG-YYYY-NNNN 승인" ----------
+
+def _card_and_feedback(vault, feedback_body, target='"DG-2026-0001"',
+                       card_fm=None):
+    active = vault["root"] / "파이프라인" / "활성"
+    active.mkdir(parents=True, exist_ok=True)
+    card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
+    card.write_text(card_fm or CARD_FM, encoding="utf-8")
+    for p in vault["fb_dir"].glob("*.md"):
+        p.unlink()
+    fb = vault["fb_dir"] / "2026-07-13 1200 승인 피드백.md"
+    fb.write_text(
+        "---\ntype: feedback\n"
+        f"target: {target}\n"
+        "status: pending\n출처: telegram\n---\n\n"
+        f"# 피드백 -- 승인\n\n{feedback_body}\n", encoding="utf-8")
+    return card, fb
+
+
+def test_is_approval_matches_short_messages_only():
+    assert sf._is_approval("DG-2026-0001 승인")
+    assert sf._is_approval("승인")
+    assert sf._is_approval("발행 승인!")
+    assert sf._is_approval("승인해줘")
+    assert sf._is_approval("approve")
+    # 수정 지시에 '승인'이 섞인 문장은 승인이 아니다.
+    assert not sf._is_approval("도입부 고치고 나서 승인할게요")
+    assert not sf._is_approval("이 부분 고쳐줘")
+    assert not sf._is_approval("")
+
+
+def test_reply_approval_sets_approved_without_llm(vault, monkeypatch):
+    card, fb = _card_and_feedback(vault, "DG-2026-0001 승인")
+    def no_llm(*a, **k):
+        raise AssertionError("승인 답장은 LLM을 부르면 안 된다")
+    monkeypatch.setattr(llm, "call_json", no_llm)
+    monkeypatch.setattr(llm, "call_writing", no_llm)
+
+    counts = sf.apply_pending_feedback(dry_run=False)
+
+    assert counts.get("approved") == 1
+    text = card.read_text(encoding="utf-8")
+    assert "approval_status: approved" in text
+    assert "## 📝 수정 요청" not in text  # 수정 요청으로 오인하지 않는다
+    assert "status: applied" in fb.read_text(encoding="utf-8")
+    assert any("발행 승인 접수" in m for m in vault["sent"])
+
+
+def test_reply_approval_resolves_card_from_message_body(vault):
+    # 다이제스트(여러 카드 나열)에 답장하면 target에 ID가 없다 —
+    # 사용자가 쓴 본문의 ID로 카드를 찾는다.
+    card, _ = _card_and_feedback(
+        vault, "DG-2026-0001 승인", target='"오늘의 발행 추천"')
+    counts = sf.apply_pending_feedback(dry_run=False)
+    assert counts.get("approved") == 1
+    assert "approval_status: approved" in card.read_text(encoding="utf-8")
+
+
+def test_reply_approval_rejected_on_wrong_stage(vault):
+    # 아직 초안이 없는 카드(stage: research)는 답장 승인이 거부된다.
+    card, fb = _card_and_feedback(
+        vault, "승인",
+        card_fm=CARD_FM.replace("stage: approval", "stage: research"))
+    counts = sf.apply_pending_feedback(dry_run=False)
+    assert counts.get("not_approvable") == 1
+    assert "approval_status: requested" in card.read_text(encoding="utf-8")
+    assert "status: error" in fb.read_text(encoding="utf-8")
+    assert any("승인할 단계가 아닙니다" in m for m in vault["sent"])

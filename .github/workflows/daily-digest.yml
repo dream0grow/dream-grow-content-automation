@@ -1,0 +1,67 @@
+# 드림그로우 일일 발행 추천 다이제스트 (P2)
+# 발행 승인 대기 카드 중 예상 반응 상위 N개(기본 5)를 골라 매일 아침 텔레그램으로
+# 추천한다. 추천 카드에 발행 심사(verify)가 없으면 그 자리에서 심사해 카드에 기록한다.
+# 사람은 다이제스트만 보고 "DG-YYYY-NNNN 승인" 답장(또는 옵시디언 승인)만 하면 된다.
+name: daily-digest
+
+on:
+  schedule:
+    # 매일 22:40 UTC = 익일 07:40 KST (매일 발제 07:10 직후, 아침에 결재할 수 있게)
+    - cron: "40 22 * * *"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "추천 개수 (비우면 기본 5)"
+        required: false
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      DG_DIGEST_COUNT: ${{ github.event.inputs.count || secrets.DG_DIGEST_COUNT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai pyyaml
+
+      # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Send daily digest
+        run: python3 -m orchestrator.daily_digest
+
+      # 추천 카드에 새로 기록된 발행 심사 섹션을 볼트에 커밋·push
+      - name: 볼트 카드 커밋
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "daily-digest[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "일일 다이제스트: 발행 심사 기록 $(date +%Y-%m-%d)"
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]

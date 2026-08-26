@@ -41,6 +41,17 @@ jobs:
       # 시크릿 DG_DEFAULT_PUBLISH_TIME으로 바꿀 수 있고, 미설정이면 21:00(저녁 9시).
       # 즉시 발행으로 되돌리려면 시크릿에 'off' 등 형식 밖 값을 넣으면 된다.
       DG_DEFAULT_PUBLISH_TIME: ${{ secrets.DG_DEFAULT_PUBLISH_TIME || '21:00' }}
+      # 3안 병렬 판정단(P4): OpenAI/Gemini 키가 있으면 첫 초안을 3개 모델로 병렬
+      # 생성해 심사 선발한다. 키가 없으면 자동으로 기존 단일 초안 경로.
+      # 모델 교체: DG_PANEL_MODEL_CLAUDE/OPENAI/GEMINI, 끄기: DG_PANEL_ENABLED=false
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      DG_PANEL_ENABLED: ${{ secrets.DG_PANEL_ENABLED }}
+      DG_PANEL_MODEL_CLAUDE: ${{ secrets.DG_PANEL_MODEL_CLAUDE }}
+      DG_PANEL_MODEL_OPENAI: ${{ secrets.DG_PANEL_MODEL_OPENAI }}
+      DG_PANEL_MODEL_GEMINI: ${{ secrets.DG_PANEL_MODEL_GEMINI }}
+      # 발행 심사관(P1) 끄기: DG_VERIFY_ENABLED=false
+      DG_VERIFY_ENABLED: ${{ secrets.DG_VERIFY_ENABLED }}
       # 카드 저장소 = 옵시디언 볼트(vault/). 경로 바꾸려면 DG_VAULT_ROOT (기본 vault/).
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}

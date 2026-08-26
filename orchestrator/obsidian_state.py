@@ -25,6 +25,8 @@ TEXT_FIELDS = {
     "manus_task_ids", "idempotency_key", "last_error",
     "publish_progress",  # 부분 발행 진행분(media_id CSV) — 재실행 시 이어서 발행
     "publish_at",  # 발행 예약 시각(KST, 'YYYY-MM-DD HH:MM') — 이 시각 전엔 발행 보류
+    "verify_score",    # 발행 심사(verify.py) 총점 "47/50" — 사람이 승인 판단에 참고
+    "verify_verdict",  # 발행 심사 판정: recommend | conditional | needs_review
 }
 ALL_FIELDS = SELECT_FIELDS | TEXT_FIELDS | {"published_url"}
 
@@ -123,6 +125,8 @@ def _card_from_file(path: Path) -> dict:
         "published_url": get("published_url"),
         "publish_progress": get("publish_progress"),
         "publish_at": get("publish_at"),
+        "verify_score": get("verify_score"),
+        "verify_verdict": get("verify_verdict"),
     }
 
 

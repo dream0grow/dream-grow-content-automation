@@ -46,6 +46,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `style_learn.py` | AI 원본 vs 사람 수정본 diff → Honcho 문체 학습 |
 | `self_improve.py` | 주간 회고 → 프롬프트 개선 큐시트(사람 승인 후 반영) |
 | `daily_intake.py` | 매일 새 주제 자동 발제 → intake 카드 생성 (이후 오케스트레이터가 초안까지 자동) |
+| `verify.py` | 발행 심사관(P1): 초안과 분리된 fresh context에서 루브릭+AI 티+사실 위험+보이스 검사 → 카드 `🔍 발행 심사` 섹션 + frontmatter(verify_score/verify_verdict). 승인은 항상 사람 |
+| `daily_digest.py` | 일일 발행 추천(P2): 승인 대기 카드 중 예상 반응 상위 5개 LLM 랭킹 → 심사 보강 → 텔레그램 다이제스트. 답장 "DG-ID 승인"으로 결재 |
 | `preview.py` | 발행 직전 드라이런: 초안 생성 후 스레드 분할/뉴스레터 HTML 렌더 (시크릿·발행 없이) |
 | `cardnews.py` | 초안 → 실사진 오버레이 카드뉴스 PNG (Pretendard, Playwright/Chromium) |
 | `thumbnail.py` | 유튜브 썸네일 자동화: 주제 → 문구(기대/증거/의문/공감) 생성·구조분석·디벨롭 → 1280×720 PNG. `data/thumbnail_patterns.md` 주입 |
@@ -57,6 +59,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 데이터: `data/benchmark_posts.md`(스레드 7구조·12훅·변주, CSV 분석), `data/hook_patterns.md`(후킹 패턴).
 워크플로우: `.github/workflows/orchestrator.yml`(30분 cron), `daily-intake.yml`(매일 07:10 KST 새 주제 발제),
+`daily-digest.yml`(매일 07:40 KST 발행 추천 5건 텔레그램),
 `self-improve.yml`(주간), `test-stibee.yml`(수동 발송 테스트), `test-cardnews.yml`(카드뉴스 실제 생성 테스트),
 `test-reels-video.yml`(릴스 영상 실제 생성 테스트).
 
@@ -89,7 +92,10 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 `DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DEFAULT_PUBLISH_TIME`(HH:MM KST 발행 예약 기본값 — orchestrator.yml에서 기본 `21:00`),
 `DG_DAILY_TOPIC_COUNT`(기본 1),
 `DG_DEFAULT_AUDIENCE`(기본 "초등 저학년 학부모"),
-`MUAPI_API_KEY`(릴스 영상 생성 — muapi.ai)/`DG_REELS_VIDEO_MODEL`(기본 `seedance-lite-t2v`)/`DG_REELS_VIDEO_RESOLUTION`(기본 720p)/`DG_REELS_MAX_SCENES`(기본 7)
+`MUAPI_API_KEY`(릴스 영상 생성 — muapi.ai)/`DG_REELS_VIDEO_MODEL`(기본 `seedance-lite-t2v`)/`DG_REELS_VIDEO_RESOLUTION`(기본 720p)/`DG_REELS_MAX_SCENES`(기본 7),
+`OPENAI_API_KEY`/`GOOGLE_API_KEY`(3안 병렬 판정단 — 없으면 판정단만 생략),
+`DG_PANEL_ENABLED`(기본 ON)/`DG_PANEL_MODEL_CLAUDE`(기본 `claude-opus-5`)/`DG_PANEL_MODEL_OPENAI`(기본 `gpt-5.6-sol`)/`DG_PANEL_MODEL_GEMINI`(기본 `gemini-3.1-pro`),
+`DG_VERIFY_ENABLED`(발행 심사관, 기본 ON), `DG_DIGEST_COUNT`(일일 추천 개수, 기본 5)
 
 ## 운영 — 자주 하는 작업
 
@@ -122,7 +128,39 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
-### 오즈모 나노 쇼츠 자동 편집 (2026-08-25, 브랜치 `claude/dji-osmo-nano-auto-edit-8m16fx`) — ⬅️ 이번 세션 작업
+### 발행 심사관 + 일일 추천 + 답장 승인 + 3사 판정단 (2026-08-26, 브랜치 `claude/sub-agent-automation-productivity-rlozob`) — ⬅️ 이번 세션 작업
+
+승인 병목(대기 44건, 발행 3건) 해소를 위해 **사람이 전문을 안 읽고도 결재**할 수 있는 근거를
+시스템이 만들도록 업그레이드. 승인 자체는 계속 사람이 한다(사용자 요청 — 자동발행 없음).
+- **P1 발행 심사관(`verify.py` + `prompts.VERIFY`)**: 초안 완성→승인 요청 사이에 fresh context
+  검증 — 루브릭 50점 + AI 티 잔존 인용 + 사실·수치 위험 문장 + 보이스 일치(10) →
+  recommend/conditional/needs_review 판정. 카드 `🔍 발행 심사` 섹션 + frontmatter
+  `verify_score`/`verify_verdict` 기록, 승인 요청 텔레그램에 요약 첨부. 소급:
+  `python3 -m orchestrator.verify --backfill` (orchestrator Run workflow → stage 칸은 못 쓰므로
+  daily-digest가 추천 카드에 한해 자동 소급). 끄기 `DG_VERIFY_ENABLED=false`.
+- **P2 일일 추천 다이제스트(`daily_digest.py` + `daily-digest.yml` 매일 07:40 KST)**: 승인 대기
+  카드 전체에서 훅·시의성·실용성 기준 LLM 랭킹 상위 `DG_DIGEST_COUNT`(기본 5)개 →
+  심사 없는 추천 카드는 그 자리에서 심사 → ID·훅·심사 요약·GitHub 링크·승인 방법을 담아
+  텔레그램 발송. 드라이런 검증 완료(개학 시즌 시의성 판단 정상).
+- **답장 승인(`script_feedback.py`)**: 알림/다이제스트에 **"DG-YYYY-NNNN 승인" 답장**만으로
+  `approval_status: approved` (LLM 안 거침, stage가 approval/publish_ready일 때만).
+  다이제스트처럼 여러 카드가 나열된 메시지에 답장하면 본문의 ID로 카드를 찾는다(승인 한정).
+  검수 미통과 카드는 기존 handle_final_approved 게이트가 차단·통지.
+- **P4 3안 병렬 판정단(`agent_dialogue._panel_first_draft` + `prompts.PANEL_JUDGE`)**: 첫 초안을
+  **Claude(`claude-opus-5`)/OpenAI(`gpt-5.6-sol`)/Gemini(`gemini-3.1-pro`)** 3개 모델이 같은
+  작가 프롬프트로 병렬 집필(ThreadPoolExecutor) → 심사가 1등 선발 + 2등의 좋은 표현 접붙임
+  재작성 1회 → 이후 비평가/윤리 루프는 기존 그대로. `llm.call_openai`/`call_gemini` 신설(raw
+  requests, max_completion_tokens/generateContent). 타사 키 없으면 자동으로 기존 단일 초안 경로.
+  모델 교체 `DG_PANEL_MODEL_*`, 끄기 `DG_PANEL_ENABLED=false`. Claude 최상위(fable-5)로 올리려면
+  `DG_PANEL_MODEL_CLAUDE=claude-fable-5`(비용 2배·거절 폴백 미구현이라 기본은 opus-5).
+- 테스트 20종 신규(verify 5, digest 5, panel 6, 답장 승인 4) — 전체 177종 통과.
+- 벤치마킹 리서치/제안 문서: `docs/서브에이전트-벤치마킹-생산성-제안.md` (X·유튜브 수집 루틴 포함).
+- **남은 사용자 액션**: ① 브랜치 검토/머지 ② (판정단용) OpenAI·Google API 키 발급 →
+  `OPENAI_API_KEY`/`GOOGLE_API_KEY` 시크릿 등록(없으면 판정단만 생략되고 나머지는 동작)
+  ③ 머지 후 Actions → daily-digest → Run workflow 1회 → 텔레그램 다이제스트 확인 →
+  마음에 드는 카드에 "DG-ID 승인" 답장으로 적체 해소 시작.
+
+### 오즈모 나노 쇼츠 자동 편집 (2026-08-25, 브랜치 `claude/dji-osmo-nano-auto-edit-8m16fx`)
 
 DJI 오즈모 나노 촬영본을 **로컬(맥/윈도우)에서 초벌 쇼츠로 자동 편집**하는 2층 구조를 추가했다.
 실행은 전부 사용자 컴퓨터(원본을 클라우드에 안 올림), 저장소는 규칙 보관·기기 간 동기화 용도.
