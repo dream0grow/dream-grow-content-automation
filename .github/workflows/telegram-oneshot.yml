@@ -1,0 +1,41 @@
+name: telegram-oneshot
+
+# Claude 세션에서 텔레그램으로 즉시 메시지를 보내는 통로.
+# 세션은 텔레그램 시크릿이 없으므로, 메시지를 .github/notify/telegram_oneshot.txt에
+# 써서 claude/* 브랜치에 push하면 이 워크플로우가 시크릿으로 대신 전송한다.
+# 해당 파일이 변경된 push에서만 실행되므로 중복 발송되지 않는다 (main에서는 미실행).
+on:
+  push:
+    branches:
+      - "claude/**"
+    paths:
+      - .github/notify/telegram_oneshot.txt
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Send Telegram message
+        run: |
+          python3 - <<'EOF'
+          from vault_pipeline import telegram_notify
+          text = open(".github/notify/telegram_oneshot.txt", encoding="utf-8").read()
+          ok = telegram_notify.send(text)
+          print("텔레그램 전송:", "성공" if ok else "실패 (시크릿 누락 또는 API 오류)")
+          raise SystemExit(0 if ok else 1)
+          EOF
