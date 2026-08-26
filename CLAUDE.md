@@ -122,6 +122,26 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
+### 릴스 원고 자동 추천 → 텔레그램 (2026-08-26, 브랜치 `claude/top-reels-content-selection-zh68y9`) — ⬅️ 이번 세션 작업
+
+`05 리뷰/대기`의 릴스 원고(132편+)를 매일 아침 3편씩 추천해 텔레그램으로 보내는 시스템.
+- **`vault_pipeline/reels_recommend.py`**: 릴스 원고(파일명 `원고_릴스_*` 또는 `채널: reels`) 중
+  `상태`가 완료(script_feedback.DONE_STATES — 발행완료 등)가 아닌 것을 후보로 → LLM(`llm.call_json`)이
+  후킹 강도·공감 폭·오늘 날짜 시의성으로 TOP 3 선정(이유 포함) → `telegram_notify.send`
+  (GitHub 원고 링크 첨부). **로테이션**: 장부 `_system/logs/reels_recommend_ledger.json`로 미추천
+  원고 우선, 소진되면 가장 오래된 추천분부터 순환. LLM 실패 시 건너뛰고(다음 날 재시도),
+  전송 성공 시에만 장부 기록. `--dry-run`/`--count` 지원.
+- **워크플로우 `reels-recommend.yml`**: cron `38 22 * * 0-4`(= 월~금 07:38 KST, 주말 제외) +
+  수동 실행(count/dry_run 입력). 장부 변경분은 볼트 커밋·push(경합 재시도).
+- **촬영 완료 처리(사용자 운영 규칙)**: 찍은 원고는 frontmatter `상태: 발행완료`로 바꾸고
+  `05 리뷰/완료/`로 이동 — 알림·핑퐁·추천 후보에서 모두 빠진다(`영상상태` 필드는 자동화 미사용, 기록용).
+- 첫 수동 추천 3편(선생님에게 찍히는 아이 vs / 학교 가기 싫다는 아이 / 스마트폰 뺏을수록)은
+  2026-08-26 텔레그램 전송 완료 + 장부에 시드 — 다음 회차부터 중복 없이 새 원고 추천.
+  일회성 `notify-top-reels.yml`은 이 시스템으로 대체·삭제.
+- 테스트 8종 신규(`test_reels_recommend.py`). 전체 165종 통과.
+- **남은 사용자 액션**: ① 이 브랜치 검토/머지(머지해야 main cron이 돈다) ② (선택) Actions →
+  reels-recommend → dry_run=true로 1회 수동 실행해 선정 품질 확인.
+
 ### 오즈모 나노 쇼츠 자동 편집 (2026-08-25, 브랜치 `claude/dji-osmo-nano-auto-edit-8m16fx`) — ⬅️ 이번 세션 작업
 
 DJI 오즈모 나노 촬영본을 **로컬(맥/윈도우)에서 초벌 쇼츠로 자동 편집**하는 2층 구조를 추가했다.
