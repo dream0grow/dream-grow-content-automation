@@ -644,8 +644,9 @@ def find_assets(topic: str) -> list[str]:
 
 def save_render_to_vault(topic: str, png: Path, jpg: Path) -> str:
     """렌더 결과를 볼트 파이프라인/썸네일/에 저장하고 상대 경로(png)를 반환."""
-    from vault_pipeline.vault_io import now_kst, vault_root
-    folder = vault_root() / "파이프라인" / "썸네일"
+    from vault_pipeline.vault_io import now_kst, vault_root  # noqa: F401 — now_kst 사용
+    from orchestrator.obsidian_state import _pipeline_base
+    folder = _pipeline_base() / "썸네일"
     folder.mkdir(parents=True, exist_ok=True)
     stem = f"{now_kst().strftime('%Y%m%d')}_{_file_token(topic)[:30] or '무제'}"
     n, name = 0, stem
@@ -654,7 +655,7 @@ def save_render_to_vault(topic: str, png: Path, jpg: Path) -> str:
         name = f"{stem}-{n}"
     (folder / f"{name}.png").write_bytes(png.read_bytes())
     (folder / f"{name}.jpg").write_bytes(jpg.read_bytes())
-    return f"파이프라인/썸네일/{name}.png"
+    return (folder / f"{name}.png").relative_to(vault_root()).as_posix()
 
 
 # ---------- 시트 모드 ----------

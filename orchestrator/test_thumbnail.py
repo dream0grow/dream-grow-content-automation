@@ -315,7 +315,7 @@ def test_save_render_to_vault(tmp_path, monkeypatch):
     png = tmp_path / "a.png"; png.write_bytes(b"png")
     jpg = tmp_path / "a.jpg"; jpg.write_bytes(b"jpg")
     rel = thumbnail.save_render_to_vault("초등 고전 독서", png, jpg)
-    assert rel.startswith("파이프라인/썸네일/") and rel.endswith(".png")
+    assert rel.startswith("SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/썸네일/") and rel.endswith(".png")
     assert (tmp_path / "vault" / rel).read_bytes() == b"png"
     assert (tmp_path / "vault" / rel.replace(".png", ".jpg")).read_bytes() == b"jpg"
     # 같은 날 같은 주제 재렌더 → -1 파일로 보존

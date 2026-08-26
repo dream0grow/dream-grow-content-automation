@@ -206,6 +206,20 @@ def test_max_per_run_caps_publishing(vault, monkeypatch):
     assert counts["published"] == 1 and counts["waiting"] == 1
 
 
+def test_legacy_pipeline_cards_adopted(vault):
+    # yt_research 사이트가 옛 vault/파이프라인/활성에 만든 카드는 다음 실행에 입양된다.
+    from orchestrator import obsidian_state as st
+    legacy = vault / st.LEGACY_PIPELINE_BASE / "활성"
+    legacy.mkdir(parents=True)
+    (legacy / "원고_스레드_기타_옛경로_DG-2026-0001.md").write_text(
+        "---\ntopic: 옛 경로 카드\ncontent_id: DG-2026-0001\nstage: intake\n"
+        "status: queued\n---\n", encoding="utf-8")
+    cards = store.query_cards(stage="intake")  # require_backend → 입양
+    assert [c["content_id"] for c in cards] == ["DG-2026-0001"]
+    assert (st._active_dir() / "원고_스레드_기타_옛경로_DG-2026-0001.md").exists()
+    assert not (vault / st.LEGACY_PIPELINE_BASE).exists()  # 빈 옛 폴더는 정리
+
+
 def test_newsletter_without_stibee_holds(vault, monkeypatch):
     from orchestrator import stibee
     monkeypatch.setattr(stibee, "available", lambda: False)

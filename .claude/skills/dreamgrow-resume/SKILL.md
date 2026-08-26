@@ -17,7 +17,7 @@ description: 드림그로우 콘텐츠 자동화 작업을 새 세션에서 이�
 CLAUDE.md의 "현재 상태"는 갱신이 늦을 수 있으니, 실제를 확인한다:
 
 1. **볼트 파이프라인 카드** 조회 — 처리 대기/승인 대기 카드를 본다.
-   - 카드 폴더: `vault/파이프라인/활성/`(처리 중) · `vault/파이프라인/발행완료/`(완료). 볼트 루트는 `DG_VAULT_ROOT`(기본 `vault/`).
+   - 카드 폴더: `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/`(처리 중) · `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/발행완료/`(완료). 볼트 루트는 `DG_VAULT_ROOT`(기본 `vault/`).
    - `Glob`/`Grep`으로 카드 md를 훑고, 특정 카드는 `Read`로 연다. frontmatter의 stage/status/approval_status를 본다.
    - 주목: `stage`가 `keyword_approval`/`approval`이고 `status=needs_human`인 카드 = 사용자 승인 대기.
 2. **GitHub** 확인 — 열린 PR과 main 머지 상태, 최근 Actions 실행 결과.

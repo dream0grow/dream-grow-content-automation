@@ -1,6 +1,6 @@
 """옵시디언 볼트 카드 저장소 — 파이프라인의 유일한 저장소 (노션 철수 완료)
 
-카드 = `vault/파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<content_id>.md`
+카드 = `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<content_id>.md`
 (SNS 콘텐츠 제작 시스템 `00 시스템/03 파일명 규칙.md`을 따른다 — 형식·카테고리로 정렬돼 분류가 쉽다)
 - frontmatter = 라우팅 속성 (stage, status, approval_status …)
 - 본문 `## 제목 — 타임스탬프` 섹션 = 단계 산출물
@@ -33,18 +33,59 @@ def _vault() -> Path:
     return Path(os.getenv("DG_VAULT_ROOT", str(PROJECT_ROOT / "vault")))
 
 
+# 카드 저장소 위치 — SNS 콘텐츠 제작 시스템 폴더 트리 안(통합, 2026-08-26).
+# 예전 `vault/파이프라인/`은 폐기됐지만, yt_research 사이트 등 외부 작성자가
+# 옛 경로에 카드를 만들 수 있어 require_backend가 발견 즉시 새 위치로 입양한다.
+PIPELINE_BASE_DEFAULT = "SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인"
+LEGACY_PIPELINE_BASE = "파이프라인"
+
+
+def _pipeline_base() -> Path:
+    return _vault() / os.getenv("DG_PIPELINE_DIR", PIPELINE_BASE_DEFAULT).strip("/")
+
+
 def _active_dir() -> Path:
-    return _vault() / "파이프라인" / "활성"
+    return _pipeline_base() / "활성"
 
 
 def _done_dir() -> Path:
-    return _vault() / "파이프라인" / "발행완료"
+    return _pipeline_base() / "발행완료"
+
+
+def _adopt_legacy_cards() -> None:
+    """옛 `vault/파이프라인/{활성,발행완료}`에 남은 카드를 새 위치로 옮긴다.
+
+    yt_research 사이트(lib/pipeline.ts)가 아직 옛 경로에 카드를 만들 수 있다 —
+    다음 실행(require_backend 경유)에서 자동으로 주워 오므로 그쪽 배포와 무관하게
+    파이프라인이 끊기지 않는다. 옮긴 뒤 빈 옛 폴더는 정리한다(idempotent).
+    """
+    legacy_base = _vault() / LEGACY_PIPELINE_BASE
+    if not legacy_base.is_dir() or legacy_base == _pipeline_base():
+        return
+    for sub, dest in (("활성", _active_dir()), ("발행완료", _done_dir())):
+        src = legacy_base / sub
+        if not src.is_dir():
+            continue
+        for p in sorted(src.glob("*.md")):
+            target = dest / p.name
+            if target.exists():  # 같은 이름이 이미 있으면 옛 파일을 남겨 사람이 확인
+                continue
+            p.rename(target)
+        try:
+            src.rmdir()  # 비었을 때만 성공
+        except OSError:
+            pass
+    try:
+        legacy_base.rmdir()
+    except OSError:
+        pass
 
 
 def require_backend() -> None:
     """볼트 준비 — 카드 폴더만 있으면 된다 (외부 키 불필요)."""
     _active_dir().mkdir(parents=True, exist_ok=True)
     _done_dir().mkdir(parents=True, exist_ok=True)
+    _adopt_legacy_cards()
 
 
 def _now() -> str:

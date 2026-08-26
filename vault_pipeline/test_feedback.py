@@ -94,7 +94,7 @@ def test_no_style_learning_without_original(vault):
 
 def _make_pipeline_card(vault, *, stage="published", status="done", draft_len=200):
     """파이프라인 발행 카드 파일을 만든다 (obsidian_state 포맷)."""
-    active = vault / "파이프라인/활성"
+    active = vault / "SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성"
     active.mkdir(parents=True, exist_ok=True)
     body_draft = "아이의 오답을 함께 보는 저녁 대화가 배움을 바꿉니다. " * (draft_len // 30 + 1)
     (active / "DG-2026-0001 오답 대화.md").write_text(
@@ -128,7 +128,7 @@ def test_pipeline_skips_unpublished_and_stub(vault):
     assert feedback.find_published_pipeline() == []
     # 발행됐지만 본문이 스텁(<100자)이면 제외
     import shutil
-    shutil.rmtree(vault / "파이프라인")
+    shutil.rmtree(vault / "SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인")
     _make_pipeline_card(vault, draft_len=10)
     assert feedback.find_published_pipeline() == []
 

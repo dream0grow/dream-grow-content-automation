@@ -71,7 +71,9 @@ REVISION_SECTION = "📝 수정 요청"
 
 
 def _active_cards_dir() -> Path:
-    return vault_root() / "파이프라인" / "활성"
+    # 카드 저장소 경로의 단일 진실은 obsidian_state — SNS 트리 통합/레거시 입양 포함.
+    from orchestrator.obsidian_state import _active_dir
+    return _active_dir()
 
 
 def _script_dir() -> Path:

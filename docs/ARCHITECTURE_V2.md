@@ -6,7 +6,7 @@
 
 | # | 결정 | 구현 방식 |
 |---|---|---|
-| 1 | 상태 저장소는 **옵시디언 볼트(Git)** | `vault/파이프라인/활성/`의 md 카드가 단일 진실 공급원. 카드 frontmatter의 stage/status 변경이 곧 트리거. 동기화는 GitHub Actions가 볼트를 커밋·push하는 git 단일 경로 |
+| 1 | 상태 저장소는 **옵시디언 볼트(Git)** | `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/`의 md 카드가 단일 진실 공급원. 카드 frontmatter의 stage/status 변경이 곧 트리거. 동기화는 GitHub Actions가 볼트를 커밋·push하는 git 단일 경로 |
 | 2 | **기존 시스템 통합** | claude_client, memory_manager(Honcho), diff_learner를 그대로 재사용. 신규 코드는 `orchestrator/`에만 추가 |
 | 3 | **Manus는 외부 리서치 전담** | `task.create`는 리서치 stage에서만 호출. 키 미설정 시 Claude 리서치로 폴백 |
 | 4 | **핸드폰 연속성 + 24시간 가동** | GitHub Actions cron이 30분마다 볼트를 폴링. 운영자는 옵시디언 모바일 앱(또는 텔레그램)에서 카드 생성·승인만 하면 됨 (Mac 불필요) |
@@ -19,7 +19,7 @@
 [운영자: 옵시디언 모바일/데스크톱 · 텔레그램]
    │  카드 생성 (주제 입력) · 승인 (frontmatter의 approval_status 변경)
    ▼
-[볼트: vault/파이프라인/활성/*.md]  ← 단일 진실 공급원 (git으로 동기화)
+[볼트: vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/*.md]  ← 단일 진실 공급원 (git으로 동기화)
    │  frontmatter: stage / status / approval_status
    ▼
 [GitHub Actions cron (30분)] → python3 -m orchestrator.run
@@ -52,7 +52,7 @@
 4. 자가 학습은 제안까지만 자동. **프롬프트 실제 변경은 사람 승인 후** 적용.
 5. API 키는 GitHub Secrets / .env에만. 볼트 카드·로그에 기록 금지.
 
-## 3. 볼트 카드 스키마 (`vault/파이프라인/활성/<content_id> <주제>.md`)
+## 3. 볼트 카드 스키마 (`vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/<content_id> <주제>.md`)
 
 카드는 md 파일이다. 아래 속성은 파일 상단 **frontmatter(YAML)**에 담긴다.
 
@@ -73,11 +73,11 @@
 | idempotency_key | 중복 실행 방지 |
 | last_error | 최근 오류 |
 
-리서치 요약·키워드 표·브리프·초안·검수 결과·에이전트 대화록은 카드 **본문**에 `## 제목 — 타임스탬프` 섹션으로 단계별 누적된다 (노션 시절의 페이지 토글 블록 대응). 발행이 끝난 카드는 `vault/파이프라인/발행완료/`로 옮겨진다.
+리서치 요약·키워드 표·브리프·초안·검수 결과·에이전트 대화록은 카드 **본문**에 `## 제목 — 타임스탬프` 섹션으로 단계별 누적된다 (노션 시절의 페이지 토글 블록 대응). 발행이 끝난 카드는 `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/발행완료/`로 옮겨진다.
 
 ## 4. 핸드폰 운영 시나리오
 
-1. 출근길에 옵시디언 모바일에서 `vault/파이프라인/활성/`에 새 카드 md 생성: 파일명·topic에 주제, frontmatter에 audience 입력, stage=intake, status=queued
+1. 출근길에 옵시디언 모바일에서 `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/`에 새 카드 md 생성: 파일명·topic에 주제, frontmatter에 audience 입력, stage=intake, status=queued
 2. 30분 내 GitHub Actions가 볼트를 폴링해 감지 → 리서치 → 키워드 점수화까지 자동 진행
 3. 점심에 텔레그램 알림 확인: keyword_approval 카드에서 키워드 표(본문 섹션) 확인 → frontmatter의 `approved_keyword`에 선택 키워드 입력 + approval_status=approved
 4. 오후에 초안 완성 + 검수 결과가 카드 본문에 쌓임 → 승인하면 publish_ready
@@ -101,7 +101,7 @@
 
 ## 6. 카드 저장소 (볼트)
 
-- **카드 폴더**: `vault/파이프라인/활성/`(처리 중) · `vault/파이프라인/발행완료/`(발행 완료)
+- **카드 폴더**: `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/`(처리 중) · `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/발행완료/`(발행 완료)
 - 볼트 루트는 `DG_VAULT_ROOT`(기본 `vault/`). 백엔드 구현은 `orchestrator/obsidian_state.py`.
 - 동기화는 GitHub Actions가 볼트를 커밋·push하는 **git 단일 경로**다 (Obsidian Sync 아님).
 - 카드 저장소 백엔드는 이제 옵시디언 하나뿐이다. `DG_STATE_BACKEND`로 노션/옵시디언을 고르던 이중 백엔드는 폐기됐고 노션은 완전히 철수했다.

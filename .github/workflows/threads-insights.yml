@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "빈 값=전체(수집+리포트), update=수집만, report=리포트만"
+        description: "빈 값=전체(수집+리포트), check=권한 예비 점검만, update=수집만, report=리포트만"
         required: false
 
 concurrency:

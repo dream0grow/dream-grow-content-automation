@@ -136,7 +136,7 @@ def test_process_row_creates_card_and_review_copy(tmp_path, monkeypatch):
     result = youtube_body.process_row(_row(), cols, rownum=13, audience="초등 학부모")
 
     # ① 활성 카드 생성 — 파일명은 main 통일 규칙(card_filename), 재처리되지 않는 상태
-    cards = list((tmp_path / "파이프라인" / "활성").glob("*.md"))
+    cards = list((tmp_path / "SNS 콘텐츠 제작 시스템" / "06 제작" / "50 파이프라인" / "활성").glob("*.md"))
     assert len(cards) == 1
     assert cards[0].name.startswith("원고_YT롱폼_독서_")
     assert cards[0].name.endswith("_DG-2026-0001.md")
@@ -159,7 +159,7 @@ def test_sync_ledger_rows_backfills_empty_link_and_body(tmp_path, monkeypatch):
     """Z열(본문)을 나중에 만든 경우 — 처리 완료 행의 빈 칸을 카드에서 백필한다."""
     monkeypatch.setenv("DG_VAULT_ROOT", str(tmp_path))
     card_name = "DG-2026-0049 원고_YT롱폼_독서_초등+고전+독서.md"
-    card_dir = tmp_path / "파이프라인" / "활성"
+    card_dir = tmp_path / "SNS 콘텐츠 제작 시스템" / "06 제작" / "50 파이프라인" / "활성"
     card_dir.mkdir(parents=True)
     (card_dir / card_name).write_text(
         "---\ntopic: t\n---\n\n## ✍️ 영상 원고\n\n# 영상 원고 -- t\n\n"

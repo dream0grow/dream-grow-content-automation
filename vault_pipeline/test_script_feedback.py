@@ -205,7 +205,7 @@ CARD_FEEDBACK_FM = (
 
 
 def test_apply_card_target_records_revision_request(vault):
-    active = vault["root"] / "파이프라인" / "활성"
+    active = vault["root"] / "SNS 콘텐츠 제작 시스템" / "06 제작" / "50 파이프라인" / "활성"
     active.mkdir(parents=True)
     card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
     card.write_text(CARD_FM, encoding="utf-8")
@@ -269,7 +269,7 @@ def test_chat_feedback_answers_instead_of_revising(vault, monkeypatch):
 
 def test_chat_feedback_on_card_does_not_requeue(vault, monkeypatch):
     # 발행 승인 대기 카드에 온 대화 메시지가 revision_requested로 디큐되면 안 된다.
-    active = vault["root"] / "파이프라인" / "활성"
+    active = vault["root"] / "SNS 콘텐츠 제작 시스템" / "06 제작" / "50 파이프라인" / "활성"
     active.mkdir(parents=True)
     card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
     card.write_text(CARD_FM, encoding="utf-8")
@@ -333,7 +333,7 @@ def test_announce_skips_old_backlog_and_published(vault):
 # ---------- 열람 사본(스레드_/뉴스레터_) 피드백 → 카드 라우팅 ----------
 
 def test_review_copy_feedback_routes_to_card(vault):
-    active = vault["root"] / "파이프라인" / "활성"
+    active = vault["root"] / "SNS 콘텐츠 제작 시스템" / "06 제작" / "50 파이프라인" / "활성"
     active.mkdir(parents=True)
     card = active / "DG-2026-0001 받아쓰기 시험만 보면 우는 아이.md"
     card.write_text(CARD_FM, encoding="utf-8")

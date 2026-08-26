@@ -12,7 +12,7 @@ GitHub Actions가 cron으로 카드 저장소를 폴링하고, 사람은 모바�
 흐름: `intake → 리서치 → 키워드 점수화 → ⏸️키워드 승인(자동승인 기본 ON) → 브리프 → 작가↔비평가↔검수 토론 초안 → 검수/평가 → ⏸️발행 승인 → 발행(Threads/스티비)`
 
 **저장소 = 옵시디언 볼트 하나** (노션 철수 완료). 카드는
-`vault/파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<DG-ID>.md`
+`vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<DG-ID>.md`
 (파일명 규칙: 볼트 `SNS 콘텐츠 제작 시스템/00 시스템/03 파일명 규칙.md`, 생성은 `card_filename`),
 frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹션`이 단계 산출물이다
 (`orchestrator/obsidian_state.py`, 볼트 경로 `DG_VAULT_ROOT` 기본 `vault/`). 호출부는 파사드
@@ -26,7 +26,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 - 개발 브랜치: **`claude/dreamgrow-orchestrator-review-z4zo4b`** (모든 작업은 여기서, main에 PR로 머지)
 - 저장소: `dream0grow/dream-grow-content-automation`
-- 카드 저장소: 옵시디언 볼트 `vault/파이프라인/{활성,발행완료}/` (별도 DB 없음, git으로 동기화)
+- 카드 저장소: 옵시디언 볼트 `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/{활성,발행완료}/` (별도 DB 없음, git으로 동기화)
 - 볼트 경로 override: `DG_VAULT_ROOT` (기본 `vault/`)
 - 알림 채널: 텔레그램 (`TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`)
 
@@ -36,7 +36,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 |---|---|
 | `run.py` | stage 상태 머신 (DISPATCH) + 고아 청소·실패 재시도. cron이 `python3 -m orchestrator.run` 실행 |
 | `state.py` | 저장소 파사드 — 옵시디언 볼트 백엔드를 노출. 호출부(`store`)는 이 모듈만 본다 |
-| `obsidian_state.py` | 볼트 카드 저장소 — `vault/파이프라인/` md 카드 읽기/쓰기, 텔레그램+결재함 알림(`notify`) |
+| `obsidian_state.py` | 볼트 카드 저장소 — `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/` md 카드 읽기/쓰기, 텔레그램+결재함 알림(`notify`) |
 | `prompts.py` | 브랜드 보이스/룰북 + 에이전트 프롬프트 (리서치/키워드/브리프/작가/비평가/검수/평가/회고) |
 | `agent_dialogue.py` | 작가↔비평가↔검수 토론 루프 + 벤치마킹/후킹 로드 |
 | `manus_research.py` | Manus 외부 리서치(전담). 25분 내 결과 없으면 Claude 폴백 |
@@ -93,10 +93,10 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 운영 — 자주 하는 작업
 
-카드는 볼트 `vault/파이프라인/활성/`의 md 파일이다. 승인은 카드 frontmatter를 바꾸는 것
+카드는 볼트 `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/`의 md 파일이다. 승인은 카드 frontmatter를 바꾸는 것
 (옵시디언/텔레그램). 사람이 바꾼 frontmatter를 cron이 감지해 다음 단계를 돌린다.
 
-- **새 글 만들기**: `vault/파이프라인/활성/`에 카드 생성 (frontmatter `stage: intake`, `status: queued`,
+- **새 글 만들기**: `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/`에 카드 생성 (frontmatter `stage: intake`, `status: queued`,
   `format: thread`/`newsletter`/`youtube`(유튜브 롱폼 원고, 콤마 혼합 가능), `audience` 입력).
   매일 발제(`daily-intake`)와 yt_research 사이트 「파이프라인 발제 🚀」도 카드를 만든다.
 - **글감 카드 (완성 원고 기반)**: 카드 본문에 `## 📄 글감` 섹션으로 원문을 붙여넣으면
@@ -177,6 +177,19 @@ SNS 시스템의 원래 흐름 D(05 리뷰/대기 → 리뷰완료+발행시간 
   - 필요 권한: THREADS_ACCESS_TOKEN에 `threads_manage_insights`(+`threads_manage_replies`
     댓글 분석용). 없으면 수집만 실패 통지, 파이프라인엔 영향 없음.
   - 테스트 4종 신규(test_threads_insights), 전체 178종 통과.
+- **4차 확장(같은 세션) — vault/파이프라인 폐기, 카드 저장소 SNS 트리 통합**:
+  사용자 결정으로 카드 저장소를 `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/
+  {활성,발행완료,썸네일}`로 이전(git mv 62카드+썸네일 188파일). `vault/파이프라인/` 삭제.
+  - `obsidian_state`가 경로의 단일 진실(`_pipeline_base`, `DG_PIPELINE_DIR` override).
+    script_feedback/youtube_body/thumbnail의 하드코딩 경로를 전부 여기로 수렴.
+  - **레거시 입양**: yt_research 사이트(lib/pipeline.ts)는 아직 옛 경로에 카드를 만든다 —
+    `require_backend`의 `_adopt_legacy_cards`가 발견 즉시 새 위치로 옮기므로 그쪽 배포와
+    무관하게 동작(그쪽 저장소는 나중에 경로만 맞추면 됨). 프론트매터는 영어 키 유지.
+  - **`threads_insights.py --check`**: 토큰·threads_manage_insights 권한 예비 점검 모드
+    (계정+게시물 인사이트 1건씩 호출, 결과 텔레그램 통지). threads-insights.yml
+    Run workflow에서 mode=check로 실행. Claude는 워크플로우 실행 권한 없음(403) —
+    사용자가 클릭해야 함.
+  - 테스트 fixture 경로 갱신 + 입양 테스트 1종, 전체 179종 통과.
 - **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② 05 리뷰/대기에서 발행할 원고 골라
   `상태: 리뷰완료`(또는 텔레그램 알림에 "발행해줘" 답장) — 그날 21시 자동 발행.
   하루 1~2건 승인 권장 ③ 05 리뷰/완료의 옛 승인 2건은 첫 실행 때 보류 통지가 오면 정리.
@@ -274,7 +287,7 @@ DJI 오즈모 나노 촬영본을 **로컬(맥/윈도우)에서 초벌 쇼츠로
   행 맥락(S 만든 제목, L 키워드, E~H 시청자 분석, M 디벨롭) 수집 → ①필수 메시지 정리(T08,
   `prompts.YOUTUBE_BODY_MESSAGES`) ②본문·마무리·제작 메모 집필(`prompts.YOUTUBE_BODY`,
   보이스 프로필+HUMANIZE_RULES 주입). **도입부는 사용자 원문 그대로 보존**(코드로 조립).
-- 완성 원고는 `vault/파이프라인/활성/` 카드(stage: draft, status: needs_human, format: youtube —
+- 완성 원고는 `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/` 카드(stage: draft, status: needs_human, format: youtube —
   DISPATCH에 안 걸려 재처리 없음) + `05 리뷰/대기` 사본(script_feedback 텔레그램 핑퐁) 저장.
   카드 파일명은 main의 통일 규칙 그대로(`card_filename` — `원고_YT롱폼_<카테고리>_<키워드>_<DG-ID>.md`).
   시트 되써넣기: 「완성 원고」열(Y)=카드 링크, **「본문」열(Z)=낭독분(본문+마무리, 제작 메모 제외)**.
@@ -288,7 +301,7 @@ DJI 오즈모 나노 촬영본을 **로컬(맥/윈도우)에서 초벌 쇼츠로
   (영상 9편+커뮤니티 반응 17건 딥리서치. 유튜브 댓글 직접 수집은 프록시 차단 → Threads/Q&A 대체 명시)
 - T08 → `SNS…/06 제작/52 원고/초등 고전 독서_필수 메시지 정리.md` (사용자 핵심 메시지:
   '책을 즐기는 사람' 정체성 형성 → 재미 사다리 → 쉬운 고전·소설 중심)
-- 완성 원고(도입부 수정본+본문) → `vault/파이프라인/활성/원고_YT롱폼_독서_초등+고전+독서를_DG-2026-0050.md`
+- 완성 원고(도입부 수정본+본문) → `vault/SNS 콘텐츠 제작 시스템/06 제작/50 파이프라인/활성/원고_YT롱폼_독서_초등+고전+독서를_DG-2026-0050.md`
   (윤문 스킬 통과). 장부에 카드 참조 시드 완료 — 다음 워크플로우 실행 때 시트 Y13(링크)·Z13(본문) 백필.
 - 사용자 완료(2026-08-19): `GSHEET_SA_JSON` 시크릿 등록, 시트에 Z열 「본문」 생성, main 머지.
 - **남은 사용자 액션**: Actions → youtube-body Run workflow 1회 실행(또는 2시간 cron 대기)

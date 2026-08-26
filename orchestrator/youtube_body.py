@@ -249,13 +249,16 @@ def process_row(row: list[str], cols: dict[str, int], rownum: int,
 
 def card_link(page_id: str) -> str:
     """카드 GitHub blob URL — 이 모듈이 만드는 카드는 항상 활성 폴더에 있다."""
+    from orchestrator.obsidian_state import _active_dir, _vault
     from vault_pipeline import telegram_notify
-    return telegram_notify.note_url(f"파이프라인/활성/{Path(page_id).name}")
+    rel = (_active_dir() / Path(page_id).name).relative_to(_vault()).as_posix()
+    return telegram_notify.note_url(rel)
 
 
 def read_card_body(card_name: str) -> str:
     """활성 카드 파일에서 낭독분(본문+마무리)을 읽는다 — 백필용."""
-    path = vault_root() / "파이프라인" / "활성" / card_name
+    from orchestrator.obsidian_state import _active_dir
+    path = _active_dir() / card_name
     try:
         return extract_body(path.read_text(encoding="utf-8"))
     except OSError:

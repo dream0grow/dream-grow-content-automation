@@ -46,7 +46,7 @@ def export(card: dict, fmt: str, draft: str) -> str:
         "상태: 리뷰대기",
         f"생성일: {date}",
         f"카테고리: {card.get('approved_keyword') or ''}",
-        f"원본: 파이프라인/활성 카드 {content_id}",
+        f"원본: 파이프라인 활성 카드 {content_id}",
         "검수상태: 대기",
         "generator: dreamgrow-orchestrator",
         "---",

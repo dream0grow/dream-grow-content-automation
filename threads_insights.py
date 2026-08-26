@@ -1058,10 +1058,58 @@ def run_report(published_files: list = None):
         print(f"  [경고] 텔레그램 요약 발송 실패: {e}")
 
 
+def run_check() -> bool:
+    """토큰·권한 예비 점검 — 계정/게시물 인사이트를 1건씩만 호출해 확인한다.
+
+    threads_manage_insights 권한이 토큰에 없으면 여기서 바로 드러난다.
+    결과는 stdout과 텔레그램으로 보고한다. 수집/리포트/발행에는 영향 없음.
+    """
+    print("[점검] Threads Insights 권한 예비 점검")
+    if not check_api_config():
+        _notify_check("❌ Threads 점검 실패: THREADS_ACCESS_TOKEN/THREADS_USER_ID "
+                      "Secret이 비어 있습니다.")
+        return False
+    ok_account = fetch_account_insights(days=7)
+    if ok_account:
+        print(f"  계정 인사이트 OK — 7일 조회수 {ok_account.get('views', '?')}")
+    else:
+        print("  계정 인사이트 실패 (위 API 오류 참조)")
+    ok_post = None
+    files = find_published_files()
+    if files:
+        ok_post = fetch_post_insights(files[0].get("thread_id", ""))
+        print(f"  게시물 인사이트 {'OK' if ok_post else '실패'} — {files[0]['_filename']}")
+    else:
+        print("  게시물 인사이트: thread_id 있는 발행완료 파일이 없어 건너뜀")
+    passed = bool(ok_account) or bool(ok_post)
+    if passed:
+        _notify_check("✅ Threads Insights 권한 점검 통과 — 주간 성과 수집이 "
+                      "정상 동작합니다. (계정 "
+                      + ("OK" if ok_account else "실패") + " / 게시물 "
+                      + ("OK" if ok_post else ("실패" if files else "대상 없음")) + ")")
+    else:
+        _notify_check("❌ Threads Insights 권한 점검 실패 — 토큰에 "
+                      "threads_manage_insights 권한이 없거나 만료됐을 수 있습니다. "
+                      "developers.facebook.com 앱에서 권한을 추가해 토큰을 재발급하고 "
+                      "THREADS_ACCESS_TOKEN Secret을 갱신하세요.")
+    return passed
+
+
+def _notify_check(message: str) -> None:
+    try:
+        from vault_pipeline import telegram_notify
+        telegram_notify.send(message)
+    except Exception:  # noqa: BLE001 — 통지는 부가 기능
+        pass
+
+
 def main():
     dry_run = "--dry-run" in sys.argv
     mode_update = "--update" in sys.argv
     mode_report = "--report" in sys.argv
+
+    if "--check" in sys.argv:
+        sys.exit(0 if run_check() else 1)
 
     now = datetime.now()
     print(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}] Threads Insights 수집기")
