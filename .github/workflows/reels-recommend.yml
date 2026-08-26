@@ -1,0 +1,67 @@
+# 릴스 원고 자동 추천 — 매일 아침 TOP 3를 텔레그램으로 (월~금, 주말 제외)
+# 07:38 KST = 22:38 UTC 전날 (일~목 UTC = 월~금 KST). 정시 cron 누락이 잦아 38분 사용.
+name: reels-recommend
+
+on:
+  schedule:
+    - cron: "38 22 * * 0-4"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "추천 개수"
+        required: false
+        default: "3"
+      dry_run:
+        description: "true면 전송 없이 선정만"
+        required: false
+        default: "false"
+
+jobs:
+  recommend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv pyyaml
+
+      # ANTHROPIC_API_KEY가 없으면 Claude Max 구독(CLAUDE_CODE_OAUTH_TOKEN)으로 실행
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run reels recommend
+        run: |
+          COUNT="${{ github.event.inputs.count }}"
+          EXTRA=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then EXTRA="--dry-run"; fi
+          python3 -m vault_pipeline.reels_recommend --count "${COUNT:-3}" $EXTRA
+
+      # 추천 장부(_system/logs) 변경분을 볼트에 커밋·push (경합 재시도)
+      - name: 볼트 커밋
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "reels-recommend[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "릴스 추천 장부 갱신 $(date +%Y-%m-%d)"
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]
