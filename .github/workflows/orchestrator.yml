@@ -76,6 +76,12 @@ jobs:
         if: ${{ github.event.inputs.stage == '' }}
         run: python3 -m vault_pipeline.script_feedback
 
+      # SNS 콘텐츠 제작 시스템 05 리뷰 원고 직접 발행 — 상태: 리뷰완료가 발행 승인.
+      # 핑퐁 다음에 돌아 '발행해줘' 답장으로 승인된 원고가 같은 실행에서 게이트를 탄다.
+      - name: 05 리뷰 원고 발행 (리뷰완료 → Threads/스티비)
+        if: ${{ github.event.inputs.stage == '' }}
+        run: python3 -m orchestrator.sns_publish
+
       # 카드 변경분을 볼트에 커밋·push (git이 유일한 동기화 경로)
       - name: 볼트 카드 커밋
         run: |

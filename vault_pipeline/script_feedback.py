@@ -208,8 +208,9 @@ def announce_new_scripts(dry_run: bool, max_items: int = DEFAULT_MAX) -> list[st
             f"{head}\n"
             f"원고: {s['name']}\n"
             f"{script_links(s['name'])}\n\n"
-            "이 메시지에 답장으로 수정 의견을 보내면 다음 실행에 반영됩니다. "
-            "(예: 도입부를 더 짧게, 사례를 교실 장면으로)"
+            "이 메시지에 답장으로 수정 의견을 보내면 다음 실행에 반영되고, "
+            "'발행해줘'라고 답장하면 발행 승인됩니다. "
+            "(예: 도입부를 더 짧게 / 발행해줘 / 내일 21시에 발행해줘)"
         )
         ok = False if dry_run else telegram_notify.send(msg)
         log_line(f"원고 알림{'(dry)' if dry_run else ''}: {s['name']}"
@@ -354,16 +355,63 @@ def _feedback_context(card_path: Path | None, target_path: Path | None) -> str:
 
 
 def _triage_feedback(fb: dict, context: str) -> dict:
-    """메시지가 '수정 지시'인지 '대화/질문'인지 판정. 실패 시 revise(기존 동작 유지)."""
+    """메시지 종류 판정: 수정 지시(revise)/대화(chat)/발행 승인(publish).
+
+    실패 시 revise(기존 동작 유지). publish는 publish_at(희망 시각)을 함께 돌려준다.
+    """
     try:
         data = llm.call_json(prompts.FEEDBACK_TRIAGE.format(
-            context=context, message=fb["instruction"][:2000]))
-        if (str(data.get("kind", "")).strip() == "chat"
-                and str(data.get("reply") or "").strip()):
+            context=context, message=fb["instruction"][:2000],
+            today=now_kst().strftime("%Y-%m-%d %H:%M")))
+        kind = str(data.get("kind", "")).strip()
+        if kind == "chat" and str(data.get("reply") or "").strip():
             return {"kind": "chat", "reply": str(data["reply"]).strip()}
+        if kind == "publish":
+            return {"kind": "publish", "reply": "",
+                    "publish_at": str(data.get("publish_at") or "").strip()}
     except Exception as e:  # noqa: BLE001 — 판정 실패가 핑퐁을 막으면 안 됨
         log_line(f"피드백 판정 실패(수정 지시로 간주): {type(e).__name__}: {e}")
     return {"kind": "revise", "reply": ""}
+
+
+def _apply_publish_approval(fb: dict, card_path: Path | None,
+                            target_path: Path | None, publish_at: str) -> str:
+    """텔레그램 답장 '발행해줘'를 발행 승인으로 반영한다.
+
+    - 05 리뷰 원고 파일(열람 사본 포함): 상태를 리뷰완료로 — sns_publish가 그 본문
+      (사용자가 폰에서 고친 내용 포함)을 발행하고 원본 카드를 동기화한다.
+    - 파일 없이 카드만 지목되면: 카드 approval_status를 approved로 — 카드 발행 흐름.
+    """
+    when_note = f" ({publish_at} KST 예약)" if publish_at else ""
+    if target_path is not None:
+        from orchestrator import sns_publish
+        fields = {"상태": sns_publish.TRIGGER_STATE}
+        if publish_at:
+            fields["발행시간"] = publish_at
+        sns_publish.set_fields(target_path, **fields)
+        _mark_feedback(fb, "applied", f"발행 승인 반영: {target_path.name}",
+                       dry_run=False)
+        telegram_notify.send(
+            f"✅ 발행 승인 접수{when_note}: {target_path.name}\n"
+            "다음 실행(30분 내)에 검수·예약 게이트를 거쳐 발행됩니다.")
+        log_line(f"발행 승인(파일): {target_path.name} ← {fb['path'].name}")
+        return "approved"
+    if card_path is not None:
+        from orchestrator import state as store
+        fields = {"approval_status": "approved"}
+        if publish_at:
+            fields["publish_at"] = publish_at
+        store.update_card(str(card_path), **fields)
+        card_id = CARD_ID_RE.search(card_path.name).group(0)
+        _mark_feedback(fb, "applied", f"카드 발행 승인: {card_path.name}",
+                       dry_run=False)
+        telegram_notify.send(
+            f"✅ [{card_id}] 발행 승인 접수{when_note} — 다음 실행에서 검수 확인 후 "
+            "자동 발행됩니다.")
+        log_line(f"발행 승인(카드): {card_path.name} ← {fb['path'].name}")
+        return "approved"
+    _mark_feedback(fb, "error", "발행 승인 대상 없음", dry_run=False)
+    return "unresolved"
 
 
 def _answer_feedback(fb: dict, reply: str, dry_run: bool) -> str:
@@ -405,6 +453,10 @@ def apply_one(fb: dict, dry_run: bool) -> str:
         triage = _triage_feedback(fb, _feedback_context(card_path, target_path))
         if triage["kind"] == "chat":
             return _answer_feedback(fb, triage["reply"], dry_run)
+        if triage["kind"] == "publish":
+            # 발행 승인 — 원고 파일이 있으면 파일 상태(리뷰완료)로, 없으면 카드 승인으로.
+            return _apply_publish_approval(
+                fb, card_path, target_path, triage.get("publish_at", ""))
     if card_path is not None:
         return _apply_card_revision(fb, card_path, dry_run)
     if not fb["instruction"]:

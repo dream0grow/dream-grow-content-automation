@@ -462,6 +462,7 @@ def _parse_publish_at(raw: str) -> datetime | None:
     if not raw:
         return None
     for fmt in ("%Y-%m-%d %H:%M", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M",
+                "%Y-%m-%dT%H:%M:%S",  # 05 리뷰 원고의 옛 발행시간 표기
                 "%Y-%m-%d"):
         try:
             return datetime.strptime(raw, fmt).replace(tzinfo=KST)
