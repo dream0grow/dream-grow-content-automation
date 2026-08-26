@@ -166,6 +166,17 @@ SNS 시스템의 원래 흐름 D(05 리뷰/대기 → 리뷰완료+발행시간 
     기록/YYYY-MM 발행 기록.md`에 기존 형식 그대로 추가(글 수/플랫폼/링크)
     ③`06 제작/54 발행 캘린더/YYYY-MM 발행 현황.md` 표에 한 줄. 실패해도 발행 성공 유지.
 - 테스트 17종 신규(sns_publish 12, publish_approval 5), 전체 174종 통과.
+- **3차 확장(같은 세션) — 주간 성과 수집 클라우드 이식**: 맥 로컬 하드코딩으로 죽어 있던
+  `threads_insights.py`(발행완료 조회수/좋아요/답글/리포스트 수집 → frontmatter 기록 →
+  주간성과 리포트 + 댓글 AI 분석·주제 추천)를 클라우드로 이식.
+  - 경로를 `DG_VAULT_ROOT` 기반으로 교체, **`threads-insights.yml`**(매주 월 07:30 KST cron
+    + 수동 mode=update/report) 신설 — 수집 후 볼트 커밋, 주간 요약(7일 조회수·팔로워·톱3)
+    텔레그램 통지(`send_telegram_summary`).
+  - `sns_publish`가 발행 시 `thread_id`(첫 글 ID)를 frontmatter에 기록 → 수집 대상 자동 등록.
+    옛 발행분은 `backfill_thread_ids`가 61 성과 기록의 '첫 글 ID'로 복원(기존 4건 백필 완료).
+  - 필요 권한: THREADS_ACCESS_TOKEN에 `threads_manage_insights`(+`threads_manage_replies`
+    댓글 분석용). 없으면 수집만 실패 통지, 파이프라인엔 영향 없음.
+  - 테스트 4종 신규(test_threads_insights), 전체 178종 통과.
 - **남은 사용자 액션**: ① 이 브랜치 검토/머지 ② 05 리뷰/대기에서 발행할 원고 골라
   `상태: 리뷰완료`(또는 텔레그램 알림에 "발행해줘" 답장) — 그날 21시 자동 발행.
   하루 1~2건 승인 권장 ③ 05 리뷰/완료의 옛 승인 2건은 첫 실행 때 보류 통지가 오면 정리.

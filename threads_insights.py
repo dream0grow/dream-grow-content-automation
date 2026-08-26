@@ -29,7 +29,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- 경로 설정 ---
-SNS_SYSTEM = "/Users/lhg/Documents/obsidian/초생산/SNS 콘텐츠 제작 시스템"
+# 저장소 볼트(vault/) 기준 — GitHub Actions(threads-insights.yml)와 로컬 어디서든 돈다.
+# (예전 맥 로컬 절대경로 하드코딩을 DG_VAULT_ROOT 기반으로 교체 — 2026-08-26)
+_VAULT_ROOT = os.getenv("DG_VAULT_ROOT") or os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "vault")
+SNS_SYSTEM = os.path.join(_VAULT_ROOT, "SNS 콘텐츠 제작 시스템")
 PUBLISHED_DIR = os.path.join(SNS_SYSTEM, "06 제작", "64 발행완료")
 REPORT_DIR = os.path.join(SNS_SYSTEM, "07 운영", "61 성과 기록")
 
@@ -831,10 +835,87 @@ def generate_weekly_report(
 # 메인 실행
 # ============================================================
 
+def backfill_thread_ids(dry_run: bool = False) -> int:
+    """thread_id가 없는 발행완료 파일에 '발행 기록'의 첫 글 ID를 채워 넣는다.
+
+    옛 발행분은 frontmatter에 thread_id가 없어 수집 대상에서 빠진다 —
+    61 성과 기록/`YYYY-MM 발행 기록.md`의 `## … - 파일명` + `첫 글 ID` 쌍으로 복원한다.
+    (신규 발행분은 sns_publish가 발행 시 thread_id를 직접 기록한다.)
+    """
+    import glob as _glob
+    id_map = {}
+    for path in _glob.glob(os.path.join(REPORT_DIR, "* 발행 기록.md")):
+        with open(path, encoding="utf-8") as f:
+            text = f.read()
+        for m in re.finditer(r"^## [\d\- :]+ - (.+?)\n(.*?)(?=^## |\Z)",
+                             text, re.MULTILINE | re.DOTALL):
+            idm = re.search(r"첫 글 ID:\s*(\d+)", m.group(2))
+            if idm:
+                id_map[m.group(1).strip()] = idm.group(1)
+    if not id_map or not os.path.isdir(PUBLISHED_DIR):
+        return 0
+    filled = 0
+    for fname in os.listdir(PUBLISHED_DIR):
+        if not fname.endswith(".md") or fname not in id_map:
+            continue
+        filepath = os.path.join(PUBLISHED_DIR, fname)
+        fm = parse_frontmatter(filepath)
+        if fm.get("thread_id"):
+            continue
+        if dry_run:
+            print(f"  [DRY RUN] thread_id 백필: {fname}")
+            filled += 1
+            continue
+        content = fm["_content"]
+        content = content.replace(
+            "\n---\n", f"\nthread_id: {id_map[fname]}\n---\n", 1)
+        with open(filepath, "w", encoding="utf-8") as f:
+            f.write(content)
+        filled += 1
+        print(f"  thread_id 백필: {fname}")
+    return filled
+
+
+def send_telegram_summary(report_path, published_files: list,
+                          account_insights: dict | None) -> bool:
+    """주간 성과 요약을 텔레그램으로 보낸다 (미설정/실패 시 조용히 건너뜀)."""
+    try:
+        from vault_pipeline import telegram_notify
+    except ImportError:
+        return False
+    lines = ["📈 주간 성과 리포트가 준비됐습니다."]
+    if account_insights:
+        views = account_insights.get("views")
+        followers = account_insights.get("followers_count")
+        parts = []
+        if views is not None:
+            parts.append(f"7일 조회수 {views:,}")
+        if followers is not None:
+            parts.append(f"팔로워 {followers:,}")
+        if parts:
+            lines.append(" · ".join(parts))
+    top = sorted(published_files,
+                 key=lambda fm: parse_number(fm.get("조회수", "0")),
+                 reverse=True)[:3]
+    for fm in top:
+        lines.append(f"🏆 {fm.get('주제', fm['_filename'])} — "
+                     f"조회 {parse_number(fm.get('조회수', '0')):,}")
+    if report_path:
+        rel = os.path.relpath(report_path, _VAULT_ROOT)
+        lines.append("🔗 " + telegram_notify.note_url(rel))
+    return telegram_notify.send("\n".join(lines))
+
+
 def run_update(dry_run: bool = False) -> list:
     """발행완료 파일의 성과 지표를 API로 업데이트합니다."""
     if not check_api_config():
         return []
+
+    # 옛 발행분 thread_id 복원 → 수집 대상 확대 (idempotent)
+    try:
+        backfill_thread_ids(dry_run=dry_run)
+    except Exception as e:  # noqa: BLE001 — 백필 실패가 수집을 막으면 안 됨
+        print(f"  [경고] thread_id 백필 실패 (수집은 계속): {e}")
 
     files = find_published_files()
     if not files:
@@ -961,7 +1042,7 @@ def run_report(published_files: list = None):
         except Exception as e:
             print(f"  [경고] 주제 추천 실패 (리포트는 계속 생성): {e}")
 
-    generate_weekly_report(
+    report_path = generate_weekly_report(
         published_files,
         account_insights,
         hooks_data=hooks_data,
@@ -969,6 +1050,12 @@ def run_report(published_files: list = None):
         comment_analysis=comment_analysis,
         topic_suggestions=topic_suggestions,
     )
+
+    # 주간 요약 텔레그램 통지 — 폰에서 리포트로 바로 이동 (미설정 시 무시)
+    try:
+        send_telegram_summary(report_path, published_files, account_insights)
+    except Exception as e:  # noqa: BLE001 — 통지 실패가 리포트 생성을 덮으면 안 됨
+        print(f"  [경고] 텔레그램 요약 발송 실패: {e}")
 
 
 def main():

@@ -335,6 +335,9 @@ def publish_item(item: dict) -> bool:
             media_ids, permalink = publish.publish_chain(
                 posts, done_ids=done_ids, on_progress=_save_progress)
             post_count = len(media_ids)
+            if media_ids:
+                # 주간 성과 수집(threads_insights)이 이 ID로 조회수를 가져온다.
+                set_fields(path, thread_id=media_ids[0])
             permalink = permalink or f"발행 {len(media_ids)}개 (링크 조회 실패)"
     except Exception as e:  # noqa: BLE001 — 실패를 기록·통지하고 다음 파일로
         set_fields(path, 상태=ERROR_STATE)

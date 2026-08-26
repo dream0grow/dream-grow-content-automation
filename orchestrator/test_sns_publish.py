@@ -122,6 +122,7 @@ def test_publish_success_moves_to_done(vault, monkeypatch):
     meta = _meta(dest)
     assert meta["상태"] == sp.DONE_STATE
     assert meta["발행링크"] == "https://threads.net/@x/post/1"
+    assert meta["thread_id"] == "m1"  # 주간 성과 수집(threads_insights)용
     assert len(sent["posts"]) == 2  # '---' 구분 스레드 분할
 
     # 발행 축적(3단계): 라이브러리 복사 + 월별 발행 기록 + 발행 캘린더
