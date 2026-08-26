@@ -51,10 +51,14 @@ MIN_KEEP_RATIO = 0.5
 # 한 번에 보낼 최대 알림/처리 건수(첫 실행 백로그 폭주 방지).
 DEFAULT_MAX = 10
 
-# 검수 대기 상태로 인정하는 값(사이트는 새 원고에 "대기"를 넣는다). 완료/승인은 제외.
-PENDING_REVIEW = {"", "대기", "검토대기", "리뷰대기"}
+# 알림 대상으로 인정하는 검수상태 — 검수 전(대기류)과 검수 통과(발행 승인 대기)
+# 모두 사람이 봐야 할 원고다. "완료"(검수·후속 처리 끝) 등은 제외.
+PENDING_REVIEW = {"", "대기", "검토대기", "리뷰대기", "미검수",
+                  "통과", "자동수정완료"}
 # 이 상태의 원고는 이미 끝난 것으로 보고 알리지 않는다.
-DONE_STATES = {"발행완료", "발행됨", "완료", "보류", "폐기"}
+DONE_STATES = {"발행완료", "발행됨", "완료", "보류", "폐기",
+               # sns_publish의 승인·보류·오류 상태 — 각자 별도 통지가 나간다.
+               "리뷰완료", "발행보류", "발행오류"}
 # youtube-script 외 형식(스레드/릴스/뉴스레터 등)은 생성일이 이 일수 안일 때만 알린다 —
 # 폴더에 수백 건 쌓인 옛 백로그가 확대 적용 첫날 알림으로 쏟아지는 것을 막는다.
 ANNOUNCE_MAX_AGE_DAYS = int(os.getenv("DG_ANNOUNCE_MAX_AGE_DAYS") or "7")
@@ -226,6 +230,53 @@ def announce_new_scripts(dry_run: bool, max_items: int = DEFAULT_MAX) -> list[st
     return sent_names
 
 
+def send_daily_digest(dry_run: bool) -> bool:
+    """하루 한 번 결재함 요약을 보낸다 — 05 리뷰/대기의 발행 가능 원고 현황.
+
+    개별 알림은 최근 7일 원고만 커버하므로, 백로그(수백 건)는 이 요약으로 파악한다.
+    DG_REVIEW_DIGEST=off로 끌 수 있고, DG_REVIEW_DIGEST_HOUR(기본 8시 KST) 이후
+    첫 실행에서 발송한다. 발송 여부는 장부의 digest_date로 하루 1회를 보장한다.
+    """
+    if os.getenv("DG_REVIEW_DIGEST", "").strip().lower() in ("off", "false", "0"):
+        return False
+    now = now_kst()
+    if now.hour < int(os.getenv("DG_REVIEW_DIGEST_HOUR") or "8"):
+        return False
+    ledger = _load_ledger()
+    today = now.strftime("%Y-%m-%d")
+    if ledger.get("digest_date") == today:
+        return False
+    total, passed, samples = 0, 0, []
+    for p in sorted(_script_dir().glob("*.md")):
+        meta, _ = parse_frontmatter(p.read_text(encoding="utf-8", errors="ignore"))
+        channel = str(meta.get("채널") or meta.get("type") or "").strip().lower()
+        if channel not in ("thread", "newsletter", "스레드", "뉴스레터"):
+            continue
+        if str(meta.get("상태") or "").strip() not in ("", "리뷰대기", "초안"):
+            continue
+        total += 1
+        if str(meta.get("검수상태") or "").strip() in ("통과", "자동수정완료"):
+            passed += 1
+            if len(samples) < 3:
+                samples.append(p.name)
+    if total == 0:
+        ledger["digest_date"] = today
+        _save_ledger(ledger, dry_run)
+        return False
+    lines = [f"📋 오늘의 결재함 — 리뷰 대기 {total}건 (검수 통과 {passed}건)"]
+    lines += [f"· {name}\n{script_links(name)}" for name in samples]
+    lines.append(
+        "발행하려면 원고 알림에 '발행해줘'라고 답장하거나, 파일 frontmatter "
+        "상태를 '리뷰완료'로 바꾸세요 — 그날 기본 예약 시각에 자동 발행됩니다."
+    )
+    ok = False if dry_run else telegram_notify.send("\n\n".join(lines))
+    log_line(f"결재함 요약{'(dry)' if dry_run else ''}: 대기 {total}건/통과 {passed}건",
+             dry_run=dry_run)
+    ledger["digest_date"] = today
+    _save_ledger(ledger, dry_run)
+    return bool(ok)
+
+
 # ---------- ② 피드백 반영 ----------
 
 def find_pending_feedback() -> list[dict]:
@@ -335,8 +386,32 @@ def _apply_card_revision(fb: dict, card_path: Path, dry_run: bool) -> str:
     return "applied"
 
 
+# 대화 답장이 원고 내용을 근거로 답할 수 있게 본문 앞부분을 함께 넣는다.
+CONTEXT_DRAFT_CHARS = 3000
+
+
 def _feedback_context(card_path: Path | None, target_path: Path | None) -> str:
-    """triage 프롬프트에 넣을 대상 요약 — 답장이 카드 상태를 근거로 답할 수 있게."""
+    """triage 프롬프트에 넣을 대상 요약 — 상태 + 원고 본문 발췌.
+
+    본문이 있어야 "이 글 어때?", "뭘 보완하면 좋을까?" 같은 대화에
+    구체적으로 답할 수 있다(콘텐츠 수정·보완 전용 어시스턴트).
+    """
+    draft = ""
+    if target_path is not None:
+        _, body = parse_frontmatter(
+            target_path.read_text(encoding="utf-8", errors="ignore"))
+        draft = body.strip()
+    if not draft and card_path is not None:
+        try:
+            from orchestrator import state as store
+            meta, _ = parse_frontmatter(
+                card_path.read_text(encoding="utf-8", errors="ignore"))
+            fmt = str(meta.get("format") or "thread").split(",")[0].strip()
+            draft = store.read_final_draft(str(card_path), fmt)
+        except Exception:  # noqa: BLE001 — 본문은 부가 맥락, 못 읽으면 생략
+            draft = ""
+    draft_block = (f"\n\n[원고 본문 (앞 {CONTEXT_DRAFT_CHARS}자)]\n"
+                   f"{draft[:CONTEXT_DRAFT_CHARS]}") if draft else ""
     if card_path is not None:
         meta, _ = parse_frontmatter(
             card_path.read_text(encoding="utf-8", errors="ignore"))
@@ -348,9 +423,11 @@ def _feedback_context(card_path: Path | None, target_path: Path | None) -> str:
             f"review_status: {meta.get('review_status', '')}\n"
             "- 이 카드는 자동 파이프라인(리서치→키워드→브리프→초안→검수)의 산출물이다. "
             "stage가 approval이면 초안이 완성돼 사용자의 발행 승인만 남은 상태다."
+            + draft_block
         )
     if target_path is not None:
-        return f"원고 파일: {target_path.name} (05 리뷰/대기 폴더의 완성 원고)"
+        return (f"원고 파일: {target_path.name} (05 리뷰/대기 폴더의 완성 원고)"
+                + draft_block)
     return "대상 정보 없음"
 
 
@@ -535,6 +612,7 @@ def main() -> None:
     announced: list[str] = []
     if do_announce:
         announced = announce_new_scripts(args.dry_run, args.max)
+        send_daily_digest(args.dry_run)
     counts: dict[str, int] = {}
     if do_apply:
         counts = apply_pending_feedback(args.dry_run, args.max)

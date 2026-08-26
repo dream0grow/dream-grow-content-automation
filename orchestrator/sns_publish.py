@@ -31,6 +31,7 @@ YAML 파싱이 깨지는 파일이 실측 39건이라, 파싱은 줄 단위 관�
 import argparse
 import os
 import re
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -41,6 +42,10 @@ from orchestrator.run import _next_default_publish_at, _parse_publish_at
 # script_feedback.SCRIPT_DIR_DEFAULT와 같은 폴더 체계 — 대기/완료 둘 다 본다.
 REVIEW_WAIT_DEFAULT = "SNS 콘텐츠 제작 시스템/05 리뷰/대기"
 PUBLISHED_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/06 제작/64 발행완료"
+# 발행 축적(통합 3단계): 라이브러리(흐름 D5)·성과 기록·발행 캘린더.
+LIBRARY_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/03 라이브러리/38 주제별 콘텐츠"
+PERF_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/07 운영/61 성과 기록"
+CALENDAR_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/06 제작/54 발행 캘린더"
 
 PUBLISHABLE_CHANNELS = {"thread", "newsletter", "스레드", "뉴스레터", "threads"}
 CHANNEL_NORM = {"스레드": "thread", "threads": "thread", "뉴스레터": "newsletter"}
@@ -247,6 +252,46 @@ def _move_to_published(path: Path) -> Path:
     return dest
 
 
+def _accumulate(dest: Path, meta: dict, channel: str, permalink: str,
+                post_count: int) -> None:
+    """발행 축적(통합 3단계) — 라이브러리 복사(흐름 D5) + 월별 발행 기록 + 발행 캘린더.
+
+    실패해도 발행 성공을 덮지 않도록 호출부에서 try로 감싼다.
+    """
+    now = datetime.now(KST)
+    platform = "스티비" if channel == "newsletter" else "Threads"
+
+    # ① 03 라이브러리/38 주제별 콘텐츠/<카테고리>/ — 다음 생성 때 AI가 참고할 자산.
+    category = (meta.get("카테고리") or "").strip()
+    if not category:
+        from orchestrator.obsidian_state import topic_category
+        category = topic_category(meta.get("주제") or dest.stem)
+    lib = _vault() / os.getenv("DG_SNS_LIBRARY_PATH", LIBRARY_DIR_DEFAULT).strip("/") / category
+    lib.mkdir(parents=True, exist_ok=True)
+    if not (lib / dest.name).exists():
+        shutil.copy2(dest, lib / dest.name)
+
+    # ② 07 운영/61 성과 기록/YYYY-MM 발행 기록.md — 기존 파일 형식 그대로 이어 쓴다.
+    perf = _vault() / PERF_DIR_DEFAULT / f"{now:%Y-%m} 발행 기록.md"
+    perf.parent.mkdir(parents=True, exist_ok=True)
+    header = "" if perf.exists() else f"# {now:%Y-%m} 발행 기록\n"
+    with perf.open("a", encoding="utf-8") as f:
+        f.write(f"{header}\n## {now:%Y-%m-%d %H:%M} - {dest.name}\n"
+                f"- 글 수: {post_count}개\n- 플랫폼: {platform}\n"
+                f"- 링크: {permalink}\n")
+
+    # ③ 06 제작/54 발행 캘린더/YYYY-MM 발행 현황.md — 표 한 줄씩 누적.
+    cal = _vault() / CALENDAR_DIR_DEFAULT / f"{now:%Y-%m} 발행 현황.md"
+    cal.parent.mkdir(parents=True, exist_ok=True)
+    if not cal.exists():
+        cal.write_text(f"# {now:%Y-%m} 발행 현황\n\n자동 기록 — sns_publish가 "
+                       "발행할 때마다 한 줄씩 추가합니다.\n\n"
+                       "| 발행일 | 채널 | 원고 | 링크 |\n|---|---|---|---|\n",
+                       encoding="utf-8")
+    with cal.open("a", encoding="utf-8") as f:
+        f.write(f"| {now:%m-%d %H:%M} | {platform} | [[{dest.stem}]] | {permalink} |\n")
+
+
 def publish_item(item: dict) -> bool:
     """원고 하나를 발행한다. 성공 True. 실패는 상태 기록+통지 후 False."""
     path, channel, meta = item["path"], item["channel"], item["meta"]
@@ -274,6 +319,7 @@ def publish_item(item: dict) -> bool:
                 return False
             result = stibee.create_and_send(item["body"])
             permalink = result.get("detail", "")
+            post_count = 1
         else:
             if not publish.available():
                 _hold(item, "THREADS_ACCESS_TOKEN/THREADS_USER_ID Secret이 없어 자동 "
@@ -288,6 +334,7 @@ def publish_item(item: dict) -> bool:
 
             media_ids, permalink = publish.publish_chain(
                 posts, done_ids=done_ids, on_progress=_save_progress)
+            post_count = len(media_ids)
             permalink = permalink or f"발행 {len(media_ids)}개 (링크 조회 실패)"
     except Exception as e:  # noqa: BLE001 — 실패를 기록·통지하고 다음 파일로
         set_fields(path, 상태=ERROR_STATE)
@@ -316,6 +363,12 @@ def publish_item(item: dict) -> bool:
             )
         except Exception as e:  # noqa: BLE001 — 동기화 실패가 발행 성공을 덮으면 안 됨
             print(f"{path.name}: 카드 동기화 실패({content_id}): {e}")
+
+    # 발행 축적(3단계): 라이브러리·성과 기록·발행 캘린더 — 실패해도 발행 성공은 유지.
+    try:
+        _accumulate(dest, meta, channel, permalink, post_count)
+    except Exception as e:  # noqa: BLE001
+        print(f"{path.name}: 발행 축적 실패(발행은 완료): {e}")
 
     store.notify(str(dest),
                  f"✅ '{path.stem}' {'뉴스레터 발송' if channel == 'newsletter' else 'Threads 발행'} "

@@ -64,6 +64,40 @@ def test_publish_reply_on_card_id_approves_card(vault, monkeypatch):
     assert updated["approval_status"] == "approved"
 
 
+def test_feedback_context_includes_draft_body(vault):
+    script = _script(vault, "스레드_맥락.md")
+    ctx = sf._feedback_context(None, script)
+    assert "본문입니다." in ctx  # 대화 답장이 원고 내용을 근거로 답할 수 있다
+
+
+def test_announce_includes_review_passed_and_skips_approved(vault, monkeypatch):
+    from vault_pipeline.vault_io import now_kst
+    today = now_kst().strftime("%Y-%m-%d")
+    base = "---\n주제: 알림\n채널: thread\n상태: 리뷰대기\n생성일: {d}\n검수상태: {r}\n---\n\n1/ 본문\n"
+    (vault / sf.SCRIPT_DIR_DEFAULT / "스레드_통과.md").write_text(
+        base.format(d=today, r="통과"), encoding="utf-8")
+    (vault / sf.SCRIPT_DIR_DEFAULT / "스레드_승인됨.md").write_text(
+        base.format(d=today, r="통과").replace("상태: 리뷰대기", "상태: 리뷰완료"),
+        encoding="utf-8")
+    names = [s["name"] for s in sf.find_new_scripts()]
+    assert "스레드_통과.md" in names       # 검수 통과 = 발행 승인 대기 → 알림 대상
+    assert "스레드_승인됨.md" not in names  # 이미 승인됨 → 별도 통지가 있으니 제외
+
+
+def test_daily_digest_once_per_day(vault, monkeypatch):
+    monkeypatch.setenv("DG_REVIEW_DIGEST_HOUR", "0")
+    sent = []
+    monkeypatch.setattr(sf.telegram_notify, "send", lambda m, html=False:
+                        sent.append(m) or True)
+    (vault / sf.SCRIPT_DIR_DEFAULT / "스레드_요약.md").write_text(
+        "---\n주제: 요약\n채널: thread\n상태: 리뷰대기\n검수상태: 통과\n---\n\n1/ 본문\n",
+        encoding="utf-8")
+    assert sf.send_daily_digest(dry_run=False) is True
+    assert "리뷰 대기 1건" in sent[0] and "검수 통과 1건" in sent[0]
+    assert sf.send_daily_digest(dry_run=False) is False  # 하루 1회
+    assert len(sent) == 1
+
+
 def test_revise_reply_still_revises(vault, monkeypatch):
     # publish 의도가 아닐 때 기존 수정 흐름이 유지되는지 (사본 없는 원고 파일 수정)
     monkeypatch.setattr(llm, "call_json", lambda *a, **k: {

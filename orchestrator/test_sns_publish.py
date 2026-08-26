@@ -124,6 +124,17 @@ def test_publish_success_moves_to_done(vault, monkeypatch):
     assert meta["발행링크"] == "https://threads.net/@x/post/1"
     assert len(sent["posts"]) == 2  # '---' 구분 스레드 분할
 
+    # 발행 축적(3단계): 라이브러리 복사 + 월별 발행 기록 + 발행 캘린더
+    lib_copies = list((vault / sp.LIBRARY_DIR_DEFAULT).rglob("스레드_발행.md"))
+    assert len(lib_copies) == 1
+    perf = list((vault / sp.PERF_DIR_DEFAULT).glob("* 발행 기록.md"))
+    assert len(perf) == 1
+    log = perf[0].read_text(encoding="utf-8")
+    assert "스레드_발행.md" in log and "글 수: 2개" in log and "Threads" in log
+    cal = list((vault / sp.CALENDAR_DIR_DEFAULT).glob("* 발행 현황.md"))
+    assert len(cal) == 1
+    assert "[[스레드_발행]]" in cal[0].read_text(encoding="utf-8")
+
 
 def test_copy_publish_syncs_original_card(vault, monkeypatch):
     from orchestrator import publish
