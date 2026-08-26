@@ -1,0 +1,37 @@
+name: notify-top-reels
+
+# 세션에서 고른 릴스 TOP 3를 텔레그램으로 1회 전송한다.
+# 메시지 파일이 바뀐 push에서만 실행되므로 중복 발송되지 않는다.
+on:
+  push:
+    branches:
+      - claude/top-reels-content-selection-zh68y9
+    paths:
+      - .github/notify/top_reels_telegram.txt
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Send Telegram message
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID 시크릿이 비어 있습니다."
+            exit 1
+          fi
+          resp=$(curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=true" \
+            --data-urlencode "text@.github/notify/top_reels_telegram.txt")
+          echo "$resp"
+          echo "$resp" | grep -q '"ok":true'
