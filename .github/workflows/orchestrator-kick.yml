@@ -1,0 +1,77 @@
+# orchestrator 수동 킥 (임시 우회로)
+# GitHub의 schedule cron이 장시간 누락될 때, claude/* 브랜치에서
+# .github/notify/orchestrator_kick.txt 를 바꿔 push하면 orchestrator를 즉시 1회 돌린다.
+# 워크플로우 파일은 push된 브랜치에서 읽히지만, 실행은 main을 체크아웃해
+# main의 볼트 상태로 돌고 결과도 main에 push한다 (상태 이원화·중복 발행 방지).
+# concurrency 그룹을 orchestrator.yml과 공유해 cron 실행과 겹치지 않는다.
+# cron이 안정화되면 이 파일과 kick 파일은 삭제해도 된다.
+name: orchestrator-kick
+
+on:
+  push:
+    branches: ["claude/**"]
+    paths: [".github/notify/orchestrator_kick.txt"]
+
+concurrency:
+  group: orchestrator
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
+      HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
+      DG_AUTO_APPROVE_KEYWORD: ${{ secrets.DG_AUTO_APPROVE_KEYWORD }}
+      THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+      THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+      NAVER_AD_API_KEY: ${{ secrets.NAVER_AD_API_KEY }}
+      NAVER_AD_SECRET: ${{ secrets.NAVER_AD_SECRET }}
+      NAVER_AD_CUSTOMER_ID: ${{ secrets.NAVER_AD_CUSTOMER_ID }}
+      STIBEE_API_KEY: ${{ secrets.STIBEE_API_KEY }}
+      STIBEE_LIST_ID: ${{ secrets.STIBEE_LIST_ID }}
+      STIBEE_SENDER_EMAIL: ${{ secrets.STIBEE_SENDER_EMAIL }}
+      STIBEE_SENDER_NAME: ${{ secrets.STIBEE_SENDER_NAME }}
+      STIBEE_AUTO_SEND: ${{ secrets.STIBEE_AUTO_SEND }}
+      DG_DEFAULT_PUBLISH_TIME: ${{ secrets.DG_DEFAULT_PUBLISH_TIME || '21:00' }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv honcho-ai pyyaml
+
+      - name: Install Claude Code CLI (Max 구독 인증용)
+        if: ${{ env.ANTHROPIC_API_KEY == '' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run orchestrator
+        run: python3 -m orchestrator.run
+
+      - name: 볼트 카드 커밋 (main)
+        run: |
+          python3 tools/vault_secret_scan.py vault/ --quiet
+          git config user.name "orchestrator[bot]"
+          git config user.email "actions@github.com"
+          git add vault/
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "오케스트레이터(kick): 카드 갱신 $(date +%Y-%m-%dT%H:%M)"
+          pushed=0
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main || true
+            if git push origin HEAD:main; then pushed=1; break; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          [ "$pushed" = 1 ]
