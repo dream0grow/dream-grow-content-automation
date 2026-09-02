@@ -1,24 +1,30 @@
-💬 아까 보내주신 메시지, Claude 세션에서 확인하고 작업했어요.
+🎬 조회수 잘 나올 릴스 원고 TOP 5 (요청하신 것)
 
-✍️ 원고 수정 완료 — "학교 가기 싫다는 아이"
-보내주신 글감(선생님이 싫거나 vs 친구가 싫거나)대로 전면 재작성했습니다. 친구 문제는 선생님께 도움 요청, 선생님 문제는 상황 수용 + 정서 회복(긍정 해석 연습 / 집에서 재밌는 활동 / 이겨낸 성취감) 구조로, 파일명도 새 방향에 맞게 바꿨어요.
-🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%95%99%EA%B5%90_%ED%95%99%EA%B5%90%2B%EA%B0%80%EA%B8%B0%2B%EC%8B%AB%EB%8B%A4%EB%8A%94%2B%EC%95%84%EC%9D%B4%2C%2B%EC%9D%B4%EC%9C%A0%EB%8A%94%2B%EB%91%98%2B%EC%A4%91%2B%ED%95%98%EB%82%98%EC%9E%85%EB%8B%88%EB%8B%A4.md
+132편 중 이미 추천드린 21편과 발행완료분을 빼고, 후킹 강도·공감 폭·9월 시의성(2학기 개학·상담 시즌)으로 골랐습니다.
 
-🎬 새 릴스 추천 3편 (요청하신 것)
+1️⃣ 담임선생님이 내 아이를 제대로 보고 있는지 확인하는 3가지 질문 (학교)
+훅: 학부모 상담에서 성적을 물어보시나요? 솔직히, 가장 아까운 15분입니다.
+→ 9월 2학기 상담 시즌 정조준입니다. "교사만 아는 상담 활용법"이라 저장·공유가 잘 나오는 유형입니다.
+🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%95%99%EA%B5%90_%EB%8B%B4%EC%9E%84%EC%84%A0%EC%83%9D%EB%8B%98%EC%9D%B4%2B%EB%82%B4%2B%EC%95%84%EC%9D%B4%EB%A5%BC%2B%EC%A0%9C%EB%8C%80%EB%A1%9C%2B%EB%B3%B4%EA%B3%A0%2B%EC%9E%88%EB%8A%94%EC%A7%80%2B%ED%99%95%EC%9D%B8%ED%95%98%EB%8A%94%2B3%EA%B0%80%EC%A7%80%2B%EC%A7%88%EB%AC%B8.md
 
-1️⃣ 칭찬을 많이 해도 아이 자존감이 낮은 이유 (감정)
-훅: "잘했어"라는 말, 많이 할수록 아이 자존감이 낮아집니다.
-→ 모든 부모가 매일 하는 말을 뒤집는 반직관 훅이라 공감 폭이 가장 넓습니다.
-🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%EA%B0%90%EC%A0%95_%EC%B9%AD%EC%B0%AC%EC%9D%84%2B%EB%A7%8E%EC%9D%B4%2B%ED%95%B4%EB%8F%84%2B%EC%95%84%EC%9D%B4%2B%EC%9E%90%EC%A1%B4%EA%B0%90%EC%9D%B4%2B%EB%82%AE%EC%9D%80%2B%EC%9D%B4%EC%9C%A0.md
+2️⃣ 선생님이 말하지 않는 학교생활 적응의 진짜 열쇠 (학교)
+훅: "선생님 말씀 잘 들어." 이 한마디가 적응을 망칩니다.
+→ 개학 직후 모든 부모가 하는 말을 뒤집는 반전 훅 + "선생님이 말하지 않는" 궁금증 유발 제목이라 클릭률이 높은 조합입니다.
+🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%95%99%EA%B5%90_%EC%84%A0%EC%83%9D%EB%8B%98%EC%9D%B4%2B%EB%A7%90%ED%95%98%EC%A7%80%2B%EC%95%8A%EB%8A%94%2B%ED%95%99%EA%B5%90%EC%83%9D%ED%99%9C%2B%EC%A0%81%EC%9D%91%EC%9D%98%2B%EC%A7%84%EC%A7%9C%2B%EC%97%B4%EC%87%A0.md
 
-2️⃣ 숙제를 대신 해주는 부모가 아이의 자기주도학습을 막는 이유 (학습)
-훅: 숙제를 완벽하게 해오는 아이가, 수업 시간에 제일 먼저 무너집니다.
-→ 개학 직후 숙제 전쟁이 시작되는 지금 시의성이 크고, 반전 훅이 강합니다.
-🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%95%99%EC%8A%B5_%EC%88%99%EC%A0%9C%EB%A5%BC%2B%EB%8C%80%EC%8B%A0%2B%ED%95%B4%EC%A3%BC%EB%8A%94%2B%EB%B6%80%EB%AA%A8%EA%B0%80%2B%EC%95%84%EC%9D%B4%EC%9D%98%2B%EC%9E%90%EA%B8%B0%EC%A3%BC%EB%8F%84%ED%95%99%EC%8A%B5%EC%9D%84%2B%EB%A7%89%EB%8A%94%2B%EC%9D%B4%EC%9C%A0.md
+3️⃣ 학원을 보낼수록 자기주도학습이 사라지는 이유 (학습)
+훅: 학원 3개 보내는데 "뭐 공부할래?" 하면 멍하니 쳐다봅니다.
+→ 2학기 학원 재편 시즌의 논쟁 소재라 댓글이 붙는 주제입니다. "15년간 교실에서 봐온 패턴" 교사 신뢰 근거도 강합니다.
+🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%95%99%EC%8A%B5_%ED%95%99%EC%9B%90%EC%9D%84%2B%EB%B3%B4%EB%82%BC%EC%88%98%EB%A1%9D%2B%EC%9E%90%EA%B8%B0%EC%A3%BC%EB%8F%84%ED%95%99%EC%8A%B5%EC%9D%B4%2B%EC%82%AC%EB%9D%BC%EC%A7%80%EB%8A%94%2B%EC%9D%B4%EC%9C%A0.md
 
-3️⃣ 형제가 싸울 때 부모가 해야 할 것 (훈육)
-훅: "형제가 싸울 때 '누가 먼저 했어?' 묻고 계시죠?"
-→ 다자녀 부모 즉시 공감 + 크레이머 교수 실명 연구 근거로 신뢰도가 높습니다.
-🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%9B%88%EC%9C%A1_%ED%98%95%EC%A0%9C%EA%B0%88%EB%93%B1%2B%EA%B3%BC%ED%95%99%EC%A0%81%ED%95%B4%EA%B2%B0%EB%B2%95.md
+4️⃣ 아이가 책보다 유튜브를 좋아하는 건 의지 문제가 아니라 도파민 역치 문제다 (독서)
+훅: 아이가 책을 안 펴는 거, 의지 문제가 아닙니다. 뇌가 이미 망가졌거든요.
+→ 스마트폰·유튜브는 이 계정에서 반응이 가장 검증된 소재이고, "뇌" 충격 훅 + 폭죽/스며듦 비유가 강해 완주율이 높을 원고입니다.
+🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%EB%8F%85%EC%84%9C_%EC%95%84%EC%9D%B4%EA%B0%80%2B%EC%B1%85%EB%B3%B4%EB%8B%A4%2B%EC%9C%A0%ED%8A%9C%EB%B8%8C%EB%A5%BC%2B%EC%A2%8B%EC%95%84%ED%95%98%EB%8A%94%2B%EA%B1%B4%2B%EC%9D%98%EC%A7%80%2B%EB%AC%B8%EC%A0%9C%EA%B0%80%2B%EC%95%84%EB%8B%88%EB%9D%BC%2B%EB%8F%84%ED%8C%8C%EB%AF%BC%2B%EC%97%AD%EC%B9%98%2B.md
 
-ℹ️ "ai로 작업하고 대답할 수 있지?" — 지금 이 봇은 답장이면 원고 수정, 일반 메시지면 아이디어 저장만 해요. 이번 요청은 Claude 세션에서 대신 처리했고, 봇 자체를 대화형(질문·지시를 AI가 판단해 실행+답장)으로 바꾸는 방법은 Claude Code 채팅에 정리해 뒀습니다. 내일 아침 7:38부터는 매일 자동 추천이 옵니다.
+5️⃣ 혼낼수록 같은 행동이 반복되는 이유 (훈육)
+훅: 매일 혼내는데 왜 같은 행동이 반복될까요. 훈육이 부족한 게 아니라, 방향이 잘못된 거거든요.
+→ "몇 번을 말해야 알겠니"는 전 연령 부모의 보편 공감 지점이고, 감정 인정→경계 설정→대안 제시 3단계 해법까지 있어 저장 가치가 큽니다.
+🔗 https://github.com/dream0grow/dream-grow-content-automation/blob/main/vault/SNS%20%EC%BD%98%ED%85%90%EC%B8%A0%20%EC%A0%9C%EC%9E%91%20%EC%8B%9C%EC%8A%A4%ED%85%9C/05%20%EB%A6%AC%EB%B7%B0/%EB%8C%80%EA%B8%B0/%EC%9B%90%EA%B3%A0_%EB%A6%B4%EC%8A%A4_%ED%9B%88%EC%9C%A1_%ED%98%BC%EB%82%BC%EC%88%98%EB%A1%9D%2B%EA%B0%99%EC%9D%80%2B%ED%96%89%EB%8F%99%EC%9D%B4%2B%EB%B0%98%EB%B3%B5%EB%90%98%EB%8A%94%2B%EC%9D%B4%EC%9C%A0%2B-%2B%ED%9B%88%EC%9C%A1%EC%9D%80%2B%ED%98%BC%EB%82%B4%EB%8A%94%2B%EA%B2%83%EC%9D%B4%2B%E1%84%8B.md
+
+📒 5편 모두 추천 장부에 기록해서 매일 아침 자동 추천과 겹치지 않게 했습니다(브랜치 머지 후 적용). 촬영하신 원고는 frontmatter를 `상태: 발행완료`로 바꾸고 05 리뷰/완료로 옮겨 주시면 됩니다.
