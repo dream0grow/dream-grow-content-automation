@@ -21,8 +21,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, prompts, review_copy,
-    youtube_script,
+    agent_dialogue, claude_research, llm, manus_research, naver_keywords, prompts,
+    review_copy, youtube_script,
 )
 from orchestrator import state as store
 from orchestrator.config import (
@@ -45,9 +45,13 @@ SOURCE_SECTION = "📄 글감"
 # 다음 실행에서 1회 자동 재시도를 표시하는 last_error 접두사(A3).
 _RETRY_MARK = "[자동재시도]"
 
-# 실패해도 status를 되돌려 다음 실행에 재시도해도 안전한 stage → 재큐 status.
+# 실패해도 status를 되돌려 다음 실행에 재시도해도 안전한 stage → 재큐 (stage, status).
+# stage까지 같이 되돌리는 이유: handle_intake가 리서치 호출 **전에** stage=research로 바꿔
+# 두므로 status만 되돌리면 research/queued(어떤 DISPATCH도 안 집는 미아)가 된다 —
+# 2026-08-24~09-09 사이 카드 22장이 이렇게 갇혔다.
 # publish_ready는 부분 발행 후 재시도하면 중복 게시 위험이 있어 제외(즉시 사람 호출).
 _REQUEUE_STATUS = {"intake": "queued", "research": "running", "keyword": "queued"}
+_REQUEUE_STAGE = {"intake": "intake", "research": "research", "keyword": "keyword"}
 
 
 def log(msg: str):
@@ -154,18 +158,20 @@ def handle_intake(card: dict):
         "리서치부터 초안까지 자동으로 진행하고, 초안이 완성되면 다시 알립니다.",
     )
     if manus_research.available():
+        # 옛 경로: DG_RESEARCH_PROVIDER=manus + 키가 있을 때만. 폴링은 handle_research.
         task_ids = manus_research.create_research_tasks(
             content_id, card["topic"], card["audience"],
         )
         store.update_card(page_id, manus_task_ids=",".join(task_ids))
         log(f"{content_id} Manus 리서치 {len(task_ids)}개 병렬 생성")
-    else:
-        results = manus_research.claude_research_fallback(
-            card["topic"], card["audience"],
-        )
-        _save_research(page_id, results)
-        store.update_card(page_id, stage="keyword", status="queued")
-        log(f"{content_id} Claude 폴백 리서치 {len(results)}건 완료 → keyword")
+        return
+    # 기본 경로: Claude 와이드 리서치(웹 검색, 관점 3개 병렬) → 같은 실행에서 keyword로.
+    results = claude_research.run(card["topic"], card["audience"])
+    if not results:
+        raise RuntimeError("Claude 리서치가 관점 3개 모두 실패했습니다")
+    _save_research(page_id, results)
+    store.update_card(page_id, stage="keyword", status="queued")
+    log(f"{content_id} Claude 리서치 {len(results)}건 완료 → keyword")
 
 
 # research가 이 분(minute)을 넘겨도 안 끝나면 Manus가 막힌 것으로 보고 Claude로 우회
@@ -676,6 +682,7 @@ def _handle_failure(card: dict, stage: str, exc: Exception, approval: str | None
         fields = {"last_error": f"{_RETRY_MARK} {err}"[:1500]}
         if stage in _REQUEUE_STATUS:
             fields["status"] = _REQUEUE_STATUS[stage]
+            fields["stage"] = _REQUEUE_STAGE[stage]
         store.update_card(page_id, **fields)
         log(f"{cid} {stage} 실패 → 다음 실행에서 1회 자동 재시도 ({err[:120]})")
         return
@@ -718,13 +725,37 @@ def _sweep_stale_running(now_limit: int = STALE_RUNNING_MINUTES):
             log(f"{cid} {stage} 고아({age:.0f}분) → 재초안 큐")
 
 
+def _sweep_orphan_research(page_size: int = 50) -> int:
+    """research/queued 미아 카드를 intake/queued로 되돌린다(2026-09-14 구제).
+
+    intake 실패 재큐가 stage를 안 되돌리던 버그로 research/queued에 갇힌 카드는 어떤
+    DISPATCH도 집지 않았다. 리서치를 처음부터 다시 하도록 intake로 보내고, handle_intake의
+    중복 차단(idempotency_key)과 Manus 흔적을 지운다. 재시도 표식도 지워 새 출발.
+    """
+    fixed = 0
+    for card in store.query_cards(stage="research", status="queued", page_size=page_size):
+        if card.get("manus_task_ids", "").strip():
+            continue  # Manus task가 살아 있는 카드는 handle_research 몫(running이어야 함)
+        store.update_card(
+            card["page_id"], stage="intake", status="queued",
+            idempotency_key="", last_error="",
+        )
+        cid = card.get("content_id") or card["page_id"]
+        log(f"{cid} research/queued 미아 → intake 재시작")
+        fixed += 1
+    if fixed:
+        log(f"미아 카드 {fixed}장 리서치 재시작")
+    return fixed
+
+
 def run(only_stage: str | None = None):
     store.require_backend()
     if not only_stage:
-        try:
-            _sweep_stale_running()
-        except Exception as e:  # noqa: BLE001 — 청소 실패가 본 처리를 막으면 안 됨
-            log(f"고아 카드 청소 실패(계속 진행): {e}")
+        for sweeper in (_sweep_stale_running, _sweep_orphan_research):
+            try:
+                sweeper()
+            except Exception as e:  # noqa: BLE001 — 청소 실패가 본 처리를 막으면 안 됨
+                log(f"고아 카드 청소 실패({sweeper.__name__}, 계속 진행): {e}")
     processed = 0
     for stage, status, approval, handler in DISPATCH:
         if only_stage and stage != only_stage:

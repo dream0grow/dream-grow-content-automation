@@ -376,16 +376,87 @@ def test_intake_notifies_new_card(monkeypatch):
     state = FakeState()
     state.append_formatted_section = lambda *a, **k: None
     _patch(state)
-    fake_manus = types.SimpleNamespace(
-        available=lambda: False,
-        claude_research_fallback=lambda topic, audience: [],
-    )
-    monkeypatch.setattr(run, "manus_research", fake_manus)
+    monkeypatch.setattr(run, "manus_research", types.SimpleNamespace(available=lambda: False))
+    monkeypatch.setattr(run, "claude_research", types.SimpleNamespace(
+        run=lambda topic, audience: [{"research_focus": "학술", "key_findings": ["a"]}],
+    ))
     run.handle_intake({
         "page_id": "p1", "content_id": "DG-2026-0009",
         "idempotency_key": "", "topic": "받아쓰기 우는 아이", "audience": "학부모",
     })
     assert any("🆕" in msg and "받아쓰기 우는 아이" in msg for _, msg in state.notes)
+    merged = _last_update(state, "p1")
+    assert merged.get("stage") == "keyword" and merged.get("status") == "queued"
+
+
+def test_intake_uses_claude_research_by_default(monkeypatch):
+    """Manus 키가 있어도 제공자가 claude면 Claude 와이드 리서치로 같은 실행에서 keyword로 간다."""
+    state = FakeState()
+    saved = []
+    state.append_formatted_section = lambda pid, title, body: saved.append(title)
+    _patch(state)
+    called = {}
+
+    def _fail(*a, **k):
+        raise AssertionError("Manus 경로가 호출되면 안 된다")
+    monkeypatch.setattr(run, "manus_research", types.SimpleNamespace(
+        available=lambda: False, create_research_tasks=_fail))
+    monkeypatch.setattr(run, "claude_research", types.SimpleNamespace(
+        run=lambda topic, audience: called.setdefault("args", (topic, audience)) and [
+            {"research_focus": "학술·전문 근거", "key_findings": ["x"]},
+            {"research_focus": "부모 커뮤니티", "key_findings": ["y"]},
+        ]))
+    run.handle_intake({
+        "page_id": "p1", "content_id": "DG-2026-0080",
+        "idempotency_key": "", "topic": "모둠 활동 고집", "audience": "초등 저학년 학부모",
+    })
+    assert called["args"] == ("모둠 활동 고집", "초등 저학년 학부모")
+    assert len(saved) == 2 and all(s.startswith("🔍 리서치") for s in saved)
+    assert _last_update(state, "p1").get("stage") == "keyword"
+
+
+def test_intake_all_focus_failed_raises(monkeypatch):
+    state = FakeState()
+    state.append_formatted_section = lambda *a, **k: None
+    _patch(state)
+    monkeypatch.setattr(run, "manus_research", types.SimpleNamespace(available=lambda: False))
+    monkeypatch.setattr(run, "claude_research", types.SimpleNamespace(run=lambda t, a: []))
+    import pytest
+    with pytest.raises(RuntimeError):
+        run.handle_intake({
+            "page_id": "p1", "content_id": "DG-2026-0081",
+            "idempotency_key": "", "topic": "t", "audience": "a",
+        })
+
+
+# ---------- research/queued 미아 방지·구제 (2026-09-14) ----------
+
+def test_failure_requeue_restores_stage_for_intake():
+    """intake 실패 재큐는 stage도 intake로 되돌려야 한다(research/queued 미아 방지)."""
+    st = FakeState()
+    _patch(st)
+    card = {"page_id": "p1", "content_id": "DG-1", "last_error": ""}
+    run._handle_failure(card, "intake", RuntimeError("401"))
+    merged = _last_update(st, "p1")
+    assert merged.get("stage") == "intake" and merged.get("status") == "queued"
+    assert not st.notes
+
+
+def test_sweep_orphan_research_restarts_intake():
+    orphan = {"page_id": "p1", "content_id": "DG-1", "stage": "research",
+              "status": "queued", "manus_task_ids": "",
+              "last_error": f"{run._RETRY_MARK} HTTPError: 401"}
+    manus_live = {"page_id": "p2", "content_id": "DG-2", "stage": "research",
+                  "status": "queued", "manus_task_ids": "t1,t2"}
+    running = {"page_id": "p3", "content_id": "DG-3", "stage": "research",
+               "status": "running", "manus_task_ids": ""}
+    st = FakeState(cards=[orphan, manus_live, running])
+    _patch(st)
+    assert run._sweep_orphan_research() == 1
+    merged = _last_update(st, "p1")
+    assert merged == {"stage": "intake", "status": "queued",
+                      "idempotency_key": "", "last_error": ""}
+    assert not any(pid in ("p2", "p3") for pid, _ in st.updates)
 
 
 # ---------- 열람 사본 내보내기 ----------
@@ -417,6 +488,7 @@ def test_intake_with_source_material_skips_research(monkeypatch):
     def _fail(*a, **k):
         raise AssertionError("글감 카드는 리서치를 호출하면 안 됨")
 
+    monkeypatch.setattr(run, "claude_research", types.SimpleNamespace(run=_fail))
     monkeypatch.setattr(run, "manus_research", types.SimpleNamespace(
         available=_fail, create_research_tasks=_fail, claude_research_fallback=_fail,
     ))

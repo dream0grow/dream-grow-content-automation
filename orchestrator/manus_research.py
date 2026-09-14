@@ -1,7 +1,8 @@
-"""Manus API 연동 - 외부 리서치 전담 (설계 결정 #3)
+"""Manus API 연동 - 옛 외부 리서치 경로 (2026-09-14부터 기본 아님)
 
-Manus는 리서치 stage에서만 호출한다. 키워드/브리프/초안/검수는 모두 Claude.
-MANUS_API_KEY가 없으면 Claude 리서치로 자동 폴백하므로 시스템은 항상 동작한다.
+기본 리서치는 orchestrator/claude_research.py(Claude + 웹 검색)가 맡는다.
+이 모듈은 DG_RESEARCH_PROVIDER=manus 이고 MANUS_API_KEY가 있을 때만 켜진다
+(available()). Manus 키가 401로 죽어 파이프라인 입구가 막혔던 사고 이후 옵션으로 강등.
 """
 import json
 import os
@@ -9,8 +10,8 @@ import time
 
 import requests
 
-from orchestrator import llm, prompts
-from orchestrator.config import MANUS_API_BASE, MANUS_API_KEY
+from orchestrator import prompts
+from orchestrator.config import MANUS_API_BASE, MANUS_API_KEY, RESEARCH_PROVIDER
 
 RESEARCH_SCHEMA = {
     "type": "object",
@@ -32,7 +33,8 @@ RESEARCH_SCHEMA = {
 
 
 def available() -> bool:
-    return bool(MANUS_API_KEY)
+    """Manus 경로를 쓸지: 제공자를 명시적으로 manus로 두고 키도 있어야 한다."""
+    return RESEARCH_PROVIDER == "manus" and bool(MANUS_API_KEY)
 
 
 def _headers() -> dict:
@@ -158,14 +160,6 @@ def _extract_structured_output(data: dict) -> dict | None:
 
 
 def claude_research_fallback(topic: str, audience: str) -> list[dict]:
-    """Manus 키가 없을 때 Claude가 관점 3개 리서치를 수행한다 (웹 접근 없이 지식 기반)."""
-    results = []
-    for focus in prompts.RESEARCH_FOCUSES:
-        prompt = prompts.RESEARCH.format(
-            topic=topic, audience=audience or "초등 학부모", focus=focus,
-        ) + "\n\n주의: 웹 검색 없이 작성하므로 확신할 수 없는 출처는 적지 말고, confidence를 보수적으로 매기세요."
-        try:
-            results.append(llm.call_json(prompt, system=prompts.get_system()))
-        except (ValueError, json.JSONDecodeError):
-            continue
-    return results
+    """Manus가 막혔을 때의 우회 — Claude 와이드 리서치(웹 검색)로 위임한다."""
+    from orchestrator import claude_research
+    return claude_research.run(topic, audience)

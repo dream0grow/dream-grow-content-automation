@@ -3,7 +3,8 @@
 느린 리서치(Manus)는 주간 잡으로 분리해 data/cardnews_benchmark.md 를 갱신하고,
 빠른 카드 생성(cardnews.make_slides)은 load()로 그 파일만 읽어 프롬프트에 주입한다.
 
-Manus가 있으면 웹 리서치로 task 생성 후 폴링, 없으면 Claude 지식 기반 폴백.
+기본은 Claude 웹 검색 리서치(llm.call_json(web_search=True)). DG_RESEARCH_PROVIDER=manus 일 때만
+Manus task 생성 후 폴링(시간 초과·실패 시 Claude).
 
 실행:
   python3 -m orchestrator.cardnews_benchmark            # 리서치 → 벤치마크 파일 갱신
@@ -87,7 +88,12 @@ def _manus_research() -> dict | None:
 
 
 def _claude_research() -> dict:
-    return llm.call_json(prompts.CARDNEWS_BENCHMARK, system=prompts.get_system())
+    return llm.call_json(
+        prompts.CARDNEWS_BENCHMARK
+        + "\n\n조사 방법: 웹 검색으로 최근 3개월 안의 실제 사례를 찾아 반영하세요. "
+          "설명 없이 JSON만 출력하세요.",
+        system=prompts.get_system(), max_tokens=6000, web_search=True,
+    )
 
 
 def _fmt_md(data: dict) -> str:

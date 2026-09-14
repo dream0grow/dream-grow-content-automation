@@ -2,14 +2,14 @@
 
 > 이 파일은 새 세션이 자동으로 읽는다. 작업을 이어가려면 `/dreamgrow-resume` 스킬을 호출하라.
 > 지난 세션 기록(2026-06~07)은 `docs/HISTORY.md`에 있다.
-> 마지막 갱신: 2026-07-07
+> 마지막 갱신: 2026-09-14
 
 ## 무엇을 만들고 있나
 
 초등 학부모 교육 브랜드 "드림그로우"의 콘텐츠를 **멀티 에이전트 파이프라인**으로 자동 생산·발행한다.
 GitHub Actions가 cron으로 카드 저장소를 폴링하고, 사람은 모바일에서 카드 생성·승인만 한다.
 
-흐름: `intake → 리서치 → 키워드 점수화 → ⏸️키워드 승인(자동승인 기본 ON) → 브리프 → 작가↔비평가↔검수 토론 초안 → 검수/평가 → ⏸️발행 승인 → 발행(Threads/스티비)`
+흐름: `intake → 리서치(Claude 웹 검색, 관점 3개 병렬) → 키워드 점수화 → ⏸️키워드 승인(자동승인 기본 ON) → 브리프 → 작가↔비평가↔검수 토론 초안 → 검수/평가 → ⏸️발행 승인 → 발행(Threads/스티비)`
 
 **저장소 = 옵시디언 볼트 하나** (노션 철수 완료). 카드는
 `vault/파이프라인/활성/원고_<형식>_<카테고리>_<키워드+키워드>_<DG-ID>.md`
@@ -39,7 +39,8 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `obsidian_state.py` | 볼트 카드 저장소 — `vault/파이프라인/` md 카드 읽기/쓰기, 텔레그램+결재함 알림(`notify`) |
 | `prompts.py` | 브랜드 보이스/룰북 + 에이전트 프롬프트 (리서치/키워드/브리프/작가/비평가/검수/평가/회고) |
 | `agent_dialogue.py` | 작가↔비평가↔검수 토론 루프 + 벤치마킹/후킹 로드 |
-| `manus_research.py` | Manus 외부 리서치(전담). 25분 내 결과 없으면 Claude 폴백 |
+| `claude_research.py` | **기본 리서치**: Claude가 웹 검색(API 서버 도구 / CLI WebSearch)으로 관점 3개(학술·부모언어·트렌드) 병렬 조사 → intake 한 번에 keyword로 |
+| `manus_research.py` | 옛 Manus 경로. `DG_RESEARCH_PROVIDER=manus` + 키가 있을 때만 켜짐(기본 꺼짐) |
 | `naver_keywords.py` | 네이버 검색광고 API로 키워드 실측 검색량/경쟁도 |
 | `publish.py` | publish_ready 카드 발행 (Threads 체인 / 스티비 뉴스레터) |
 | `stibee.py` | 스티비 3단계 발행: POST /emails → POST /emails/{id}/content(text/html) → /send |
@@ -52,7 +53,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 | `reels_video.py` | 릴스(숏폼) 영상: 릴스 원고 B-roll → Muapi.ai(Open Generative AI 게이트웨이) 장면별 9:16 클립 → ffmpeg 합본 |
 | `stock.py` | 실물 스톡 사진 검색 (Pexels/Unsplash, 상업 라이선스) |
 | `image_gen.py` | AI 배경 이미지 생성 (OpenAI gpt-image-1 / Google Imagen, 한국인 중심) |
-| `cardnews_benchmark.py` | 최근 뜬 카드뉴스 벤치마킹 리서치(Manus/Claude) → `data/cardnews_benchmark.md`, 카드 생성 시 주입 |
+| `cardnews_benchmark.py` | 최근 뜬 카드뉴스 벤치마킹 리서치(Claude 웹 검색) → `data/cardnews_benchmark.md`, 카드 생성 시 주입 |
 | `config.py` | 환경변수 한 곳 관리 |
 
 데이터: `data/benchmark_posts.md`(스레드 7구조·12훅·변주, CSV 분석), `data/hook_patterns.md`(후킹 패턴).
@@ -84,7 +85,7 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 필수: (`ANTHROPIC_API_KEY` 또는 `CLAUDE_CODE_OAUTH_TOKEN`)
 선택: `DG_VAULT_ROOT`(기본 `vault/`), `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`(알림),
-`MANUS_API_KEY`, `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
+`DG_RESEARCH_PROVIDER`(기본 claude)/`DG_WEB_SEARCH_MAX_USES`(기본 6, 0이면 검색 끔)/`DG_RESEARCH_PARALLEL`(기본 3), `MANUS_API_KEY`(provider=manus일 때만), `HONCHO_API_KEY`, `NAVER_AD_API_KEY`/`NAVER_AD_SECRET`/`NAVER_AD_CUSTOMER_ID`,
 `THREADS_ACCESS_TOKEN`/`THREADS_USER_ID`, `STIBEE_API_KEY`/`STIBEE_LIST_ID`/`STIBEE_SENDER_EMAIL`/`STIBEE_SENDER_NAME`/`STIBEE_AUTO_SEND`,
 `DG_AUTO_APPROVE_KEYWORD`(기본 ON), `DG_DEFAULT_PUBLISH_TIME`(HH:MM KST 발행 예약 기본값 — orchestrator.yml에서 기본 `21:00`),
 `DG_DAILY_TOPIC_COUNT`(기본 1),
@@ -118,9 +119,31 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - 볼트 카드는 md 파일이라 Glob/Grep/Read로 직접 읽는다. 본문이 크면 python 슬라이스로 읽기.
 - 볼트 동기화는 git 하나뿐 — 여러 워크플로우가 같은 브랜치에 push하므로 `pull --rebase → push`를 재시도한다.
 - cron이 정시(00/30분)엔 자주 누락 → `8,23,38,53분`으로 설정함. 불안정하면 수동 실행.
-- Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
+- 리서치는 Claude 웹 검색이 기본(2026-09-14). Manus는 `DG_RESEARCH_PROVIDER=manus`로만 켜진다(키 401 사고 이력).
+- Actions는 `ANTHROPIC_API_KEY`가 비어 있어 Claude Code CLI(`CLAUDE_CODE_OAUTH_TOKEN`) 경로로 돈다 — 웹 검색은 `--allowedTools WebSearch WebFetch`로 허용(검증 완료).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 리서치를 Claude 웹 검색으로 전환 + 리서치 데드엔드 수리 (2026-09-14, 브랜치 `claude/sns-content-automation-review-daa6n6`) — ⬅️ 이번 세션 작업
+
+전체 코드 점검 보고서 `docs/SYSTEM_AUDIT_2026-09-09.md`(워크플로우 15개 상태·버그 12건·코드 5분류)에서 찾은
+🔴 두 건을 고쳤다. 08-24부터 매일 발제 카드가 `research/queued`에 갇혀 새 초안이 하나도 안 나오던 원인.
+- **`orchestrator/claude_research.py` 신설 — 리서치 기본 제공자**: `prompts.RESEARCH_FOCUSES` 3관점을
+  `ThreadPoolExecutor`로 병렬 호출, 각 호출은 `llm.call_json(web_search=True)`. 결과는 Manus와 같은
+  JSON(`🔍 리서치` 섹션 저장)이라 keyword 이후 단계는 무변경. 관점 일부 실패는 건너뛰고 전부 실패면 예외.
+- **`llm.call(web_search=)`**: API 키 경로는 서버 도구 `web_search_20260209`(`max_uses`=`DG_WEB_SEARCH_MAX_USES`,
+  `pause_turn` 이어 보내기), CLI 경로는 `claude_client.claude_call(tools=[WebSearch, WebFetch])` →
+  `--allowedTools`. 세션에서 CLI 검색 실측 성공(KCI 논문 URL 반환).
+- **`manus_research.available()`**: `DG_RESEARCH_PROVIDER=manus`이고 키가 있을 때만 True(기본 False).
+  `claude_research_fallback`은 `claude_research.run`으로 위임. `cardnews_benchmark`도 Claude 웹 검색이 기본.
+- **run.py 데드엔드 수리**: ① `_handle_failure` 재큐가 `stage`도 되돌림(`_REQUEUE_STAGE`) — intake 실패가
+  `research/queued` 미아를 만들던 버그. ② `_sweep_orphan_research`: `research/queued`(Manus task 없음) 카드를
+  `intake/queued`로 되돌리고 `idempotency_key`·`last_error`를 비움 → **머지 후 첫 cron에서 갇힌 카드 22장이
+  자동으로 리서치부터 재시작**(볼트 수동 편집 불필요). ③ `handle_intake`는 Claude 리서치 후 같은 실행에서 keyword로.
+- 테스트: `test_claude_research.py` 6종 + `test_run.py` 5종 신규, 전체 183종 통과.
+- **남은 사용자 액션**: ① 이 브랜치 머지 → 다음 cron부터 카드 22장 순차 처리(실행당 최대 5장) ② Actions Secrets의
+  `MANUS_API_KEY`는 지워도 무방(코드가 안 봄) ③ 보고서의 🟠 항목(썸네일 무한 재렌더, 이미지 API 키)은 별도 작업.
+
 
 ### 릴스 원고 자동 추천 → 텔레그램 (2026-08-26, 브랜치 `claude/top-reels-content-selection-zh68y9`) — ⬅️ 이번 세션 작업
 

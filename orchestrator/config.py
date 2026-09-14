@@ -11,9 +11,16 @@ load_dotenv(PROJECT_ROOT / ".env")
 # 볼트 동기화는 GitHub Actions가 vault/를 커밋·push하는 git/GitHub 단일 경로다.
 # 승인 대기·발행 알림은 텔레그램으로 나간다 (obsidian_state.notify → telegram_notify).
 
-# Manus (선택 - 외부 리서치 전담, 없으면 Claude 리서치로 폴백)
+# 리서치 제공자: 기본 "claude" — Claude가 웹 검색을 써서 관점 3개를 병렬로 조사한다
+# (orchestrator/claude_research.py). "manus"로 바꾸고 MANUS_API_KEY를 주면 옛 Manus 경로.
+# Manus 키가 401로 죽어 파이프라인 입구가 막혔던 사고(2026-08-24~09-09) 이후 Claude가 기본.
+RESEARCH_PROVIDER = (os.getenv("DG_RESEARCH_PROVIDER") or "claude").strip().lower()
 MANUS_API_KEY = os.getenv("MANUS_API_KEY", "")
 MANUS_API_BASE = os.getenv("MANUS_API_BASE", "https://api.manus.ai")
+
+# Claude 웹 검색 — API 키 경로는 서버 도구(web_search), CLI 경로는 WebSearch/WebFetch 허용.
+# 0이면 검색 없이 지식 기반으로만 답한다. 리서치 호출당 최대 검색 횟수.
+WEB_SEARCH_MAX_USES = int(os.getenv("DG_WEB_SEARCH_MAX_USES") or "6")
 
 # 모델 (유틸리티/글쓰기 분리)
 MODEL_UTILITY = os.getenv("DG_MODEL_UTILITY", "claude-sonnet-5")

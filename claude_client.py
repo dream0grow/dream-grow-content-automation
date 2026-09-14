@@ -18,6 +18,8 @@ from dataclasses import dataclass, field
 CLAUDE_BIN = os.getenv("CLAUDE_BIN", "claude")
 
 MODEL_MAP = {
+    "claude-opus-5": "opus",
+    "claude-sonnet-5": "sonnet",
     "claude-opus-4-8": "opus",
     "claude-opus-4-6": "opus",
     "claude-sonnet-4-20250514": "sonnet",
@@ -36,11 +38,19 @@ def claude_call(
     model: str = "sonnet",
     system: str | None = None,
     timeout: int = 600,
+    tools: list[str] | None = None,
 ) -> str:
+    """Claude Code CLI(-p)로 한 번 묻는다.
+
+    tools: 미리 허용할 내장 도구 이름(예: ["WebSearch", "WebFetch"]). 비우면 도구 없이
+    순수 생성만 한다(권한 프롬프트가 뜰 수 없는 비대화 실행이라 명시 허용이 필요).
+    """
     cli_model = MODEL_MAP.get(model, "sonnet")
     cmd = [CLAUDE_BIN, "-p", "--model", cli_model]
     if system:
         cmd.extend(["--append-system-prompt", system])
+    if tools:
+        cmd.extend(["--allowedTools", *tools])
     env = {k: v for k, v in __import__("os").environ.items() if k != "ANTHROPIC_API_KEY"}
     result = subprocess.run(
         cmd, input=prompt, capture_output=True, text=True, timeout=timeout, env=env,

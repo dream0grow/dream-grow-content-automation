@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 30
     env:
       MANUS_API_KEY: ${{ secrets.MANUS_API_KEY }}
+      DG_RESEARCH_PROVIDER: ${{ secrets.DG_RESEARCH_PROVIDER }}
+      DG_WEB_SEARCH_MAX_USES: ${{ secrets.DG_WEB_SEARCH_MAX_USES }}
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
     steps:

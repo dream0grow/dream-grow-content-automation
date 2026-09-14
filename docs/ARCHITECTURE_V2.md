@@ -8,7 +8,7 @@
 |---|---|---|
 | 1 | 상태 저장소는 **옵시디언 볼트(Git)** | `vault/파이프라인/활성/`의 md 카드가 단일 진실 공급원. 카드 frontmatter의 stage/status 변경이 곧 트리거. 동기화는 GitHub Actions가 볼트를 커밋·push하는 git 단일 경로 |
 | 2 | **기존 시스템 통합** | claude_client, memory_manager(Honcho), diff_learner를 그대로 재사용. 신규 코드는 `orchestrator/`에만 추가 |
-| 3 | **Manus는 외부 리서치 전담** | `task.create`는 리서치 stage에서만 호출. 키 미설정 시 Claude 리서치로 폴백 |
+| 3 | **리서치는 Claude 웹 검색** (2026-09-14 개정) | `orchestrator/claude_research.py`가 관점 3개를 병렬 조사. Manus는 `DG_RESEARCH_PROVIDER=manus`일 때만 쓰는 옵션(키 401로 입구가 막혔던 사고 이후 강등) |
 | 4 | **핸드폰 연속성 + 24시간 가동** | GitHub Actions cron이 30분마다 볼트를 폴링. 운영자는 옵시디언 모바일 앱(또는 텔레그램)에서 카드 생성·승인만 하면 됨 (Mac 불필요) |
 | 5 | **병렬 에이전트 간 대화** | 작가↔비평가↔교육윤리 검수자가 제한된 라운드(기본 2회)로 토론하며 초안을 업그레이드. 전체 대화록은 md 카드 본문 섹션에 기록 |
 | 6 | **자가 학습 (헤르메스 스타일)** | 주간 회고 에이전트가 Honcho 수정 패턴 + 성과 데이터를 분석해 프롬프트 개선안을 **큐시트**(승인 대기 카드)로 제출. 사람 승인 후에만 반영 |
@@ -24,8 +24,8 @@
    ▼
 [GitHub Actions cron (30분)] → python3 -m orchestrator.run
    │
-   ├─ intake      → Manus 리서치 3종 병렬 생성 (학술/부모언어/트렌드)
-   ├─ research    → Manus 완료 폴링 → 리서치 요약을 카드 본문 섹션에 저장
+   ├─ intake      → Claude 웹 검색 리서치 3종 병렬 (학술/부모언어/트렌드) → 카드 본문 섹션에 저장 → keyword
+   ├─ research    → (Manus 옵션일 때만) 완료 폴링 / research·queued 미아는 run() 시작 시 intake로 구제
    ├─ keyword     → Claude 키워드 점수화 (근거·브랜드핏·확장성·시급성)
    │                 → keyword_approval, needs_human  ⏸️ 사람 승인 (텔레그램 알림)
    ├─ brief       → Claude 브리프 1개 생성
