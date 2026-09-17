@@ -2,7 +2,7 @@
 
 > 이 파일은 새 세션이 자동으로 읽는다. 작업을 이어가려면 `/dreamgrow-resume` 스킬을 호출하라.
 > 지난 세션 기록(2026-06~07)은 `docs/HISTORY.md`에 있다.
-> 마지막 갱신: 2026-07-07
+> 마지막 갱신: 2026-09-17
 
 ## 무엇을 만들고 있나
 
@@ -121,6 +121,32 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 - Manus listMessages는 structured output을 안 줌 → 25분 후 Claude 폴백이 정상 동작(품질 좋음).
 
 ## 현재 상태 (세션마다 갱신)
+
+### 쇼츠 편집 v2 — 자막 스타일 프리셋(그로우써클) + 이름으로 영상 지정 (2026-09-17, 브랜치 `claude/hopeful-wozniak-ad8ovb`) — ⬅️ 이번 세션 작업
+
+사용자 요청: 구글 드라이브 `DJI_오즈모 영상` 폴더의 `DJI_20260914072454_0008_D`를
+참조 쇼츠(https://www.youtube.com/shorts/DAeAY5ZWVEs)의 자막 스타일로 자동 편집. 클라우드 세션은
+드라이브·유튜브가 막혀 영상을 직접 못 만지므로(1.2GB, 드라이브 MCP는 base64 인라인뿐), **엔진을
+업그레이드하고 로컬 실행 명령을 건네는 방식**으로 처리했다.
+- **`tools/shorts_edit.py` v2**: ① 자막을 SRT force_style 대신 **ASS 스타일 프리셋**으로 굽는다
+  (`--style`, `data/shorts_styles/<이름>.json`, 기본 `growcircle`; 1080×1920 절대 px 크기, 서체 폴백,
+  `data/fonts/` 폴더 폰트 설치 없이 사용) ② Whisper 문장을 `max_chars`로 짧게 끊는 쇼츠식 자막
+  (`chunk_entries`) ③ `==단어==` 노란 강조(썸네일 관례 동일) + `--highlight` 자동 강조
+  ④ `--hook "첫 줄|둘째 줄"` 상단 후킹 자막(`--hook-seconds`) ⑤ 확장자 없는 **이름만으로 영상 지정**
+  (`--source-dir`/`DG_OSMO_DIR`, DJI `.LRF`/`.WAV` 자동 제외) ⑥ ffmpeg 폴백(`pip install imageio-ffmpeg`
+  동봉 바이너리, ffprobe 없으면 `ffmpeg -i` 파싱). 산출물에 `subtitles.ass` 추가, notes.md에 다듬기 절차.
+- **프리셋 `growcircle.json`**: 흰 볼드 + 검은 테두리 + 노란 강조, 하단 1/4 큰 자막, 상단 후킹.
+  참조 쇼츠는 Higgsfield 영상 분석으로 장면(짙은 청록 배경 토킹헤드, 16초)만 확인됐고 자막 서체·색은
+  못 읽었다 → **사용자가 자막 장면 캡처를 주면 프리셋을 맞춘다**(`data/shorts_styles/README.md`).
+- 스킬 `dreamgrow-shorts-editor`·`docs/shorts-edit-setup.md` 갱신(드라이브 폴더 경로, 로컬/클라우드 판단,
+  스타일 피드백 루프). 테스트 37종 통과(신규 16: ASS 색·헤더·강조·줄나눔·SRT 왕복·이름 해석·ffprobe 폴백).
+  합성 영상 e2e(이름 해석→분석→렌더→합본→growcircle+후킹 굽기) 프레임 확인 완료.
+- **남은 사용자 액션**: ① 맥북에서 `brew install ffmpeg && pip install faster-whisper` ② 저장소 폴더에서
+  `export DG_OSMO_DIR="$HOME/Library/CloudStorage/GoogleDrive-leehg0211@gmail.com/내 드라이브/DJI_오즈모 영상"`
+  → `python3 tools/shorts_edit.py DJI_20260914072454_0008_D --mode analyze`(컷 계획) → `--hook "…"`로 전체 실행
+  ③ 참조 쇼츠 자막 캡처 1장을 세션에 올려 `growcircle.json` 확정 ④ 브랜치 머지.
+- **다음 업그레이드 후보**: 드라이브 폴더 감시→새 촬영본 자동 초벌(로컬 launchd/cron), 릴스 원고
+  (`05 리뷰/대기`)와 촬영본 매칭해 후킹 자막·제목 자동 제안, 자막 오탈자 LLM 교정.
 
 ### 릴스 원고 자동 추천 → 텔레그램 (2026-08-26, 브랜치 `claude/top-reels-content-selection-zh68y9`) — ⬅️ 이번 세션 작업
 
