@@ -1,0 +1,72 @@
+{
+  "version": 3,
+  "channel": "dreamgrow",
+  "brand": "드림그로우",
+  "reference": "https://www.youtube.com/shorts/DAeAY5ZWVEs",
+  "style": "shorts/styles/growcircle_reference_v1.json",
+  "source_root": "~/Library/CloudStorage/GoogleDrive-leehg0211@gmail.com",
+  "source_name": "DJI_20260914072454_0008_D.MP4",
+  "output_name": "dreamgrow_괜찮아보다_감정읽기_v1.mp4",
+  "max_duration": 30,
+  "title_lines": [
+    "\"괜찮아. 별일아니야.\"",
+    "위로가 안되는 이유"
+  ],
+  "editorial_notes": "쇼츠에서 제목이 시각적 후킹 역할을 하므로 원본 도입부(1.68–29.70 setup)는 제거하고, 15.62초의 핵심 후킹 '너 감정 아무렇지도 않으니까 그냥 조용히 해 라고 들리는 경우도 있어요'로 바로 시작한다. 이 문장이 편집의 존재 이유. 뒤에 결과(마음의 문을 닫는다) → 대안(상황·상태 말로 읽기) → 예시(속상했구나/아팠겠다) → 결론(인정이 내면을 단단하게)로 이어짐. 인용 발화 자막(핵심 후킹·예시 대사)에는 여닫는 큰따옴표. 화자 서술 자막은 따옴표 없이. 마지막 clip에 gap_after 0.5초로 자연스러운 마무리. 컷 사이 0.3초는 스타일 기본.",
+  "clips": [
+    {
+      "start": 15.62,
+      "end": 23.74,
+      "center_x": 0.5,
+      "zoom": 1.05,
+      "captions": [
+        {"start": 15.62, "end": 18.2, "text": "\"너 감정 아무렇지도\n않으니까"},
+        {"start": 18.2, "end": 20.5, "text": "그냥 조용히 해\""},
+        {"start": 20.5, "end": 23.74, "text": "라고 들리는 경우도 있어요"}
+      ]
+    },
+    {
+      "start": 25.68,
+      "end": 29.7,
+      "center_x": 0.5,
+      "zoom": 1,
+      "captions": [
+        {"start": 25.68, "end": 27.6, "text": "그렇게 되면 아이들은"},
+        {"start": 27.6, "end": 29.7, "text": "마음의 문을 닫게 되죠"}
+      ]
+    },
+    {
+      "start": 67.76,
+      "end": 71.96,
+      "center_x": 0.525,
+      "zoom": 1.06,
+      "captions": [
+        {"start": 67.76, "end": 69.6, "text": "아이의 상황과 상태를"},
+        {"start": 69.6, "end": 71.96, "text": "말로 읽어 줘야 됩니다"}
+      ]
+    },
+    {
+      "start": 73.26,
+      "end": 78.28,
+      "center_x": 0.52,
+      "zoom": 1,
+      "captions": [
+        {"start": 73.26, "end": 75.3, "text": "\"아, 너 지금 너무 속상했구나"},
+        {"start": 75.3, "end": 76.9, "text": "무릎이 까지니까"},
+        {"start": 76.9, "end": 78.28, "text": "진짜 아팠겠다\""}
+      ]
+    },
+    {
+      "start": 156.16,
+      "end": 160.16,
+      "center_x": 0.52,
+      "zoom": 1.02,
+      "gap_after": 0.5,
+      "captions": [
+        {"start": 156.16, "end": 157.6, "text": "그 인정이"},
+        {"start": 157.6, "end": 159.2, "text": "아이의 내면을"},
+        {"start": 159.2, "end": 160.16, "text": "단단하게 만듭니다"}
+      ]
+    }
+  ]
+}

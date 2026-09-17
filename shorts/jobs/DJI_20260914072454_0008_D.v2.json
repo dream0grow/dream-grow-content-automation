@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "channel": "dreamgrow",
+  "brand": "드림그로우",
+  "reference": "https://www.youtube.com/shorts/DAeAY5ZWVEs",
+  "style": "shorts/styles/growcircle_reference_v1.json",
+  "source_root": "~/Library/CloudStorage/GoogleDrive-leehg0211@gmail.com",
+  "source_name": "DJI_20260914072454_0008_D.MP4",
+  "output_name": "dreamgrow_괜찮아보다_감정읽기_v2.mp4",
+  "max_duration": 45,
+  "title_lines": [
+    "\"괜찮아. 별일아니야.\"",
+    "위로가 안되는 이유"
+  ],
+  "editorial_notes": "v2 iteration 2. 사용자 피드백 반영: (1) 원본 21.73–22.36초의 0.63초 무음 제거 위해 후킹 clip을 두 개로 분할, (2) 원본 67.03–68.75초의 무음 제거 위해 clip 시작을 68.75로 이동, (3) '다섯 가지 대화 케이스' 뒤 '스' 잔음(원본 165.33 이후) 제거 위해 clip end를 165.33으로 앞당김, (4) 원본 166.44–167.50초의 큰 무음 제거 위해 clip 7 시작을 167.50으로 이동, (5) 스타일 playback_rate 1.2 상속으로 전체 재생 속도 1.2배. clip 6a '인정의 말'과 clip 6b '다섯 가지 대화 케이스' 사이는 원본 대화 리듬 유지 위해 gap_after 0.15로 짧게. 딸린 리드 마그넷: lead_magnets/인정의_말_5가지_대화_케이스_v1.md.",
+  "clips": [
+    {
+      "start": 15.62,
+      "end": 21.73,
+      "center_x": 0.5,
+      "zoom": 1.05,
+      "captions": [
+        {"start": 15.62, "end": 18.2, "text": "\"너 감정 아무렇지도\n않으니까"},
+        {"start": 18.2, "end": 20.5, "text": "그냥 조용히 해\""},
+        {"start": 20.5, "end": 21.73, "text": "라고 들리는"}
+      ]
+    },
+    {
+      "start": 22.36,
+      "end": 23.74,
+      "center_x": 0.5,
+      "zoom": 1.05,
+      "captions": [
+        {"start": 22.36, "end": 23.74, "text": "경우도 있어요"}
+      ]
+    },
+    {
+      "start": 25.68,
+      "end": 29.7,
+      "center_x": 0.5,
+      "zoom": 1,
+      "captions": [
+        {"start": 25.68, "end": 27.6, "text": "그렇게 되면 아이들은"},
+        {"start": 27.6, "end": 29.7, "text": "마음의 문을 닫게 되죠"}
+      ]
+    },
+    {
+      "start": 68.75,
+      "end": 71.96,
+      "center_x": 0.525,
+      "zoom": 1.06,
+      "captions": [
+        {"start": 68.75, "end": 70.2, "text": "아이의 상황과 상태를"},
+        {"start": 70.2, "end": 71.96, "text": "말로 읽어 줘야 됩니다"}
+      ]
+    },
+    {
+      "start": 73.26,
+      "end": 78.28,
+      "center_x": 0.52,
+      "zoom": 1,
+      "captions": [
+        {"start": 73.26, "end": 75.3, "text": "\"아, 너 지금 너무 속상했구나"},
+        {"start": 75.3, "end": 76.9, "text": "무릎이 까지니까"},
+        {"start": 76.9, "end": 78.28, "text": "진짜 아팠겠다\""}
+      ]
+    },
+    {
+      "start": 156.16,
+      "end": 160.16,
+      "center_x": 0.52,
+      "zoom": 1.02,
+      "captions": [
+        {"start": 156.16, "end": 157.6, "text": "그 인정이"},
+        {"start": 157.6, "end": 159.2, "text": "아이의 내면을"},
+        {"start": 159.2, "end": 160.16, "text": "단단하게 만듭니다"}
+      ]
+    },
+    {
+      "start": 161.06,
+      "end": 163.9,
+      "center_x": 0.52,
+      "zoom": 1.02,
+      "gap_after": 0.15,
+      "captions": [
+        {"start": 161.06, "end": 163.9, "text": "아이의 내면을 단단하게\n만드는 인정의 말"}
+      ]
+    },
+    {
+      "start": 164.77,
+      "end": 165.33,
+      "center_x": 0.52,
+      "zoom": 1.02,
+      "captions": [
+        {"start": 164.77, "end": 165.33, "text": "다섯 가지 대화 케이스"}
+      ]
+    },
+    {
+      "start": 167.5,
+      "end": 169.56,
+      "center_x": 0.52,
+      "zoom": 1,
+      "gap_after": 0.5,
+      "captions": [
+        {"start": 167.5, "end": 168.6, "text": "아무 댓글이나 주시면"},
+        {"start": 168.6, "end": 169.56, "text": "보내드리도록 하겠습니다"}
+      ]
+    }
+  ]
+}

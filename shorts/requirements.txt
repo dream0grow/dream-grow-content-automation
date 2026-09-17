@@ -1,0 +1,3 @@
+Pillow>=11,<13
+# Optional speech preparation, Apple Silicon only; rendering needs no model/API.
+mlx-whisper>=0.4,<0.5; sys_platform == "darwin" and platform_machine == "arm64"
