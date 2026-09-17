@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "reference": "https://www.youtube.com/shorts/DAeAY5ZWVEs",
+  "font_match": "Visual approximation using installed Pretendard; reference font not confirmed",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "video_box": {"y": 540, "height": 1040},
+  "title_font": "~/Library/Fonts/Pretendard-Black.otf",
+  "caption_font": "~/Library/Fonts/Pretendard-SemiBold.otf",
+  "title_lines": [
+    {"y": 346, "size": 82, "color": "#FFE84B"},
+    {"y": 451, "size": 90, "color": "#FFFFFF"}
+  ],
+  "caption_size": 68,
+  "caption_color": "#FFFFFF",
+  "caption_y": 1020,
+  "caption_strip_height": 220,
+  "caption_line_height": 86,
+  "caption_skew": 0.16,
+  "caption_shadow": 8,
+  "caption_stroke": 2,
+  "brand_y": 1710,
+  "brightness": 0.015,
+  "saturation": 1.03,
+  "cut_gap": 0.3,
+  "playback_rate": 1.2
+}
