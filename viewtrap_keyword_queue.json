@@ -1,5 +1,5 @@
 {
-  "description": "뷰트랩 키워드 발굴 큐. 스레드 CSV(threads_archive_dream_grow_lee_2026-04-09.csv)에서 추출. 하루 30개씩 처리. status: pending | done | error",
+  "description": "뷰트랩 키워드 발굴 큐. 1차: 스레드 CSV(threads_archive_dream_grow_lee_2026-04-09.csv)에서 추출, 2차(2026-09-19): threads_archive_20260613.csv 기반 90개. 하루 30개씩 처리. status: pending | done | error",
   "sheet": {
     "url": "https://docs.google.com/spreadsheets/d/1Vy6_9gn3nNovUUdTqYOmkuc4ZamNbj-5tlvZ1fHmN24",
     "keywordGid": "949293824",
@@ -785,6 +785,726 @@
       "keyword": "조부모 육아",
       "status": "pending",
       "source": "threads_csv"
+    },
+    {
+      "keyword": "잔소리",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 49,
+      "threadsViews": 439263
+    },
+    {
+      "keyword": "가정 규칙",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 56,
+      "threadsViews": 438046
+    },
+    {
+      "keyword": "정리정돈",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 41,
+      "threadsViews": 192323
+    },
+    {
+      "keyword": "나눗셈",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 34,
+      "threadsViews": 459418
+    },
+    {
+      "keyword": "승부욕",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 32,
+      "threadsViews": 244532
+    },
+    {
+      "keyword": "공감 능력",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 28,
+      "threadsViews": 278778
+    },
+    {
+      "keyword": "인사 잘하는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 27,
+      "threadsViews": 190297
+    },
+    {
+      "keyword": "경제 교육",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 27,
+      "threadsViews": 188696
+    },
+    {
+      "keyword": "완벽주의 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 26,
+      "threadsViews": 197107
+    },
+    {
+      "keyword": "책상 정리",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 25,
+      "threadsViews": 320338
+    },
+    {
+      "keyword": "아침 루틴",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 23,
+      "threadsViews": 136209
+    },
+    {
+      "keyword": "첫째 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 23,
+      "threadsViews": 107261
+    },
+    {
+      "keyword": "책 읽어주기",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 22,
+      "threadsViews": 160081
+    },
+    {
+      "keyword": "정서 안정",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 22,
+      "threadsViews": 117599
+    },
+    {
+      "keyword": "초등 2학년",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 21,
+      "threadsViews": 578295
+    },
+    {
+      "keyword": "둘째 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 20,
+      "threadsViews": 100360
+    },
+    {
+      "keyword": "초등 3학년",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 19,
+      "threadsViews": 280148
+    },
+    {
+      "keyword": "거짓말하는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 19,
+      "threadsViews": 146889
+    },
+    {
+      "keyword": "학습만화",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 18,
+      "threadsViews": 147261
+    },
+    {
+      "keyword": "소리 지르는 엄마",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 18,
+      "threadsViews": 124340
+    },
+    {
+      "keyword": "독해",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 18,
+      "threadsViews": 108016
+    },
+    {
+      "keyword": "비교하는 부모",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 18,
+      "threadsViews": 99069
+    },
+    {
+      "keyword": "자신감",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 17,
+      "threadsViews": 80055
+    },
+    {
+      "keyword": "초등 5학년",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 16,
+      "threadsViews": 164005
+    },
+    {
+      "keyword": "사랑 표현",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 16,
+      "threadsViews": 152726
+    },
+    {
+      "keyword": "포기하는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 16,
+      "threadsViews": 123254
+    },
+    {
+      "keyword": "한자",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 16,
+      "threadsViews": 85701
+    },
+    {
+      "keyword": "보드게임",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 15,
+      "threadsViews": 272006
+    },
+    {
+      "keyword": "유치원",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 15,
+      "threadsViews": 242762
+    },
+    {
+      "keyword": "체벌",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 15,
+      "threadsViews": 142785
+    },
+    {
+      "keyword": "반항하는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 15,
+      "threadsViews": 129166
+    },
+    {
+      "keyword": "담임 선생님",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 14,
+      "threadsViews": 465713
+    },
+    {
+      "keyword": "아이 운동",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 14,
+      "threadsViews": 240997
+    },
+    {
+      "keyword": "레고",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 14,
+      "threadsViews": 61597
+    },
+    {
+      "keyword": "학교 적응",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 12,
+      "threadsViews": 298619
+    },
+    {
+      "keyword": "예민한 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 12,
+      "threadsViews": 192206
+    },
+    {
+      "keyword": "애착",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 12,
+      "threadsViews": 97350
+    },
+    {
+      "keyword": "바른 자세",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 12,
+      "threadsViews": 60271
+    },
+    {
+      "keyword": "예의 없는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 11,
+      "threadsViews": 149107
+    },
+    {
+      "keyword": "초등 4학년",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 11,
+      "threadsViews": 50877
+    },
+    {
+      "keyword": "우는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 10,
+      "threadsViews": 184123
+    },
+    {
+      "keyword": "영어 유치원",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 10,
+      "threadsViews": 100599
+    },
+    {
+      "keyword": "받아올림",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 10,
+      "threadsViews": 36862
+    },
+    {
+      "keyword": "준비물",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 9,
+      "threadsViews": 237727
+    },
+    {
+      "keyword": "급식",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 9,
+      "threadsViews": 181199
+    },
+    {
+      "keyword": "집안일",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 9,
+      "threadsViews": 173946
+    },
+    {
+      "keyword": "경쟁심",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 9,
+      "threadsViews": 128509
+    },
+    {
+      "keyword": "떼쓰는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 8,
+      "threadsViews": 76975
+    },
+    {
+      "keyword": "과학 실험",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 8,
+      "threadsViews": 65030
+    },
+    {
+      "keyword": "인내심",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 8,
+      "threadsViews": 48549
+    },
+    {
+      "keyword": "고집 센 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 8,
+      "threadsViews": 42114
+    },
+    {
+      "keyword": "칭찬 스티커",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 8,
+      "threadsViews": 34936
+    },
+    {
+      "keyword": "공부 안 하는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 8,
+      "threadsViews": 26259
+    },
+    {
+      "keyword": "책 안 읽는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 63883
+    },
+    {
+      "keyword": "분노 조절",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 50582
+    },
+    {
+      "keyword": "ADHD",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 45554
+    },
+    {
+      "keyword": "느린 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 35556
+    },
+    {
+      "keyword": "늦게 자는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 32196
+    },
+    {
+      "keyword": "계획표",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 26283
+    },
+    {
+      "keyword": "공부방",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 7,
+      "threadsViews": 25665
+    },
+    {
+      "keyword": "글씨 쓰기",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 6,
+      "threadsViews": 294466
+    },
+    {
+      "keyword": "학원 숙제",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 6,
+      "threadsViews": 72537
+    },
+    {
+      "keyword": "코딩",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 6,
+      "threadsViews": 68616
+    },
+    {
+      "keyword": "태블릿 학습",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 6,
+      "threadsViews": 36187
+    },
+    {
+      "keyword": "어린이 신문",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 6,
+      "threadsViews": 21261
+    },
+    {
+      "keyword": "말 안 듣는 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 5,
+      "threadsViews": 195485
+    },
+    {
+      "keyword": "게임 시간",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 5,
+      "threadsViews": 181618
+    },
+    {
+      "keyword": "배려",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 5,
+      "threadsViews": 60041
+    },
+    {
+      "keyword": "도형",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 5,
+      "threadsViews": 53036
+    },
+    {
+      "keyword": "부부 싸움",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 5,
+      "threadsViews": 26682
+    },
+    {
+      "keyword": "등교 거부",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 5,
+      "threadsViews": 12848
+    },
+    {
+      "keyword": "초등 문법",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 4,
+      "threadsViews": 370786
+    },
+    {
+      "keyword": "엄마 죄책감",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 4,
+      "threadsViews": 76558
+    },
+    {
+      "keyword": "띄어쓰기",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 4,
+      "threadsViews": 74616
+    },
+    {
+      "keyword": "소아 비만",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 4,
+      "threadsViews": 72529
+    },
+    {
+      "keyword": "새 학기",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 4,
+      "threadsViews": 65436
+    },
+    {
+      "keyword": "시간 관리",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 4,
+      "threadsViews": 26717
+    },
+    {
+      "keyword": "반장 선거",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 42659
+    },
+    {
+      "keyword": "알림장",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 40751
+    },
+    {
+      "keyword": "맞춤법",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 29832
+    },
+    {
+      "keyword": "말대꾸",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 20387
+    },
+    {
+      "keyword": "서술형",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 14898
+    },
+    {
+      "keyword": "독서록",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 12123
+    },
+    {
+      "keyword": "영어 애니메이션",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 10618
+    },
+    {
+      "keyword": "전학",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 8269
+    },
+    {
+      "keyword": "필사",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 3,
+      "threadsViews": 7159
+    },
+    {
+      "keyword": "피아노",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 2,
+      "threadsViews": 122735
+    },
+    {
+      "keyword": "내성적인 아이",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 2,
+      "threadsViews": 24343
+    },
+    {
+      "keyword": "마인크래프트",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 2,
+      "threadsViews": 22083
+    },
+    {
+      "keyword": "용돈",
+      "status": "pending",
+      "source": "threads_csv_20260613",
+      "collectedAt": "2026-09-19",
+      "threadsPosts": 2,
+      "threadsViews": 15432
     }
   ],
   "reusedFromHistory": [
@@ -1102,7 +1822,8 @@
   "notes": [
     "2026-09-18: rows 3-61 J/K swapped to correct semantics (J=views median, K=subs median).",
     "2026-09-18: pool tab rows 86-146 = curated 교육·육아 채널 videos for the 13 good keywords (label suffix \"(교육·육아 채널)\").",
-    "Viewtrap search trigger endpoint observed: POST https://api.viewtrap.com/api/v2/contents/videos/request/keyword (body not captured)."
+    "Viewtrap search trigger endpoint observed: POST https://api.viewtrap.com/api/v2/contents/videos/request/keyword (body not captured).",
+    "2026-09-19: 2차 배치 90개 추가 (vault/raw/스레드_아카이브/threads_archive_20260613.csv 원글 1,565개 언급 근거, 시트 5점 패턴에 맞춰 우선순위 정렬; 9/21~9/23 3일분). threadsPosts=언급 원글 수, threadsViews=원글 조회수 합."
   ],
   "viewtrapApi": {
     "histories": "GET https://api.viewtrap.com/api/v2/contents/histories/keyword",
