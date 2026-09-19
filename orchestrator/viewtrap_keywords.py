@@ -23,6 +23,10 @@ Aside 세션에서 손으로 검증한 절차(2026-09-18)를 그대로 옮긴 �
 
 필요 환경변수
   VIEWTRAP_COOKIE   브라우저 DevTools → Network → api.viewtrap.com 요청의 `cookie:` 헤더 값 전체
+  VIEWTRAP_COOKIE_KEY (선택) Fernet 키. 있으면 서버가 재발급한 토큰을 `data/viewtrap_session.enc`에 암호화해 보관하고
+                    다음 실행부터 그것을 우선 사용한다 (자동 갱신). 토큰은 발급 후 7일짜리이고 서버는
+                    만료 직전/직후 요청에 같은 ticket으로 새 토큰을 내려준 적이 있다(2026-09-17 관찰). `--touch-only`로
+                    하루 몇 번 API를 건드려 그 재발급을 받아 저장한다. 재발급이 없으면 만료 알림 후 수동 교체.
   GSHEET_SA_JSON    구글 서비스 계정 JSON (orchestrator/gsheet.py와 동일, 시트에 편집자로 공유돼 있어야 함)
   TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID  (선택) 요약 알림
 선택
@@ -85,6 +89,84 @@ class AuthError(RuntimeError):
     pass
 
 
+SESSION_FILE = REPO_ROOT / "data" / "viewtrap_session.enc"
+
+
+def _keys() -> tuple[bytes, bytes] | None:
+    """VIEWTRAP_COOKIE_KEY → (암호화 키, MAC 키). 표준 라이브러리만 쓴다 (러너에 추가 설치 없음)."""
+    import hashlib
+    import hmac
+    key = os.getenv("VIEWTRAP_COOKIE_KEY", "").strip()
+    if not key:
+        return None
+    raw = hashlib.sha256(key.encode()).digest()
+    return (hmac.new(raw, b"enc", hashlib.sha256).digest(), hmac.new(raw, b"mac", hashlib.sha256).digest())
+
+
+def _keystream(kenc: bytes, nonce: bytes, n: int) -> bytes:
+    import hashlib
+    import hmac
+    out, ctr = b"", 0
+    while len(out) < n:
+        out += hmac.new(kenc, nonce + ctr.to_bytes(4, "big"), hashlib.sha256).digest()
+        ctr += 1
+    return out[:n]
+
+
+def encrypt_blob(plain: bytes) -> bytes:
+    """HMAC-SHA256 카운터 스트림 + encrypt-then-MAC. 공개 저장소에 세션 쿠키를 놓기 위한 최소 구성."""
+    import hmac
+    import hashlib
+    import base64
+    kenc, kmac = _keys()
+    nonce = os.urandom(16)
+    ct = bytes(a ^ b for a, b in zip(plain, _keystream(kenc, nonce, len(plain))))
+    tag = hmac.new(kmac, nonce + ct, hashlib.sha256).digest()
+    return base64.b64encode(nonce + ct + tag)
+
+
+def decrypt_blob(blob: bytes) -> bytes:
+    import hmac
+    import hashlib
+    import base64
+    kenc, kmac = _keys()
+    raw = base64.b64decode(blob)
+    nonce, ct, tag = raw[:16], raw[16:-32], raw[-32:]
+    if not hmac.compare_digest(tag, hmac.new(kmac, nonce + ct, hashlib.sha256).digest()):
+        raise ValueError("MAC 불일치 (키가 다르거나 파일 손상)")
+    return bytes(a ^ b for a, b in zip(ct, _keystream(kenc, nonce, len(ct))))
+
+
+def load_saved_cookie() -> str | None:
+    """이전 실행이 저장한(서버 재발급) 쿠키. 키가 없거나 파일이 없으면 None."""
+    if not _keys() or not SESSION_FILE.exists():
+        return None
+    try:
+        return decrypt_blob(SESSION_FILE.read_bytes()).decode()
+    except Exception as e:
+        log(f"저장된 쿠키 복호 실패(무시): {e}")
+        return None
+
+
+def save_cookie(cookie: str) -> bool:
+    if not _keys():
+        return False
+    SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+    SESSION_FILE.write_bytes(encrypt_blob(cookie.encode()))
+    return True
+
+
+def pick_cookie() -> str:
+    """환경변수 쿠키와 저장된 쿠키 중 토큰 만료가 더 늦은 쪽을 쓴다 (사람이 새로 붙여넣은 쿠키도 자연히 우선됨)."""
+    env = os.getenv("VIEWTRAP_COOKIE", "").strip()
+    saved = load_saved_cookie()
+    ts = lambda c: (cookie_expiry(c) or datetime.fromtimestamp(0, KST)).timestamp()
+    if saved and ts(saved) > ts(env):
+        log(f"저장된 자동 갱신 쿠키 사용 (만료 {cookie_expiry(saved):%m/%d %H:%M})")
+        return saved
+    return env
+
+
 def cookie_expiry(cookie: str) -> datetime | None:
     """VIEWTRAP_COOKIE 안의 `token=` JWT에서 만료 시각(KST)을 꺼낸다. 뷰트랩 세션 토큰은 발급 후 7일짜리다."""
     import base64
@@ -100,9 +182,11 @@ class Viewtrap:
     def __init__(self, cookie: str):
         if not cookie.strip():
             raise AuthError("VIEWTRAP_COOKIE 미설정")
+        self.cookie = cookie.strip()
+        self.token0 = next((c.strip()[6:] for c in self.cookie.split(";") if c.strip().startswith("token=")), None)
         self.s = requests.Session()
         self.s.headers.update({
-            "Cookie": cookie.strip(),
+            "Cookie": self.cookie,
             "Origin": "https://app.viewtrap.com",
             "Referer": "https://app.viewtrap.com/video-search",
             "User-Agent": UA,
@@ -118,6 +202,13 @@ class Viewtrap:
     def get(self, path: str, **params) -> dict:
         r = self.s.get(f"{API}/{path}", params=params or None, timeout=60)
         return self._check(r)
+
+    def refreshed_cookie(self) -> str | None:
+        """서버가 Set-Cookie로 새 token을 내려줬으면 그 쿠키 문자열, 아니면 None."""
+        new = self.s.cookies.get("token", domain="api.viewtrap.com") or self.s.cookies.get("token")
+        if new and new != self.token0:
+            return "token=" + new
+        return None
 
     def remaining(self) -> int:
         """남은 영상 찾기 횟수 (`km_use_count`는 사용량이 아니라 잔여량이다)."""
@@ -398,10 +489,11 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
         notify("뷰트랩 키워드 조사: 큐가 비었습니다. viewtrap_keyword_queue.json에 키워드를 추가하세요.")
         return 0
 
-    vt = Viewtrap(os.getenv("VIEWTRAP_COOKIE", ""))
+    cookie = pick_cookie()
+    vt = Viewtrap(cookie)
     remaining = vt.remaining()
     log(f"잔여 검색 횟수 {remaining}")
-    expiry = cookie_expiry(os.getenv("VIEWTRAP_COOKIE", ""))
+    expiry = cookie_expiry(cookie)
     expiry_note = ""
     if expiry:
         left = expiry - datetime.now(KST)
@@ -496,6 +588,7 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
     q["lastRun"] = {"date": today, "searched": len(results), "remainingSearchCredits": remaining,
                     "errors": errors}
     save_queue(q)
+    persist_refresh(vt)
 
     lines = [f"뷰트랩 키워드 조사 {today}: {len(results)}개 처리, 잔여 검색 {remaining}회" + (f", {expiry_note}" if expiry_note else "")]
     lines += [f"- {m['keyword']}: {m['score']}점 (F {m['F']}만, G {m['G']}, J {m['medViews']}, K {m['medSubs']})"
@@ -513,6 +606,40 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
     return 0
 
 
+def persist_refresh(vt: "Viewtrap") -> bool:
+    """서버가 재발급한 토큰이 있으면 암호화 저장하고 알린다."""
+    new = vt.refreshed_cookie()
+    if not new:
+        return False
+    exp = cookie_expiry(new)
+    if save_cookie(new):
+        log(f"서버가 토큰을 재발급 → 저장 (만료 {exp:%m/%d %H:%M})" if exp else "재발급 토큰 저장")
+        notify(f"✅ 뷰트랩 쿠키 자동 갱신됨 (새 만료 {exp:%m/%d %H:%M})" if exp else "✅ 뷰트랩 쿠키 자동 갱신됨")
+        return True
+    log("서버가 토큰을 재발급했지만 VIEWTRAP_COOKIE_KEY가 없어 저장하지 못함")
+    return False
+
+
+def touch_only() -> int:
+    """검색 없이 API만 한 번 호출해 토큰 재발급을 받아 저장한다 (만료 직전/직후 주기 실행용)."""
+    cookie = pick_cookie()
+    exp = cookie_expiry(cookie)
+    left = (exp - datetime.now(KST)) if exp else None
+    log(f"touch: 현재 쿠키 만료 {exp:%m/%d %H:%M}, 남은 {left}" if exp else "touch: 만료 시각 불명")
+    vt = Viewtrap(cookie)
+    try:
+        remaining = vt.remaining()
+        log(f"touch: 인증 OK, 잔여 {remaining}")
+    except AuthError as e:
+        if left is not None and left < timedelta(0):
+            # 만료된 토큰으로도 재발급이 오는지 확인한 셀이므로, 여기서 재발급이 없으면 사람 차례
+            if persist_refresh(vt):
+                return 0
+        raise
+    persist_refresh(vt)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--limit", type=int, default=int(os.getenv("DG_VT_DAILY_LIMIT", "30")))
@@ -522,9 +649,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--pause", default="8,15", help="검색 사이 대기 초 (min,max)")
     ap.add_argument("--no-edu-extra", action="store_true",
                     help="5점 키워드의 교육·육아 채널 추가 선별 행을 넣지 않음")
+    ap.add_argument("--touch-only", action="store_true",
+                    help="검색 없이 API만 호출해 토큰 재발급을 받아 저장 (쿠키 유지용)")
     args = ap.parse_args(argv)
     lo, hi = (float(x) for x in args.pause.split(","))
     try:
+        if args.touch_only:
+            return touch_only()
         return run(args.limit, args.dry_run, args.max_age_days, args.min_credits, (lo, hi),
                    edu_extra=not args.no_edu_extra)
     except AuthError as e:
