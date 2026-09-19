@@ -62,19 +62,24 @@ PATTERNS_FILE = Path(__file__).resolve().parent.parent / "data" / "thumbnail_pat
 # 원고 핑퐁과 같은 폴더 — script_feedback이 `검수상태: 대기` + 최근 생성일이면 알림을 보낸다
 REVIEW_DIR_DEFAULT = "SNS 콘텐츠 제작 시스템/05 리뷰/대기"
 
-# 분석 탭 기본 열 배치 (2026-08-19 개편: J 영상 문구 분석 신설, M 키워드 디벨롭,
-# P 핫비디오 디벨롭). 실행 시 헤더 행을 읽어 이름으로 재해석하므로(resolve_columns)
-# 열이 옮겨져도 따라간다 — 여기 값은 헤더를 못 읽었을 때의 폴백이다.
-COL_DEFAULT = {"date_kw": 0, "url": 1, "thumb_img": 2, "title": 3,
-               "situation": 4, "worry": 5, "desire": 6, "plan": 7,        # E~H
-               "copy_emotion": 8, "structure": 9, "image_emotion": 10,    # I,J,K
-               "my_keyword": 11, "kw_develop": 12,                        # L,M
-               "hot_thumb": 13, "hot_analysis": 14, "hot_develop": 15,    # N,O,P
-               "image_develop": 16, "made_thumb": 17, "made_title": 18}   # Q,R,S
-LAST_COL = "S"
+# 분석 탭 기본 열 배치 (2026-09-19 개편: A 뒤에 B 조회수(게시일)·C 구독자 수 삽입 →
+# 나머지 열이 두 칸씩 밀림. 2026-08-19: J→L 영상 문구 분석, M→O 키워드 디벨롭, P→R 핫비디오 디벨롭).
+# 실행 시 헤더 행을 읽어 이름으로 재해석하므로(resolve_columns) 열이 옮겨져도 따라간다 —
+# 여기 값은 헤더를 못 읽었을 때의 폴백이다.
+COL_DEFAULT = {"date_kw": 0, "views": 1, "subs": 2, "url": 3, "thumb_img": 4, "title": 5,
+               "situation": 6, "worry": 7, "desire": 8, "plan": 9,        # G~J
+               "copy_emotion": 10, "structure": 11, "image_emotion": 12,  # K,L,M
+               "my_keyword": 13, "kw_develop": 14,                        # N,O
+               "hot_thumb": 15, "hot_analysis": 16, "hot_develop": 17,    # P,Q,R
+               "image_develop": 18, "made_thumb": 19, "made_title": 20}   # S,T,U
+# 헤더/행을 읽는 범위. 열이 늘어나도 이름으로 찾으므로 넉넉히 읽는다 (예전 "S"는 2026-09-19
+# 열 삽입 뒤 '만든 썸네일/만든 제목'을 놓쳐 폴백 인덱스로 엉뚱한 열에 쓸 위험이 있었다).
+LAST_COL = "AZ"
 
 # 헤더 이름 → 열 키 매핑 (공백 제거 후 startswith 비교, 위에서부터 우선)
 _HEADER_PATTERNS = [
+    ("views", "조회수"),
+    ("subs", "구독자"),
     ("hot_analysis", "핫비디오썸네일분석"),
     ("hot_develop", "핫비디오로문구디벨롭"),
     ("hot_thumb", "핫비디오썸네일"),
@@ -774,9 +779,9 @@ def expansion_values(expand: dict, parent_row: list[str],
                               f"/강도{vv.get('desire_intensity', '')} — {vv.get('evidence', '')}"]
         row = [""] * width
         # 벤치마크 정보 상속 (C 썸네일 이미지는 셀 위 이미지라 API로 복사 불가)
-        for key in ("date_kw", "url", "title", "situation", "worry", "desire", "plan",
-                    "copy_emotion", "structure", "image_emotion"):
-            if cols[key] < width:
+        for key in ("date_kw", "views", "subs", "url", "title", "situation", "worry",
+                    "desire", "plan", "copy_emotion", "structure", "image_emotion"):
+            if key in cols and cols[key] < width:
                 row[cols[key]] = _cell(parent_row, cols[key])
         viewer = x.get("viewer", {})
         for key, val in (("situation", viewer.get("situation")),

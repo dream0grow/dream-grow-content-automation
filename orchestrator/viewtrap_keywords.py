@@ -50,6 +50,8 @@ from pathlib import Path
 import requests
 
 from orchestrator import gsheet
+from orchestrator.pool_cells import (col_letter, resolve_pool_columns, subs_cell, video_id,
+                                     views_cell)
 
 API = "https://api.viewtrap.com/api/v2"
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
@@ -320,16 +322,21 @@ def keyword_row(r: int, m: dict, suggestions: list[str]) -> list:
     ]
 
 
-def pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None) -> list[list]:
-    """풀링 영상 만들기 탭 A~D. 쇼츠 제외, 조회수 순."""
+def pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None,
+              cols: dict[str, int] | None = None) -> list[list]:
+    """풀링 영상 만들기 탭 한 행(헤더 위치 기준: 날짜·조회수·구독자·URL·썸네일·제목). 쇼츠 제외, 조회수 순."""
     y, mo, d = m["searchDate"].split("-")
     label = f"{y}.{int(mo)}.{int(d)}. \n\n{m['keyword']}"
     vids = [v for v in data.get("videos", []) if not v.get("shorts")
             and v.get("id") and v["id"] not in (exclude_ids or set())]
     vids.sort(key=lambda v: float(v.get("viewCount") or 0), reverse=True)
-    return [[label, f"https://www.youtube.com/watch?v={v['id']}",
-             f'=IMAGE("https://img.youtube.com/vi/{v["id"]}/hqdefault.jpg")', v.get("title", "")]
-            for v in vids[:top_n]]
+    return [_to_pool_row(label, v, cols, m["searchDate"]) for v in vids[:top_n]]
+
+
+def pool_row_video_id(row: list, cols: dict[str, int] | None = None) -> str:
+    """풀링 행에서 영상 ID (URL 열 위치는 헤더 기준)."""
+    c = (cols or resolve_pool_columns([]))["url"]
+    return video_id(row[c] if c < len(row) else "")
 
 
 EDU_RE = re.compile(
@@ -350,15 +357,28 @@ def _edu_label(m: dict) -> str:
     return f"{y}.{int(mo)}.{int(d)}. \n\n{m['keyword']} (교육·육아 채널)"
 
 
-def _to_pool_row(label: str, v: dict) -> list:
-    return [label, f"https://www.youtube.com/watch?v={v['id']}",
-            f'=IMAGE("https://img.youtube.com/vi/{v["id"]}/hqdefault.jpg")', v.get("title", "")]
+def _to_pool_row(label: str, v: dict, cols: dict[str, int] | None = None,
+                 search_date: str | None = None) -> list:
+    """풀링 행 값 목록 (A부터 연속, 헤더로 찾은 위치에 배치). 뷰트랩 응답의
+    viewCount/subscriberCount/publishedAt로 조회수(게시일)·구독자 열도 바로 채운다."""
+    cols = cols or resolve_pool_columns([])
+    row = [""] * (max(cols[k] for k in ("date_kw", "views", "subs", "url", "thumb", "title")) + 1)
+    row[cols["date_kw"]] = label
+    row[cols["url"]] = f"https://www.youtube.com/watch?v={v['id']}"
+    row[cols["thumb"]] = f'=IMAGE("https://img.youtube.com/vi/{v["id"]}/hqdefault.jpg")'
+    row[cols["title"]] = v.get("title", "")
+    if v.get("viewCount") is not None:
+        row[cols["views"]] = views_cell(v.get("viewCount"), v.get("publishedAt"), search_date)
+    if v.get("subscriberCount") is not None:
+        row[cols["subs"]] = subs_cell(v.get("subscriberCount"), v.get("viewCount"))
+    return row
 
 
 EDU_METHOD = {"llm": 0, "regex": 0}  # 실행 중 어느 선별 방식이 쓰였는지 (요약 문구용)
 
 
-def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None) -> list[list]:
+def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None,
+                  cols: dict[str, int] | None = None) -> list[list]:
     """교육·육아 채널 영상만 골라 풀링 행을 만든다 (일반 명사 키워드 보완용, 라벨에 '(교육·육아 채널)').
 
     1차: LLM(orchestrator.llm.call_json)에 후보 40개(조회수 순, 쇼츠 제외)를 주고 고르게 한다.
@@ -383,7 +403,7 @@ def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None =
         picks = [int(i) for i in obj.get("picks", []) if str(i).isdigit() and int(i) < len(cands)]
         EDU_METHOD["llm"] += 1
         log(f"교육·육아 선별(LLM) {m['keyword']}: {len(picks[:top_n])}개")
-        return [_to_pool_row(label, cands[i]) for i in picks[:top_n]]
+        return [_to_pool_row(label, cands[i], cols, m["searchDate"]) for i in picks[:top_n]]
     except Exception as e:
         log(f"교육·육아 선별 LLM 실패({m['keyword']}): {e} → 정규식 휴리스틱 사용")
     EDU_METHOD["regex"] += 1
@@ -391,7 +411,7 @@ def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None =
     for v in vids:
         text = f"{v.get('title', '')} {v.get('channelTitle', '')}"
         if EDU_RE.search(text) and not EDU_EXCLUDE_RE.search(text):
-            out.append(_to_pool_row(label, v))
+            out.append(_to_pool_row(label, v, cols, m["searchDate"]))
         if len(out) >= top_n:
             break
     return out
@@ -406,6 +426,9 @@ class Sheet:
         self.pool_gid = int(os.getenv("DG_VT_POOL_GID", "") or POOL_GID_DEFAULT)
         self.kw_title = gsheet.resolve_title(self.kw_gid)
         self.pool_title = gsheet.resolve_title(self.pool_gid)
+        # 풀링 탭 열 위치는 헤더 이름으로 (2026-09-19 B/C 조회수·구독자 열 삽입 이후 위치 고정 금지)
+        header = (gsheet.read("A1:AZ1", self.pool_title) or [[]])[0]
+        self.pool_cols = resolve_pool_columns(header)
 
     @staticmethod
     def _last_nonempty(col_values: list[list[str]]) -> int:
@@ -426,9 +449,11 @@ class Sheet:
 
     def pooled_video_ids(self) -> set[str]:
         ids = set()
-        for r in gsheet.read("B2:B5000", self.pool_title):
-            if r and "v=" in r[0]:
-                ids.add(r[0].split("v=")[1].split("&")[0])
+        u = col_letter(self.pool_cols["url"])
+        for r in gsheet.read(f"{u}2:{u}5000", self.pool_title):
+            vid = video_id(r[0]) if r else ""
+            if vid:
+                ids.add(vid)
         return ids
 
     def write_keyword_rows(self, start: int, rows: list[list]) -> None:
@@ -444,7 +469,9 @@ class Sheet:
 
     def write_pool_rows(self, start: int, rows: list[list]) -> None:
         end = start + len(rows) - 1
-        gsheet.update(f"A{start}:D{end}", rows, self.pool_title)
+        width = max(len(r) for r in rows)
+        rows = [r + [""] * (width - len(r)) for r in rows]
+        gsheet.update(f"A{start}:{col_letter(width - 1)}{end}", rows, self.pool_title)
         gsheet.batch_update([{
             "updateDimensionProperties": {
                 "range": {"sheetId": self.pool_gid, "dimension": "ROWS",
@@ -582,11 +609,11 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
         exclude = sheet.pooled_video_ids()
         prow = []
         for item, m, data in good:
-            rows = pool_rows(m, data, 5, exclude)
-            exclude.update(r[1].split("v=")[1] for r in rows)
+            rows = pool_rows(m, data, 5, exclude, sheet.pool_cols)
+            exclude.update(pool_row_video_id(r, sheet.pool_cols) for r in rows)
             if edu_extra:
-                extra = edu_pool_rows(m, data, 5, exclude)
-                exclude.update(r[1].split("v=")[1] for r in extra)
+                extra = edu_pool_rows(m, data, 5, exclude, sheet.pool_cols)
+                exclude.update(pool_row_video_id(r, sheet.pool_cols) for r in extra)
                 rows += extra
             prow.extend(rows)
             item["pooled"] = bool(rows)

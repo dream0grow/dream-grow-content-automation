@@ -32,10 +32,11 @@ VOICE_FILE = Path(__file__).resolve().parent.parent / "data" / "youtube_voice.md
 LEDGER_REL = Path("_system") / "logs" / "youtube_body_ledger.json"
 LAST_COL = "AZ"  # 열 개편에 대비해 넉넉히 읽는다 (resolve가 이름으로 찾음)
 
-# 기본 열 배치 (2026-08-19 분석 탭). 헤더 행을 이름으로 재해석하므로 폴백일 뿐이다.
-COL_DEFAULT = {"date_kw": 0, "situation": 4, "worry": 5, "desire": 6, "plan": 7,
-               "my_keyword": 11, "kw_develop": 12, "made_title": 18,
-               "intro": 23, "result": 24, "body": 25}
+# 기본 열 배치 (2026-09-19 분석 탭: A 뒤에 조회수·구독자 두 열이 들어가 예전 배치에서 +2).
+# 헤더 행을 이름으로 재해석하므로 폴백일 뿐이다.
+COL_DEFAULT = {"date_kw": 0, "situation": 6, "worry": 7, "desire": 8, "plan": 9,
+               "my_keyword": 13, "kw_develop": 14, "made_title": 20,
+               "intro": 25, "result": 26, "body": 27}
 
 _HEADER_PATTERNS = [
     ("intro", "만든도입부"),
