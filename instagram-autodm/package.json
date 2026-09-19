@@ -1,0 +1,19 @@
+{
+  "name": "instagram-autodm",
+  "version": "1.0.0",
+  "description": "Instagram 댓글→DM 자동화 (팔로우 확인 게이트 + 리드마그넷 자동 전송 + 자동 대댓글). KittyChat 구조를 참고한 자체 호스팅 버전.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "mock": "MOCK_INSTAGRAM=1 DASHBOARD_PASSWORD=test node src/server.js",
+    "test": "node test/simulate.js",
+    "check": "node --check src/server.js && node --check src/automation.js && node --check src/instagram.js && node --check src/db.js && node --check src/queues.js && node --check src/webhook.js"
+  },
+  "license": "MIT",
+  "private": true
+}

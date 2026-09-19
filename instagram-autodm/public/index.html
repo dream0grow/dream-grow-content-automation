@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instagram AutoDM - 팔로우 확인 · 리드마그넷 자동 전송 · 자동 대댓글</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="layout">
+  <aside class="side">
+    <div class="logo"><span class="dot"></span> AutoDM</div>
+    <div class="account" id="accountBox">연결된 계정 없음</div>
+    <nav class="nav">
+      <a href="#dashboard" data-page="dashboard"><span class="ico">📊</span>대시보드</a>
+      <a href="#automations" data-page="automations"><span class="ico">💬</span>자동 DM &amp; 대댓글</a>
+      <a href="#leads" data-page="leads"><span class="ico">👥</span>리드(Lead) 수집</a>
+      <a href="#settings" data-page="settings"><span class="ico">⚙️</span>설정 · 안전장치</a>
+      <a href="#connect" data-page="connect"><span class="ico">🔗</span>연결</a>
+      <a href="#logs" data-page="logs"><span class="ico">🧾</span>활동 로그</a>
+      <a href="#help" data-page="help"><span class="ico">❓</span>사용 설명</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <!-- ───────── 대시보드 ───────── -->
+    <section class="page" id="page-dashboard">
+      <h1>대시보드</h1>
+      <div class="sub">댓글 → 팔로우 확인 → 리드마그넷 DM 흐름의 성과를 한눈에.</div>
+      <div id="dashNotes"></div>
+      <div class="cards" id="statCards"></div>
+      <div class="panel">
+        <div class="row between"><h2 style="margin:0">최근 30일 자동 DM 발송 / 리드마그넷 전달</h2><span class="hint">막대: 전달 완료 · 숫자: 발송</span></div>
+        <div class="chart" id="chart"></div>
+        <div class="legend" id="chartLegend"></div>
+      </div>
+      <div class="panel">
+        <h2 style="margin-top:0">최근 업데이트</h2>
+        <div class="log" id="dashLog"></div>
+      </div>
+    </section>
+
+    <!-- ───────── 자동화 ───────── -->
+    <section class="page" id="page-automations">
+      <div class="row between">
+        <div><h1>자동 DM &amp; 대댓글</h1><div class="sub">키워드 댓글이 달리면 대댓글을 달고, 버튼형 DM을 보낸 뒤 <b>팔로우한 사람에게만</b> 리드마그넷을 공개합니다.</div></div>
+        <div class="row">
+          <label class="switch" title="전체 자동화 켜기/끄기"><input type="checkbox" id="masterSwitch"> <span id="masterLabel">켜짐</span></label>
+          <button class="btn" id="btnPool">일반 자동대댓글 문구</button>
+          <button class="btn primary" id="btnAdd">+ 자동화 추가</button>
+        </div>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>키워드 / 게시물</th><th>DM 미리보기</th><th>상세</th><th>액션</th></tr></thead>
+          <tbody id="autoRows"><tr><td colspan="4" class="muted">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ───────── 리드 ───────── -->
+    <section class="page" id="page-leads">
+      <div class="row between">
+        <div><h1>리드(Lead) 수집</h1><div class="sub">자동 DM을 받은 사람과 팔로우 게이트 통과 여부.</div></div>
+        <div class="row"><select class="input" id="leadFilter" style="width:auto"><option value="">전체 단계</option><option value="delivered">전달 완료</option><option value="gate_blocked">팔로우 대기</option><option value="dm_sent">DM 발송(클릭 전)</option><option value="awaiting_reply">답장 대기</option><option value="failed">실패</option></select>
+          <a class="btn" href="/api/leads?format=csv">CSV 내보내기</a></div>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th>사용자</th><th>자동화</th><th>단계</th><th>팔로우</th><th>경로</th><th>시각</th></tr></thead>
+          <tbody id="leadRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ───────── 설정 ───────── -->
+    <section class="page" id="page-settings">
+      <h1>설정 · 안전장치</h1>
+      <div class="sub">KittyChat 설정 화면과 같은 항목입니다. 잘 모르면 기본값을 유지하세요.</div>
+      <form id="settingsForm">
+        <div class="panel">
+          <h2 style="margin-top:0">🔒 팔로우 확인 (팔로우 게이트)</h2>
+          <div class="form-grid">
+            <div class="full"><label class="f">비팔로워에게 보내는 메시지 <span class="hint">버튼을 눌렀는데 팔로우가 확인되지 않을 때 보내는 안내. [username] 사용 가능</span></label><textarea class="input" name="non_follower_message"></textarea></div>
+            <div><label class="f">재시도 버튼 레이블 <span class="hint">20자 이내</span></label><input class="input" name="follow_retry_button_label" maxlength="20"></div>
+            <div><label class="f">팔로우 확인 API 오류 시 <span class="hint">엄격: 차단 / 관대: 통과</span></label><select class="input" name="gate_fail_open"><option value="0">엄격 (팔로우 확인 실패 = 미전송)</option><option value="1">관대 (확인 실패해도 전송)</option></select></div>
+            <div class="full"><label class="f">재시도해도 아직 미팔로우일 때 메시지</label><textarea class="input" name="follow_still_not_message"></textarea></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 style="margin-top:0">📨 자동 DM</h2>
+          <div class="form-grid">
+            <div><label class="f">시간당 자동 DM 전송 제한 <span class="hint">짧은 시간에 너무 많은 DM은 스팸으로 간주될 수 있습니다. 발송 간격 = 3600 ÷ 제한(초)</span></label><input class="input" type="number" name="dm_hour_limit" min="1"></div>
+            <div><label class="f">'키워드' 외에 추가 텍스트/이모지가 있어도 자동 DM <span class="hint">exact 모드에서도 이모지·감탄사 정도는 허용</span></label><select class="input" name="keyword_fuzzy"><option value="1">켜짐</option><option value="0">꺼짐</option></select></div>
+            <div class="full"><label class="f">버튼형 DM 전송이 거부될 때 보내는 폴백 문구 <span class="hint">Private Reply 는 댓글당 1회만 가능. 템플릿이 거부되면 이 텍스트를 보내고, 사용자가 답장하면 팔로우 확인 후 자료를 보냅니다.</span></label><textarea class="input" name="fallback_prompt_message"></textarea></div>
+            <div><label class="f">폴백 답장 키워드</label><input class="input" name="text_dm_reply_keyword"></div>
+            <div><label class="f">자료 전달 후 추가 안내 (선택)</label><input class="input" name="delivered_followup" placeholder="비우면 보내지 않음"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 style="margin-top:0">💬 자동 대댓글</h2>
+          <div class="form-grid">
+            <div><label class="f">현 자동대댓글 상황</label><select class="input" name="comment_reply_enabled"><option value="1">켜짐</option><option value="0">꺼짐</option></select></div>
+            <div><label class="f">게시물별 시간당 허용 대댓글 수</label><input class="input" type="number" name="comment_reply_post_hour_limit" min="1"></div>
+            <div><label class="f">대댓글 지연 최소 (초) <span class="hint">권장 300 이상</span></label><input class="input" type="number" name="comment_reply_delay_min" min="0"></div>
+            <div><label class="f">대댓글 지연 최대 (초)</label><input class="input" type="number" name="comment_reply_delay_max" min="0"></div>
+            <div><label class="f">경고 감지 시 자동 대댓글 끄기</label><select class="input" name="auto_disable_on_warnings"><option value="1">켜짐</option><option value="0">꺼짐</option></select></div>
+            <div><label class="f">경고 임계치 (24시간 내 오류 횟수)</label><input class="input" type="number" name="warning_threshold" min="1"></div>
+          </div>
+        </div>
+        <div class="row"><button class="btn primary" type="submit">저장</button><button class="btn" type="button" id="btnDefaults">기본값 불러오기</button></div>
+      </form>
+    </section>
+
+    <!-- ───────── 연결 ───────── -->
+    <section class="page" id="page-connect">
+      <h1>연결</h1>
+      <div class="sub">인스타그램 프로페셔널(비즈니스/크리에이터) 계정을 연결하세요. Facebook 페이지는 필요 없습니다.</div>
+      <div class="panel" id="connectPanel"></div>
+      <div class="panel">
+        <h2 style="margin-top:0">Meta 앱 설정값 (앱 대시보드에 그대로 입력)</h2>
+        <div class="hint" style="margin-bottom:8px">이 주소들은 환경 변수 PUBLIC_URL 에서 만들어집니다. 서버가 인터넷에서 접근 가능한 https 주소에 배포된 뒤 등록하세요 (docs/deploy.md).</div>
+        <table>
+          <tr><th style="width:220px">OAuth 리다이렉트 URI</th><td class="mono" id="cfgRedirect"></td></tr>
+          <tr><th>웹훅 콜백 URL</th><td class="mono" id="cfgWebhook"></td></tr>
+          <tr><th>연결 해제 콜백 URL</th><td class="mono" id="cfgDeauth"></td></tr>
+          <tr><th>데이터 삭제 요청 URL</th><td class="mono" id="cfgDeletion"></td></tr>
+          <tr><th>개인정보처리방침 URL</th><td class="mono" id="cfgPrivacy"></td></tr>
+          <tr><th>웹훅 구독 필드</th><td class="mono">comments, messages, messaging_postbacks</td></tr>
+          <tr><th>권한(scope)</th><td class="mono">instagram_business_basic, instagram_business_manage_messages, instagram_business_manage_comments</td></tr>
+          <tr><th>환경 변수 상태</th><td id="cfgEnv"></td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h2 style="margin-top:0">🔍 팔로우 확인 테스트</h2>
+        <div class="hint" style="margin-bottom:8px">IGSID(Instagram-scoped ID, 리드 목록에서 확인)를 넣으면 그 사람이 나를 팔로우하는지 API로 즉시 조회합니다.</div>
+        <div class="row"><input class="input" id="fcIgsid" placeholder="예: 1234567890123456" style="max-width:320px"><button class="btn" id="btnFollowCheck">확인</button></div>
+        <pre class="mono" id="fcResult" style="white-space:pre-wrap"></pre>
+      </div>
+    </section>
+
+    <!-- ───────── 로그 ───────── -->
+    <section class="page" id="page-logs">
+      <div class="row between"><h1>활동 로그</h1><button class="btn" id="btnLogRefresh">새로고침</button></div>
+      <div class="panel"><div class="log" id="fullLog" style="max-height:none"></div></div>
+    </section>
+
+    <!-- ───────── 도움말 ───────── -->
+    <section class="page" id="page-help">
+      <h1>사용 설명</h1>
+      <div class="panel">
+        <h2 style="margin-top:0">작동 흐름</h2>
+        <ol class="steps">
+          <li><b>댓글 감지</b> — 게시물/릴스에 키워드 댓글이 달리면 Meta 웹훅이 서버로 알림을 보냅니다.</li>
+          <li><b>자동 대댓글</b> — 243개 문구 풀에서 무작위로 골라 <code class="k">@아이디</code>를 붙여 지연 시간 후 게시합니다.</li>
+          <li><b>버튼형 DM (Private Reply)</b> — 이미지·제목·부제목·버튼이 있는 카드 DM을 보냅니다. 팔로워면 받은 메시지함, 비팔로워면 '요청' 폴더에 도착합니다.</li>
+          <li><b>★ 팔로우 확인</b> — 사용자가 버튼을 누르면 Instagram User Profile API 의 <code class="k">is_user_follow_business</code> 값을 조회합니다.</li>
+          <li><b>분기</b> — 팔로워면 버튼 속 메시지(리드마그넷 링크)를 즉시 전송, 비팔로워면 안내 메시지 + <code class="k">팔로우했어요.</code> 재시도 버튼을 보냅니다. 팔로우 후 재시도하면 통과합니다.</li>
+        </ol>
+        <h2>인스타그램 규칙 (중요)</h2>
+        <ul>
+          <li>Private Reply 는 <b>댓글당 1회</b>, 댓글 작성 후 <b>7일 이내</b>에만 보낼 수 있습니다.</li>
+          <li>이후 메시지는 사용자가 응답(버튼 클릭 포함)한 뒤 <b>24시간 안</b>에만 보낼 수 있습니다. 그래서 '버튼 → 확인 → 공개' 구조가 필요합니다.</li>
+          <li>자동 대댓글이 너무 잦으면 제재 위험이 있습니다. 지연 300초 이상, 게시물별 시간당 4개 이하를 권장합니다. 오류가 반복되면 자동으로 대댓글을 멈춥니다(자동 DM 은 계속).</li>
+          <li>인스타그램 앱 설정 → 메시지 → 메시지 요청 → <b>'메시지 접근 허용'</b> 이 꺼져 있으면 DM 이 가지 않습니다.</li>
+        </ul>
+        <h2>치환자</h2>
+        <ul>
+          <li><code class="k">[username]</code> 이름(없으면 아이디) · <code class="k">@[username]</code> 아이디 멘션(대댓글용)</li>
+          <li><code class="k">[today]</code> <code class="k">[tomorrow]</code> <code class="k">[1week]</code> <code class="k">[2weeks]</code> 날짜 자동 계산</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- 자동화 편집 모달 -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="row between"><h2 id="modalTitle">자동화 추가</h2><button class="btn sm" id="modalClose">✕ 닫기</button></div>
+    <form id="autoForm">
+      <div class="form-grid">
+        <div><label class="f">자동화 이름</label><input class="input" name="name" placeholder="예: 수학 개념 로드맵" required></div>
+        <div><label class="f">자동화 종류</label>
+          <div class="seg" data-seg="trigger_type"><button type="button" data-v="comment">댓글→DM 자동화</button><button type="button" data-v="dm">DM→DM 자동화</button></div>
+          <label class="switch" style="margin-left:12px"><input type="checkbox" name="also_dm"> DM 속 키워드에도 적용</label>
+        </div>
+
+        <div class="full"><label class="f">게시물 선택 <span class="hint">특정 게시물만 적용하거나 전체 게시물에 적용</span></label>
+          <div class="row" style="margin-bottom:8px">
+            <div class="seg" data-seg="post_scope"><button type="button" data-v="all">전체</button><button type="button" data-v="selected">선택</button></div>
+            <label class="switch"><input type="checkbox" name="apply_to_future"> 다음 발행되는 게시물에 적용</label>
+            <button type="button" class="btn sm" id="btnMediaRefresh">게시물 새로고침</button>
+          </div>
+          <div class="media-list" id="mediaList"></div>
+        </div>
+
+        <div><label class="f">키워드 <span class="hint">쉼표로 여러 개. '불특정'이면 아무 댓글에나 반응</span></label>
+          <div class="seg" data-seg="keyword_mode" style="margin-bottom:6px"><button type="button" data-v="contains">포함</button><button type="button" data-v="exact">정확히</button><button type="button" data-v="any">불특정</button></div>
+          <input class="input" name="keywords" placeholder="로드맵, 자료"></div>
+        <div><label class="f">자동 대댓글 <span class="hint">일반: 문구 풀에서 무작위 / 특정: 이 자동화 전용 문구</span></label>
+          <div class="seg" data-seg="comment_reply_mode" style="margin-bottom:6px"><button type="button" data-v="general">일반</button><button type="button" data-v="custom">특정</button><button type="button" data-v="off">Off</button></div>
+          <textarea class="input" name="comment_replies" placeholder="한 줄에 하나씩. @[username] 사용 가능" style="min-height:64px"></textarea></div>
+
+        <div class="full"><h2 style="margin:8px 0 6px">DM 내용</h2></div>
+        <div><label class="f">DM 종류</label><div class="seg" data-seg="dm_type"><button type="button" data-v="button">버튼형 (카드)</button><button type="button" data-v="text">텍스트</button></div></div>
+        <div><label class="f">AI 문구 변형 <span class="hint">ANTHROPIC_API_KEY 가 있을 때만 작동. 링크·의미는 유지하고 표현만 변형</span></label><label class="switch"><input type="checkbox" name="ai_variation"> 사용</label></div>
+        <div class="full" id="textFields"><label class="f">텍스트 DM 본문 <span class="hint">900자. 링크 앞뒤에 공백을 두세요</span></label><textarea class="input" name="dm_text" maxlength="900"></textarea></div>
+        <div id="cardFields" class="full">
+          <div class="form-grid">
+            <div class="full"><label class="f">헤더 이미지 URL (선택) <span class="hint">1080×1080 권장. 공개 접근 가능한 https 주소</span></label><input class="input" name="image_url" placeholder="https://..."></div>
+            <div><label class="f">DM 제목 <span class="hint">80자</span></label><input class="input" name="title" maxlength="80"></div>
+            <div><label class="f">DM 부제목 (선택) <span class="hint">80자</span></label><input class="input" name="subtitle" maxlength="80"></div>
+          </div>
+        </div>
+        <div class="full gate-box">
+          <label class="switch"><input type="checkbox" name="follow_gate"> 🔒 '팔로워'에게만 버튼 속 메시지 공개 (팔로우 확인)</label>
+          <div class="hint" style="margin-top:6px">첫 DM 은 모두에게 발송되고, 버튼을 눌렀을 때 팔로우 여부를 확인합니다. 비팔로워에게는 설정의 안내 문구와 '팔로우했어요.' 버튼이 전송됩니다.</div>
+        </div>
+        <div class="full" id="buttonsBox"></div>
+        <div class="full"><button type="button" class="btn sm" id="btnAddButton">+ 버튼 추가 (최대 3개)</button></div>
+      </div>
+      <div class="row between" style="margin-top:18px">
+        <label class="switch"><input type="checkbox" name="enabled" checked> 이 자동화 켜짐</label>
+        <div class="row"><button type="button" class="btn" id="btnPreview">미리보기</button><button class="btn primary" type="submit">저장</button></div>
+      </div>
+    </form>
+    <div id="previewBox" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- 대댓글 문구 풀 모달 -->
+<div class="modal-bg" id="poolModal">
+  <div class="modal">
+    <div class="row between"><h2>일반 자동대댓글 문구 목록</h2><button class="btn sm" id="poolClose">✕ 닫기</button></div>
+    <div class="hint" style="margin-bottom:8px">댓글이 DM 자동화를 트리거하면 이 중 하나가 무작위로 원본 댓글 아래에 게시됩니다. 문구가 다양할수록 스팸 판정 위험이 줄어듭니다. <code class="k">@[username]</code> 자리에 상대 아이디가 들어갑니다. 한 줄에 하나씩.</div>
+    <textarea class="input" id="poolText" style="min-height:360px"></textarea>
+    <div class="row between" style="margin-top:10px"><span class="hint" id="poolCount"></span><button class="btn primary" id="poolSave">저장</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
