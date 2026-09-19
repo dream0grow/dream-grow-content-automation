@@ -489,9 +489,8 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
         notify("뷰트랩 키워드 조사: 큐가 비었습니다. viewtrap_keyword_queue.json에 키워드를 추가하세요.")
         return 0
 
-    cookie = pick_cookie()
-    vt = Viewtrap(cookie)
-    remaining = vt.remaining()
+    vt, remaining = authenticate()
+    cookie = vt.cookie
     log(f"잔여 검색 횟수 {remaining}")
     expiry = cookie_expiry(cookie)
     expiry_note = ""
@@ -620,22 +619,27 @@ def persist_refresh(vt: "Viewtrap") -> bool:
     return False
 
 
-def touch_only() -> int:
-    """검색 없이 API만 한 번 호출해 토큰 재발급을 받아 저장한다 (만료 직전/직후 주기 실행용)."""
+def authenticate() -> tuple["Viewtrap", int]:
+    """쿠키로 인증한다. 토큰이 만료되었어도 서버가 응답에 새 token을 내려주면 그것을 저장하고 한 번 더 시도한다."""
     cookie = pick_cookie()
     exp = cookie_expiry(cookie)
-    left = (exp - datetime.now(KST)) if exp else None
-    log(f"touch: 현재 쿠키 만료 {exp:%m/%d %H:%M}, 남은 {left}" if exp else "touch: 만료 시각 불명")
+    if exp:
+        left = exp - datetime.now(KST)
+        log(f"쿠키 만료 {exp:%m/%d %H:%M} ({'만료됨, ' if left < timedelta(0) else ''}남은 {left.days}일 {left.seconds // 3600}시간)")
     vt = Viewtrap(cookie)
     try:
-        remaining = vt.remaining()
-        log(f"touch: 인증 OK, 잔여 {remaining}")
-    except AuthError as e:
-        if left is not None and left < timedelta(0):
-            # 만료된 토큰으로도 재발급이 오는지 확인한 셀이므로, 여기서 재발급이 없으면 사람 차례
-            if persist_refresh(vt):
-                return 0
-        raise
+        return vt, vt.remaining()
+    except AuthError:
+        if not persist_refresh(vt):
+            raise
+        vt2 = Viewtrap(vt.refreshed_cookie())
+        return vt2, vt2.remaining()
+
+
+def touch_only() -> int:
+    """검색 없이 API만 한 번 호출해 토큰 재발급을 받아 저장한다 (만료 직전/직후 주기 실행용)."""
+    vt, remaining = authenticate()
+    log(f"touch: 인증 OK, 잔여 {remaining}")
     persist_refresh(vt)
     return 0
 
