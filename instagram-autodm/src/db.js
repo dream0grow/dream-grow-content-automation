@@ -160,8 +160,19 @@ CREATE TABLE IF NOT EXISTS media_cache (
 );
 `);
 
-// 기존 DB 마이그레이션 (컴럼 추가)
-try { db.exec('ALTER TABLE dm_queue ADD COLUMN final INTEGER DEFAULT 0'); } catch {}
+// 기존 DB 마이그레이션 (컬럼 추가). 이미 있으면 조용히 무시됩니다.
+for (const sql of [
+  'ALTER TABLE dm_queue ADD COLUMN final INTEGER DEFAULT 0',
+  // 예약 발송 자동 DM
+  "ALTER TABLE automations ADD COLUMN send_mode TEXT DEFAULT 'immediate'",   // immediate | scheduled
+  'ALTER TABLE automations ADD COLUMN scheduled_at INTEGER',
+  // 버튼형 캐러셀 (추가 카드, 최대 10장)
+  "ALTER TABLE automations ADD COLUMN cards TEXT DEFAULT '[]'",
+  // 게시물별 대댓글에도 AI 문구 다양화 적용
+  'ALTER TABLE automations ADD COLUMN comment_ai_variation INTEGER DEFAULT 0',
+  // 단체 DM · 예약 발송 추적용
+  'ALTER TABLE dm_queue ADD COLUMN tag TEXT',
+]) { try { db.exec(sql); } catch {} }
 
 // 오래된 기록 정리
 export function cleanupOld() {
@@ -186,6 +197,19 @@ export const DEFAULT_SETTINGS = {
   comment_reply_delay_max: '420',      // 대댓글 지연 최대(초)
   auto_disable_on_warnings: '1',
   warning_threshold: '3',              // 24시간 내 대댓글 오류 N회면 대댓글 자동 중단
+  // 제재 경고 단계적 대응 (KittyChat: 1·2차 경고 → 간격 자동 증가, 3차 → 중단)
+  warning_backoff_enabled: '1',
+  warning_backoff_step: '180',         // 경고 1회당 대댓글 지연에 더할 초
+  warning_backoff_max: '3600',         // 지연 상한(초)
+  // 스토리 멘션 자동 DM
+  story_mention_enabled: '0',
+  story_mention_message: '스토리에 저를 태그해 주셔서 감사해요, [username]님! 큰 힘이 됩니다 🙌',
+  story_mention_automation_id: '',     // 비워두면 위 텍스트만, 지정하면 해당 자동화의 버튼형 DM 재사용
+  // DM 첫 화면 / 고정 메뉴 (Instagram 에 저장된 값의 로컬 사본)
+  ice_breakers: '[]',
+  persistent_menu: '[]',
+  // 단체 DM 안전장치
+  bulk_dm_enabled: '1',
   keyword_fuzzy: '1',                  // 키워드 외 텍스트/이모지 있어도 매칭
   text_dm_reply_keyword: '받기',        // 템플릿 전송 실패 폴백: 이 단어로 답장하면 계속 진행
   fallback_prompt_message: '댓글 감사합니다! 자료를 받으시려면 이 메시지에 "받기" 라고 답장해 주세요 :)',
@@ -241,7 +265,7 @@ export function getAccount() {
   return db.prepare('SELECT * FROM accounts ORDER BY id DESC LIMIT 1').get() || null;
 }
 
-const AUTOMATION_JSON = ['media_ids', 'keywords', 'comment_replies', 'buttons'];
+const AUTOMATION_JSON = ['media_ids', 'keywords', 'comment_replies', 'buttons', 'cards'];
 export function parseAutomation(row) {
   if (!row) return null;
   const a = { ...row };
@@ -262,7 +286,8 @@ export function saveAutomation(input, id = null) {
     enabled: input.enabled ? 1 : 0,
     trigger_type: input.trigger_type === 'dm' ? 'dm' : 'comment',
     also_dm: input.also_dm ? 1 : 0,
-    post_scope: input.post_scope === 'selected' ? 'selected' : 'all',
+    // all(전체) | reels(릴스만) | feed(일반 게시물만) | selected(직접 선택)
+    post_scope: ['all', 'reels', 'feed', 'selected'].includes(input.post_scope) ? input.post_scope : 'all',
     media_ids: JSON.stringify(Array.isArray(input.media_ids) ? input.media_ids.map(String) : []),
     apply_to_future: input.apply_to_future ? 1 : 0,
     keyword_mode: ['any', 'contains', 'exact'].includes(input.keyword_mode) ? input.keyword_mode : 'contains',
@@ -280,6 +305,18 @@ export function saveAutomation(input, id = null) {
       .filter((b) => b.label)),
     follow_gate: input.follow_gate ? 1 : 0,
     ai_variation: input.ai_variation ? 1 : 0,
+    comment_ai_variation: input.comment_ai_variation ? 1 : 0,
+    send_mode: input.send_mode === 'scheduled' ? 'scheduled' : 'immediate',
+    scheduled_at: input.send_mode === 'scheduled' && input.scheduled_at ? Number(input.scheduled_at) || null : null,
+    // 추가 캐러셀 카드 (첫 카드는 title/subtitle/image_url/buttons 로 따로 관리, 여기엔 2장째부터 최대 9장)
+    cards: JSON.stringify((Array.isArray(input.cards) ? input.cards : []).slice(0, 9).map((c) => ({
+      title: String(c.title || '').slice(0, 80),
+      subtitle: String(c.subtitle || '').slice(0, 80),
+      image_url: String(c.image_url || '').trim(),
+      buttons: (Array.isArray(c.buttons) ? c.buttons : []).slice(0, 3)
+        .map((b) => ({ label: String(b.label || '').slice(0, 20), reply: String(b.reply || '').slice(0, 900), url: String(b.url || '').trim() }))
+        .filter((b) => b.label),
+    })).filter((c) => c.title || c.image_url)),
     updated_at: now(),
   };
   if (id) {

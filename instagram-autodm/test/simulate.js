@@ -97,7 +97,7 @@ try {
   const gp = await lastCall('getUserProfile');
   check('is_user_follow_business 조회함', gp?.igsid === '1001' && gp.is_user_follow_business === false);
   const blockMsg = await lastCall('sendMessage');
-  check('비팔로워 안내 + 재시도 버튼(RC) 발송', blockMsg?.message.attachment?.payload?.template_type === 'button' && blockMsg.message.attachment.payload.buttons[0].payload === `RC:${auto.id}:0` && /팔로우/.test(blockMsg.message.attachment.payload.text));
+  check('비팔로워 안내 + 재시도 버튼(RC) 발송', blockMsg?.message.attachment?.payload?.template_type === 'button' && blockMsg.message.attachment.payload.buttons[0].payload === `RC:${auto.id}:0:0` && /팔로우/.test(blockMsg.message.attachment.payload.text));
   check('리드마그넷 링크가 노출되지 않음', !JSON.stringify(blockMsg).includes('drive.google.com'));
   ld = (await leads()).find((l) => l.igsid === '1001');
   check('delivery 단계 = gate_blocked', ld?.stage === 'gate_blocked' && ld.is_follower === 0);

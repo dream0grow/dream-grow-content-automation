@@ -5,15 +5,15 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { config, ROOT, redirectUri, webhookUrl } from './config.js';
 import {
-  db, now, logEvent, getAccount, getSettings, setSettings, listAutomations, getAutomation, saveAutomation, DEFAULT_SETTINGS,
+  db, now, logEvent, getAccount, getSettings, setSettings, settingOn, listAutomations, getAutomation, saveAutomation, DEFAULT_SETTINGS,
 } from './db.js';
-import { authorizeUrl, exchangeCode, exchangeLongLived, clientFor, mockState } from './instagram.js';
+import { authorizeUrl, exchangeCode, exchangeLongLived, clientFor, mockState, msg } from './instagram.js';
 import { verifyChallenge, validSignature, dispatch, eventKey } from './webhook.js';
-import { startQueues, tick, queueStatus, pendingCount } from './queues.js';
+import { startQueues, tick, queueStatus, pendingCount, enqueueDm } from './queues.js';
 import { startPoller, pollOnce } from './poller.js';
 import { startTokenRefresher, refreshIfNeeded } from './tokens.js';
-import { loadReplyPool, saveReplyPool } from './text.js';
-import { upsertMedia, buildFirstMessage } from './automation.js';
+import { loadReplyPool, saveReplyPool, render } from './text.js';
+import { upsertMedia, buildFirstMessage, mediaKind, handleStoryMention } from './automation.js';
 
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
@@ -24,6 +24,7 @@ function json(res, status, data) {
   res.end(JSON.stringify(data));
 }
 function text(res, status, body, type = 'text/plain; charset=utf-8') { res.writeHead(status, { 'Content-Type': type }); res.end(body); }
+function safeJson(s, d = []) { try { const v = JSON.parse(s); return v ?? d; } catch { return d; } }
 function redirect(res, to) { res.writeHead(302, { Location: to }); res.end(); }
 function readBody(req) {
   return new Promise((resolve, reject) => {
@@ -135,13 +136,119 @@ async function api(req, res, url) {
     const account = getAccount();
     if (!account) return json(res, 200, []);
     const fresh = url.searchParams.get('refresh') === '1';
-    const cached = db.prepare('SELECT * FROM media_cache ORDER BY timestamp DESC LIMIT 100').all();
-    if (cached.length && !fresh && now() - Math.max(...cached.map((c) => c.fetched_at)) < 10 * 60000) return json(res, 200, cached);
+    // kind(reels|feed) 를 붙여 반환 → 프론트에서 릴스/게시물 필터링
+    const withKind = (rows) => rows.map((r) => ({ ...r, kind: mediaKind(r) }));
+    const read = () => db.prepare('SELECT * FROM media_cache ORDER BY timestamp DESC LIMIT 400').all();
+    const cached = read();
+    if (cached.length && !fresh && now() - Math.max(...cached.map((c) => c.fetched_at)) < 10 * 60000) return json(res, 200, withKind(cached));
     try {
-      const media = await clientFor(account).getMedia(100);
+      const media = await clientFor(account).getMedia(300);
       for (const mm of media) upsertMedia(mm);
-      return json(res, 200, db.prepare('SELECT * FROM media_cache ORDER BY timestamp DESC LIMIT 100').all());
-    } catch (e) { return json(res, 502, { error: e.message, cached }); }
+      return json(res, 200, withKind(read()));
+    } catch (e) { return json(res, 502, { error: e.message, cached: withKind(cached) }); }
+  }
+
+  // ── 단체 DM (Bulk DM) ────────────────────────────────────────────────
+  // 인스타그램은 "상대가 마지막으로 반응한 지 24시간" 안에서만 먼저 DM 을 보낼 수 있습니다.
+  // 버튼 클릭(postback) / 답장이 있었던 사람만 대상으로 잡습니다.
+  if (p === '/api/bulk/audience' && m === 'GET') {
+    const cutoff = now() - 24 * 3600000;
+    const rows = db.prepare(`SELECT d.igsid, MAX(d.updated_at) AS last_at,
+        MAX(d.username) AS username, MAX(d.name) AS name, MAX(d.stage) AS stage, MAX(d.is_follower) AS is_follower
+      FROM deliveries d
+      WHERE d.igsid IS NOT NULL AND d.updated_at > ?
+        AND d.stage IN ('delivered','gate_blocked','awaiting_reply')
+      GROUP BY d.igsid ORDER BY last_at DESC`).all(cutoff);
+    return json(res, 200, rows.map((r) => ({ ...r, expires_at: r.last_at + 24 * 3600000, minutes_left: Math.max(0, Math.round((r.last_at + 24 * 3600000 - now()) / 60000)) })));
+  }
+  if (p === '/api/bulk/send' && m === 'POST') {
+    const account = getAccount();
+    if (!account) return json(res, 400, { error: '연결된 계정이 없습니다' });
+    if (!settingOn('bulk_dm_enabled')) return json(res, 400, { error: '설정에서 단체 DM 이 꺼져 있습니다' });
+    const targets = (Array.isArray(body.igsids) ? body.igsids : []).map(String).filter(Boolean);
+    const textBody = String(body.text || '').slice(0, 900);
+    if (!targets.length) return json(res, 400, { error: '받는 사람을 1명 이상 골라주세요' });
+    if (!textBody.trim()) return json(res, 400, { error: '보낼 내용을 입력하세요' });
+    const link = String(body.button_url || '').trim();
+    const label = String(body.button_label || '').slice(0, 20).trim();
+    let queued = 0;
+    for (const igsid of targets) {
+      const d = db.prepare('SELECT username, name FROM deliveries WHERE igsid = ? ORDER BY id DESC LIMIT 1').get(igsid) || {};
+      const rendered = render(textBody, { username: d.username, name: d.name });
+      const payload = (link && label) ? msg.button(rendered, [msg.webUrl(label, link)]) : msg.text(rendered);
+      enqueueDm({ kind: 'message', igsid, payload, tag: 'bulk' });
+      queued++;
+    }
+    logEvent('info', 'bulk_dm', `단체 DM ${queued}명 대기열 등록 (시간당 ${getSettings().dm_hour_limit}건 제한에 맞춰 순차 발송)`);
+    return json(res, 200, { queued, queue: queueStatus() });
+  }
+
+  // ── DM 첫 화면(인박스 스타터) · DM 고정 메뉴 ────────────────────────────────
+  if (p === '/api/dm-menu' && m === 'GET') {
+    const s = getSettings();
+    const local = { ice_breakers: safeJson(s.ice_breakers), persistent_menu: safeJson(s.persistent_menu) };
+    const account = getAccount();
+    if (!account || url.searchParams.get('remote') !== '1') return json(res, 200, { ...local, remote: null });
+    try { return json(res, 200, { ...local, remote: await clientFor(account).getMessengerProfile() }); }
+    catch (e) { return json(res, 200, { ...local, remote: null, remote_error: e.message }); }
+  }
+  if (p === '/api/dm-menu' && m === 'PUT') {
+    const account = getAccount();
+    if (!account) return json(res, 400, { error: '연결된 계정이 없습니다' });
+    // 인박스 스타터 최대 4개, 고정 메뉴 최대 5개
+    const ice = (Array.isArray(body.ice_breakers) ? body.ice_breakers : []).slice(0, 4)
+      .map((x) => ({ question: String(x.question || '').slice(0, 80), payload: `ICE:${String(x.answer || '').slice(0, 900)}` }))
+      .filter((x) => x.question);
+    const menu = (Array.isArray(body.persistent_menu) ? body.persistent_menu : []).slice(0, 5)
+      .map((x) => (String(x.url || '').trim()
+        ? { type: 'web_url', title: String(x.title || '').slice(0, 20), url: String(x.url).trim() }
+        : { type: 'postback', title: String(x.title || '').slice(0, 20), payload: `MENU:${String(x.answer || '').slice(0, 900)}` }))
+      .filter((x) => x.title);
+    const profile = {};
+    if (ice.length) profile.ice_breakers = [{ call_to_actions: ice, locale: 'default' }];
+    if (menu.length) profile.persistent_menu = [{ locale: 'default', composer_input_disabled: false, call_to_actions: menu }];
+    try {
+      if (Object.keys(profile).length) await clientFor(account).setMessengerProfile(profile);
+      const drop = [];
+      if (!ice.length) drop.push('ice_breakers');
+      if (!menu.length) drop.push('persistent_menu');
+      if (drop.length) { try { await clientFor(account).deleteMessengerProfile(drop); } catch {} }
+    } catch (e) { return json(res, 502, { error: e.message }); }
+    setSettings({ ice_breakers: JSON.stringify(body.ice_breakers || []), persistent_menu: JSON.stringify(body.persistent_menu || []) });
+    logEvent('info', 'dm_menu', `DM 첫 화면 ${ice.length}개 · 고정 메뉴 ${menu.length}개 저장`);
+    return json(res, 200, { ice_breakers: body.ice_breakers || [], persistent_menu: body.persistent_menu || [] });
+  }
+
+  // ── 진단: "자동 DM 이 발송되지 않는다면?" 체크리스트를 서버가 자동으로 점검 ──────────
+  if (p === '/api/diagnostics' && m === 'GET') {
+    const account = getAccount();
+    const s = getSettings();
+    const checks = [];
+    const add = (ok, label, hint) => checks.push({ ok, label, hint });
+    add(!!account, '인스타그램 계정 연결', '‘연결’ 페이지에서 계정을 연결하세요.');
+    add(!!account?.webhook_subscribed, '웹훅 구독', '‘연결’ 페이지의 ‘웹훅 다시 구독’을 눌러주세요.');
+    const daysLeft = account?.token_expires_at ? Math.floor((account.token_expires_at - now()) / 86400000) : null;
+    add(daysLeft === null || daysLeft > 7, `액세스 토큰 유효 (${daysLeft ?? '?'}일 남음)`, '토큰이 곧 만료됩니다. ‘연결’에서 토큰을 갱신하세요.');
+    add(s.master_switch === '1', '전체 자동화 스위치 켜짐', '‘자동 DM & 대댓글’ 상단 스위치를 켜주세요.');
+    const autos = listAutomations();
+    add(autos.some((a) => a.enabled), `켜져 있는 자동화 ${autos.filter((a) => a.enabled).length}개`, '자동화를 1개 이상 만들고 켜주세요.');
+    add(s.keyword_fuzzy === '1', '키워드 외 텍스트/이모지 허용', '‘이벤트😊’처럼 키워드 뒤에 글자가 붙으면 매칭되지 않을 수 있습니다.');
+    add(s.comment_reply_enabled === '1', '자동 대댓글 켜짐', '경고 누적으로 꺼졌을 수 있습니다. 5~7일 뒤에 다시 켜주세요.');
+    const errs = queueStatus().comment_errors_24h;
+    add(errs < Math.max(1, Number(s.warning_threshold)), `24시간 내 대댓글 오류 ${errs}회`, '인스타그램 제재 신호입니다. 대댓글 지연을 늘리고 몇 일 쉬어가세요.');
+    add(!!config.appSecret || !!config.metaAppSecret, '웹훅 서명 시크릿 설정', 'IG_APP_SECRET / META_APP_SECRET 환경변수를 넣어주세요.');
+    return json(res, 200, {
+      checks,
+      manual: [
+        '인스타그램 앱 > 프로필 > ☰ > ‘메시지 및 스토리 답장’ > ‘메시지 요청’ > ‘메시지 접근 허용’이 켜져 있어야 합니다.',
+        '매니챗 등 다른 자동DM 서비스가 같은 계정에 연결되어 있으면 충돌해서 발송되지 않습니다.',
+        '특정 게시물만 안 된다면 그 게시물이 제재받았을 가능성이 높습니다. ‘DM 속 키워드에도 적용’을 켜고 팔로워에게 DM 으로 키워드를 보내달라고 안내하세요.',
+        '댓글을 달은 지 7일이 지나면 인스타그램가 자동 DM 을 막습니다 (예약 발송 포함).',
+      ],
+    });
+  }
+  if (p === '/api/tools/story-mention-test' && m === 'POST') {
+    return json(res, 200, await handleStoryMention({ igsid: String(body.igsid || '') }));
   }
 
   if (p === '/api/leads' && m === 'GET') {

@@ -84,8 +84,22 @@ export class InstagramClient {
   getMe() { return this.get('me', { fields: 'id,user_id,username,name,profile_picture_url,followers_count,account_type' }); }
 
   // 게시물/릴스 목록 (자동화 게시물 선택용)
-  async getMedia(limit = 50) {
-    const r = await this.get('me/media', { fields: 'id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp', limit });
+  // Instagram 은 한 번에 최대 ~100개만 돌려주므로 paging.next 를 따라가며 모두 가져옵니다.
+  // (이걸 안 하면 최근 게시물 100개 안에 릴스가 몇 개 없을 때 "릴스가 목록에 없다"는 상황이 생깁니다)
+  async getMedia(max = 300) {
+    const fields = 'id,caption,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp';
+    const out = [];
+    let next = this.url('me/media', { fields, limit: Math.min(100, max) });
+    for (let page = 0; page < 10 && next && out.length < max; page++) {
+      const r = await graphFetch(next, { headers: this.headers() });
+      for (const mm of r.data || []) out.push(mm);
+      next = r.paging?.next || null;
+    }
+    return out.slice(0, max);
+  }
+  // 현재 올라가 있는 스토리 (24시간). 권한/플랜에 따라 실패할 수 있어 호출부에서 try/catch 합니다.
+  async getStories() {
+    const r = await this.get('me/stories', { fields: 'id,media_type,media_product_type,thumbnail_url,media_url,permalink,timestamp' });
     return r.data || [];
   }
   async getComments(mediaId, limit = 50) {
@@ -117,6 +131,17 @@ export class InstagramClient {
     return this.post(`${this.igUserId}/subscribed_apps`, null, { subscribed_fields: fields.join(',') });
   }
   getSubscribedApps() { return this.get(`${this.igUserId}/subscribed_apps`); }
+
+  // DM 첫 화면(인박스 스타터) · DM 고정 메뉴 — Messenger Profile API
+  getMessengerProfile(fields = ['ice_breakers', 'persistent_menu']) {
+    return this.get(`${this.igUserId}/messenger_profile`, { platform: 'instagram', fields: fields.join(',') });
+  }
+  setMessengerProfile(profile) {
+    return this.post(`${this.igUserId}/messenger_profile`, { platform: 'instagram', ...profile });
+  }
+  deleteMessengerProfile(fields) {
+    return this.post(`${this.igUserId}/messenger_profile`, { platform: 'instagram', fields }, { method_override: 'delete' });
+  }
 }
 
 // ── 메시지 빌더 ───────────────────────────────────────────────────────────
@@ -141,6 +166,21 @@ export const msg = {
   button: (text, buttons) => ({
     attachment: { type: 'template', payload: { template_type: 'button', text: String(text).slice(0, 640), buttons: buttons.slice(0, 3) } },
   }),
+  // 캐러셀: 카드 최대 10장 (KittyChat '버튼형 캐러셀 메시지'와 동일)
+  carousel: (elements) => ({
+    attachment: {
+      type: 'template',
+      payload: {
+        template_type: 'generic',
+        elements: elements.slice(0, 10).map((e) => ({
+          title: String(e.title || ' ').slice(0, 80),
+          ...(e.subtitle ? { subtitle: String(e.subtitle).slice(0, 80) } : {}),
+          ...(e.image_url ? { image_url: e.image_url } : {}),
+          buttons: (e.buttons || []).slice(0, 3),
+        })),
+      },
+    },
+  }),
   postback: (title, payload) => ({ type: 'postback', title: String(title).slice(0, 20), payload: String(payload).slice(0, 1000) }),
   webUrl: (title, url) => ({ type: 'web_url', title: String(title).slice(0, 20), url }),
 };
@@ -158,6 +198,11 @@ export class MockInstagramClient extends InstagramClient {
       { id: 'media_3', caption: '초등 필독서 80권 목록 나눔 - "인생책목록"', media_type: 'IMAGE', media_product_type: 'FEED', permalink: 'https://instagram.com/p/mock3', timestamp: new Date().toISOString() },
     ];
   }
+  async getStories() { return [{ id: 'story_1', media_type: 'IMAGE', media_product_type: 'STORY', permalink: 'https://instagram.com/stories/mock1', timestamp: new Date().toISOString() }]; }
+  async get(path) { const id = String(path).split('/')[0]; const found = (await this.getMedia()).find((mm) => mm.id === id); if (found) return found; throw new InstagramApiError('mock: not found', { status: 404 }); }
+  async getMessengerProfile() { return { data: [{ ice_breakers: [], persistent_menu: [] }] }; }
+  async setMessengerProfile(profile) { this.record('setMessengerProfile', profile); return { result: 'success' }; }
+  async deleteMessengerProfile(fields) { this.record('deleteMessengerProfile', { fields }); return { result: 'success' }; }
   async getComments() { return []; }
   async getUserProfile(igsid) {
     const follows = !!mockState.follow[String(igsid)];

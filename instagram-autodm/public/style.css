@@ -79,11 +79,25 @@ textarea.input { min-height: 84px; resize: vertical; }
 .switch input:checked { background: var(--ok); }
 .switch input:checked::after { left: 21px; }
 .gate-box { background: #eefdf5; border: 1px solid #c5efde; border-radius: 10px; padding: 12px; }
-.media-list { max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 9px; padding: 6px; }
+.media-list { max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 9px; padding: 6px; }
 .media-item { display: flex; gap: 10px; align-items: center; padding: 6px; border-radius: 8px; cursor: pointer; }
 .media-item:hover { background: var(--soft); }
+.media-item:has(input:checked) { background: #eef4ff; }
 .media-item img { width: 44px; height: 44px; object-fit: cover; border-radius: 6px; background: #eee; }
 .media-item .cap { flex: 1; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.media-item .kind { flex: 0 0 auto; }
+.media-item .when { flex: 0 0 auto; font-size: 11px; }
+
+/* 릴스/게시물 필터 칩 */
+.chips { display: flex; gap: 6px; }
+.chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: #555; }
+.chip:hover { background: var(--soft); }
+.chip.on { background: #111827; color: #fff; border-color: #111827; }
+
+/* 캐러셀 카드 편집 */
+.card-block { border-left: 3px solid #c7d2fe; }
+.cbtn { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.cbtn .input { flex: 1; }
 .btn-block { border: 1px dashed var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: #fcfcff; }
 .btn-block .row { margin-bottom: 8px; }
 

@@ -14,14 +14,39 @@ const PAYLOAD_LM = 'LM';        // 리드마그넷 버튼
 const PAYLOAD_RECHECK = 'RC';   // 팔로우 재확인 버튼
 
 // ── 게시물 정보 캐시 ('다음 발행 게시물에 적용' 판정용) ──────────────────────
-async function mediaTimestamp(ig, mediaId) {
-  const row = db.prepare('SELECT timestamp FROM media_cache WHERE id = ?').get(mediaId);
-  if (row?.timestamp) return row.timestamp;
+let lastMediaSync = 0;
+// 캐시에 없는 게시물은 ① 개별 조회 ② 전체 목록 동기화 순으로 채워넣습니다.
+// (릴스/게시물 범위 자동화는 media_product_type 을 모르면 판단을 못 하므로 필수)
+async function mediaRow(ig, mediaId) {
+  const get = () => db.prepare('SELECT * FROM media_cache WHERE id = ?').get(String(mediaId));
+  const row = get();
+  if (row?.media_product_type || row?.media_type) return row;
   try {
     const m = await ig.get(String(mediaId), { fields: 'id,caption,media_type,media_product_type,thumbnail_url,permalink,timestamp' });
     upsertMedia(m);
-    return m.timestamp || null;
-  } catch { return null; }
+    const fresh = get();
+    if (fresh) return fresh;
+  } catch { /* 개별 조회 실패 → 전체 동기화로 재시도 */ }
+  if (now() - lastMediaSync > 5 * 60000) {
+    lastMediaSync = now();
+    try {
+      for (const mm of await ig.getMedia(300)) upsertMedia(mm);
+      logEvent('info', 'media_sync', '게시물 목록을 다시 불러왔습니다 (릴스/게시물 구분용)');
+    } catch (e) { logEvent('warn', 'media_sync', `게시물 목록 동기화 실패: ${e.message}`); }
+  }
+  return get() || row || null;
+}
+async function mediaTimestamp(ig, mediaId) { return (await mediaRow(ig, mediaId))?.timestamp || null; }
+
+// 릴스 / 일반 게시물 구분. media_product_type 이 비어 있으면 media_type 으로 추정합니다.
+export function mediaKind(m) {
+  const pt = String(m?.media_product_type || '').toUpperCase();
+  if (pt === 'REELS') return 'reels';
+  if (pt === 'STORY') return 'story';
+  if (pt === 'AD') return 'feed';
+  if (pt === 'FEED') return 'feed';
+  // product_type 이 없는 경우: 영상은 릴스로 본다 (현재 IG 는 모든 단일 동영상을 릴스로 게시)
+  return String(m?.media_type || '').toUpperCase() === 'VIDEO' ? 'reels' : 'feed';
 }
 export function upsertMedia(m) {
   db.prepare(`INSERT INTO media_cache(id, caption, media_type, media_product_type, thumbnail_url, permalink, timestamp, fetched_at) VALUES(?,?,?,?,?,?,?,?)
@@ -32,6 +57,11 @@ export function upsertMedia(m) {
 
 async function automationAppliesToMedia(ig, a, mediaId) {
   if (a.post_scope === 'all') return true;
+  if (a.post_scope === 'reels' || a.post_scope === 'feed') {
+    const row = await mediaRow(ig, mediaId);
+    if (!row) return false;
+    return mediaKind(row) === a.post_scope;
+  }
   if ((a.media_ids || []).map(String).includes(String(mediaId))) return true;
   if (a.apply_to_future) {
     const ts = await mediaTimestamp(ig, mediaId);
@@ -40,20 +70,23 @@ async function automationAppliesToMedia(ig, a, mediaId) {
   return false;
 }
 
-// 여러 자동화가 매칭되면: 특정 게시물 > 전체, 특정 키워드 > 불특정
+// 여러 자동화가 매칭되면: 특정 게시물 > 릴스/게시물 범위 > 전체, 특정 키워드 > 불특정
 function rankAutomation(a) {
-  return (a.post_scope === 'selected' ? 2 : 0) + (a.keyword_mode !== 'any' ? 1 : 0);
+  const scope = a.post_scope === 'selected' ? 4 : (a.post_scope === 'reels' || a.post_scope === 'feed') ? 2 : 0;
+  return scope + (a.keyword_mode !== 'any' ? 1 : 0);
 }
 
 // ── 첫 DM 메시지 구성 ────────────────────────────────────────────────────
 export function buildFirstMessage(a) {
   const buttons = (a.buttons || []).slice(0, 3);
   const needsGate = !!a.follow_gate;
-  const mkButtons = () => buttons.map((b, i) => {
+  // 카드 번호 c (0 = 첫 카드), 버튼 번호 i 를 payload 에 담아 어느 카드의 어느 버튼인지 구분
+  const mkButtons = (list, c) => (list || []).slice(0, 3).map((b, i) => {
     // 링크만 있는 버튼은 즉시 이동(게이트 불가). 답장 내용이 있으면 postback → 팔로우 확인 후 공개
     if (b.url && !b.reply) return msg.webUrl(b.label, b.url);
-    return msg.postback(b.label, `${PAYLOAD_LM}:${a.id}:${i}`);
+    return msg.postback(b.label, `${PAYLOAD_LM}:${a.id}:${i}${c ? ':' + c : ''}`);
   });
+  const extraCards = (a.cards || []).filter((c) => c.title || c.image_url);
 
   if (a.dm_type === 'text' && !needsGate) {
     return { message: msg.text(a.dm_text || a.title || ''), gated: false };
@@ -63,15 +96,28 @@ export function buildFirstMessage(a) {
     const label = buttons[0]?.label || '자료 받기';
     return { message: msg.button(a.dm_text || a.title || '아래 버튼을 눌러 자료를 받아가세요!', [msg.postback(label, `${PAYLOAD_LM}:${a.id}:0`)]), gated: true };
   }
+  // 캐러셀: 추가 카드가 있으면 첫 카드 + 추가 카드를 generic elements 로 묶음 (최대 10장)
+  if (extraCards.length) {
+    const elements = [
+      { title: a.title || a.name, subtitle: a.subtitle, image_url: a.image_url, buttons: mkButtons(buttons, 0) },
+      ...extraCards.map((c, ci) => ({ title: c.title, subtitle: c.subtitle, image_url: c.image_url, buttons: mkButtons(c.buttons, ci + 1) })),
+    ];
+    return { message: msg.carousel(elements), gated: needsGate };
+  }
   // 버튼형: 이미지/제목/부제목 + 버튼
   if (a.image_url || a.subtitle) {
-    return { message: msg.generic({ title: a.title || a.name, subtitle: a.subtitle, image_url: a.image_url, buttons: mkButtons() }), gated: needsGate };
+    return { message: msg.generic({ title: a.title || a.name, subtitle: a.subtitle, image_url: a.image_url, buttons: mkButtons(buttons, 0) }), gated: needsGate };
   }
-  return { message: msg.button(a.title || a.dm_text || a.name, mkButtons()), gated: needsGate };
+  return { message: msg.button(a.title || a.dm_text || a.name, mkButtons(buttons, 0)), gated: needsGate };
 }
 
-function buttonReplyText(a, idx) {
-  const b = (a.buttons || [])[idx];
+// cardIndex 0 = 첫 카드(a.buttons), 1이상 = a.cards[cardIndex-1].buttons
+function buttonAt(a, idx, cardIndex = 0) {
+  const list = cardIndex > 0 ? (a.cards || [])[cardIndex - 1]?.buttons : a.buttons;
+  return (list || [])[idx];
+}
+function buttonReplyText(a, idx, cardIndex = 0) {
+  const b = buttonAt(a, idx, cardIndex);
   if (b?.reply) return b.reply + (b.url && !b.reply.includes(b.url) ? `\n${b.url}` : '');
   if (b?.url) return b.url;
   return a.dm_text || a.title || '';
@@ -128,6 +174,8 @@ export async function handleComment({ account, comment, source = 'comment' }) {
     const picked = pickReply(pool, recentReplyTexts(20));
     if (picked) {
       replyText = render(picked, { username, name: from.name });
+      // 게시물별 대댓글에도 AI 문구 다양화 (같은 문구 반복 → 스팸 판정 위험 줄임)
+      if (a.comment_ai_variation) replyText = await aiVariation(replyText);
       enqueueCommentReply({ comment_id: commentId, media_id: mediaId, igsid, username, automation_id: a.id, text: replyText });
     }
   }
@@ -142,10 +190,23 @@ export async function handleComment({ account, comment, source = 'comment' }) {
   const fallback = msg.text(render(getSetting('fallback_prompt_message'), { username, name: from.name }));
   const finalText = !gated && !message.attachment; // 게이트 없는 텍스트 DM 은 이 메시지 자체가 리드마그넷
   if (finalText) message.text = render(message.text, { username, name: from.name });
-  enqueueDm({ delivery_id: deliveryId, kind: 'private_reply', igsid, comment_id: commentId, payload: message, fallback_payload: message.attachment ? fallback : null, final: finalText });
-  logEvent('info', 'comment_matched', `댓글 매칭: @${username} "${text.slice(0, 40)}" → 자동화 #${a.id} "${a.name}"${keyword ? ` (키워드: ${keyword})` : ''}${gated ? ' [팔로우 게이트]' : ''}`,
+
+  // ★ 예약 발송: 대댓글은 지금 달고, DM 은 예약 시각에 일괄 발송
+  //   ⚠ 인스타그램 규칙상 댓글 시점으로부터 7일이 지나면 Private Reply 가 차단됩니다.
+  let delayMs = 0;
+  if (a.send_mode === 'scheduled' && a.scheduled_at) {
+    delayMs = Math.max(0, Number(a.scheduled_at) - now());
+    const LIMIT = 7 * 86400000;
+    if (delayMs > LIMIT) {
+      delayMs = LIMIT - 3600000; // 7일 바로 전으로 당겨 발송 (차단 방지)
+      logEvent('warn', 'schedule_clamped', `예약 시각이 댓글 시점 +7일을 넘어 인스타그램에 차단됩니다. 7일 직전으로 당겨 발송합니다. (자동화 #${a.id})`, { automation: a.id });
+    }
+  }
+
+  enqueueDm({ delivery_id: deliveryId, kind: 'private_reply', igsid, comment_id: commentId, payload: message, fallback_payload: message.attachment ? fallback : null, final: finalText, delayMs, tag: delayMs > 0 ? 'scheduled' : null });
+  logEvent('info', 'comment_matched', `댓글 매칭: @${username} "${text.slice(0, 40)}" → 자동화 #${a.id} "${a.name}"${keyword ? ` (키워드: ${keyword})` : ''}${gated ? ' [팔로우 게이트]' : ''}${delayMs > 0 ? ` [예약 발송 ${new Date(now() + delayMs).toLocaleString('ko-KR')}]` : ''}`,
     { comment_id: commentId, media_id: mediaId, delivery_id: deliveryId });
-  return { automation: a.id, delivery_id: deliveryId, gated, replyText };
+  return { automation: a.id, delivery_id: deliveryId, gated, replyText, scheduled: delayMs > 0 };
 }
 
 // ── 2) 버튼 클릭 → 팔로우 확인 → 전달 ─────────────────────────────────────
@@ -153,19 +214,34 @@ export async function handlePostback({ account, igsid, payload, mid, title }) {
   account = account || getAccount();
   if (!account || !settingOn('master_switch')) return { skipped: 'off' };
   if (mid && !markProcessed(`pb:${mid}`)) return { skipped: 'duplicate' };
-  const [kind, aidStr, idxStr] = String(payload || '').split(':');
+  const raw = String(payload || '');
+  // DM 첫 화면(인박스 스타터) / 고정 메뉴 클릭 → 저장해둔 답변을 그대로 보냅니다.
+  if (raw.startsWith('ICE:') || raw.startsWith('MENU:')) {
+    const answer = raw.slice(raw.indexOf(':') + 1);
+    if (!answer.trim()) return { skipped: 'empty_answer' };
+    const ig = clientFor(account);
+    let user = {};
+    try { const pr = await ig.getUserProfile(igsid); user = { username: pr?.username, name: pr?.name }; } catch {}
+    try {
+      await ig.sendMessage(igsid, msg.text(render(answer, user)));
+      logEvent('info', 'dm_menu_click', `${raw.startsWith('ICE:') ? 'DM 첫 화면' : '고정 메뉴'} 클릭 → 답변 전송: "${String(title || answer).slice(0, 30)}"`, { igsid });
+    } catch (e) { logEvent('error', 'dm_menu_click', `메뉴 답변 전송 실패: ${e.message}`, { igsid }); }
+    return { menu: true };
+  }
+  const [kind, aidStr, idxStr, cardStr] = raw.split(':');
   if (![PAYLOAD_LM, PAYLOAD_RECHECK].includes(kind)) {
     logEvent('info', 'postback_unknown', `알 수 없는 postback: ${payload}`, { igsid, title });
     return { skipped: 'unknown' };
   }
   const a = getAutomation(Number(aidStr));
   const idx = Number(idxStr) || 0;
+  const cardIndex = Number(cardStr) || 0;
   if (!a) { logEvent('warn', 'postback_missing', `삭제된 자동화 #${aidStr} 버튼 클릭`, { igsid }); return { skipped: 'missing' }; }
-  return deliverLeadMagnet({ account, a, igsid, idx, recheck: kind === PAYLOAD_RECHECK, source: 'postback' });
+  return deliverLeadMagnet({ account, a, igsid, idx, cardIndex, recheck: kind === PAYLOAD_RECHECK, source: 'postback' });
 }
 
 // ★ 팔로우 게이트: 팔로워에게만 리드마그넷 공개
-export async function deliverLeadMagnet({ account, a, igsid, idx = 0, recheck = false, source = 'postback', userHint = {} }) {
+export async function deliverLeadMagnet({ account, a, igsid, idx = 0, cardIndex = 0, recheck = false, source = 'postback', userHint = {} }) {
   const ig = clientFor(account);
   let delivery = findDelivery(a.id, igsid);
   if (!delivery) {
@@ -196,7 +272,7 @@ export async function deliverLeadMagnet({ account, a, igsid, idx = 0, recheck = 
       const text = render(attempts > 1 ? getSetting('follow_still_not_message') : getSetting('non_follower_message'), user);
       const label = getSetting('follow_retry_button_label') || '팔로우했어요.';
       try {
-        await ig.sendMessage(igsid, msg.button(text, [msg.postback(label, `${PAYLOAD_RECHECK}:${a.id}:${idx}`)]));
+        await ig.sendMessage(igsid, msg.button(text, [msg.postback(label, `${PAYLOAD_RECHECK}:${a.id}:${idx}:${cardIndex}`)]));
       } catch (e) { logEvent('error', 'gate_message_error', `비팔로워 안내 발송 실패: ${e.message}`, { igsid }); }
       logEvent('info', 'gate_blocked', `팔로우 미확인 → 안내 발송 (@${user.username || igsid}, ${attempts}회차, 자동화 #${a.id})`, { igsid, automation: a.id });
       return { blocked: true, attempts };
@@ -206,7 +282,7 @@ export async function deliverLeadMagnet({ account, a, igsid, idx = 0, recheck = 
   }
 
   // 팔로워 확인됨(또는 게이트 꺼짐) → 리드마그넷 전송
-  let text = render(buttonReplyText(a, idx), user);
+  let text = render(buttonReplyText(a, idx, cardIndex), user);
   if (a.ai_variation) text = await aiVariation(text);
   try {
     await ig.sendMessage(igsid, msg.text(text));
@@ -226,11 +302,15 @@ export async function deliverLeadMagnet({ account, a, igsid, idx = 0, recheck = 
 }
 
 // ── 3) DM 수신 처리 (DM→DM 자동화 + 폴백 답장) ─────────────────────────────
-export async function handleMessage({ account, igsid, text, mid, quickReplyPayload }) {
+export async function handleMessage({ account, igsid, text, mid, quickReplyPayload, attachments = [] }) {
   account = account || getAccount();
   if (!account || !settingOn('master_switch')) return { skipped: 'off' };
   if (mid && !markProcessed(`msg:${mid}`)) return { skipped: 'duplicate' };
   if (quickReplyPayload) return handlePostback({ account, igsid, payload: quickReplyPayload, mid: null });
+  // ★ 스토리 멘션: 내 스토리에 태그되면 attachments 에 story_mention 으로 들어옵니다.
+  if ((attachments || []).some((at) => String(at?.type || '').toLowerCase() === 'story_mention')) {
+    return handleStoryMention({ account, igsid });
+  }
   text = String(text || '');
 
   // A. 템플릿 실패 폴백: "받기" 라고 답장한 사용자 → 게이트 확인 후 전달
@@ -259,4 +339,33 @@ export async function handleMessage({ account, igsid, text, mid, quickReplyPaylo
   enqueueDm({ delivery_id: deliveryId, kind: 'message', igsid, payload: message });
   logEvent('info', 'dm_matched', `DM 키워드 매칭: "${text.slice(0, 40)}" → 자동화 #${a.id}`, { igsid, delivery_id: deliveryId });
   return { automation: a.id, delivery_id: deliveryId, gated };
+}
+
+// ── 4) 스토리 멘션 자동 DM ─────────────────────────────────────────────
+// 설정에서 켜면, 내 스토리에 태그한 사람에게 감사 메시지를 보냅니다.
+// 자동화를 지정하면 그 자동화의 버튼형 DM(팔로우 게이트 포함)을 그대로 재사용합니다.
+export async function handleStoryMention({ account, igsid }) {
+  account = account || getAccount();
+  if (!account) return { skipped: 'no_account' };
+  if (!settingOn('story_mention_enabled')) return { skipped: 'story_mention_off' };
+  const ig = clientFor(account);
+
+  let user = {};
+  try { const p = await ig.getUserProfile(igsid); user = { username: p?.username, name: p?.name }; } catch {}
+
+  const aid = Number(getSetting('story_mention_automation_id')) || 0;
+  const a = aid ? getAutomation(aid) : null;
+  if (a && a.enabled) {
+    const { message, gated } = buildFirstMessage(a);
+    const deliveryId = createDelivery({ automation_id: a.id, igsid, username: user.username, name: user.name, source: 'story_mention', stage: 'queued' });
+    enqueueDm({ delivery_id: deliveryId, kind: 'message', igsid, payload: message, tag: 'story_mention' });
+    logEvent('info', 'story_mention', `스토리 멘션 → 자동화 #${a.id} "${a.name}" DM 예약 (@${user.username || igsid})`, { igsid, automation: a.id });
+    return { automation: a.id, delivery_id: deliveryId, gated };
+  }
+
+  const body = render(getSetting('story_mention_message'), user);
+  if (!body.trim()) return { skipped: 'empty_message' };
+  enqueueDm({ kind: 'message', igsid, payload: msg.text(body), tag: 'story_mention' });
+  logEvent('info', 'story_mention', `스토리 멘션 → 감사 DM 예약 (@${user.username || igsid})`, { igsid });
+  return { story_mention: true };
 }

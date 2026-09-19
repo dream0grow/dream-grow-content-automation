@@ -14,6 +14,8 @@
     <nav class="nav">
       <a href="#dashboard" data-page="dashboard"><span class="ico">📊</span>대시보드</a>
       <a href="#automations" data-page="automations"><span class="ico">💬</span>자동 DM &amp; 대댓글</a>
+      <a href="#bulk" data-page="bulk"><span class="ico">📣</span>단체 DM</a>
+      <a href="#dmmenu" data-page="dmmenu"><span class="ico">📌</span>DM 첫화면 · 고정메뉴</a>
       <a href="#leads" data-page="leads"><span class="ico">👥</span>리드(Lead) 수집</a>
       <a href="#settings" data-page="settings"><span class="ico">⚙️</span>설정 · 안전장치</a>
       <a href="#connect" data-page="connect"><span class="ico">🔗</span>연결</a>
@@ -33,6 +35,11 @@
         <div class="row between"><h2 style="margin:0">최근 30일 자동 DM 발송 / 리드마그넷 전달</h2><span class="hint">막대: 전달 완료 · 숫자: 발송</span></div>
         <div class="chart" id="chart"></div>
         <div class="legend" id="chartLegend"></div>
+      </div>
+      <div class="panel">
+        <div class="row between"><h2 style="margin:0">🩺 자동 DM 진단</h2><button class="btn sm" id="btnDiag">다시 점검</button></div>
+        <div class="hint" style="margin:6px 0 10px">자동 DM 이 안 나갈 때 흔한 원인을 서버가 자동으로 점검합니다.</div>
+        <div id="diagBox"></div>
       </div>
       <div class="panel">
         <h2 style="margin-top:0">최근 업데이트</h2>
@@ -56,6 +63,48 @@
           <tbody id="autoRows"><tr><td colspan="4" class="muted">불러오는 중...</td></tr></tbody>
         </table>
       </div>
+    </section>
+
+    <!-- ───────── 단체 DM ───────── -->
+    <section class="page" id="page-bulk">
+      <h1>단체 DM</h1>
+      <div class="sub">최근 <b>24시간 안에 반응한 사람</b>에게만 단체 DM 을 보낼 수 있습니다 (인스타그램 24시간 규칙). 받는 사람에게는 1:1 메시지로 보입니다.</div>
+      <div class="panel">
+        <div class="form-grid">
+          <div class="full"><label class="f">보낼 내용 <span class="hint">900자. [username] 치환 가능. 링크 앞뒤에 공백을 두세요</span></label><textarea class="input" id="bulkText" maxlength="900" style="min-height:110px" placeholder="[username]님, 오늘 신청이 열렸어요! 아래 버튼으로 확인해 주세요."></textarea></div>
+          <div><label class="f">버튼 레이블 (선택)</label><input class="input" id="bulkLabel" maxlength="20" placeholder="예: 지금 신청하기"></div>
+          <div><label class="f">버튼 링크 (선택)</label><input class="input" id="bulkUrl" placeholder="https://..."></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="btnBulkRefresh">대상 다시 불러오기</button>
+          <button class="btn" id="btnBulkAll">전체 선택</button>
+          <button class="btn primary" id="btnBulkSend">선택한 사람에게 보내기</button>
+          <span class="hint" id="bulkHint"></span>
+        </div>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr><th style="width:40px"></th><th>사용자</th><th>마지막 반응</th><th>남은 시간</th><th>팔로우</th></tr></thead>
+          <tbody id="bulkRows"><tr><td colspan="5" class="muted">불러오는 중...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ───────── DM 첫화면 · 고정메뉴 ───────── -->
+    <section class="page" id="page-dmmenu">
+      <h1>DM 첫화면 · 고정 메뉴</h1>
+      <div class="sub">처음 DM 창을 열었을 때 보이는 <b>첫화면 메뉴(최대 4개)</b>와, 대화 중 언제든 ☰ 로 염 수 있는 <b>고정 메뉴(최대 5개)</b>를 설정합니다.</div>
+      <div class="panel">
+        <div class="row between"><h2 style="margin:0">💬 DM 첫화면 (인박스 스타터)</h2><button class="btn sm" id="btnIceAdd">+ 항목 추가</button></div>
+        <div class="hint" style="margin:6px 0 10px">자주 묻는 질문을 넣으면 상대가 누를 때 준비한 답변이 바로 갑니다. 클릭 후엔 메뉴가 사라집니다.</div>
+        <div id="iceBox"></div>
+      </div>
+      <div class="panel">
+        <div class="row between"><h2 style="margin:0">📌 DM 고정 메뉴</h2><button class="btn sm" id="btnMenuAdd">+ 항목 추가</button></div>
+        <div class="hint" style="margin:6px 0 10px">링크를 넣으면 클릭 즉시 이동, 비우면 적어둔 답변을 DM 으로 보냅니다.</div>
+        <div id="menuBox"></div>
+      </div>
+      <div class="row"><button class="btn primary" id="btnDmMenuSave">인스타그램에 저장</button><span class="hint" id="dmMenuHint"></span></div>
     </section>
 
     <!-- ───────── 리드 ───────── -->
@@ -106,6 +155,23 @@
             <div><label class="f">대댓글 지연 최대 (초)</label><input class="input" type="number" name="comment_reply_delay_max" min="0"></div>
             <div><label class="f">경고 감지 시 자동 대댓글 끄기</label><select class="input" name="auto_disable_on_warnings"><option value="1">켜짐</option><option value="0">꺼짐</option></select></div>
             <div><label class="f">경고 임계치 (24시간 내 오류 횟수)</label><input class="input" type="number" name="warning_threshold" min="1"></div>
+            <div><label class="f">경고 1·2차 시 간격 자동 증가 <span class="hint">제재 신호가 보이면 스스로 느려집니다</span></label><select class="input" name="warning_backoff_enabled"><option value="1">켜짐</option><option value="0">꺼짐</option></select></div>
+            <div><label class="f">경고 1회당 더할 지연 (초)</label><input class="input" type="number" name="warning_backoff_step" min="0"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 style="margin-top:0">📸 스토리 멘션 자동 DM</h2>
+          <div class="hint" style="margin-bottom:10px">누가 내 계정을 스토리에 태그하면 자동으로 감사 DM 을 보냅니다.</div>
+          <div class="form-grid">
+            <div><label class="f">스토리 멘션 자동 DM</label><select class="input" name="story_mention_enabled"><option value="0">꺼짐</option><option value="1">켜짐</option></select></div>
+            <div><label class="f">이 자동화의 DM 을 그대로 사용 (선택) <span class="hint">비우면 아래 텍스트만 보냅니다</span></label><select class="input" name="story_mention_automation_id" id="storyAutoSel"><option value="">사용 안 함</option></select></div>
+            <div class="full"><label class="f">스토리 멘션 감사 메시지 <span class="hint">[username] · [tomorrow] 같은 치환자 사용 가능</span></label><textarea class="input" name="story_mention_message"></textarea></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2 style="margin-top:0">📣 단체 DM</h2>
+          <div class="form-grid">
+            <div><label class="f">단체 DM 기능 <span class="hint">24시간 내 반응한 사람에게만 보냅니다</span></label><select class="input" name="bulk_dm_enabled"><option value="1">켜짐</option><option value="0">꺼짐</option></select></div>
           </div>
         </div>
         <div class="row"><button class="btn primary" type="submit">저장</button><button class="btn" type="button" id="btnDefaults">기본값 불러오기</button></div>
@@ -169,6 +235,29 @@
           <li><code class="k">[username]</code> 이름(없으면 아이디) · <code class="k">@[username]</code> 아이디 멘션(대댓글용)</li>
           <li><code class="k">[today]</code> <code class="k">[tomorrow]</code> <code class="k">[1week]</code> <code class="k">[2weeks]</code> 날짜 자동 계산</li>
         </ul>
+
+        <h2>🎬 릴스에 자동화 걸기</h2>
+        <ul>
+          <li>자동화 편집 화면의 <b>적용 대상</b>에서 <code class="k">🎬 릴스만</code>을 고르면 지금 있는 릴스와 앞으로 올릴 새 릴스 전부에 자동 적용됩니다.</li>
+          <li>특정 릴스만 고르고 싶으면 <code class="k">직접 선택</code> → 목록 위 <code class="k">🎬 릴스</code> 필터를 누르세요. 측션 검색도 됩니다.</li>
+          <li>목록은 최근 게시물 300개까지 불러옵니다. 방금 올린 릴스가 안 보이면 <b>새로고침</b>을 누르세요.</li>
+          <li>스토리는 댓글이 없어서 게시물 목록에 나오지 않습니다. 대신 설정의 <b>스토리 멘션 자동 DM</b> 을 쓰세요.</li>
+        </ul>
+
+        <h2>⏰ 예약 발송 · 🎠 캐러셀 · 📣 단체 DM</h2>
+        <ul>
+          <li><b>예약 발송</b> — 런칭·공동구매처럼 "알림 신청" 댓글을 미리 받아두고, 정해둔 시각에 DM 을 일괄 발송합니다. 대댓글은 댓글이 달릴 때 바로 달립니다. 댓글 시점으로부터 <b>7일 이내</b>여야 합니다.</li>
+          <li><b>캐러셀</b> — 버튼형 DM 에 카드를 더 붙이면 옆으로 넘기는 카드 묶음이 됩니다 (최대 10장, 카드당 버튼 3개).</li>
+          <li><b>단체 DM</b> — 인스타그램 규칙상 <b>최근 24시간 안에 반응한 사람</b>에게만 보낼 수 있습니다. 남은 시간이 표시됩니다.</li>
+          <li><b>DM 첫화면/고정메뉴</b> — 첫화면은 최대 4개, 고정 메뉴는 최대 5개까지 인스타그램에 직접 저장됩니다.</li>
+        </ul>
+
+        <h2>🛡️ 제재 경고 단계적 대응</h2>
+        <ul>
+          <li>대댓글 오류 <b>1·2차</b> → 경고 기록 + 대댓글 간격을 자동으로 늘립니다.</li>
+          <li><b>3차</b> → 자동 대댓글을 즉시 중단합니다. 자동 DM 은 계속 작동합니다. 5~7일 뒤에 다시 켜주세요.</li>
+          <li>대시보드의 <b>자동 DM 진단</b> 카드에서 흔한 원인을 한번에 점검할 수 있습니다.</li>
+        </ul>
       </div>
     </section>
   </main>
@@ -186,13 +275,31 @@
           <label class="switch" style="margin-left:12px"><input type="checkbox" name="also_dm"> DM 속 키워드에도 적용</label>
         </div>
 
-        <div class="full"><label class="f">게시물 선택 <span class="hint">특정 게시물만 적용하거나 전체 게시물에 적용</span></label>
+        <div class="full"><label class="f">적용 대상 <span class="hint">릴스만 / 일반 게시물만 / 직접 골라서 적용할 수 있습니다</span></label>
           <div class="row" style="margin-bottom:8px">
-            <div class="seg" data-seg="post_scope"><button type="button" data-v="all">전체</button><button type="button" data-v="selected">선택</button></div>
+            <div class="seg" data-seg="post_scope">
+              <button type="button" data-v="all">전체</button>
+              <button type="button" data-v="reels">🎬 릴스만</button>
+              <button type="button" data-v="feed">🖼️ 게시물만</button>
+              <button type="button" data-v="selected">직접 선택</button>
+            </div>
             <label class="switch"><input type="checkbox" name="apply_to_future"> 다음 발행되는 게시물에 적용</label>
-            <button type="button" class="btn sm" id="btnMediaRefresh">게시물 새로고침</button>
           </div>
-          <div class="media-list" id="mediaList"></div>
+          <div class="hint" id="scopeHint" style="margin-bottom:8px"></div>
+          <div id="pickerWrap">
+            <div class="row" style="margin-bottom:6px;flex-wrap:wrap">
+              <div class="chips" id="mediaTabs">
+                <button type="button" class="chip on" data-k="">전체</button>
+                <button type="button" class="chip" data-k="reels">🎬 릴스</button>
+                <button type="button" class="chip" data-k="feed">🖼️ 게시물</button>
+                <button type="button" class="chip" data-k="checked">✔ 선택한 것</button>
+              </div>
+              <input class="input" id="mediaSearch" placeholder="측션 검색..." style="max-width:220px">
+              <button type="button" class="btn sm" id="btnMediaRefresh">새로고침</button>
+              <span class="hint" id="mediaCount"></span>
+            </div>
+            <div class="media-list" id="mediaList"></div>
+          </div>
         </div>
 
         <div><label class="f">키워드 <span class="hint">쉼표로 여러 개. '불특정'이면 아무 댓글에나 반응</span></label>
@@ -203,8 +310,18 @@
           <textarea class="input" name="comment_replies" placeholder="한 줄에 하나씩. @[username] 사용 가능" style="min-height:64px"></textarea></div>
 
         <div class="full"><h2 style="margin:8px 0 6px">DM 내용</h2></div>
+        <div><label class="f">자동 DM 발송 시점 <span class="hint">예약을 고르면 대댓글은 바로 달리고 DM 만 예약 시각에 일괄 발송됩니다</span></label>
+          <div class="seg" data-seg="send_mode"><button type="button" data-v="immediate">즉시 발송</button><button type="button" data-v="scheduled">⏰ 예약 발송</button></div>
+          <div id="scheduleBox" style="margin-top:6px">
+            <input class="input" type="datetime-local" name="scheduled_at">
+            <div class="hint" style="margin-top:4px">⚠ 인스타그램은 댓글이 달린 지 <b>7일이 지나면</b> 자동 DM 을 막습니다. 예약 시각은 그 안으로 잡아주세요.</div>
+          </div>
+        </div>
         <div><label class="f">DM 종류</label><div class="seg" data-seg="dm_type"><button type="button" data-v="button">버튼형 (카드)</button><button type="button" data-v="text">텍스트</button></div></div>
-        <div><label class="f">AI 문구 변형 <span class="hint">ANTHROPIC_API_KEY 가 있을 때만 작동. 링크·의미는 유지하고 표현만 변형</span></label><label class="switch"><input type="checkbox" name="ai_variation"> 사용</label></div>
+        <div><label class="f">AI 문구 변형 <span class="hint">ANTHROPIC_API_KEY 가 있을 때만 작동. 링크·의미는 유지하고 표현만 변형</span></label>
+          <label class="switch"><input type="checkbox" name="ai_variation"> DM 문구</label>
+          <label class="switch" style="margin-left:10px"><input type="checkbox" name="comment_ai_variation"> 대댓글 문구</label>
+        </div>
         <div class="full" id="textFields"><label class="f">텍스트 DM 본문 <span class="hint">900자. 링크 앞뒤에 공백을 두세요</span></label><textarea class="input" name="dm_text" maxlength="900"></textarea></div>
         <div id="cardFields" class="full">
           <div class="form-grid">
@@ -219,6 +336,11 @@
         </div>
         <div class="full" id="buttonsBox"></div>
         <div class="full"><button type="button" class="btn sm" id="btnAddButton">+ 버튼 추가 (최대 3개)</button></div>
+        <div class="full" id="carouselWrap">
+          <label class="f" style="margin-top:10px">🎠 캐러셀 추가 카드 <span class="hint">카드를 더 넣으면 옆으로 넘기는 캐러셀 DM 이 됩니다 (첫 카드 포함 최대 10장)</span></label>
+          <div id="cardsBox"></div>
+          <button type="button" class="btn sm" id="btnAddCard">+ 카드 추가</button>
+        </div>
       </div>
       <div class="row between" style="margin-top:18px">
         <label class="switch"><input type="checkbox" name="enabled" checked> 이 자동화 켜짐</label>

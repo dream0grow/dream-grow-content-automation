@@ -68,7 +68,7 @@ export async function dispatch(body) {
       } else if (ev.type === 'postback') {
         results.push(await handlePostback({ account, igsid: ev.igsid, payload: ev.payload, mid: ev.mid, title: ev.title }));
       } else if (ev.type === 'message') {
-        results.push(await handleMessage({ account, igsid: ev.igsid, text: ev.text, mid: ev.mid, quickReplyPayload: ev.quickReplyPayload }));
+        results.push(await handleMessage({ account, igsid: ev.igsid, text: ev.text, mid: ev.mid, quickReplyPayload: ev.quickReplyPayload, attachments: ev.attachments }));
       }
     } catch (e) {
       logEvent('error', 'webhook_handler', `이벤트 처리 오류(${ev.type}): ${e.message}`, { stack: e.stack?.split('\n').slice(0, 3) });

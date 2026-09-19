@@ -8,9 +8,9 @@ const TRANSIENT_CODES = new Set([1, 2, 4, 17, 32, 613]); // 일시 오류/호출
 let lastDmSentAt = 0;
 let running = false;
 
-export function enqueueDm({ delivery_id, kind, igsid, comment_id, payload, fallback_payload, delayMs = 0, final = false }) {
-  const r = db.prepare(`INSERT INTO dm_queue(delivery_id, kind, igsid, comment_id, payload, fallback_payload, final, run_at, created_at)
-    VALUES(?,?,?,?,?,?,?,?,?)`).run(delivery_id, kind, igsid || null, comment_id || null, JSON.stringify(payload), fallback_payload ? JSON.stringify(fallback_payload) : null, final ? 1 : 0, now() + delayMs, now());
+export function enqueueDm({ delivery_id, kind, igsid, comment_id, payload, fallback_payload, delayMs = 0, final = false, tag = null }) {
+  const r = db.prepare(`INSERT INTO dm_queue(delivery_id, kind, igsid, comment_id, payload, fallback_payload, final, tag, run_at, created_at)
+    VALUES(?,?,?,?,?,?,?,?,?,?)`).run(delivery_id || null, kind, igsid || null, comment_id || null, JSON.stringify(payload), fallback_payload ? JSON.stringify(fallback_payload) : null, final ? 1 : 0, tag, now() + delayMs, now());
   return Number(r.lastInsertRowid);
 }
 
@@ -141,16 +141,27 @@ async function processCommentReplyQueue() {
     const info = errInfo(e);
     db.prepare("UPDATE comment_reply_queue SET status = 'failed', error = ?, done_at = ? WHERE id = ?").run(info, now(), job.id);
     logEvent('error', 'comment_reply_error', `자동 대댓글 실패: ${info}`, { comment_id: job.comment_id });
-    // 경고 감지: 24시간 내 오류가 임계치 이상이면 대댓글 자동 중단 (자동 DM 은 계속)
+    // 경고 감지 — KittyChat 과 동일한 단계적 대응
+    //   1·2차: 이벤트 경고 + 대댓글 간격 자동 증가 (활동 속도를 낮춤)
+    //   3차  : 대댓글 시스템 중단 (자동 DM 은 계속 작동)
     const errs = recentCommentErrors24h();
     const threshold = Math.max(1, settingNum('warning_threshold'));
     if (settingOn('auto_disable_on_warnings') && errs >= threshold) {
       setSettings({ comment_reply_enabled: '0' });
       logEvent('warn', 'comment_reply_disabled',
-        `인스타그램 대댓글 오류가 24시간 내 ${errs}회 발생해 자동 대댓글을 일시 중단했습니다. 지연 시간을 5분(300초) 이상으로 늘리고 3~5일 후 설정에서 다시 켜주세요. 자동 DM 은 계속 작동합니다.`);
+        `인스타그램 대댓글 오류가 24시간 내 ${errs}회 발생해 자동 대댓글을 일시 중단했습니다. 5~7일간 꺼두었다가 지연 시간을 5분(300초) 이상으로 늘리고 다시 켜주세요. 자동 DM 은 계속 작동합니다.`);
     } else if (errs >= 1) {
+      let extra = '';
+      if (settingOn('warning_backoff_enabled')) {
+        const step = Math.max(0, settingNum('warning_backoff_step'));
+        const cap = Math.max(60, settingNum('warning_backoff_max'));
+        const min = Math.min(cap, Math.max(0, settingNum('comment_reply_delay_min')) + step);
+        const max = Math.min(cap + 120, Math.max(min, settingNum('comment_reply_delay_max') + step));
+        setSettings({ comment_reply_delay_min: String(Math.round(min)), comment_reply_delay_max: String(Math.round(max)) });
+        extra = ` 대댓글 간격을 ${Math.round(min)}~${Math.round(max)}초로 자동 증가했습니다.`;
+      }
       logEvent('warn', 'comment_reply_warning',
-        `경고 감지: 자동 대댓글 오류 ${errs}/${threshold}. 지연 시간을 늘리고 대댓글 문구 다양성을 높여주세요. ${threshold}회 도달 시 자동 대댓글이 중단됩니다.`);
+        `경고 감지: 자동 대댓글 오류 ${errs}/${threshold}.${extra} ${threshold}회 도달 시 자동 대댓글이 중단됩니다.`);
     }
   }
 }
@@ -176,5 +187,7 @@ export function queueStatus() {
     dm_pending: db.prepare("SELECT COUNT(*) AS c FROM dm_queue WHERE status = 'pending'").get().c,
     comment_pending: db.prepare("SELECT COUNT(*) AS c FROM comment_reply_queue WHERE status = 'pending'").get().c,
     comment_errors_24h: recentCommentErrors24h(),
+    scheduled_pending: db.prepare("SELECT COUNT(*) AS c FROM dm_queue WHERE status = 'pending' AND run_at > ?").get(now()).c,
+    next_scheduled_at: db.prepare("SELECT MIN(run_at) AS t FROM dm_queue WHERE status = 'pending' AND run_at > ?").get(now()).t || null,
   };
 }

@@ -20,7 +20,7 @@ function route() {
   const page = (location.hash || '#dashboard').slice(1).split('?')[0];
   $$('.page').forEach((p) => p.classList.toggle('active', p.id === `page-${page}`));
   $$('.nav a').forEach((a) => a.classList.toggle('active', a.dataset.page === page));
-  ({ dashboard: loadDashboard, automations: loadAutomations, leads: loadLeads, settings: loadSettings, connect: loadConnect, logs: loadLogs }[page] || (() => {}))();
+  ({ dashboard: loadDashboard, automations: loadAutomations, leads: loadLeads, settings: loadSettings, connect: loadConnect, logs: loadLogs, bulk: loadBulk, dmmenu: loadDmMenu }[page] || (() => {}))();
 }
 window.addEventListener('hashchange', route);
 
@@ -57,7 +57,17 @@ async function loadDashboard() {
   $('#chart').innerHTML = days.map((d) => `<div class="bar" style="height:${Math.round((d.delivered / max) * 100)}%" title="${d.date}: 발송 ${d.dm_sent}, 전달 ${d.delivered}"><i>${d.dm_sent || ''}</i>${[0, 10, 20, 29].includes(days.indexOf(d)) ? `<span>${d.date.slice(5)}</span>` : ''}</div>`).join('');
   $('#chartLegend').textContent = `합계 30일: 발송 ${days.reduce((n, d) => n + (d.dm_sent || 0), 0)} · 전달 ${days.reduce((n, d) => n + (d.delivered || 0), 0)}`;
   renderLog($('#dashLog'), await api('GET', '/api/events?limit=40'));
+  loadDiagnostics().catch(() => {});
 }
+
+// ── 진단 체크리스트 ──────────────────────────────────────────
+async function loadDiagnostics() {
+  const d = await api('GET', '/api/diagnostics');
+  $('#diagBox').innerHTML = d.checks.map((c) => `<div class="item"><span class="pill ${c.ok ? 'on' : 'warn'}">${c.ok ? '✓' : '!'}</span><span>${esc(c.label)}</span>${c.ok ? '' : `<span class="hint" style="margin-left:8px">${esc(c.hint)}</span>`}</div>`).join('')
+    + `<div class="hint" style="margin-top:10px"><b>서버가 확인할 수 없는 항목 (직접 점검)</b><ul style="margin:6px 0 0 16px">${d.manual.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+}
+$('#btnDiag').onclick = () => loadDiagnostics().then(() => toast('점검 완료')).catch((e) => toast(e.message));
+function kindIcon(m) { if (!m) return '▪'; const k = m.kind || (String(m.media_product_type || '').toUpperCase() === 'REELS' ? 'reels' : 'feed'); return k === 'reels' ? '🎬' : '🖼️'; }
 function renderLog(el, events) {
   el.innerHTML = events.length ? events.map((e) => `<div class="item"><span class="time">${fmtTime(e.created_at)}</span><span class="pill ${e.level === 'error' ? 'err' : e.level === 'warn' ? 'warn' : 'info'}">${esc(e.type)}</span><span>${esc(e.message)}</span></div>`).join('') : '<div class="muted">아직 기록이 없습니다.</div>';
 }
@@ -74,12 +84,13 @@ async function loadAutomations() {
   const list = await api('GET', '/api/automations');
   const mediaMap = Object.fromEntries((await api('GET', '/api/media').catch(() => [])).map((m) => [String(m.id), m]));
   $('#autoRows').innerHTML = list.length ? list.map((a) => {
-    const posts = a.post_scope === 'all' ? '<span class="pill info">전체 게시물</span>' : (a.media_ids || []).map((id) => `<div class="trunc" title="${esc(mediaMap[id]?.caption || id)}">▪ ${esc((mediaMap[id]?.caption || `게시물 ${id}`).slice(0, 34))}</div>`).join('') + (a.apply_to_future ? '<div class="pill info">+ 다음 게시물</div>' : '');
+    const SCOPE_PILL = { all: '<span class="pill info">전체 게시물</span>', reels: '<span class="pill gate">🎬 릴스 전체</span>', feed: '<span class="pill info">🖼️ 일반 게시물 전체</span>' };
+    const posts = SCOPE_PILL[a.post_scope] || ((a.media_ids || []).map((id) => `<div class="trunc" title="${esc(mediaMap[id]?.caption || id)}">${kindIcon(mediaMap[id])} ${esc((mediaMap[id]?.caption || `게시물 ${id}`).slice(0, 32))}</div>`).join('') + (a.apply_to_future ? '<div class="pill info">+ 다음 게시물</div>' : ''));
     const kw = a.keyword_mode === 'any' ? '<span class="pill off">아무 댓글</span>' : (a.keywords || []).map((k) => `<span class="pill gate">${esc(k)}</span>`).join(' ') + ` <span class="hint">(${a.keyword_mode === 'exact' ? '정확히' : '포함'})</span>`;
     return `<tr>
       <td><div style="margin-bottom:6px"><b>${esc(a.name)}</b> ${a.enabled ? '<span class="pill on">켜짐</span>' : '<span class="pill off">꺼짐</span>'} ${a.trigger_type === 'dm' ? '<span class="pill info">DM→DM</span>' : ''}${a.also_dm ? '<span class="pill info">+DM</span>' : ''}</div><div style="margin-bottom:6px">${kw}</div>${posts}</td>
       <td><div class="preview" style="padding:8px">${previewHtml(a)}</div></td>
-      <td><div>${a.follow_gate ? '<span class="pill gate">🔒 팔로우 확인</span>' : '<span class="pill off">팔로우 확인 없음</span>'}</div><div class="hint" style="margin-top:6px">대댓글: ${{ off: 'Off', general: '일반', custom: '특정' }[a.comment_reply_mode]}</div><div class="hint">발송 ${a.send_count} · 전달 ${a.delivered_count}</div><div class="hint">${fmtTime(a.updated_at)}</div></td>
+      <td><div>${a.follow_gate ? '<span class="pill gate">🔒 팔로우 확인</span>' : '<span class="pill off">팔로우 확인 없음</span>'}${(a.cards || []).length ? `<span class="pill info">🎠 캐러셀 ${(a.cards || []).length + 1}장</span>` : ''}${a.send_mode === 'scheduled' ? `<span class="pill warn">⏰ ${fmtTime(a.scheduled_at)} 예약</span>` : ''}</div><div class="hint" style="margin-top:6px">대댓글: ${{ off: 'Off', general: '일반', custom: '특정' }[a.comment_reply_mode]}${a.comment_ai_variation ? ' + AI변형' : ''}</div><div class="hint">발송 ${a.send_count} · 전달 ${a.delivered_count}</div><div class="hint">${fmtTime(a.updated_at)}</div></td>
       <td><div class="row"><button class="btn sm" data-edit="${a.id}">수정</button><button class="btn sm" data-toggle="${a.id}">${a.enabled ? '끄기' : '켜기'}</button><button class="btn sm danger" data-del="${a.id}">삭제</button></div></td></tr>`;
   }).join('') : '<tr><td colspan="4" class="muted">아직 자동화가 없습니다. "+ 자동화 추가"를 눌러 첫 자동화를 만드세요.</td></tr>';
   $$('[data-edit]').forEach((b) => b.onclick = () => openModal(list.find((a) => a.id === Number(b.dataset.edit))));
@@ -93,11 +104,21 @@ const form = $('#autoForm');
 let editing = null;
 function seg(name, value) { $$(`[data-seg="${name}"] button`).forEach((b) => b.classList.toggle('on', b.dataset.v === value)); form.dataset[name] = value; syncDmFields(); }
 $$('[data-seg]').forEach((s) => $$('button', s).forEach((b) => b.onclick = () => seg(s.dataset.seg, b.dataset.v)));
+const SCOPE_HINT = {
+  all: '모든 게시물·릴스에 적용됩니다.',
+  reels: '🎬 <b>릴스에만</b> 적용됩니다. 앞으로 올릴 새 릴스에도 자동으로 적용돼요.',
+  feed: '🖼️ <b>일반 게시물(사진·캐러셀)에만</b> 적용됩니다. 릴스는 제외돼요.',
+  selected: '아래에서 체크한 게시물/릴스에만 적용됩니다.',
+};
 function syncDmFields() {
   const t = form.dataset.dm_type || 'button';
   $('#cardFields').style.display = t === 'button' ? '' : 'none';
+  $('#carouselWrap').style.display = t === 'button' ? '' : 'none';
   $('#textFields').style.display = t === 'text' ? '' : 'none';
-  $('#mediaList').style.opacity = form.dataset.post_scope === 'selected' ? 1 : .45;
+  const scope = form.dataset.post_scope || 'all';
+  $('#pickerWrap').style.display = scope === 'selected' ? '' : 'none';
+  $('#scopeHint').innerHTML = SCOPE_HINT[scope] || '';
+  $('#scheduleBox').style.display = form.dataset.send_mode === 'scheduled' ? '' : 'none';
   form.comment_replies.parentElement.querySelector('textarea').style.display = form.dataset.comment_reply_mode === 'custom' ? '' : 'none';
 }
 function buttonBlock(b = {}, i = 0) {
@@ -110,32 +131,136 @@ function buttonBlock(b = {}, i = 0) {
   return d;
 }
 function renumber() { $$('#buttonsBox .btn-block b').forEach((b, i) => b.textContent = `버튼 ${i + 1}`); $('#btnAddButton').disabled = $$('#buttonsBox .btn-block').length >= 3; }
+
+// ── 캐러셀 추가 카드 (최대 9장 = 첫 카드 포함 10장) ────────────────────────
+function cardBlock(c = {}) {
+  const d = document.createElement('div'); d.className = 'btn-block card-block';
+  d.innerHTML = `<div class="row between"><b class="ct">추가 카드</b><button type="button" class="btn sm danger" data-rm>− 카드 삭제</button></div>
+    <div class="row"><input class="input" data-k="title" maxlength="80" placeholder="카드 제목 (80자)" value="${esc(c.title || '')}" style="max-width:320px"><input class="input" data-k="subtitle" maxlength="80" placeholder="부제목 (선택)" value="${esc(c.subtitle || '')}"></div>
+    <input class="input" data-k="image_url" placeholder="카드 이미지 URL (선택, 1080×1080 권장)" value="${esc(c.image_url || '')}" style="margin-top:6px">
+    <div class="cbtns" style="margin-top:8px"></div>
+    <button type="button" class="btn sm" data-addb>+ 이 카드에 버튼 추가 (최대 3개)</button>`;
+  const box = d.querySelector('.cbtns');
+  const addBtn = (b = {}) => {
+    if (box.children.length >= 3) return;
+    const e = document.createElement('div'); e.className = 'cbtn';
+    e.innerHTML = `<input class="input" data-k="label" maxlength="20" placeholder="버튼 레이블" value="${esc(b.label || '')}" style="max-width:200px">
+      <input class="input" data-k="url" placeholder="(선택) 링크만 → 즉시 이동" value="${esc(b.url || '')}" style="max-width:240px">
+      <input class="input" data-k="reply" maxlength="900" placeholder="버튼 클릭 시 보낼 메시지 (팔로우 확인 적용)" value="${esc(b.reply || '')}">
+      <button type="button" class="btn sm danger" data-rmb>−</button>`;
+    e.querySelector('[data-rmb]').onclick = () => e.remove();
+    box.appendChild(e);
+  };
+  (c.buttons || []).forEach(addBtn);
+  if (!(c.buttons || []).length) addBtn();
+  d.querySelector('[data-addb]').onclick = () => addBtn();
+  d.querySelector('[data-rm]').onclick = () => { d.remove(); renumberCards(); };
+  return d;
+}
+function renumberCards() {
+  $$('#cardsBox .card-block .ct').forEach((b, i) => b.textContent = `카드 ${i + 2}`);
+  $('#btnAddCard').disabled = $$('#cardsBox .card-block').length >= 9;
+}
+$('#btnAddCard').onclick = () => { if ($$('#cardsBox .card-block').length < 9) { $('#cardsBox').appendChild(cardBlock()); renumberCards(); } };
+function readCards() {
+  return $$('#cardsBox .card-block').map((d) => ({
+    title: $('[data-k="title"]', d).value,
+    subtitle: $('[data-k="subtitle"]', d).value,
+    image_url: $('[data-k="image_url"]', d).value,
+    buttons: $$('.cbtn', d).map((e) => ({ label: $('[data-k="label"]', e).value, url: $('[data-k="url"]', e).value, reply: $('[data-k="reply"]', e).value })).filter((b) => b.label.trim()),
+  })).filter((c) => c.title.trim() || c.image_url.trim());
+}
 $('#btnAddButton').onclick = () => { if ($$('#buttonsBox .btn-block').length < 3) { $('#buttonsBox').appendChild(buttonBlock({}, $$('#buttonsBox .btn-block').length)); renumber(); } };
 function readButtons() { return $$('#buttonsBox .btn-block').map((d) => ({ label: $('[data-k="label"]', d).value, url: $('[data-k="url"]', d).value, reply: $('[data-k="reply"]', d).value })).filter((b) => b.label.trim()); }
 
-async function renderMedia(selected = []) {
-  const el = $('#mediaList');
-  el.innerHTML = media.length ? media.map((m) => `<label class="media-item"><input type="checkbox" value="${esc(m.id)}" ${selected.includes(String(m.id)) ? 'checked' : ''}><img src="${esc(m.thumbnail_url || '')}" onerror="this.style.visibility='hidden'"><span class="cap" title="${esc(m.caption)}">${esc((m.caption || '(캡션 없음)').split('\n')[0].slice(0, 60))}</span><span class="pill off">${esc(m.media_product_type || m.media_type || '')}</span></label>`).join('')
-    : '<div class="muted" style="padding:8px">게시물이 없습니다. 계정을 연결한 뒤 "게시물 새로고침"을 눌러주세요.</div>';
+// 릴스 / 게시물 구분. 서버가 kind 를 넣어주지만 예전 캐시 데이터를 위해 프런트에서도 보정합니다.
+function kindOf(m) {
+  if (m.kind) return m.kind;
+  const pt = String(m.media_product_type || '').toUpperCase();
+  if (pt === 'REELS') return 'reels';
+  if (pt === 'STORY') return 'story';
+  if (pt) return 'feed';
+  return String(m.media_type || '').toUpperCase() === 'VIDEO' ? 'reels' : 'feed';
 }
-$('#btnMediaRefresh').onclick = async () => { media = await api('GET', '/api/media?refresh=1').catch((e) => { toast('게시물 조회 실패: ' + e.message); return media; }); renderMedia(readSelectedMedia()); };
-const readSelectedMedia = () => $$('#mediaList input:checked').map((i) => i.value);
+const KIND_LABEL = { reels: ['🎬 릴스', 'gate'], feed: ['🖼️ 게시물', 'off'], story: ['📸 스토리', 'info'] };
+let mediaFilter = '';   // '' | reels | feed | checked
+let mediaQuery = '';
+const selectedMedia = new Set();
+
+function updateMediaCount(shown) {
+  const nReels = media.filter((m) => kindOf(m) === 'reels').length;
+  $('#mediaCount').innerHTML = `전체 ${media.length}개 · <b>🎬 릴스 ${nReels}</b> · 🖼️ 게시물 ${media.length - nReels} · 표시 ${shown} · 선택 <b>${selectedMedia.size}</b>`;
+}
+function renderMedia() {
+  const el = $('#mediaList');
+  if (!media.length) {
+    el.innerHTML = '<div class="muted" style="padding:8px">게시물이 없습니다. 계정을 연결한 뒤 "새로고침"을 눌러주세요.</div>';
+    $('#mediaCount').textContent = '';
+    return;
+  }
+  const q = mediaQuery.trim().toLowerCase();
+  const rows = media.filter((m) => {
+    if (mediaFilter === 'checked') { if (!selectedMedia.has(String(m.id))) return false; }
+    else if (mediaFilter && kindOf(m) !== mediaFilter) return false;
+    if (q && !String(m.caption || '').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  el.innerHTML = rows.length ? rows.map((m) => {
+    const [label, cls] = KIND_LABEL[kindOf(m)] || ['기타', 'off'];
+    const cap = (m.caption || '(캡션 없음)').split('\n')[0].slice(0, 60);
+    return `<label class="media-item"><input type="checkbox" value="${esc(m.id)}" ${selectedMedia.has(String(m.id)) ? 'checked' : ''}>`
+      + `<img src="${esc(m.thumbnail_url || '')}" onerror="this.style.visibility='hidden'">`
+      + `<span class="pill ${cls} kind">${label}</span>`
+      + `<span class="cap" title="${esc(m.caption)}">${esc(cap)}</span>`
+      + `<span class="hint when">${esc(String(m.timestamp || '').slice(0, 10))}</span></label>`;
+  }).join('') : '<div class="muted" style="padding:8px">조건에 맞는 게시물이 없습니다. 필터를 "전체"로 바꿔보세요.</div>';
+  $$('#mediaList input[type=checkbox]').forEach((i) => i.onchange = () => {
+    if (i.checked) selectedMedia.add(i.value); else selectedMedia.delete(i.value);
+    updateMediaCount(rows.length);
+  });
+  updateMediaCount(rows.length);
+}
+$$('#mediaTabs .chip').forEach((c) => c.onclick = () => {
+  mediaFilter = c.dataset.k;
+  $$('#mediaTabs .chip').forEach((x) => x.classList.toggle('on', x === c));
+  renderMedia();
+});
+$('#mediaSearch').oninput = (e) => { mediaQuery = e.target.value; renderMedia(); };
+$('#btnMediaRefresh').onclick = async () => {
+  const b = $('#btnMediaRefresh'); b.textContent = '불러오는 중...'; b.disabled = true;
+  media = await api('GET', '/api/media?refresh=1').catch((e) => { toast('게시물 조회 실패: ' + e.message); return media; });
+  b.textContent = '새로고침'; b.disabled = false;
+  renderMedia();
+  toast(`게시물 ${media.length}개 (릴스 ${media.filter((m) => kindOf(m) === 'reels').length}개) 불러옴`);
+};
+const readSelectedMedia = () => [...selectedMedia];
 
 async function openModal(a = null) {
   editing = a;
   $('#modalTitle').textContent = a ? `자동화 수정: ${a.name}` : '자동화 추가';
   form.reset(); $('#buttonsBox').innerHTML = ''; $('#previewBox').innerHTML = '';
-  const v = a || { trigger_type: 'comment', post_scope: 'all', keyword_mode: 'contains', comment_reply_mode: 'general', dm_type: 'button', follow_gate: 1, enabled: 1, buttons: [{ label: '자료 받기', reply: '' }] };
+  const v = a || { trigger_type: 'comment', post_scope: 'all', keyword_mode: 'contains', comment_reply_mode: 'general', dm_type: 'button', send_mode: 'immediate', follow_gate: 1, enabled: 1, buttons: [{ label: '자료 받기', reply: '' }] };
+  $('#cardsBox').innerHTML = '';
   form.name.value = v.name || ''; form.also_dm.checked = !!v.also_dm; form.apply_to_future.checked = !!v.apply_to_future;
   form.keywords.value = (v.keywords || []).join(', '); form.comment_replies.value = (v.comment_replies || []).join('\n');
   form.dm_text.value = v.dm_text || ''; form.image_url.value = v.image_url || ''; form.title.value = v.title || ''; form.subtitle.value = v.subtitle || '';
-  form.follow_gate.checked = !!v.follow_gate; form.ai_variation.checked = !!v.ai_variation; form.enabled.checked = v.enabled !== 0;
+  form.follow_gate.checked = !!v.follow_gate; form.ai_variation.checked = !!v.ai_variation; form.comment_ai_variation.checked = !!v.comment_ai_variation; form.enabled.checked = v.enabled !== 0;
+  form.scheduled_at.value = v.scheduled_at ? toLocalInput(v.scheduled_at) : '';
   (v.buttons || []).forEach((b, i) => $('#buttonsBox').appendChild(buttonBlock(b, i))); renumber();
-  seg('trigger_type', v.trigger_type); seg('post_scope', v.post_scope); seg('keyword_mode', v.keyword_mode); seg('comment_reply_mode', v.comment_reply_mode); seg('dm_type', v.dm_type);
+  (v.cards || []).forEach((c) => $('#cardsBox').appendChild(cardBlock(c))); renumberCards();
+  seg('trigger_type', v.trigger_type); seg('post_scope', v.post_scope); seg('keyword_mode', v.keyword_mode); seg('comment_reply_mode', v.comment_reply_mode); seg('dm_type', v.dm_type); seg('send_mode', v.send_mode || 'immediate');
+  // 선택 상태 초기화 후 목록 렌더
+  selectedMedia.clear();
+  (v.media_ids || []).forEach((id) => selectedMedia.add(String(id)));
+  mediaFilter = ''; mediaQuery = ''; $('#mediaSearch').value = '';
+  $$('#mediaTabs .chip').forEach((x) => x.classList.toggle('on', x.dataset.k === ''));
   if (!media.length) media = await api('GET', '/api/media').catch(() => []);
-  renderMedia((v.media_ids || []).map(String));
+  renderMedia();
   $('#modal').classList.add('open');
 }
+// datetime-local 은 로컬 시각 문자열을 쓰므로 타임존 보정이 필요합니다.
+function toLocalInput(ms) { const d = new Date(Number(ms) - new Date().getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); }
+function fromLocalInput(s) { return s ? new Date(s).getTime() : null; }
 function readForm() {
   return {
     name: form.name.value, enabled: form.enabled.checked, trigger_type: form.dataset.trigger_type, also_dm: form.also_dm.checked,
@@ -143,7 +268,9 @@ function readForm() {
     keyword_mode: form.dataset.keyword_mode, keywords: form.keywords.value.split(',').map((s) => s.trim()).filter(Boolean),
     comment_reply_mode: form.dataset.comment_reply_mode, comment_replies: form.comment_replies.value.split('\n').map((s) => s.trim()).filter(Boolean),
     dm_type: form.dataset.dm_type, dm_text: form.dm_text.value, image_url: form.image_url.value, title: form.title.value, subtitle: form.subtitle.value,
-    buttons: readButtons(), follow_gate: form.follow_gate.checked, ai_variation: form.ai_variation.checked,
+    buttons: readButtons(), cards: readCards(), follow_gate: form.follow_gate.checked,
+    ai_variation: form.ai_variation.checked, comment_ai_variation: form.comment_ai_variation.checked,
+    send_mode: form.dataset.send_mode, scheduled_at: fromLocalInput(form.scheduled_at.value),
   };
 }
 form.onsubmit = async (e) => {
@@ -151,6 +278,8 @@ form.onsubmit = async (e) => {
   const d = readForm();
   if (d.keyword_mode !== 'any' && !d.keywords.length) return toast('키워드를 입력하거나 "불특정"을 선택하세요');
   if (d.post_scope === 'selected' && !d.media_ids.length && !d.apply_to_future) return toast('게시물을 선택하거나 "다음 발행 게시물"을 켜세요');
+  if (d.send_mode === 'scheduled' && !d.scheduled_at) return toast('예약 발송 시각을 골라주세요');
+  if (d.send_mode === 'scheduled' && d.scheduled_at < Date.now()) return toast('예약 시각은 현재 이후로 잡아주세요');
   if (d.dm_type === 'button' && !d.buttons.length) return toast('버튼을 1개 이상 추가하세요');
   if (d.follow_gate && !d.buttons.some((b) => b.reply.trim())) return toast('팔로우 확인을 쓰려면 버튼에 "클릭 시 메시지"가 있어야 합니다');
   if (editing) await api('PUT', `/api/automations/${editing.id}`, d); else await api('POST', '/api/automations', d);
@@ -185,8 +314,70 @@ $('#leadFilter').onchange = loadLeads;
 const sform = $('#settingsForm');
 async function loadSettings(values) {
   const s = values || await api('GET', '/api/settings');
+  // 스토리 멘션에서 재사용할 자동화 목록 채우기
+  try {
+    const list = await api('GET', '/api/automations');
+    $('#storyAutoSel').innerHTML = '<option value="">사용 안 함 (아래 텍스트만 보냄)</option>'
+      + list.map((a) => `<option value="${a.id}">#${a.id} ${esc(a.name)}</option>`).join('');
+  } catch {}
   for (const el of sform.elements) if (el.name && s[el.name] !== undefined) el.value = s[el.name];
 }
+
+// ── 단체 DM ──────────────────────────────────────────────────
+let bulkAudience = [];
+async function loadBulk() {
+  bulkAudience = await api('GET', '/api/bulk/audience').catch(() => []);
+  $('#bulkRows').innerHTML = bulkAudience.length ? bulkAudience.map((r) => `<tr>
+    <td><input type="checkbox" class="bulkchk" value="${esc(r.igsid)}"></td>
+    <td><b>${r.username ? '@' + esc(r.username) : '-'}</b><div class="hint">${esc(r.name || '')}</div></td>
+    <td>${fmtTime(r.last_at)}</td>
+    <td>${r.minutes_left > 60 ? `${Math.floor(r.minutes_left / 60)}시간 ${r.minutes_left % 60}분` : `${r.minutes_left}분`}</td>
+    <td>${r.is_follower ? '<span class="pill on">팔로우</span>' : '<span class="pill off">-</span>'}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="muted">최근 24시간 안에 반응한 사람이 없습니다. 버튼을 누르거나 DM 으로 답장한 사람만 대상이 됩니다.</td></tr>';
+  $('#bulkHint').textContent = `발송 가능 대상 ${bulkAudience.length}명`;
+}
+$('#btnBulkRefresh').onclick = () => loadBulk().then(() => toast('대상 갱신됨'));
+$('#btnBulkAll').onclick = () => { const all = $$('.bulkchk'); const on = all.some((c) => !c.checked); all.forEach((c) => c.checked = on); };
+$('#btnBulkSend').onclick = async () => {
+  const igsids = $$('.bulkchk').filter((c) => c.checked).map((c) => c.value);
+  if (!igsids.length) return toast('받는 사람을 골라주세요');
+  if (!confirm(`${igsids.length}명에게 단체 DM 을 보낼까요? 시간당 전송 제한에 맞춰 순차 발송됩니다.`)) return;
+  try {
+    const r = await api('POST', '/api/bulk/send', { igsids, text: $('#bulkText').value, button_label: $('#bulkLabel').value, button_url: $('#bulkUrl').value });
+    toast(`${r.queued}명 대기열에 등록됨`);
+  } catch (e) { toast('실패: ' + e.message); }
+};
+
+// ── DM 첫화면 · 고정 메뉴 ───────────────────────────────────────
+function iceRow(x = {}) {
+  const d = document.createElement('div'); d.className = 'btn-block';
+  d.innerHTML = `<div class="row"><input class="input" data-k="question" maxlength="80" placeholder="보이는 질문 (80자) 예: 리드마그넷 어떻게 받나요?" value="${esc(x.question || '')}" style="max-width:340px"><button type="button" class="btn sm danger" data-rm>−</button></div>
+    <textarea class="input" data-k="answer" maxlength="900" placeholder="누르면 보낼 답변 (900자, [username] 치환 가능)" style="margin-top:6px">${esc(x.answer || '')}</textarea>`;
+  d.querySelector('[data-rm]').onclick = () => d.remove();
+  return d;
+}
+function menuRow(x = {}) {
+  const d = document.createElement('div'); d.className = 'btn-block';
+  d.innerHTML = `<div class="row"><input class="input" data-k="title" maxlength="20" placeholder="메뉴 이름 (20자)" value="${esc(x.title || '')}" style="max-width:220px"><input class="input" data-k="url" placeholder="(선택) 링크 — 넣으면 클릭 즉시 이동" value="${esc(x.url || '')}"><button type="button" class="btn sm danger" data-rm>−</button></div>
+    <textarea class="input" data-k="answer" maxlength="900" placeholder="링크 대신 보낼 답변 (900자)" style="margin-top:6px">${esc(x.answer || '')}</textarea>`;
+  d.querySelector('[data-rm]').onclick = () => d.remove();
+  return d;
+}
+async function loadDmMenu() {
+  const d = await api('GET', '/api/dm-menu').catch(() => ({ ice_breakers: [], persistent_menu: [] }));
+  $('#iceBox').innerHTML = ''; $('#menuBox').innerHTML = '';
+  (d.ice_breakers || []).forEach((x) => $('#iceBox').appendChild(iceRow(x)));
+  (d.persistent_menu || []).forEach((x) => $('#menuBox').appendChild(menuRow(x)));
+  $('#dmMenuHint').textContent = '';
+}
+$('#btnIceAdd').onclick = () => { if ($$('#iceBox .btn-block').length < 4) $('#iceBox').appendChild(iceRow()); else toast('최대 4개까지'); };
+$('#btnMenuAdd').onclick = () => { if ($$('#menuBox .btn-block').length < 5) $('#menuBox').appendChild(menuRow()); else toast('최대 5개까지'); };
+$('#btnDmMenuSave').onclick = async () => {
+  const ice = $$('#iceBox .btn-block').map((d) => ({ question: $('[data-k="question"]', d).value, answer: $('[data-k="answer"]', d).value })).filter((x) => x.question.trim());
+  const menu = $$('#menuBox .btn-block').map((d) => ({ title: $('[data-k="title"]', d).value, url: $('[data-k="url"]', d).value, answer: $('[data-k="answer"]', d).value })).filter((x) => x.title.trim());
+  try { await api('PUT', '/api/dm-menu', { ice_breakers: ice, persistent_menu: menu }); toast('인스타그램에 저장됨'); $('#dmMenuHint').textContent = `첫화면 ${ice.length}개 · 고정메뉴 ${menu.length}개 저장됨`; }
+  catch (e) { toast('저장 실패: ' + e.message); }
+};
 sform.onsubmit = async (e) => { e.preventDefault(); const d = {}; for (const el of sform.elements) if (el.name) d[el.name] = el.value; await api('PUT', '/api/settings', d); toast('설정 저장됨'); loadStatus(); };
 $('#btnDefaults').onclick = async () => loadSettings(await api('GET', '/api/settings/defaults'));
 
