@@ -85,6 +85,17 @@ class AuthError(RuntimeError):
     pass
 
 
+def cookie_expiry(cookie: str) -> datetime | None:
+    """VIEWTRAP_COOKIE 안의 `token=` JWT에서 만료 시각(KST)을 꺼낸다. 뷰트랩 세션 토큰은 발급 후 7일짜리다."""
+    import base64
+    try:
+        tok = next(c.strip()[6:] for c in cookie.split(";") if c.strip().startswith("token="))
+        payload = json.loads(base64.urlsafe_b64decode(tok.split(".")[1] + "=="))
+        return datetime.fromtimestamp(int(payload["exp"]), KST)
+    except Exception:
+        return None
+
+
 class Viewtrap:
     def __init__(self, cookie: str):
         if not cookie.strip():
@@ -384,6 +395,15 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
     vt = Viewtrap(os.getenv("VIEWTRAP_COOKIE", ""))
     remaining = vt.remaining()
     log(f"잔여 검색 횟수 {remaining}")
+    expiry = cookie_expiry(os.getenv("VIEWTRAP_COOKIE", ""))
+    expiry_note = ""
+    if expiry:
+        left = expiry - datetime.now(KST)
+        expiry_note = f"쿠키 만료 {expiry.strftime('%m/%d %H:%M')} (남은 {left.days}일 {left.seconds // 3600}시간)"
+        log(expiry_note)
+        if left < timedelta(days=2):
+            notify(f"⚠️ 뷰트랩 쿠키가 {expiry.strftime('%m/%d %H:%M')}에 만료됩니다. 만료 전에 app.viewtrap.com에 다시 로그인해 "
+                   f"DevTools → Network → api.viewtrap.com 요청의 cookie 헤더를 GitHub Secret VIEWTRAP_COOKIE에 다시 넣어주세요.")
     sheet = Sheet()
     existing = sheet.existing_keywords()
     hist = {}
@@ -471,7 +491,7 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
                     "errors": errors}
     save_queue(q)
 
-    lines = [f"뷰트랩 키워드 조사 {today}: {len(results)}개 처리, 잔여 검색 {remaining}회"]
+    lines = [f"뷰트랩 키워드 조사 {today}: {len(results)}개 처리, 잔여 검색 {remaining}회" + (f", {expiry_note}" if expiry_note else "")]
     lines += [f"- {m['keyword']}: {m['score']}점 (F {m['F']}만, G {m['G']}, J {m['medViews']}, K {m['medSubs']})"
               for _, m, _, _ in sorted(results, key=lambda x: -x[1]["score"])]
     if good:
