@@ -93,6 +93,10 @@ def _dump(meta: dict, body: str) -> str:
 _FORMAT_ALIASES = {
     "threads": "thread", "스레드": "thread", "쓰레드": "thread",
     "newsletters": "newsletter", "뉴스레터": "newsletter",
+    "유튜브": "youtube", "yt": "youtube",
+    "릴스": "reels", "reel": "reels", "쇼츠": "reels", "shorts": "reels",
+    "블로그": "blog", "네이버": "blog", "naver": "blog",
+    "all": "youtube, reels, thread, newsletter, blog", "전체": "youtube, reels, thread, newsletter, blog",
 }
 
 
@@ -193,7 +197,8 @@ def next_content_id() -> str:
 # `_`=카테고리 분류, `+`=키워드 연결. ID를 뒤로 보내 형식·카테고리로 정렬/분류된다.
 
 FORMAT_LABELS = {"thread": "스레드", "newsletter": "뉴스레터",
-                 "youtube": "YT롱폼", "cardnews": "카드뉴스"}
+                 "youtube": "YT롱폼", "cardnews": "카드뉴스",
+                 "reels": "릴스", "blog": "블로그"}
 
 # 주제 카테고리 판별 키워드 — 점수(매칭 수) 최고인 카테고리, 동점이면 앞선 것.
 CATEGORY_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [

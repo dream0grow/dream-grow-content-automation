@@ -83,6 +83,10 @@ jobs:
         if: ${{ github.event.inputs.stage == '' }}
         run: python3 -m vault_pipeline.script_feedback
 
+      # 사람이 고친 원고(05 리뷰/완료·64 발행완료) vs AI 원본 diff → Honcho 학습 + 볼트 기록. 실패해도 진행.
+      - name: 원고 수정 학습 (diff → 다음 원고에 반영)
+        run: python3 -m vault_pipeline.script_learn --max 5 || true
+
       # 카드 변경분을 볼트에 커밋·push (git이 유일한 동기화 경로)
       - name: 볼트 카드 커밋
         run: |

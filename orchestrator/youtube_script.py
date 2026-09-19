@@ -120,6 +120,12 @@ def save_to_review(card: dict, script: str) -> str:
         n += 1
         path = folder / f"{name[:-3]}-{n}.md"
     path.write_text(md, encoding="utf-8")
+    # 학습용 AI 원본 보관 (사람이 고친 뒤 vault_pipeline.script_learn 이 diff 학습)
+    try:
+        from orchestrator.extra_formats import save_ai_original
+        save_ai_original(path.name, md)
+    except Exception:
+        pass
     return path.name
 
 

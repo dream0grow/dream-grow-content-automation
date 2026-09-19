@@ -21,8 +21,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from orchestrator import (
-    agent_dialogue, llm, manus_research, naver_keywords, prompts, review_copy,
-    youtube_script,
+    agent_dialogue, extra_formats, llm, manus_research, naver_keywords, prompts,
+    review_copy, youtube_script,
 )
 from orchestrator import state as store
 from orchestrator.config import (
@@ -319,7 +319,8 @@ def handle_keyword_approved(card: dict):
     formats = [f.strip() for f in card["format"].split(",") if f.strip()]
     supported = [f for f in formats if f in ("thread", "newsletter")]
     wants_yt = youtube_script.wants_youtube(card["format"])
-    if not supported and not wants_yt:
+    extra = extra_formats.wanted(card["format"])  # reels / blog
+    if not supported and not wants_yt and not extra:
         supported = ["thread"]
 
     # 유튜브 롱폼 원고 — 05 리뷰/대기에 저장하면 script_feedback이 텔레그램 알림·
@@ -344,18 +345,41 @@ def handle_keyword_approved(card: dict):
             )
             log(f"{card['content_id']} 유튜브 원고 실패 (계속 진행): {e}")
 
+    # 릴스 스크립트 · 네이버 블로그 원고 — 유튜브와 같은 경로(05 리뷰/대기 → 텔레그램 알림 → 핑퐁).
+    extra_names: list[str] = []
+    for fmt in extra:
+        try:
+            name = extra_formats.deliver(fmt, card, brief, revision_note)
+            extra_names.append(name)
+            label = extra_formats.SPEC[fmt]["label"]
+            store.append_section(
+                page_id, f"🎞 {label} 원고",
+                f"`05 리뷰/대기/{name}` 에 저장했습니다. 텔레그램 알림에 답장하면 수정이 반영됩니다(핑퐁).",
+            )
+            log(f"{card['content_id']} {label} 원고 저장 → 05 리뷰/대기/{name}")
+        except Exception as e:
+            if not supported and not wants_yt and len(extra) == 1:
+                raise
+            store.notify(
+                page_id,
+                f"⚠️ [{card['content_id']}] {extra_formats.SPEC[fmt]['label']} 원고 생성 실패: {str(e)[:200]} "
+                "— 나머지 형식은 계속 진행합니다.",
+            )
+            log(f"{card['content_id']} {fmt} 원고 실패 (계속 진행): {e}")
+
     if not supported:
-        # 유튜브 전용 카드 — 자동 발행이 없으므로 여기서 사이클 완료.
+        # 유튜브/릴스/블로그 전용 카드 — 자동 발행이 없으므로 여기서 사이클 완료.
         store.update_card(
             page_id, stage="published", status="done", approval_status="",
         )
+        made = [n for n in ([yt_name] if yt_name else []) + extra_names]
         store.notify(
             page_id,
-            f"🎬 [{card['content_id']}] 유튜브 원고가 완성됐습니다 — "
-            f"05 리뷰/대기/{yt_name} 저장. 원고 알림 메시지에 답장하면 수정 지시가 "
-            "반영됩니다(핑퐁). 촬영에 쓰실 최종본은 옵시디언에서 확인하세요.",
+            f"🎬 [{card['content_id']}] 원고 {len(made)}종이 완성됐습니다 — "
+            + ", ".join(f"05 리뷰/대기/{n}" for n in made)
+            + ". 원고 알림 메시지에 답장하면 수정 지시가 반영됩니다(핑퐁). 최종본은 옵시디언에서 확인하세요.",
         )
-        log(f"{card['content_id']} 유튜브 전용 카드 완료 ✅ (원고 인계)")
+        log(f"{card['content_id']} 원고 전용 카드 완료 ✅ ({len(made)}종 인계)")
         return
 
     store.update_card(page_id, stage="draft", status="running")
