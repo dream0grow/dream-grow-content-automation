@@ -40,7 +40,7 @@ jobs:
     env:
       GSHEET_SA_JSON: ${{ secrets.GSHEET_SA_JSON }}
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-      YT_RESEARCH_URL: ${{ secrets.YT_RESEARCH_URL }}
+      YT_RESEARCH_URL: ${{ secrets.YT_RESEARCH_URL || 'https://yt-research-two.vercel.app' }}  # 사이트의 YouTube 키로 통계를 받는다 (YOUTUBE_API_KEY 가 있으면 그것을 우선)
       YT_RESEARCH_PASSWORD: ${{ secrets.YT_RESEARCH_PASSWORD }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
