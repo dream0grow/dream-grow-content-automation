@@ -1,0 +1,956 @@
+{
+  "description": "뷰트랩 키워드 발굴 큐. 스레드 CSV(threads_archive_dream_grow_lee_2026-04-09.csv)에서 추출. 하루 30개씩 처리. status: pending | done | error",
+  "sheet": {
+    "url": "https://docs.google.com/spreadsheets/d/1Vy6_9gn3nNovUUdTqYOmkuc4ZamNbj-5tlvZ1fHmN24",
+    "keywordGid": "949293824",
+    "poolGid": "787785781"
+  },
+  "dailyLimit": 30,
+  "keywords": [
+    {
+      "keyword": "초등 학원",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "885",
+      "score": 4,
+      "sheetRow": 114,
+      "pooled": false
+    },
+    {
+      "keyword": "아이 스마트폰",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "886",
+      "score": 5,
+      "sheetRow": 105,
+      "pooled": true
+    },
+    {
+      "keyword": "국어 공부법",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "887",
+      "score": 4,
+      "sheetRow": 112,
+      "pooled": false
+    },
+    {
+      "keyword": "친구 없는 아이",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "888",
+      "score": 5,
+      "sheetRow": 104,
+      "pooled": true
+    },
+    {
+      "keyword": "일기쓰기",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "889",
+      "score": 3,
+      "sheetRow": 118,
+      "pooled": false
+    },
+    {
+      "keyword": "학원비",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "890",
+      "score": 2,
+      "sheetRow": 122,
+      "pooled": false
+    },
+    {
+      "keyword": "선행학습",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "891",
+      "score": 1,
+      "sheetRow": 127,
+      "pooled": false
+    },
+    {
+      "keyword": "뇌 발달",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "892",
+      "score": 3,
+      "sheetRow": 116,
+      "pooled": false
+    },
+    {
+      "keyword": "논술",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "893",
+      "score": 4,
+      "sheetRow": 115,
+      "pooled": false
+    },
+    {
+      "keyword": "통지표",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "894",
+      "score": 0,
+      "sheetRow": 129,
+      "pooled": false
+    },
+    {
+      "keyword": "눈치 보는 아이",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "895",
+      "score": 4,
+      "sheetRow": 109,
+      "pooled": false
+    },
+    {
+      "keyword": "끈기",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "896",
+      "score": 2,
+      "sheetRow": 124,
+      "pooled": false
+    },
+    {
+      "keyword": "창의력",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "897",
+      "score": 2,
+      "sheetRow": 121,
+      "pooled": false
+    },
+    {
+      "keyword": "영단어 암기",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "898",
+      "score": 5,
+      "sheetRow": 107,
+      "pooled": true
+    },
+    {
+      "keyword": "겨울방학",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "899",
+      "score": 1,
+      "sheetRow": 126,
+      "pooled": false
+    },
+    {
+      "keyword": "게임 중독",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "900",
+      "score": 2,
+      "sheetRow": 119,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 고학년",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "901",
+      "score": 2,
+      "sheetRow": 123,
+      "pooled": false
+    },
+    {
+      "keyword": "학습지",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "902",
+      "score": 4,
+      "sheetRow": 113,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 글쓰기",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "903",
+      "score": 2,
+      "sheetRow": 125,
+      "pooled": false
+    },
+    {
+      "keyword": "아빠 육아",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "904",
+      "score": 5,
+      "sheetRow": 103,
+      "pooled": true
+    },
+    {
+      "keyword": "초등 1학년",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "905",
+      "score": 5,
+      "sheetRow": 106,
+      "pooled": true
+    },
+    {
+      "keyword": "아이 놀이",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "906",
+      "score": 5,
+      "sheetRow": 101,
+      "pooled": true
+    },
+    {
+      "keyword": "장난감",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "907",
+      "score": 5,
+      "sheetRow": 100,
+      "pooled": true
+    },
+    {
+      "keyword": "성적 올리는 법",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "908",
+      "score": 0,
+      "sheetRow": 128,
+      "pooled": false
+    },
+    {
+      "keyword": "아이 유튜브",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "909",
+      "score": 4,
+      "sheetRow": 108,
+      "pooled": false
+    },
+    {
+      "keyword": "공부 습관",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "910",
+      "score": 4,
+      "sheetRow": 111,
+      "pooled": false
+    },
+    {
+      "keyword": "실수하는 아이",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "911",
+      "score": 5,
+      "sheetRow": 102,
+      "pooled": true
+    },
+    {
+      "keyword": "집중 못하는 아이",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "912",
+      "score": 4,
+      "sheetRow": 110,
+      "pooled": false
+    },
+    {
+      "keyword": "한글 떼기",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "913",
+      "score": 2,
+      "sheetRow": 120,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 독서",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "914",
+      "score": 3,
+      "sheetRow": 117,
+      "pooled": false
+    },
+    {
+      "keyword": "메타인지",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "915",
+      "score": 1,
+      "sheetRow": 130,
+      "pooled": false
+    },
+    {
+      "keyword": "회복탄력성",
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-18",
+      "round_no": "916",
+      "score": 2,
+      "sheetRow": 131,
+      "pooled": false
+    },
+    {
+      "keyword": "워킹맘",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 시험",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "질문하는 아이",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "공부 스트레스",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "편식",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "형제 싸움",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "발표",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "숙제",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "아이 수면",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "학교폭력",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "받아쓰기",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "문장제",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "어림셈",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "구구단",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "파닉스",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "영어책",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "그릿",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "자기효능감",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "심화 문제집",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "오답노트",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "공부 동기",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "자기조절",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "화내는 엄마",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "학습부진",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "산만한 아이",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 6학년",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "예비 중학생",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "예비 초등",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "수 감각",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "연산 실수",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "공부 정서",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "아이 대화",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "부모 말습관",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "칭찬하는 법",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "아이 훈육",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "불안한 아이",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "학습 동기",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 영어 학원",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "엄마표 영어",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "엄마표 수학",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "수학 학원",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 수학 문제집",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "사고력",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "문해력 키우기",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "어휘력 키우기",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 역사",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 과학",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "초등 체육",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "AI 시대 교육",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "EBS",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "성장 마인드셋",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "자율성",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "책임감",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "인성",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "사회성",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "교사 상담",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "학부모 상담",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "학교 생활",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "방과후",
+      "status": "pending",
+      "source": "threads_csv"
+    },
+    {
+      "keyword": "조부모 육아",
+      "status": "pending",
+      "source": "threads_csv"
+    }
+  ],
+  "reusedFromHistory": [
+    {
+      "keyword": "수업",
+      "round_no": "805",
+      "searchDate": "2026-03-23",
+      "score": 5,
+      "sheetRow": 62,
+      "pooled": true
+    },
+    {
+      "keyword": "칭찬",
+      "round_no": "812",
+      "searchDate": "2026-03-31",
+      "score": 5,
+      "sheetRow": 63,
+      "pooled": true
+    },
+    {
+      "keyword": "감정",
+      "round_no": "852",
+      "searchDate": "2026-05-26",
+      "score": 5,
+      "sheetRow": 64,
+      "pooled": true
+    },
+    {
+      "keyword": "교과서",
+      "round_no": "859",
+      "searchDate": "2026-08-18",
+      "score": 5,
+      "sheetRow": 65,
+      "pooled": true
+    },
+    {
+      "keyword": "친구관계",
+      "round_no": "838",
+      "searchDate": "2026-04-08",
+      "score": 5,
+      "sheetRow": 66,
+      "pooled": true
+    },
+    {
+      "keyword": "집중력",
+      "round_no": "844",
+      "searchDate": "2026-04-23",
+      "score": 4,
+      "sheetRow": 67,
+      "pooled": false
+    },
+    {
+      "keyword": "습관",
+      "round_no": "855",
+      "searchDate": "2026-06-23",
+      "score": 4,
+      "sheetRow": 68,
+      "pooled": false
+    },
+    {
+      "keyword": "중독",
+      "round_no": "842",
+      "searchDate": "2026-04-20",
+      "score": 4,
+      "sheetRow": 69,
+      "pooled": false
+    },
+    {
+      "keyword": "한글공부",
+      "round_no": "818",
+      "searchDate": "2026-04-01",
+      "score": 4,
+      "sheetRow": 70,
+      "pooled": false
+    },
+    {
+      "keyword": "자존감",
+      "round_no": "811",
+      "searchDate": "2026-03-31",
+      "score": 4,
+      "sheetRow": 71,
+      "pooled": false
+    },
+    {
+      "keyword": "도파민",
+      "round_no": "843",
+      "searchDate": "2026-04-23",
+      "score": 4,
+      "sheetRow": 72,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 수학",
+      "round_no": "717",
+      "searchDate": "2025-12-08",
+      "score": 4,
+      "sheetRow": 73,
+      "pooled": false
+    },
+    {
+      "keyword": "개념",
+      "round_no": "757",
+      "searchDate": "2026-03-17",
+      "score": 4,
+      "sheetRow": 74,
+      "pooled": false
+    },
+    {
+      "keyword": "미루기",
+      "round_no": "847",
+      "searchDate": "2026-04-27",
+      "score": 3,
+      "sheetRow": 75,
+      "pooled": false
+    },
+    {
+      "keyword": "불안",
+      "round_no": "851",
+      "searchDate": "2026-05-21",
+      "score": 3,
+      "sheetRow": 76,
+      "pooled": false
+    },
+    {
+      "keyword": "대화법",
+      "round_no": "840",
+      "searchDate": "2026-04-20",
+      "score": 3,
+      "sheetRow": 77,
+      "pooled": false
+    },
+    {
+      "keyword": "엄마표",
+      "round_no": "711",
+      "searchDate": "2025-11-05",
+      "score": 3,
+      "sheetRow": 78,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 교육",
+      "round_no": "726",
+      "searchDate": "2026-02-14",
+      "score": 3,
+      "sheetRow": 79,
+      "pooled": false
+    },
+    {
+      "keyword": "초등공부",
+      "round_no": "857",
+      "searchDate": "2026-08-17",
+      "score": 3,
+      "sheetRow": 80,
+      "pooled": false
+    },
+    {
+      "keyword": "어휘력",
+      "round_no": "864",
+      "searchDate": "2026-08-19",
+      "score": 3,
+      "sheetRow": 81,
+      "pooled": false
+    },
+    {
+      "keyword": "수학 문제집",
+      "round_no": "860",
+      "searchDate": "2026-08-18",
+      "score": 3,
+      "sheetRow": 82,
+      "pooled": false
+    },
+    {
+      "keyword": "집중력 높이는 법",
+      "round_no": "845",
+      "searchDate": "2026-04-27",
+      "score": 2,
+      "sheetRow": 83,
+      "pooled": false
+    },
+    {
+      "keyword": "오답",
+      "round_no": "761",
+      "searchDate": "2026-03-17",
+      "score": 2,
+      "sheetRow": 84,
+      "pooled": false
+    },
+    {
+      "keyword": "과학공부",
+      "round_no": "764",
+      "searchDate": "2026-03-17",
+      "score": 2,
+      "sheetRow": 85,
+      "pooled": false
+    },
+    {
+      "keyword": "고전 독서",
+      "round_no": "862",
+      "searchDate": "2026-08-19",
+      "score": 2,
+      "sheetRow": 86,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 방학",
+      "round_no": "856",
+      "searchDate": "2026-07-09",
+      "score": 2,
+      "sheetRow": 87,
+      "pooled": false
+    },
+    {
+      "keyword": "그림책",
+      "round_no": "749",
+      "searchDate": "2026-03-16",
+      "score": 2,
+      "sheetRow": 88,
+      "pooled": false
+    },
+    {
+      "keyword": "자기주도학습",
+      "round_no": "677",
+      "searchDate": "2025-05-20",
+      "score": 2,
+      "sheetRow": 89,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 한국사",
+      "round_no": "713",
+      "searchDate": "2025-11-05",
+      "score": 1,
+      "sheetRow": 90,
+      "pooled": false
+    },
+    {
+      "keyword": "문해력",
+      "round_no": "865",
+      "searchDate": "2026-08-19",
+      "score": 1,
+      "sheetRow": 91,
+      "pooled": false
+    },
+    {
+      "keyword": "아이 뇌",
+      "round_no": "664",
+      "searchDate": "2025-03-12",
+      "score": 1,
+      "sheetRow": 92,
+      "pooled": false
+    },
+    {
+      "keyword": "짜증내는아이",
+      "round_no": "645",
+      "searchDate": "2025-02-28",
+      "score": 1,
+      "sheetRow": 93,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 국어",
+      "round_no": "708",
+      "searchDate": "2025-10-28",
+      "score": 1,
+      "sheetRow": 94,
+      "pooled": false
+    },
+    {
+      "keyword": "초등입학",
+      "round_no": "731",
+      "searchDate": "2026-03-02",
+      "score": 1,
+      "sheetRow": 95,
+      "pooled": false
+    },
+    {
+      "keyword": "사고력 수학",
+      "round_no": "804",
+      "searchDate": "2026-03-23",
+      "score": 1,
+      "sheetRow": 96,
+      "pooled": false
+    },
+    {
+      "keyword": "학기초",
+      "round_no": "732",
+      "searchDate": "2026-03-02",
+      "score": 1,
+      "sheetRow": 97,
+      "pooled": false
+    },
+    {
+      "keyword": "초등 논술",
+      "round_no": "709",
+      "searchDate": "2025-10-28",
+      "score": 1,
+      "sheetRow": 98,
+      "pooled": false
+    },
+    {
+      "keyword": "독서법",
+      "round_no": "763",
+      "searchDate": "2026-03-17",
+      "score": 0,
+      "sheetRow": 99,
+      "pooled": false
+    }
+  ],
+  "lastRun": {
+    "date": "2026-09-18",
+    "searched": 32,
+    "remainingSearchCredits": 245,
+    "keywordSheetLastRow": 131,
+    "poolSheetLastRow": 146
+  },
+  "notes": [
+    "2026-09-18: rows 3-61 J/K swapped to correct semantics (J=views median, K=subs median).",
+    "2026-09-18: pool tab rows 86-146 = curated 교육·육아 채널 videos for the 13 good keywords (label suffix \"(교육·육아 채널)\").",
+    "Viewtrap search trigger endpoint observed: POST https://api.viewtrap.com/api/v2/contents/videos/request/keyword (body not captured)."
+  ],
+  "viewtrapApi": {
+    "histories": "GET https://api.viewtrap.com/api/v2/contents/histories/keyword",
+    "videos": "GET https://api.viewtrap.com/api/v2/contents/videos?round_no=<round>",
+    "search": "POST https://api.viewtrap.com/api/v2/contents/videos/request/keyword  body {\"keyword\": encodeURIComponent(kw), \"lang\":\"ko\", \"country\":\"KR\"}",
+    "user": "GET https://api.viewtrap.com/api/v2/auth/users (km_use_count = remaining searches)",
+    "auth": "httpOnly session cookie (credentials: include); without cookies -> HTTP 412"
+  }
+}
