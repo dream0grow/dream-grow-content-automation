@@ -1,0 +1,85 @@
+# 풀링 영상 만들기 탭 보강 — 빈 조회수(게시일)·구독자 셀 채우기 + 벤치마크 후보(연두색) 표시
+#  · 통계 출처: YOUTUBE_API_KEY(YouTube Data API v3) 또는 YT_RESEARCH_URL(+YT_RESEARCH_PASSWORD, yt_research 사이트 키)
+#  · 벤치마크 판정: 규칙(data/benchmark_rules.json) + Claude(ANTHROPIC_API_KEY 또는 Claude Code CLI)
+#  · 사용자가 D열(URL)을 노란색으로 칠한 행은 '확정'으로 보고 판정하지 않는다(예시로만 쓴다)
+name: pool-enrich
+
+on:
+  schedule:
+    - cron: "20 1,7,13,19 * * *"   # 6시간마다 (10:20/16:20/22:20/04:20 KST) — 뷰트랩 09:00 KST 실행 뒤 첫 회
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "시트에 쓰지 않고 로그만"
+        required: false
+        default: "false"
+      rescore:
+        description: "이미 메모가 있는 행도 다시 채점"
+        required: false
+        default: "false"
+      no_llm:
+        description: "Claude 판정 없이 규칙 점수만"
+        required: false
+        default: "false"
+      refresh_examples:
+        description: "시트의 노란 행을 data/benchmark_examples.json 으로 내보내 커밋"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pool-enrich
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GSHEET_SA_JSON: ${{ secrets.GSHEET_SA_JSON }}
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+      YT_RESEARCH_URL: ${{ secrets.YT_RESEARCH_URL }}
+      YT_RESEARCH_PASSWORD: ${{ secrets.YT_RESEARCH_PASSWORD }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install requests python-dotenv google-auth pyyaml
+
+      - name: Install Claude Code CLI (Max 구독 인증용, API 키 없을 때만)
+        if: ${{ env.ANTHROPIC_API_KEY == '' && github.event.inputs.no_llm != 'true' }}
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Enrich pool sheet
+        run: |
+          ARGS=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ github.event.inputs.rescore }}" = "true" ]; then ARGS="$ARGS --rescore"; fi
+          if [ "${{ github.event.inputs.no_llm }}" = "true" ]; then ARGS="$ARGS --no-llm"; fi
+          if [ "${{ github.event.inputs.refresh_examples }}" = "true" ]; then ARGS="$ARGS --refresh-examples"; fi
+          python3 -m orchestrator.pool_enrich $ARGS
+
+      - name: Commit examples (refresh_examples 일 때만 바뀐다)
+        if: ${{ always() }}
+        run: |
+          git config user.name "pool-enrich[bot]"
+          git config user.email "actions@github.com"
+          git add data/benchmark_examples.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "벤치마크 예시 갱신 $(date +%Y-%m-%dT%H:%M)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin ${{ github.ref_name }} || true
+            if git push origin HEAD:${{ github.ref_name }}; then exit 0; fi
+            echo "push 경합, 재시도 $i/5"; sleep $((RANDOM % 4 + 2))
+          done
+          exit 1

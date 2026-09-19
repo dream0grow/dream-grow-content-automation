@@ -33,11 +33,18 @@ def sheet_gid() -> int:
 
 
 def available() -> bool:
-    return bool(os.getenv("GSHEET_SA_JSON", "").strip())
+    return bool(os.getenv("GSHEET_SA_JSON", "").strip() or os.getenv("GSHEET_ACCESS_TOKEN", "").strip())
 
 
 def _token() -> str:
-    """서비스 계정 JSON으로 OAuth 액세스 토큰을 발급한다."""
+    """서비스 계정 JSON으로 OAuth 액세스 토큰을 발급한다.
+
+    GSHEET_ACCESS_TOKEN 이 있으면 그것을 그대로 쓴다 (로컬/샌드박스 테스트용 — google-auth의 네이티브
+    암호 라이브러리를 못 싣는 환경에서 밖에서 발급한 1시간짜리 토큰을 넣는다).
+    """
+    tok = os.getenv("GSHEET_ACCESS_TOKEN", "").strip()
+    if tok:
+        return tok
     from google.auth.transport.requests import Request
     from google.oauth2 import service_account
     info = json.loads(os.environ["GSHEET_SA_JSON"])

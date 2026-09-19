@@ -377,6 +377,31 @@ def _to_pool_row(label: str, v: dict, cols: dict[str, int] | None = None,
 EDU_METHOD = {"llm": 0, "regex": 0}  # 실행 중 어느 선별 방식이 쓰였는지 (요약 문구용)
 
 
+def bench_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None,
+                    cols: dict[str, int] | None = None) -> list[list]:
+    """벤치마크 후보 행 — 사용자가 노란색으로 확정해 온 영상과 비슷한 것 (orchestrator.benchmark).
+
+    조회수 상위 5개(pool_rows)는 키즈·방송 채널이 다 차지하므로, 검색 결과 전체에서
+    유명인·방송·키즈를 빼고 구독자 대비 조회수가 높은 소규모 채널 영상을 규칙+LLM으로 고른다.
+    라벨 '(벤치 후보)'. 점수·사유는 pool_enrich가 나중에 C열 메모로 다시 남긴다.
+    """
+    try:
+        from orchestrator import benchmark
+    except Exception as e:  # 모듈 없으면 조용히 건너뛴다
+        log(f"벤치마크 모듈 없음: {e}")
+        return []
+    y, mo, d = m["searchDate"].split("-")
+    label = f"{y}.{int(mo)}.{int(d)}. \n\n{m['keyword']} (벤치 후보)"
+    try:
+        pairs = benchmark.pick_benchmarks(data.get("videos", []), top_n=top_n, keyword=m["keyword"],
+                                          exclude_ids=exclude_ids, use_llm=benchmark.use_llm_default())
+    except Exception as e:
+        log(f"벤치마크 선별 실패({m['keyword']}): {e}")
+        return []
+    log(f"벤치마크 후보 {m['keyword']}: {len(pairs)}개 " + ", ".join(f"{s['score']}점" for _, s in pairs))
+    return [_to_pool_row(label, v, cols, m["searchDate"]) for v, _ in pairs]
+
+
 def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None,
                   cols: dict[str, int] | None = None) -> list[list]:
     """교육·육아 채널 영상만 골라 풀링 행을 만든다 (일반 명사 키워드 보완용, 라벨에 '(교육·육아 채널)').
@@ -520,7 +545,7 @@ MANUAL_STEPS = (
 
 # ---------------------------------------------------------------- 메인
 def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: tuple[float, float],
-        edu_extra: bool = True) -> int:
+        edu_extra: bool = True, bench_extra: bool = True) -> int:
     q = load_queue()
     pending = [k for k in q["keywords"] if k.get("status") == "pending"]
     if not pending:
@@ -615,6 +640,10 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
                 extra = edu_pool_rows(m, data, 5, exclude, sheet.pool_cols)
                 exclude.update(pool_row_video_id(r, sheet.pool_cols) for r in extra)
                 rows += extra
+            if bench_extra:
+                bench = bench_pool_rows(m, data, 5, exclude, sheet.pool_cols)
+                exclude.update(pool_row_video_id(r, sheet.pool_cols) for r in bench)
+                rows += bench
             prow.extend(rows)
             item["pooled"] = bool(rows)
         if prow:
@@ -692,6 +721,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--pause", default="8,15", help="검색 사이 대기 초 (min,max)")
     ap.add_argument("--no-edu-extra", action="store_true",
                     help="5점 키워드의 교육·육아 채널 추가 선별 행을 넣지 않음")
+    ap.add_argument("--no-bench-extra", action="store_true",
+                    help="벤치마크 후보(유명인·방송·키즈 제외, 구독자 대비 조회수 높은 소규모 채널) 행을 추가하지 않음")
     ap.add_argument("--touch-only", action="store_true",
                     help="검색 없이 API만 호출해 토큰 재발급을 받아 저장 (쿠키 유지용)")
     args = ap.parse_args(argv)
@@ -700,7 +731,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.touch_only:
             return touch_only()
         return run(args.limit, args.dry_run, args.max_age_days, args.min_credits, (lo, hi),
-                   edu_extra=not args.no_edu_extra)
+                   edu_extra=not args.no_edu_extra, bench_extra=not args.no_bench_extra)
     except AuthError as e:
         log(str(e))
         notify(f"🛑 뷰트랩 키워드 조사 중단: {e}\n자동 갱신이 안 돼서 사람이 한 번 바꿔줘야 합니다.\n\n" + MANUAL_STEPS)
