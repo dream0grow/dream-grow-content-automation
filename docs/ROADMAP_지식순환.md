@@ -1,20 +1,21 @@
 # 지식 선순환 로드맵 — 코드 정리 + 제텔카스텐↔콘텐츠 순환 배선
 
-> 작성 2026-09-19 · 브랜치 `claude/knowledge-cycle-roadmap-2026-09` · **이 문서가 이 주제의 진행 기준(단일 진실원천)이다.**
-> 어떤 세션·어떤 AI(Claude, Codex, Gemini 등)든 이 작업을 이어받을 때는 §0을 먼저 읽고, 끝낼 때 §3 체크박스와 §6 진행 로그를 갱신한다.
-> 근거 문서: `CLAUDE.md`(운영 현황), `vault/CLAUDE.md`(볼트 헌법), `docs/ARCHITECTURE_V2.md`, `docs/기획/통합기획_v3.md` §4(역방향 4단 관문), `docs/기획/MASTER_PLAN.md` Phase B·E.
+> 작성 2026-09-19 (v2, Aside 진단 반영) · 브랜치 `claude/knowledge-cycle-roadmap-2026-09` · **이 문서가 이 주제의 진행 기준(단일 진실원천)이다.**
+> 어떤 세션·어떤 AI(Claude, Codex, Gemini, Aside 등)든 이 작업을 이어받을 때는 §0을 먼저 읽고, 끝낼 때 §3 체크박스와 §6 진행 로그를 갱신한다.
+> 근거 문서 두 벌: ① `docs/기획/지식콘텐츠_선순환_진단_2026-09-19.md`(Aside 진단, 원문 그대로 이 브랜치에 복사) ② 이 문서 §2(Claude 진단 + Aside 지적 사항 검증). 그 외 `CLAUDE.md`, `vault/CLAUDE.md`(볼트 헌법), `docs/ARCHITECTURE_V2.md`, `docs/기획/통합기획_v3.md` §4, `docs/기획/MASTER_PLAN.md` Phase B·E.
 
 ---
 
 ## 0. 이 문서 사용법 (다중 세션·다중 AI 공통 규칙)
 
 1. **시작**: §3에서 미완 항목(`- [ ]`) 하나를 고른다. 의존 항목이 끝나지 않았으면 고르지 않는다. §6에 `착수: 날짜 / 항목 / 세션·AI 이름`을 적는다.
-2. **브랜치**: 이 브랜치(`claude/knowledge-cycle-roadmap-2026-09`)에서 작업한다. 병렬 세션은 하위 브랜치 `claude/kc-<phase>-<slug>`를 파고, 끝나면 이 브랜치로 합친다. Phase 단위로 main에 PR.
+2. **브랜치**: 이 브랜치에서 작업한다. 병렬 세션은 하위 브랜치 `claude/kc-<phase>-<slug>`를 파고, 끝나면 이 브랜치로 합친다. Phase 단위로 main에 PR.
 3. **완료**: 체크박스를 채우고 옆에 커밋 해시를 적는다. §6에 `완료: 날짜 / 항목 / 검증 방법`을 적는다. "완료 판정" 조건을 실제로 확인하지 않았으면 체크하지 않는다.
 4. **결정**: 사용자(이한결) 결정이 필요한 것은 §5 "미결"에 적고 **임의로 정하지 않는다.** 사용자가 확정하면 "결정 레지스트리"로 옮긴다.
-5. **안전**: 볼트 헌법(`vault/CLAUDE.md`) 준수. 삭제·대량 이동·rename은 dry-run → 사용자 승인 → git 커밋 → 실행. 시크릿은 절대 커밋하지 않는다(`tools/vault_secret_scan.py`).
+5. **안전**: 볼트 헌법(`vault/CLAUDE.md`) 준수. 삭제·대량 이동·rename·상태 일괄 변경은 dry-run → 사용자 승인 → git 커밋 → 실행. 정체 카드는 **개별 진단 후 재큐**하며 일괄 승인하지 않는다. 시크릿은 절대 커밋하지 않는다(`tools/vault_secret_scan.py`).
 6. **문체**: 제3자 노출 한국어 문구는 `/im-not-strange-ai` 윤문을 거친다. 이 문서는 내부 문서라 예외.
 7. **CLAUDE.md**: 현황 요약 4~5줄만 갱신하고, 상세는 전부 이 문서에 쓴다.
+8. **주장의 출처**: 이 문서의 진단 수치는 어느 체크아웃에서 쟀는지 밝힌다(§2-0). 검증 안 된 지적은 "미검증"으로 표시한다.
 
 ---
 
@@ -22,6 +23,19 @@
 
 **최상위 목표 = 지식 선순환**
 ① 제텔카스텐에 나만의 지식을 쌓고 창조한다 → ② 유튜브·스레드·릴스·쇼츠 콘텐츠를 만든다 → ③ 만들면서 생긴 지식을 다시 제텔카스텐에 쌓는다 → ④ 그 지식으로 다시 콘텐츠를 만든다. 플라우드 전사(회의·일상 인사이트)도 이 순환의 입력이어야 한다. 유튜브는 yt_research로 타 영상을 수집·분석한 뒤 만드는 경우도 있다.
+
+Aside가 정리한 목표 순환(채택):
+```text
+생활·Plaud·책·논문·유튜브 수집
+  → 출처와 화자가 보존된 자료
+  → 내 해석·의견을 검토한 지식
+  → 관련 지식·반론·실제 사례로 콘텐츠 구성
+  → 동일 최종본의 사실·표현·개인정보 검수
+  → 사람 승인·발행
+  → 수정 과정에서 생긴 새 통찰과 관객 반응을 구분해 회수
+  → 기존 지식 보완·반박·연결
+```
+문체 학습, 전문지식 축적, 조회수 최적화는 **서로 다른 세 가지 학습**이다. 지금은 첫 번째 코드가 많고 두 번째가 없다.
 
 **불편 6가지** (5번이 "가장 큰 문제")
 1. 사람 병목으로 SNS 콘텐츠를 잘 못 올린다.
@@ -35,200 +49,253 @@
 
 ---
 
-## 2. 진단 요약 (2026-09-19 실측, 코드·볼트·yt_research 전수 조사)
+## 2. 진단 (두 진단의 합본)
+
+### 2-0. 두 진단의 관계와 수치 차이의 원인
+
+| | Claude 진단 (이 문서) | Aside 진단 (`docs/기획/지식콘텐츠_선순환_진단_2026-09-19.md`) |
+|---|---|---|
+| 측정 대상 | 워크트리 = `origin/main` b94884d7 (2026-09-19) | 로컬 메인 체크아웃 = 브랜치 `feature/instagram-autodm`(origin/main보다 2 앞·4 뒤) + **미커밋 719건**(추가 521·삭제 189·수정 9) |
+| 활성 카드 | 90 | 138 |
+| 제텔카스텐 md | 2,452 | 2,685 |
+| `needs_human` | 59 | 108 |
+| 결론 | 재작성 금지, 정리+배선 | 전면 폐기 금지, 핵심 연결부 재설계 |
+
+수치는 체크아웃이 달라서 다르고, **결론은 같다.** 로컬 메인 체크아웃에 미커밋 변경이 719건(볼트 제텔카스텐 292·파이프라인 66·프로젝트 56 추가, 189 삭제)과 `vault/conflict-files-obsidian-git.md`가 있다는 사실 자체가 "git이 사용자 작업 UI"인 구조의 비용이다. **Phase 0 첫 항목은 이 체크아웃의 정합이다.**
+
+Aside가 추가로 지적한 결함은 Claude 워크트리(origin/main)에서 전부 재현됐다(§2-4 검증 열).
 
 ### 2-1. 코드 세대 — 세 세대가 한 저장소에 공존
 
+**`vault/`와 `vault_pipeline/`은 중복 코드가 아니다.** 전자는 데이터(지식·원고·카드 상태·로그), 후자는 그 데이터를 처리하는 코드다. 중복은 코드 층 안(1세대↔2세대, `orchestrator`↔`vault_pipeline`)과 Python↔TypeScript 사이에 있다.
+
 | 세대 | 위치 | 규모 | 상태 |
 |---|---|---|---|
-| 1세대 (2026-04) | 루트 `.py` 23개, `agents/`, `scheduled/`, `main.py`, `skills-draft/`, `apple_notes_raw/`(723 json), `pdf_output/` | 약 6,300줄 | 워크플로우 17개·스킬 어디서도 미참조. `/Users/lhg/...` 절대경로 20개. 외부 볼트 `초생산` 전제. 살아 있는 건 `claude_client.py`·`memory_manager.py`·`diff_learner.py` 3개뿐이며 패키지가 `sys.path`로 끌어다 씀 |
+| 1세대 (2026-04) | 루트 `.py` 23개, `agents/`, `scheduled/`, `main.py`, `skills-draft/`, `apple_notes_raw/`(723 json), `pdf_output/` | 약 6,300줄 | 워크플로우 17개·스킬 어디서도 미참조. `/Users/lhg/...` 절대경로 20개. 외부 볼트 `초생산` 전제. 살아 있는 건 `claude_client.py`·`memory_manager.py`·`diff_learner.py` 3개(패키지가 `sys.path`로 끌어다 씀). **`diff_learner`는 `self_improve`가 import하므로 즉시 삭제 금지** |
 | 2세대 (2026-06~) | `orchestrator/` | 약 10,100줄 (테스트 1,674) | 실제 운영 본체. 워크플로우 17개 전부 여기서 시작 |
-| 2.5세대 (2026-07~) | `vault_pipeline/` | 약 4,100줄 (테스트 1,127) | 플라우드·피드백·텔레그램·소크라테스. orchestrator와 **양방향 import**(함수 안 deferred import 6곳으로 순환 회피). 자체 config 없음 |
-| 별도 저장소 | `yt_research` (Next.js 14, Vercel, Supabase) | — | GitHub Contents API로 볼트에 직접 씀. 텔레그램 웹훅 수신부 |
+| 2.5세대 (2026-07~) | `vault_pipeline/` | 약 4,100줄 (테스트 1,127) | 플라우드·피드백·텔레그램·소크라테스. orchestrator와 **양방향 import**(deferred import 6곳으로 순환 회피). 자체 config 없음 |
+| 편집 엔진 | `shorts/render.py`, `shorts_gpt/render.py`(로컬 미커밋), `tools/shorts_edit.py` | 약 1,700줄+ | 전사·구간·자막·렌더가 세 벌 병렬. MLX Whisper(Apple Silicon)와 faster-whisper 경로 분리 |
+| 별도 저장소 | `yt_research` (Next.js 14, Vercel, Supabase: 영상 1,240·스냅샷 2,387, 시트 연동 ON) | — | GitHub Contents API로 볼트에 직접 씀. 텔레그램 웹훅 수신부. **이미 클라우드 중앙 DB가 있다** |
 | 타 채널 | `youtube/` | 1,289줄 | 10x인생 채널 소유. 불가침 |
+| 로컬 미커밋 | `instagram-autodm/`(Railway Dockerfile 포함), `shorts_gpt/`, `shorts/transcript_publish.py` 등 | — | 로컬 메인 체크아웃에만 있음. 의도 확인 필요(§5 미결 1) |
 
 ### 2-2. 중복 실태
 
 | 항목 | 벌 수 · 위치 |
 |---|---|
 | frontmatter 파서 | `vault_io.parse_frontmatter` = `obsidian_state._split` (정규식·예외 처리 동일). 루트 스크립트에 손파서 5벌 더 |
-| 장부 JSON load/save idiom | 7벌 (`vault_io`, `feedback`, `script_feedback`, `reels_recommend`, `telegram_assistant`, `script_learn`, `youtube_body`) |
-| 문체 학습 프롬프트 | 4벌(`vault_pipeline.prompts.STYLE_DIFF`, `orchestrator.prompts.STYLE_DIFF`, `script_learn.analyze`, 루트 `diff_learner`), 저장소 3곳(`style_lessons.md`·Honcho·카드 섹션). 두 벌이 같은 Honcho 세션에 씀 |
+| 장부 JSON load/save idiom | 7벌 |
+| 문체 학습 프롬프트 | 4벌, 저장소 3곳(`style_lessons.md`·Honcho·카드 섹션). 두 벌이 같은 Honcho 세션에 씀 |
 | `DONE_STATES` | 3벌, 서로 다른 집합 |
 | `05 리뷰/대기` 경로 상수 | 5벌 |
-| `save_to_review` | `youtube_script` vs `extra_formats` 근사 복사 |
-| `_file_token` | `youtube_script`·`thumbnail` 바이트 동일 |
-| review_queue.md 쓰기 | 두 모듈, 두 형식 |
-| GitHub blob URL 생성 | 2벌, 환경변수 이름 계열도 다름 |
-| **yt_research와 손복제** | 카드 파일명 규칙·카테고리 표·keyword slug·content_id 채번·프론트매터 스키마(**`publish_at` 드리프트 이미 발생**)·텔레그램 전송·카드ID 정규식·피드백 노트 스키마·브랜드 룰북(약 6곳)·벤치마크 채점·시트 열 해석. 두 시스템이 **같은 시트 탭**과 **같은 `_system/feedback`**에 동시에 씀 |
+| `save_to_review` / `_file_token` / review_queue 쓰기 / blob URL 생성 | 각 2벌 |
+| 렌더러 | `shorts/render.py` ↔ `shorts_gpt/render.py` ↔ `tools/shorts_edit.py` |
+| **yt_research와 손복제** | 카드 파일명 규칙·카테고리 표·keyword slug·content_id 채번·프론트매터 스키마(**`publish_at` 드리프트 이미 발생**)·텔레그램 전송·카드ID 정규식·피드백 노트 스키마·브랜드 룰북(약 6곳)·벤치마크 채점·시트 열 해석. 두 시스템이 **같은 시트 탭**과 **같은 `_system/feedback`**에 동시에 씀. TS 주석이 "수동 일치 유지"를 요구 |
 
-### 2-3. 지식 순환 실측 — 코드에 없다
+### 2-3. 지식 순환 실측 — 코드에 없다 (origin/main 기준)
 
 `orchestrator/`에 "제텔카스텐"이라는 문자열 자체가 없다.
 
 | 방향 | 실측 |
 |---|---|
-| 지식 → 콘텐츠 | 활성 카드 90개 중 제텔카스텐 참조 **0**. 05 리뷰/대기 448건 중 제텔 링크 17건(16건은 2026-04-09/10). 글감→원고 8건, 전부 4월 |
-| 콘텐츠 → 지식 | 발행 카드 4개에서 메모 19개(2026-08-21~29)뿐. 전부 `원출처_추적: 필요`로 격리된 채 방치. `feedback_ledger` 4건 모두 `lessons: 0` |
-| 플라우드 → 지식 | 노트 490개(메모 273·키워드 100·의견 105·사례 11), **전부 7월 녹음**. 8월 이후 0. 앱 미전사 6건 대기(9/3~9/7) |
-| yt_research → 지식 | 0. `02 분석` 15건을 제텔카스텐이 참조한 적 없음 |
-| 역방향 관문 `_system/candidates/` | **0건** (헌법이 정한 유일한 교차 쓰기 지점) |
+| 지식 → 콘텐츠 | 활성 카드 90개 중 제텔카스텐 참조 **0**. 05 리뷰/대기 448건 중 제텔 링크 17건(16건은 2026-04-09/10). 글감→원고 8건, 전부 4월. 단, yt_research `getVaultContext()`는 검색 주입을 한다 — 두 경로의 지식 활용 수준이 다르다 |
+| 콘텐츠 → 지식 | 발행 카드 4개에서 메모 19개(2026-08-21~29)뿐. 전부 `원출처_추적: 필요`로 격리된 채 방치 |
+| 플라우드 → 지식 | 노트 490개, **전부 7월 녹음**. 8월 이후 0. 앱 미전사 6건 대기. 단, 현재 로그는 "인증 오류 / 정상 빈 목록 / 파싱 실패"를 구분하지 못하므로 원인 단정 불가 |
+| yt_research → 지식 | 0 |
+| 역방향 관문 `_system/candidates/` | **0건** |
 | `used_in` 역링크 | **0건** |
-| 문체 학습 산출 `_system/style_lessons.md` | 파일 없음 |
+| `_system/style_lessons.md` | 파일 없음 |
 
-세 반쪽 순환(플라우드→지식 7월, 발행→지식 8월, 글감→원고 4월)이 각각 한 번씩 작동했고 시기가 겹친 적이 없다. 2026-09-19 현재 셋 다 멈춰 있고, 콘텐츠 공장은 웹 리서치만으로 매일 돈다.
+### 2-4. 결함표 (Aside 지적 + Claude 검증)
 
-### 2-4. 사람 병목 실측
+| 등급 | 결함 | 위치 | 검증 |
+|---|---|---|---|
+| **P0** | **발행·검수·환류가 서로 다른 원고 버전을 본다.** 환류는 `✍️ 초안` 최신 섹션을, 발행·문체학습은 `read_final_draft()`(가장 높은 차수)를 읽는다. 사람이 최종 수정에서 만든 통찰이 환류에서 빠지고, 이미 고친 초기 표현이 메모가 된다. 2차안은 윤리검수 **뒤에** 생성되며 재검수 없음. 승인 게이트는 본문 hash가 아닌 카드 `review_status`를 본다 | `feedback.py:108-110` vs `publish.py:173,250`·`style_learn.py:37`; `run.py:415-449`; `rubric_review.py`; `run.py:546-578` | **재현** |
+| **P0** | **매일 발제가 2026-08-24부터 전부 정체.** Manus `task.create` 401 → intake 실패 → 자동재시도가 `research/queued`로 재큐하는데 DISPATCH에 그 조합이 없어 영구 대기. 8/24~9/19 생성 카드 32개 중 27개가 이 상태. 고아 청소는 brief/draft만 본다. 즉 4주간 "초안 완성" 알림이 나올 수 없었다 | `run.py:126-175`(intake가 먼저 `research/running`으로 바꾼 뒤 실패), `run.py:663-674` DISPATCH, `run.py:718-745` sweep, 카드 `last_error` | **재현** (27건, 전부 `[자동재시도] HTTPError 401 api.manus.ai`) |
+| **P0** | **인기·문장력 평가와 사실 검증이 혼재.** 윤리검수는 주장별 근거 원문 대조기가 아니다. Manus 폴백은 웹 검색 없이 모델 지식으로 리서치를 쓴다. 글 점수는 후킹·가독성·실천성·브랜드핏·공감뿐 | `agent_dialogue.py:122-125,160-163`; `manus_research.py:160-170`; `prompts.py:469-484` | **재현** |
+| P1 | 주력 SNS 생성에 개인 지식 검색 단계 없음 (§2-3) | `run.py:304-315,390-396`; `daily_intake.py:31-53` | **재현** |
+| P1 | yt_research 볼트 검색에 **사용 자격 필터 없음** — candidate·`_ai`·비공개·노랑 사례를 거르지 않고, 결과를 "내가 직접 쌓아온 경험·사례·관점"으로 프롬프트에 소개(헌법 B-2·B-7 위반) | `yt_research/lib/vault.ts:152-226, 241-245` | **재현** |
+| P1 | SNS 확정 원고는 문체 diff만 학습하고 원자 메모를 만들지 않음. `feedback.atomize`는 발췌가 원문에 있는지 대조 없이 `author: 이한결`을 붙임 | `script_learn.py`; `feedback.py:171-198` | **재현** |
+| P1 | 상태 모델 불일치: 유튜브/릴스/블로그 전용 카드가 원고 완료 시 `published/done`을 씀(실제 플랫폼 발행과 다름) | `run.py:370-382` | **재현** |
+| P1 | 플라우드: 기본 7일·3건, 60,000자 절단. segment 화자·시간 미보존(content만 join). `verbatim: true`를 붙이지만 원문 포함 검사 없음 → 타 참석자 발언이 사용자 생각으로 귀속될 수 있음. 학부모 콘텐츠 연결 단계 없음(교사 글감만) | `vault_pipeline/run.py:30-40,78-86`; `plaud_client.py:219-239`; `writers.py:143-161` | **재현** |
+| P2 | `script_learn`이 Honcho 저장 실패도 장부에 기록 → 같은 hash 재학습 안 함. `style_learn` 재주입은 Honcho 기반이라 로컬 로그만 남으면 다음 글에 반영 안 됨 | `script_learn.py:224-226` | **재현** |
+| P2 | 테스트가 CI에서 돌지 않음(pytest가 requirements에도 없음). 두 진단 모두 로컬 실행 실패 | `.github/workflows/` | **재현** |
+| P2 | 저장소 루트에 `.obsidian/` 하나 더(코드 폴더를 볼트로 연 흔적). `raw/clipings` 오타 폴더 | — | **재현** |
+| P2 | `_검토대기` 619건(헌법상 폐지 예정)이 제텔카스텐의 25%. `author` 없는 노트 1,944/2,685(Aside 측정) → 저자 기반 자격 필터 도입 전 메타데이터 이관 필요 | 볼트 | Aside 측정, 방향 일치 |
+
+### 2-5. 사람 병목 실측 (origin/main)
 
 | 항목 | 수치 |
 |---|---|
 | 활성 카드 `needs_human` | 59 / 90 |
 | `05 리뷰/대기` : `05 리뷰/완료` | 448 : 2 |
-| 소크라테스 새벽 질문 답변 | 0 / 49일 (147문항) |
-| 발행까지 간 카드 | 4 / 90 (`발행완료/` 폴더 비어 있음, 발행 카드가 `활성/`에 남음) |
-| `_system/lessons.md` · `values.md` | 예시 1줄 · `TODO(이한결)` 그대로 |
+| 소크라테스 새벽 질문 답변 | 0 / 49일 |
+| 발행까지 간 카드 | 4 / 90 (`발행완료/` 폴더 비어 있음) |
 | 60일 볼트 커밋 중 장부·로그만 바뀐 것 | 1,214 / 1,533 (**79% 소음**) |
+| 로컬 메인 체크아웃 미커밋 | 719건 + Obsidian Git 충돌 파일 |
 
-### 2-5. 원인 두 줄
+### 2-6. 원인 세 줄
 
-1. **작가가 사용자의 지식을 읽지 않는다.** 브리프 재료 = Manus/Claude 웹 리서치 + 후킹 패턴 + 벤치마크 글. 구술 노트 389·의견 119·주장 31·주제별 라이브러리 293·본인 스레드 아카이브 CSV는 프롬프트에 들어간 적이 없다. → 초안이 "일반 육아 글"이 되고 전문성은 사람이 수정으로 채운다(불편 2). 품질 게이트는 점수표(50점·100점)뿐, "이 주장의 출처가 어디냐"를 묻는 관문이 없다.
-2. **승인이 git 안의 YAML 편집이다.** 매일 발제는 승인 속도와 무관하게 카드를 만든다. 통합기획 v3 Phase B "텔레그램 인라인 버튼 승인"은 설계만 있고 미구현. 텔레그램 답장은 15분 cron 폴링. → 대기열만 자란다(불편 1·4).
-
-### 2-6. 장단점
-
-**장점**: 상태 머신이 견고(고아 청소·자동 재시도·부분 발행 재개·발행 예약·시크릿 스캔). Threads·스티비·텔레그램·시트·뷰트랩 연동이 실제 작동(120일간 orchestrator 커밋 88건). 저장소가 md라 어디서든 읽힘. 볼트 헌법(권한 매트릭스·`_ai` 딱지·사례 신호등·`own_content` 순환참조 플래그)은 설계로서 드물게 좋다.
-**단점**: 세 세대 공존. 순환 import. **테스트가 CI에서 돌지 않음**(pytest가 requirements에도 없음). yt_research와 규칙 드리프트 시작. git 소음 79%. 저장소 루트에 `.obsidian`이 하나 더 있어 코드 폴더가 볼트로 열린 흔적. 플라우드 triage는 교사 글감만 판정(학부모 SNS 씨앗 승격은 수동 스킬에만).
+1. **작가가 사용자의 지식을 읽지 않는다.** 브리프 재료 = 웹 리서치(또는 모델 지식) + 후킹 패턴 + 벤치마크. 구술 노트 389·의견 119·주장 31·라이브러리 293·스레드 아카이브는 프롬프트에 들어간 적이 없다. 품질 게이트는 점수표뿐이고 "이 주장의 출처가 어디냐"를 묻는 관문이 없다.
+2. **승인이 git 안의 YAML 편집이다.** Git은 코드와 백업용이지 사용자 작업 UI가 아니어야 한다. v3 Phase B(텔레그램 버튼)는 미구현, 웹 검토 화면은 없다. 발제는 승인 속도와 무관하게 카드를 만든다.
+3. **같은 원고의 "버전"이 없다.** 검수·승인·발행·환류가 각자 다른 본문을 집는다. 이 상태로 배선을 늘리면 오염이 는다. 그래서 **정합성이 배선보다 먼저다.**
 
 ### 2-7. 24시간·기기 문제의 실체
 
-파이프라인 본체는 이미 GitHub Actions에서 맥북 없이 돈다. 맥북에 묶인 것: ① 대화형 Claude Code 세션 ② 뷰트랩 쿠키 동기화(launchd) ③ 쇼츠 렌더링(ffmpeg·Whisper) ④ Aside 브라우저. 리눅스 노트북이 해결하는 범위는 이 넷 + "실시간 텔레그램 봇 상주"다. 동기화 UI 문제는 서버로 풀리지 않고 §3 Phase 2로 푼다.
+파이프라인 본체는 이미 GitHub Actions에서 맥북 없이 돈다(단, cron은 정시·최대 지연을 보장하는 큐가 아니며 실제 시작 간격은 설정과 달랐다). yt_research는 Vercel+Supabase로 이미 클라우드에 있다. 맥북에 묶인 것: ① 대화형 Claude Code 세션 ② 뷰트랩 쿠키 동기화(macOS Keychain·launchd 의존 — OS 이전만으로 해결 안 됨) ③ 쇼츠 렌더링(MLX Whisper = Apple Silicon 전용) ④ Aside 브라우저. 리눅스 노트북은 **렌더·전사 worker와 백업**에 유용하지만, DB·유일 원본·외부 접속 웹 서버를 집 노트북에 두면 전원·인터넷 장애가 전체 장애가 된다.
 
 ---
 
 ## 3. 로드맵 (체크리스트)
 
-**결정: 완전 재작성하지 않는다.** 2세대 본체는 작동하며 새로 짜면 같은 것을 다시 만든다. 1세대만 버리고, 2·2.5세대를 한 패키지로 합친 뒤, 순환을 배선한다.
+**결정(제안): 완전 재작성하지 않는다.** 보존 자산 = 원고·관찰·수정 이력, yt_research 웹 UI와 Supabase, 발행 어댑터(Threads·스티비), 영상 편집 엔진, 상태 머신. 바꿀 대상 = 사용자가 Git/폴더/frontmatter를 직접 다루는 운영, 제각각인 원고 버전·상태 모델, 지식 검색·환류의 단절.
 
-### Phase 0 — 정리 (약 1주) · 선행 필수
+**순서 원칙(Aside 채택): 정합성 → 작은 완전 순환 → 인터페이스 → 코드 통합·worker → 과거 자산 회수.** 코드 정리는 순환이 한 번 완주한 뒤에 한다. 최우선 투자는 에이전트 수나 서버가 아니라 **승인한 내 지식이 원고의 입력이 되고, 최종 수정이 다시 지식으로 돌아오는 연결**이다.
 
-- [ ] 0-1 1세대 처분: 루트 `.py` 20개 + `rename_threads.sh` + `agents/` + `scheduled/` + `skills-draft/` + `pdf_output/` 삭제(또는 `_archive/legacy_2026-04/`로 이동 — §5 미결). `apple_notes_raw/`는 볼트 `raw/applenotes`에 이미 606건 이관됐는지 확인 후 처분. 완료 판정: `grep -rn "/Users/lhg" --include='*.py' .` 0건.
-- [ ] 0-2 살아 있는 3개(`claude_client`·`memory_manager`·`diff_learner`) 패키지 안으로 흡수. `sys.path.insert` 전부 제거.
-- [ ] 0-3 `vault_pipeline`을 `orchestrator`에 통합(패키지명은 §5 미결, 임시 `orchestrator`). 공용 모듈 4개로 수렴: `vault_io`(frontmatter 파서 1벌·write_note·섹션 읽기쓰기), `ledger`(load/save 1벌, dry_run 지원), `telegram`(send·note_url 1벌), `config`(env 1곳, `DONE_STATES` 1벌, 경로 상수 1벌). 순환 import 0.
-- [ ] 0-4 프롬프트 한 폴더로(`prompts/` 또는 `prompts.py` 1개). 문체 학습 프롬프트 4벌 → 1벌, 저장소는 Honcho `{channel}-corrections` + 볼트 기록 2곳으로.
-- [ ] 0-5 장부·로그를 볼트 밖으로. 후보: 저장소 `state/`(git 추적, 볼트 아님) 또는 별도 브랜치 — §5 미결. 완료 판정: 볼트 커밋 중 장부만 바뀐 커밋 0.
-- [ ] 0-6 CI 테스트: `requirements-dev.txt`에 pytest, `.github/workflows/test.yml`(PR·push마다). 현재 테스트 전부 통과 상태로.
-- [ ] 0-7 yt_research 공유 계약을 데이터 파일 1개로: `data/contract.json`(카드 파일명 규칙·형식 라벨·카테고리 키워드·frontmatter 키 순서·브랜드 룰북·DG-ID 규칙). 파이썬은 import, yt_research는 GitHub raw로 읽기(`benchmarkRules.ts` 방식과 동일). `publish_at` 드리프트 해소.
-- [ ] 0-8 저장소 루트 `.obsidian/` 제거(볼트는 `vault/`만). `raw/clipings` 오타 폴더 병합.
-- [ ] 0-9 `docs/ARCHITECTURE_V2.md`·`CLAUDE.md` 코드 구조 표를 통합 후 구조로 갱신.
+### Phase 0 — 안전과 상태 정합성 (선행 필수, 약 1주)
 
-### Phase 1 — 지식 배선 (약 2~3주) · 불편 2·5·6의 해법
+- [ ] 0-1 **로컬 메인 체크아웃 정합**: `feature/instagram-autodm`(2 앞·4 뒤)과 미커밋 719건의 의도를 사용자와 확인 → 보존할 것은 브랜치·커밋으로, 볼트 변경은 origin/main과 대조 후 반영. `vault/conflict-files-obsidian-git.md` 처리. 완료 판정: 로컬 메인 체크아웃 `git status` 깨끗, origin/main과 fast-forward 관계.
+- [ ] 0-2 **매일 발제 정체 복구**: ① Manus 키 재발급 또는 401 시 Claude 리서치 폴백(현재는 키 "미설정"일 때만 폴백) ② DISPATCH에 `research/queued → handle_intake 재진입` 추가 또는 재큐 시 stage를 `intake`로 되돌리기 ③ 고아 청소 범위에 research 포함 ④ 정체 27건 **개별** 진단 후 재큐(일괄 승인 금지). 완료 판정: 새 발제 카드가 24시간 내 초안까지 도달하고 텔레그램 알림이 옴.
+- [ ] 0-3 **원고 revision 도입**: 본문 hash 기반 `revision_id`. 검수·승인·발행·환류가 같은 revision만 참조. 본문이 바뀌면 `review_status`·`approval_status` 만료. 외부 발행된 본문은 불변 snapshot으로 보관(`publication`). `feedback.find_published_pipeline`을 `read_final_draft()`로 통일. 2차안 생성 후 재검수.
+- [ ] 0-4 **상태 모델 분리**: `production_ready`(원고 완료) / `approved` / `publishing` / `published`(플랫폼 발행 확인) / `feedback_pending`. 유튜브·릴스·블로그 전용 카드의 `published/done` 오용 제거. 유효 전이만 허용.
+- [ ] 0-5 **수집 0건 원인 분리 로깅**: 플라우드 목록 조회 건강 상태 / 전체 미처리 수 / 미전사 수 / 실제 산출량을 구분해 텔레그램 요약에 표시. 인증 오류·정상 빈 목록·파싱 실패 구분.
+- [ ] 0-6 **회귀 테스트 4종 + CI**: 최종 수정본만 환류 / 수정 후 승인 만료 / 미확인 인용 차단 / 동일 콘텐츠·채널·revision 중복 발행 방지. `requirements-dev.txt`에 pytest, `.github/workflows/test.yml`(PR·push). 기존 테스트 전부 통과.
+- [ ] 0-7 `publish_at` 스키마 드리프트 수정(TS `buildIntakeMarkdown`), `script_learn` Honcho 실패 시 장부 미기록(재시도 상태 별도).
+- [ ] 0-8 **볼트 백업·기준 revision 확보**: git tag + 볼트 md 전체 스냅샷. 이후 파괴적 작업의 복구점.
 
-- [ ] 1-1 **브리프 단계 "내 지식 검색" 주입**. `handle_keyword_approved` 브리프 직전에 검색기 호출: 대상 = `제텔카스텐/3. 의견`·`4. 주장`·`5. 글감`(author 이한결, `_ai` 아님, candidate 아님 — 헌법 B-2), `6. 사례은행`(초록), `raw/스레드_아카이브/*.csv`(본인 글), `SNS…/03 라이브러리/38 주제별 콘텐츠`. 방식: 1차 키워드·태그 매칭, 2차 임베딩(yt_research `_system/yt-research/embedding-index.json` 재사용 검토). 상위 5~8건을 브리프에 `[내 지식 — 반드시 이 안에서 주장·사례를 고른다]` 블록으로 주입. 카드 frontmatter `참조원본: [[...]]` 필수 기록.
-- [ ] 1-2 **근거 0건 게이트**: 검색 결과 0건이면 초안을 쓰지 않는다. 카드 `needs_human` + 텔레그램 "이 주제로 3분만 녹음해 주세요(플라우드) 또는 글감 붙여넣기" 요청. 사람 입력을 뒤쪽 수정에서 앞쪽 발화로 옮긴다.
-- [ ] 1-3 **출처 게이트**: 초안 완성 후 LLM 1회로 "주장별 출처 표"(주장 → 참조원본 노트 / 리서치 링크 / 없음). '없음'이 1개라도 있으면 해당 문장을 일반 서술로 낮추거나 삭제한 2차안을 만들고, 카드에 표를 남긴다. 글 평가 50점표에 `source_coverage` 항목 추가.
-- [ ] 1-4 **발제 전환**: `daily_intake`를 LLM 브레인스토밍에서 "제텔카스텐 3~4단계 중 `used_in` 없는 노트 + 최근 플라우드 의견" 기반으로. 발제 카드에 근거 노트 링크 포함. 대기 카드(`needs_human`)가 N개(기본 5) 이상이면 발제 중단.
-- [ ] 1-5 **역방향 관문 완성**: `feedback.atomize` 산출을 `1. 메모` 직행 대신 `_system/candidates/`에 `status: candidate`로 격리(헌법 §4 관문 3). 텔레그램 승인(Phase 2 버튼, 그 전엔 답장 "승인 N")으로 정식 승격. 승격 시 원본 노트(`참조원본`)에 `used_in: [[카드]]` 역기록(헌법이 허용한 유일한 자동 수정). 기존 19건의 `원출처_추적: 필요` 메모를 첫 승인 대상으로.
-- [ ] 1-6 **영상 발화 환류** — §4 상세 설계. 완료 판정은 §4-7.
-- [ ] 1-7 **플라우드 triage 확장**: 교사 글감 외에 "학부모 SNS 씨앗" 갈래 추가 → 기준 충족 시 intake 카드 자동 생성(`## 📄 글감` 섹션에 발화 발췌, 근거 노트 링크). 현재 `.claude/skills/plaud-zettel`의 승격 로직을 코드로.
-- [ ] 1-8 **문체 학습 실효화**: `script_learn`·`style_learn` 통합본이 실제로 lessons를 만드는지 검증(현재 `lessons: 0`). 학습 결과가 작가 프롬프트에 주입되는 경로를 테스트로 고정.
+완료 기준: 검수·발행·환류가 동일 revision을 참조하고, 잘못된 상태가 자동 진단되며, 새 발제가 끝까지 흐른다.
 
-### Phase 2 — 승인 인터페이스 교체 (약 1주) · 불편 1·4의 해법
+### Phase 1 — 작지만 완전한 선순환 (약 2~3주) · 불편 2·5·6의 해법
 
-- [ ] 2-1 텔레그램 인라인 버튼(승인 / 수정 / 기각 / 예약)으로 카드·후보·원고 승인. 콜백 수신처: yt_research 웹훅(`app/api/telegram/webhook/route.ts`, 이미 상시 HTTP) 또는 새 봇 — §5 미결. 동작 = Contents API로 frontmatter 변경(승인) / `_system/feedback` 노트 생성(수정) / candidate 승격(지식).
-- [ ] 2-2 알림 메시지에 버튼 부착: 초안 완성·발행 승인 요청·candidate 승인·영상 매칭 확인(§4-3).
-- [ ] 2-3 옵시디언은 읽고 생각하는 도구로만. 승인 흐름에서 git 편집 제거. `docs/OBSIDIAN_SETUP.md` 갱신.
-- [ ] 2-4 (선택) Obsidian Git 자동 pull 간격 재조정 — Phase 0-5로 소음이 사라진 뒤 판단.
+범위를 **Plaud 전사 1건 + 사용자가 만족한 기존 콘텐츠 10편**으로 제한해 한 바퀴를 완주한다. 완료 기준: 어떤 원문에서 어떤 생각이 나와 어떤 원고에 쓰였고 무엇이 새로 생겼는지 **왕복 추적**이 가능하고, 학생·제3자 정보가 보호되며, 자기 콘텐츠의 순환 인용이 차단된다.
 
-### Phase 3 — 플라우드 입력 복구 (사용자 액션 + 소규모 코드)
+- [ ] 1-1 **사용 자격 필터**(검색보다 먼저): 노트 frontmatter에 `owner`·`speaker`·`authorship`(이한결/이한결(구술)/AI)·`review_state`(candidate/reviewed/approved)·`privacy`·`source_type`을 독립 필드로. 자격 규칙 = 헌법 B-2(3~5단계 + author 이한결 + `_ai` 아님 + candidate 아님) + 노랑·비공개 제외. Python·TS가 **같은 필터 함수**를 쓴다(계약 파일 `data/contract.json`에 규칙 명시). 외부 영상 노트는 "형식 벤치마크"와 "사실 근거"를 구분 태깅.
+- [ ] 1-2 **공통 근거 묶음 `get_evidence_pack(topic, audience)`**: 승인된 내 주장·실제 사례(초록)·외부 근거·반론/적용 한계를 함께 반환. 검색 = 1차 키워드·태그, 2차 임베딩(yt_research `_system/yt-research/embedding-index.json` 재사용, 새 벡터DB 도입 금지). 대상 = 제텔카스텐 3~5단계, 6. 사례은행, `raw/스레드_아카이브`, `03 라이브러리/38 주제별 콘텐츠`. **모든 제작 채널**(스레드·뉴스레터·유튜브·릴스·블로그·yt_research 대본)이 이 함수 하나를 쓴다. 카드 frontmatter `참조원본` 필수.
+- [ ] 1-3 **근거 0건 게이트**: 적합한 내 지식이 없으면 일반 글을 양산하지 않는다. 카드 `needs_human` + 텔레그램 "이 주제로 3분만 녹음해 주세요(플라우드) / 글감 붙여넣기 / 다른 소재 선택". 사람 입력을 뒤쪽 수정에서 앞쪽 발화로 옮긴다.
+- [ ] 1-4 **주장 분류·출처 게이트**: 초안 완성 후 주장을 **개인 관찰 / 의견 / 과학·통계 주장** 3종으로 분류. 검증 필요 주장은 출처 원문·위치·대상·한계와 대응. 미확인 수치·일반화는 삭제·완화·보류. 문장력 점수가 높아도 이 게이트를 우회 못 함. 같은 모델끼리 동의했다고 사실 확정 금지. 글 평가표에 `source_coverage`·`unverified_claims` 추가.
+- [ ] 1-5 **발제 전환**: `daily_intake`를 "제텔카스텐 3~4단계 중 `used_in` 없는 노트 + 최근 플라우드 의견" 기반으로. 근거 묶음이 준비된 소재만 제작. 대기 카드 N개(기본 5) 이상이면 발제 중단(운영 제한 변경은 별도 실행 시 적용).
+- [ ] 1-6 **환류 이벤트 통일**: 모든 확정 revision(스레드·뉴스레터·유튜브·릴스·블로그·교사 글)에 같은 환류 이벤트. 추출 대상은 **새 관찰·새 주장·기존 생각의 수정·적용 한계**만(요약을 여러 메모로 복제 금지). 기존 지식과 `supports / contradicts / refines / applies` 관계 제안 → `_system/candidates/`에 `status: candidate` 격리(헌법 §4 관문 3) → 사용자 짧은 확인 후 승격 → 원본 노트에 `used_in` 역기록. 발췌는 원문 substring 검사 통과 시에만 `verbatim: true`. 자기 콘텐츠를 외부 사실 근거로 순환 인용 금지(B-4). **관객 반응(댓글·성과)과 새 통찰을 구분 저장.** 기존 19건 `원출처_추적: 필요` 메모를 첫 승인 대상으로.
+- [ ] 1-7 **영상 발화 환류** — §4. 완료 판정 §4-7.
+- [ ] 1-8 **플라우드 원문 보존·확장**: `recording_id`+`segment_id`+화자+시간+원문 hash 보존. 60,000자 절단 대신 분할·통합 + 누락 보고. 7일/3건 밖 자료 백필 명령. 발화 / 해석 / 실행 약속 / 일반화 지식 후보 분리. `verbatim` substring 검사. **학생·제3자 정보는 외부 AI 전송 전 최소화·익명화**, 원문 접근권한·보관기간 별도. triage에 "학부모 SNS 씨앗" 갈래 추가 → 1-2 근거 묶음으로 연결(현재 `.claude/skills/plaud-zettel` 승격 로직을 코드로).
+- [ ] 1-9 **세 가지 학습 분리**: 문체 취향 / 사실·관점 교정 / 성과 신호를 **분리 저장**하고, 틀린 학습 규칙은 취소 가능하게. 문체 학습 4벌 → 1벌, 실제로 lessons를 만드는지 검증(현재 `lessons: 0`). 성과(조회수)는 소재·표현 실험 신호로만 쓰고 주장의 참됨을 승격하지 않는다.
+- [ ] 1-10 **기준 세트**: 사용자가 만족한 원고 10~20개 + 반려·수정 사례를 평가 기준 세트로(정확성·관점·실제 사례·적용 한계·문체). 검토 화면은 초안 전체 재검토 대신 **변경 문장·근거 부족·승인 필요 사례만 강조**.
 
-- [ ] 3-1 **사용자**: 플라우드 앱 자동 전사 켜기. 대기 6건(9/3~9/7) 전사 → 다음 실행에 자동 처리되는지 확인.
-- [ ] 3-2 미전사 N일 이상이면 텔레그램 리마인드(현재는 요약에만 표시).
-- [ ] 3-3 `수집함/plaud/` 수동 투입 경로 라이브 테스트 1회.
+### Phase 2 — 승인·편집 인터페이스 교체 (약 1~3주) · 불편 1·4의 해법
 
-### Phase 4 — 서버 (Phase 2 성공 후, MASTER_PLAN D-14 준수)
+- [ ] 2-1 **텔레그램 인라인 버튼**(빠른 승인): 승인 / 수정 / 기각 / 예약. 콜백 수신처는 yt_research 웹훅(이미 상시 HTTP) 또는 새 봇 — §5 미결. 동작 = frontmatter 변경(승인) / `_system/feedback` 노트(수정) / candidate 승격(지식). 알림 4종에 부착: 초안 완성·발행 승인·candidate 승인·영상 매칭 확인(§4-3).
+- [ ] 2-2 **웹 검토함**(yt_research 확장, 긴 편집·근거 확인용): 고칠 문장과 이유만 강조, 원문/변경점/출처 한 화면, 최종 승인·예약. Git 조작 숨김. 맥북·폰·윈도우 같은 주소·로그인.
+- [ ] 2-3 (Aside안, §5 미결 결정 후) 웹 작업실 5화면: 수집함 / 지식 / 제작실 / 검토함 / 운영판(새 지식 수·실제 발행 수·검토 적체·작업 실패·마지막 정상 수집·비용).
+- [ ] 2-4 옵시디언은 읽고 생각하는 뷰어로. `docs/OBSIDIAN_SETUP.md` 갱신. 사용자가 commit·frontmatter 편집 없이 작업을 이어갈 수 있는지 3개 기기에서 검증.
 
-- [ ] 4-1 윈도우 노트북 → Ubuntu Desktop + Tailscale. 역할 3개 한정: ① 텔레그램 봇 상주(Phase 2에서 새 봇을 택했을 때) ② `claude -p` 야간 에이전트(Max 구독 토큰, `llm.py` 폴백 경로 이미 있음) ③ ffmpeg·Whisper 렌더링(쇼츠·§4 전사 폴백). 스케줄 본체는 GitHub Actions 유지.
-- [ ] 4-2 뷰트랩 쿠키 동기화 launchd → 서버 cron 이전.
-- [ ] 4-3 무인 24시간 사이클 1회 검증.
+완료 기준: 사용자가 commit이나 frontmatter 편집 없이 승인·수정·예약을 끝낸다.
+
+### Phase 3 — worker 이전과 코드 통합 (Phase 1 완주 후)
+
+- [ ] 3-1 **1세대 처분**: 호출·데이터 경로가 없음을 확인한 뒤 `legacy/`(또는 삭제 — §5) 이동. `diff_learner`·`memory_manager`·`claude_client`는 먼저 패키지로 흡수. `sys.path.insert` 전부 제거. 완료 판정: `grep -rn "/Users/lhg" --include='*.py' .` 0건.
+- [ ] 3-2 **패키지 통합**: `vault_pipeline`↔`orchestrator` 순환 import 0. 공용 4모듈(`vault_io`·`ledger`·`telegram`·`config`), 프롬프트 한 곳, `DONE_STATES`·경로 상수 1벌. 목표 책임 경계(Aside §9): `knowledge/ content/ quality/ workers/ connectors/ media/ contracts/`(즉시 디렉터리 이동은 아님).
+- [ ] 3-3 **공유 계약 서버 한 곳**: 카드 규칙·스키마를 `data/contract.json`(또는 API)로. Python import, TS는 GitHub raw(`benchmarkRules.ts` 방식). **스키마 계약 테스트** 추가. 두 저장소 통합 여부는 나중에(§5).
+- [ ] 3-4 **렌더러 공통 코어 + 스타일/job 프로필**: `shorts/`·`shorts_gpt/`·`tools/shorts_edit.py` → 코어 1 + 프로필. ASR 어댑터 분리(MLX Whisper / faster-whisper). 기존 출력의 컷·자막·음량 **회귀검증 후** 중복 제거.
+- [ ] 3-5 **장부·로그 볼트 밖으로**(§5 위치). 완료 판정: 볼트 커밋 중 장부만 바뀐 커밋 0.
+- [ ] 3-6 **상시 worker**: DB job table(기존 Supabase 확장, 새 스키마·권한 분리) + 제한된 Python worker. 작업별 timeout·재시도·입력 hash·중복 방지·실패 큐·lease·heartbeat·마지막 정상 완료 시각. 발행 직후 네트워크 단절 시 무조건 재전송 금지 → 플랫폼 게시물 대조, 결과 불명 상태 관리.
+- [ ] 3-7 **리눅스 노트북** = 렌더·전사 worker + 백업. 작은 영상으로 속도 측정 → 덮개 절전·자동 시작·디스크/온도 감시·암호화·백업·Tailscale. 뷰트랩 쿠키 동기화는 Keychain 의존이라 별도 설계. Actions는 테스트·배포·백업·주기 점검 위주로 축소, 이전 전까지 기존 실행자 유지(동일 job에 두 실행자 금지).
+
+완료 기준: 맥북을 끈 상태에서 수집·제작·승인 대기·환류가 진행되고, worker 재시작 후 같은 작업이 중복 발행되지 않는다.
+
+### Phase 4 — 과거 자산 회수 (Phase 1 방식이 검증된 뒤)
+
+- [ ] 4-1 `05 리뷰/대기` 448건 + `64 발행완료` + `03 라이브러리` 293건: 원고·템플릿·분석·사본 구분, 동일 원고 dedupe. 파일 경로→안정 ID 매핑표, 원문 hash, 기존 링크 보존.
+- [ ] 4-2 **승인된 콘텐츠부터** 배치로 지식 후보 추출(1-6 규칙), "기존 지식 보완" 우선. **전체 파일 무검토 승격 금지.**
+- [ ] 4-3 `_검토대기` 619건 삼분류, `author` 없는 노트 메타데이터 이관(1-1 필터 전제).
+- [ ] 4-4 백업·row 수·hash·링크 보존·역이관 검증 후 레거시 entrypoint 폐기.
 
 ---
 
-## 4. 영상 발화 환류 상세 설계 (Phase 1-6, 2026-09-19 사용자 추가 요청)
+## 4. 영상 발화 환류 상세 설계 (Phase 1-7, 2026-09-19 사용자 추가 요청)
 
 ### 4-1. 목적
-촬영본은 원고와 다르게 말해진다. 그 차이에는 두 가지 가치가 있다. ① 발화 쪽이 더 나은 대목은 다음 원고에 반영해야 한다(작가 학습·원고 업그레이드). ② 실제로 말한 문장은 사용자 본인의 확정된 생각이므로 제텔카스텐의 1급 재료다(구술 verbatim). 지금은 둘 다 버려진다.
+촬영본은 원고와 다르게 말해진다. 그 차이에는 두 가지 가치가 있다. ① 발화 쪽이 더 나은 대목은 다음 원고에 반영해야 한다(작가 학습·원고 업그레이드). ② 실제로 말한 문장은 사용자 본인의 확정된 생각이므로 제텔카스텐의 1급 재료다(구술 verbatim). 지금은 둘 다 버려진다. Phase 0-3 revision과 1-6 환류 이벤트 위에 얹는다.
 
 ### 4-2. 입력원과 전사 방법 (우선순위 순)
 
 | 순위 | 입력 | 전사 | 비용·위치 |
 |---|---|---|---|
-| 1 | 로컬 쇼츠 편집 산출물 `artifacts/shorts/<원본>/<v>/subtitles.srt`·`final.mp4` | 이미 있음(mlx-whisper / faster-whisper) | 0. 로컬(맥·서버) |
-| 2 | 유튜브 채널 업로드(롱폼·쇼츠) | 자막 API(`youtube-transcript-api`, 자동자막 포함) → 없으면 yt_research `/api/transcript`(InnerTube+Gemini ASR, `YT_RESEARCH_URL` 재사용 — `pool_enrich` 패턴) | GitHub Actions |
-| 3 | 인스타그램 릴스(본인 계정) | Instagram Graph API `me/media?fields=media_url,permalink,caption,timestamp,media_type` → `media_url` mp4 다운로드 → faster-whisper(ko, CPU, 60초 릴스 OK) | Actions. Graph API 불가 시 로컬 폴백(4순위) |
-| 4 | 로컬 mp4/URL 수동 투입 | `tools/video_transcribe.py`(`tools/shorts_edit.py` Whisper 코드 재사용) → `수집함/영상전사/`에 md 드롭 | 로컬(맥·서버) |
+| 1 | 로컬 쇼츠 편집 산출물 `artifacts/shorts/<원본>/<v>/subtitles.srt`·`final.mp4` | 이미 있음 | 0. 로컬(맥·서버). 단, 편집 컷 반영본이라 원본 발화와 다를 수 있음(§4-8 ⑤) |
+| 2 | 유튜브 채널 업로드(롱폼·쇼츠) | 자막 API(`youtube-transcript-api`, 자동자막 포함) → 없으면 yt_research `/api/transcript`(InnerTube+Gemini ASR, `YT_RESEARCH_URL` 재사용) | GitHub Actions 또는 worker |
+| 3 | 인스타그램 릴스(본인 계정) | Instagram Graph API `me/media?fields=media_url,permalink,caption,timestamp,media_type` → mp4 다운로드 → faster-whisper(ko, CPU) | Actions·worker. Graph API 불가 시 4순위 |
+| 4 | 로컬 mp4/URL 수동 투입 | `tools/video_transcribe.py`(ASR 어댑터 3-4 재사용) → `수집함/영상전사/`에 md 드롭 | 로컬(맥·리눅스) |
 
 ### 4-3. 원고 매칭 규칙
-1. 원고 frontmatter에 `published_url`(또는 기존 `유튜브:` 필드)이 있으면 확정.
-2. 없으면 제목·게시일·키워드·본문 유사도로 LLM이 후보 1~3개 제안 → 텔레그램 "이 영상 = 이 원고?" (Phase 2 버튼, 그 전엔 답장 `1`/`2`/`3`/`없음`). 확정되면 원고 frontmatter에 `published_url`·`video_id` 자동 기록(사람 작업 대체).
-3. 원고가 없는 즉흥 영상도 전사·지식 저장은 한다(대조만 생략). — §5 미결 ③
+1. 원고 frontmatter `published_url`(또는 기존 `유튜브:` 필드)이 있으면 확정.
+2. 없으면 제목·게시일·키워드·본문 유사도로 LLM이 후보 1~3개 제안 → 텔레그램 "이 영상 = 이 원고?"(Phase 2 버튼, 그 전엔 답장 `1`/`2`/`3`/`없음`). 확정 시 원고 frontmatter에 `published_url`·`video_id` 자동 기록 + `publication` 레코드(revision 연결).
+3. 원고 없는 즉흥 영상도 전사·지식 저장은 한다(대조만 생략). — §4-8 ③
 4. 검색 범위: `05 리뷰/대기`·`05 리뷰/완료`·`06 제작/64 발행완료`·`파이프라인/활성`(format youtube·reels).
 
-### 4-4. 대조·업그레이드 (LLM 1회, JSON 출력)
-입력: 원고 본문, 발화 전사(타임스탬프 포함), 있으면 성과(조회수·좋아요·댓글 요약 — yt_research가 이미 수집).
+### 4-4. 화자·원문 보존 (1-8과 같은 규칙)
+- 전사는 segment 단위(시작·끝·텍스트·화자 추정)로 보존. **사용자 본인 발화만** 지식 후보. 게스트·아이·제3자 음성은 노랑 처리(사례 신호등) 또는 제외, 외부 AI 전송 전 익명화.
+- 발췌는 전사 원문 substring 검사를 통과해야 `verbatim: true`.
+
+### 4-5. 대조·업그레이드 (LLM 1회, JSON 출력)
+입력: 원고 본문(해당 revision), 발화 전사(타임스탬프), 있으면 관객 반응(댓글 요약·성과 — yt_research 수집분).
 출력:
-- `차이`: 뺀 것 / 더한 것 / 순서 바꾼 것 / 표현 바꾼 것 (각 근거 문장 인용)
-- `판단`: 대목별로 원고·발화 중 어느 쪽이 나은지 + 이유(후킹·논리·구어 리듬·정확성 기준)
-- `개선안`: 발화의 장점을 반영해 **다음 촬영용으로 재작성한 원고** (구조·핵심 주장은 원고 유지, 문장은 발화 쪽 채택)
-- `교훈`: 문체·구조 교훈 3~5줄(다음 원고 프롬프트용, "말할 때는 ~한다" 형식)
-- `정확성_경고`: 발화에서 원고에 없는 수치·연구·단정이 나왔으면 목록(전문성 방어 — 다음 촬영 전 확인 대상)
+- `차이`: 뺀 것 / 더한 것 / 순서 바꾼 것 / 표현 바꾼 것(각 근거 문장 인용)
+- `판단`: 대목별로 원고·발화 중 어느 쪽이 나은지 + 이유(후킹·논리·구어 리듬·**정확성** 기준)
+- `개선안`: 발화의 장점을 반영해 **다음 촬영용으로 재작성한 원고**(구조·핵심 주장은 원고 유지, 문장은 발화 쪽 채택) — 새 revision으로 저장
+- `교훈_문체`: "말할 때는 ~한다" 3~5줄 → 문체 학습 저장소(1-9 분리 원칙)
+- `교훈_지식`: 발화에서 새로 드러난 관찰·주장·기존 생각의 수정·적용 한계 → 1-6 환류 이벤트로(후보 격리·승인)
+- `관객_반응`: 댓글에서 드러난 반응·질문 → 지식과 분리 저장(성과 신호)
+- `정확성_경고`: 발화에 원고에 없던 수치·연구·단정이 나왔으면 목록(다음 촬영 전 확인 대상)
 
-기록:
-- 원고 파일에 `## 🎤 발화 대조 — 날짜`, `## ✍️ 발화 반영 개선안 — 날짜` 섹션 추가. frontmatter 원문 보존·본문 길이 안전장치는 `script_feedback.apply_one` 것을 재사용.
-- `SNS…/07 운영/62 셀프 피드백/영상 발화 학습.md`에 교훈 누적.
-- Honcho `{channel}-corrections`에 교훈 저장(통합 문체 학습 루프와 같은 세션) → 작가·유튜브 원고 프롬프트에 자동 주입.
-- `data/youtube_voice.md` 보이스 프로필에 "실제 발화 발췌" 갱신 후보를 제안(자동 반영은 하지 않고 사람 승인).
+기록: 원고 파일에 `## 🎤 발화 대조 — 날짜`, `## ✍️ 발화 반영 개선안 — 날짜` 섹션(frontmatter 보존·본문 길이 안전장치는 `script_feedback.apply_one` 재사용). `SNS…/07 운영/62 셀프 피드백/영상 발화 학습.md` 누적. `data/youtube_voice.md` 보이스 프로필 갱신 후보 제안(자동 반영 없이 사람 승인).
 
-### 4-5. 제텔카스텐 저장
-- **전사 원문(불변)**: `raw/영상전사/<채널>_<video_id>_<제목>.md`. frontmatter: `출처: youtube:<id>` 또는 `instagram:<shortcode>`, `published_url`, `recorded`(게시일), `duration`, `원고: [[원고 파일]]`(매칭 시), `author: 이한결(구술)`, `verbatim: true`. raw는 사람 소유 불변 영역이므로 자동화는 **추가 전용**(기존 파일 덮어쓰기 금지).
-- **원자화**: 기존 플라우드 triage를 그대로 재사용한다. 전사를 `Recording(id="youtube:<id>", name=제목, recorded=게시일, transcript=전사, source="video")`로 감싸 `process_recording`에 넣으면 `1. 메모`(구술 verbatim)·`2. 키워드`(K_ai)·`3. 의견`·`6. 사례은행`(신호등)이 자동 생성된다. "영상 = 녹음"이라 헌법 규칙(author 이한결(구술), verbatim, 출처 필수)이 그대로 맞는다.
-- triage에 **영상 모드**: 교사 글감 판정 끄기(학부모 콘텐츠), 대신 "학부모 SNS 재활용 씨앗"(스레드·뉴스레터 후보) 갈래 → Phase 1-7과 같은 intake 카드 생성 옵션.
-- 생성 메모에 `used_in: [[원고]]`·`published_url` 기록 — "이 지식은 이미 이 영상에서 쓰였다"를 남겨 발제(1-4)가 중복 주제를 피하게.
-- 장부: `video_feedback_ledger.json`(video_id 기준, Phase 0-5 위치 규칙 따름).
+### 4-6. 제텔카스텐 저장
+- **전사 원문(불변)**: `raw/영상전사/<채널>_<video_id>_<제목>.md`. frontmatter: `출처: youtube:<id>` 또는 `instagram:<shortcode>`, `published_url`, `recorded`(게시일), `duration`, `원고: [[원고 파일]]`, `revision_id`, `author: 이한결(구술)`, `speaker_segments: true`. raw는 사람 소유 불변 영역이므로 자동화는 **추가 전용**.
+- **원자화**: 기존 플라우드 triage 재사용. 전사를 `Recording(id="youtube:<id>", name=제목, recorded=게시일, transcript, source="video")`로 감싸 `process_recording`에 넣는다("영상 = 녹음"). 단 1-6 규칙에 따라 산출은 `1. 메모` 직행이 아니라 **`_system/candidates/` 격리 → 승인 → 승격**. triage 영상 모드: 교사 글감 판정 끄기, "학부모 SNS 재활용 씨앗" 갈래 → 1-2 근거 묶음·intake 카드.
+- 생성 메모에 `used_in: [[원고]]`·`published_url` 기록 — 발제(1-5)가 중복 주제를 피하게.
+- 장부: `video_feedback_ledger.json`(video_id 기준, 3-5 위치 규칙).
 
-### 4-6. 구현 위치
-- 모듈 `orchestrator/video_feedback.py`(Phase 0 통합 후 위치 조정): `list_new_videos()` / `fetch_transcript()` / `match_script()` / `compare_and_upgrade()` / `archive_transcript()` / `atomize()` / `run(--dry-run, --video-url, --since-days)`.
-- 워크플로우 `.github/workflows/video-feedback.yml`: 매일 1회(KST 새벽, 다른 cron과 분산) + 수동(`video_url` 입력).
-- 로컬 폴백 `tools/video_transcribe.py`: mp4/URL → srt·md → `수집함/영상전사/` 드롭(4-2의 4순위).
-- 시크릿: `YOUTUBE_API_KEY`(또는 `YT_RESEARCH_URL`+`YT_RESEARCH_PASSWORD`), `IG_ACCESS_TOKEN`/`IG_USER_ID`(MASTER_PLAN Phase C 토큰과 공용), 기존 텔레그램·LLM.
-- 테스트: 매칭 규칙·diff JSON 파싱·raw 추가전용·Recording 래핑·장부 dedupe(LLM·네트워크 mock).
-
-### 4-7. 완료 판정
-실제 발행 영상 1편(유튜브 1 + 인스타 1)으로 end-to-end 1회: 전사 → 텔레그램 매칭 확인 → 원고에 대조·개선안 섹션 → `raw/영상전사/` 1건 → `1. 메모` N건(`used_in` 포함) → Honcho 교훈 저장 확인.
+### 4-7. 구현 위치와 완료 판정
+- 모듈 `orchestrator/video_feedback.py`(3-2 통합 후 `connectors/`+`knowledge/`로 분리): `list_new_videos` / `fetch_transcript` / `match_script` / `compare_and_upgrade` / `archive_transcript` / `atomize` / `run(--dry-run, --video-url, --since-days)`.
+- 워크플로우 `.github/workflows/video-feedback.yml` 매일 1회 + 수동(`video_url`). worker 전환 후 job으로.
+- 로컬 폴백 `tools/video_transcribe.py`.
+- 시크릿: `YOUTUBE_API_KEY`(또는 `YT_RESEARCH_URL`+`YT_RESEARCH_PASSWORD`), `IG_ACCESS_TOKEN`/`IG_USER_ID`, 기존 텔레그램·LLM.
+- 테스트: 매칭 규칙·diff JSON 파싱·raw 추가전용·verbatim substring·Recording 래핑·장부 dedupe(LLM·네트워크 mock).
+- **완료 판정**: 실제 발행 영상 1편(유튜브 1 + 인스타 1)으로 end-to-end 1회: 전사 → 텔레그램 매칭 확인 → 원고에 대조·개선안 revision → `raw/영상전사/` 1건 → candidates N건 → 승인 후 `1. 메모` + `used_in` → 문체·지식·반응 3곳에 분리 저장 확인.
 
 ### 4-8. 미결 (사용자 결정)
-① 인스타 접근: Graph API(토큰 발급 필요) vs 로컬 폴백만. ② 개선안 저장: 원고 파일에 섹션 추가 vs 별도 파일(`원고_…_v2.md`). ③ 원고 없는 즉흥 영상도 지식 환류(기본 예). ④ 성과 지표(조회수·댓글) 결합 여부와 출처. ⑤ 쇼츠 편집 산출물의 srt를 1순위로 쓸지(편집 컷 반영본이라 원본 발화와 다를 수 있음).
+① 인스타 접근: Graph API(토큰 발급) vs 로컬 폴백만. ② 개선안 저장: 원고 파일 내 새 revision 섹션 vs 별도 파일. ③ 원고 없는 즉흥 영상도 지식 환류(기본 예). ④ 관객 반응(댓글·성과) 결합 여부와 출처. ⑤ 쇼츠 편집 srt를 1순위로 쓸지(편집 컷 반영본).
 
 ---
 
 ## 5. 미결 사항 · 결정 레지스트리
 
 ### 미결 (사용자 확인 필요, 임의 결정 금지)
-1. 1세대 처분: 삭제 vs `_archive/legacy_2026-04/` 이동(이력은 git에 남음).
-2. 통합 패키지 이름: `orchestrator` 유지 vs `dreamgrow`(통합기획 v3의 `src/` 구조 채택 여부).
-3. 장부·로그 위치: 저장소 `state/`(git 추적) vs 별도 브랜치 vs Actions cache.
-4. 텔레그램 버튼 콜백 수신처: yt_research 웹훅 확장 vs 새 봇(서버 상주).
-5. 리눅스 서버 도입 여부와 시점(Phase 2 이후 권장).
-6. 발제 중단 임계값(대기 카드 N개, 기본 5).
-7. §4-8 ①~⑤.
-8. Phase 순서 확정(제안: 0 → 1-1·1-2·1-5 → 2 → 1-6 → 3 → 1 나머지 → 4).
+1. **로컬 메인 체크아웃**(`feature/instagram-autodm` + 미커밋 719건 + `instagram-autodm/`·`shorts_gpt/`)의 의도와 보존 범위. Phase 0-1 전제.
+2. **저장소 진실원천의 갈림길** — 두 진단이 갈리는 유일한 지점:
+   - (A) Claude안: 볼트(git)=진실원천 유지. 사용자는 텔레그램 버튼+웹 검토함(yt_research가 GitHub API로 볼트를 읽고 씀)으로만 작업. 코드 변경 적음, 헌법 D-29 유지.
+   - (B) Aside안: Supabase=지식·원고 revision·근거 관계·검토·작업 상태의 유일한 쓰기 원본. Markdown은 export/백업. 한 종류의 콘텐츠부터 전환. 근본적이지만 orchestrator 상태층 재작성 필요.
+   - 제안: **Phase 0~1은 (A)로 완주**(revision·환류 이벤트는 어느 쪽에서도 필요한 공통 작업), 1단계 완료 후 (B) 전환 여부 결정. 어느 쪽이든 "같은 데이터를 Git·DB 양쪽에서 자유 편집"은 금지.
+3. 웹 작업실 범위: 검토함 하나(2-2)만 vs 5화면(2-3).
+4. 1세대 처분: 삭제 vs `legacy/` 이동.
+5. 통합 패키지 이름·경계(`orchestrator` 유지 vs Aside §9 구조).
+6. 장부·로그 위치: 저장소 `state/` vs 별도 브랜치 vs DB.
+7. 텔레그램 버튼 콜백 수신처: yt_research 웹훅 확장 vs 새 봇(서버 상주).
+8. 리눅스 서버 도입 시점(Phase 3 권장)과 역할 범위.
+9. 발제 중단 임계값(대기 카드 N개, 기본 5).
+10. 기준 세트(1-10) 원고 10~20편 선정 — 사용자만 할 수 있음.
+11. 두 저장소(Python·yt_research) 통합 여부 — Phase 3 이후.
+12. §4-8 ①~⑤.
+13. Manus: 키 재발급 vs 폐기(Claude 리서치 폴백 상시).
 
 ### 결정 레지스트리 (사용자 확정분만)
 | 날짜 | 결정 | 근거 |
 |---|---|---|
-| 2026-09-19 | 완전 재작성하지 않고 정리+배선으로 간다 (AI 제안, 사용자 이의 없음 — 확정 시 갱신) | §2-6 |
+| 2026-09-19 | 완전 재작성하지 않고 정리+배선으로 간다 (Claude·Aside 두 진단 일치, 사용자 확정 시 갱신) | §2 |
+| 2026-09-19 | 순서 = 정합성 → 작은 완전 순환 → 인터페이스 → 코드 통합·worker → 과거 자산 회수 (Aside안 채택, 사용자 확정 시 갱신) | §3 |
 
 ---
 
 ## 6. 진행 로그
 
-- 2026-09-19 · Claude(Fable 5.1) · 전수 진단 완료(코드 3세대·중복·순환 실측·yt_research 연동·1세대 생사). 이 문서 작성, 브랜치 `claude/knowledge-cycle-roadmap-2026-09` 생성·푸시. **코드 변경 없음.** 사용자 추가 요청(영상 발화 환류)을 §4로 설계.
+- 2026-09-19 · Claude(Fable 5.1) · 전수 진단(코드 3세대·중복·순환 실측·yt_research 연동·1세대 생사). 문서 v1 작성, 브랜치 생성·푸시(920b423f). 사용자 추가 요청(영상 발화 환류)을 §4로 설계. 코드 변경 없음.
+- 2026-09-19 · Aside · 별도 진단 `docs/기획/지식콘텐츠_선순환_진단_2026-09-19.md`(로컬 메인 체크아웃 기준). P0 3건·P1 5건 지적, 목표 구조(웹 작업실+Supabase+worker) 제안.
+- 2026-09-19 · Claude · Aside 지적 사항을 origin/main에서 전부 재현 검증(§2-4). **신규 발견: 매일 발제가 2026-08-24부터 Manus 401로 전부 정체(27건)**. 문서 v2로 개정: Phase 순서를 정합성 우선으로 재편, 결함표·진실원천 갈림길(§5-2)·영상 발화 환류에 화자·verbatim·revision 규칙 추가. Aside 원문을 브랜치에 복사. 코드 변경 없음.
