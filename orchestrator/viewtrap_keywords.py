@@ -264,6 +264,9 @@ def _to_pool_row(label: str, v: dict) -> list:
             f'=IMAGE("https://img.youtube.com/vi/{v["id"]}/hqdefault.jpg")', v.get("title", "")]
 
 
+EDU_METHOD = {"llm": 0, "regex": 0}  # 실행 중 어느 선별 방식이 쓰였는지 (요약 문구용)
+
+
 def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None = None) -> list[list]:
     """교육·육아 채널 영상만 골라 풀링 행을 만든다 (일반 명사 키워드 보완용, 라벨에 '(교육·육아 채널)').
 
@@ -287,9 +290,12 @@ def edu_pool_rows(m: dict, data: dict, top_n: int = 5, exclude_ids: set | None =
             '설명 없이 JSON만: {"picks": [번호, ...]}\n\n' + listing)
         obj = llm.call_json(prompt, max_tokens=300)
         picks = [int(i) for i in obj.get("picks", []) if str(i).isdigit() and int(i) < len(cands)]
+        EDU_METHOD["llm"] += 1
+        log(f"교육·육아 선별(LLM) {m['keyword']}: {len(picks[:top_n])}개")
         return [_to_pool_row(label, cands[i]) for i in picks[:top_n]]
     except Exception as e:
         log(f"교육·육아 선별 LLM 실패({m['keyword']}): {e} → 정규식 휴리스틱 사용")
+    EDU_METHOD["regex"] += 1
     out = []
     for v in vids:
         text = f"{v.get('title', '')} {v.get('channelTitle', '')}"
@@ -497,7 +503,8 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
     if good:
         lines.append("5점 이상: " + ", ".join(m["keyword"] for _, m, _ in good)
                      + (f" → 풀링 {pooled_range[0]}~{pooled_range[1]}행" if pooled_range else "")
-                     + (" (교육·육아 채널 추가 선별은 정규식 휴리스틱 — 수작업 확인 권장)" if edu_extra else ""))
+                     + (f" (교육·육아 채널 추가 선별: Claude {EDU_METHOD['llm']}개"
+                        f"{', 정규식 대체 ' + str(EDU_METHOD['regex']) + '개' if EDU_METHOD['regex'] else ''})" if edu_extra else ""))
     if errors:
         lines.append("오류: " + "; ".join(errors))
     lines.append("주의: 일반 명사 키워드는 주제 무관 대형 채널 영상 때문에 점수가 높을 수 있음")
