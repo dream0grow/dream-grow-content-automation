@@ -329,153 +329,312 @@
     },
     {
       "keyword": "워킹맘",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "917",
+      "score": 4,
+      "reused": false,
+      "sheetRow": 132
     },
     {
       "keyword": "초등 시험",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "918",
+      "score": 4,
+      "reused": false,
+      "sheetRow": 133
     },
     {
       "keyword": "질문하는 아이",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "919",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 134
     },
     {
       "keyword": "공부 스트레스",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "920",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 135,
+      "pooled": true
     },
     {
       "keyword": "편식",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "921",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 136,
+      "pooled": true
     },
     {
       "keyword": "형제 싸움",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "922",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 137,
+      "pooled": true
     },
     {
       "keyword": "발표",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "923",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 138,
+      "pooled": true
     },
     {
       "keyword": "숙제",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "924",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 139,
+      "pooled": true
     },
     {
       "keyword": "아이 수면",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "925",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 140,
+      "pooled": true
     },
     {
       "keyword": "학교폭력",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "926",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 141,
+      "pooled": true
     },
     {
       "keyword": "받아쓰기",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "927",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 142
     },
     {
       "keyword": "문장제",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "928",
+      "score": 1,
+      "reused": false,
+      "sheetRow": 143
     },
     {
       "keyword": "어림셈",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "929",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 144
     },
     {
       "keyword": "구구단",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "930",
+      "score": 4,
+      "reused": false,
+      "sheetRow": 145
     },
     {
       "keyword": "파닉스",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "931",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 146,
+      "pooled": true
     },
     {
       "keyword": "영어책",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "932",
+      "score": 3,
+      "reused": false,
+      "sheetRow": 147
     },
     {
       "keyword": "그릿",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "933",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 148
     },
     {
       "keyword": "자기효능감",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "934",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 149
     },
     {
       "keyword": "심화 문제집",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "935",
+      "score": 3,
+      "reused": false,
+      "sheetRow": 150
     },
     {
       "keyword": "오답노트",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "936",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 151
     },
     {
       "keyword": "공부 동기",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "937",
+      "score": 5,
+      "reused": false,
+      "sheetRow": 152,
+      "pooled": true
     },
     {
       "keyword": "자기조절",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "938",
+      "score": 1,
+      "reused": false,
+      "sheetRow": 153
     },
     {
       "keyword": "화내는 엄마",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "939",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 154
     },
     {
       "keyword": "학습부진",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "940",
+      "score": 1,
+      "reused": false,
+      "sheetRow": 155
     },
     {
       "keyword": "산만한 아이",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "941",
+      "score": 2,
+      "reused": false,
+      "sheetRow": 156
     },
     {
       "keyword": "초등 6학년",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "942",
+      "score": 4,
+      "reused": false,
+      "sheetRow": 157
     },
     {
       "keyword": "예비 중학생",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "943",
+      "score": 3,
+      "reused": false,
+      "sheetRow": 158
     },
     {
       "keyword": "예비 초등",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "944",
+      "score": 4,
+      "reused": false,
+      "sheetRow": 159
     },
     {
       "keyword": "수 감각",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "945",
+      "score": 1,
+      "reused": false,
+      "sheetRow": 160
     },
     {
       "keyword": "연산 실수",
-      "status": "pending",
-      "source": "threads_csv"
+      "status": "done",
+      "source": "threads_csv",
+      "date": "2026-09-19",
+      "round_no": "946",
+      "score": 1,
+      "reused": false,
+      "sheetRow": 161
     },
     {
       "keyword": "공부 정서",
@@ -935,11 +1094,10 @@
     }
   ],
   "lastRun": {
-    "date": "2026-09-18",
-    "searched": 32,
-    "remainingSearchCredits": 245,
-    "keywordSheetLastRow": 131,
-    "poolSheetLastRow": 146
+    "date": "2026-09-19",
+    "searched": 30,
+    "remainingSearchCredits": 270,
+    "errors": []
   },
   "notes": [
     "2026-09-18: rows 3-61 J/K swapped to correct semantics (J=views median, K=subs median).",
