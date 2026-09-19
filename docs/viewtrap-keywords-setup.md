@@ -37,9 +37,43 @@
 - **이 재발급이 실제로 온다는 보장은 없다.** 첫 만료(이번 쿠키는 9/24 11:13) 전후에 "자동 갱신됨" 알림이 오면 이후는 손대지 않아도 되고,
   "갱신 필요" 알림이 오면 서버가 재발급하지 않는 것이므로 주 1회 수동 교체가 필요하다. 만료된 Google 자격증명(`v_provided_key`)으로
   `/auth/login`을 다시 부르는 것은 500(C9999)으로 거부되는 것을 확인했다 (Google 토큰 만료 검사함).
-- 수동 교체가 번거로우면 대안: (a) 뷰트랩에 로그인된 브라우저가 있는 Mac에서 launchd로 쿠키 DB를 읽어 `gh secret set`하는 스크립트
-  (Keychain 접근 허용 필요, Mac이 켜져 있을 때만), (b) 뷰트랩 대신 YouTube Data API로 같은 지표를 계산(yt-research에 이미 기여도·성과도 로직이 있음,
-  단 하루 30키워드는 기본 쿼터 10,000을 넘어 기준 조정 필요).
+
+#### 쿠키 자동 유지 2호: Mac 브라우저 → GitHub 동기화 (`tools/viewtrap_cookie_sync.py`)
+브라우저(Aside/Chrome/Whale 등)가 갖고 있는 로그인 쿠키를 읽어 암호화해 `data/viewtrap_session.enc`에 올린다.
+브라우저에서 뷰트랩을 쓰는 한 브라우저 쪽 세션은 계속 살아 있으므로, 이것을 매일 복사해 오면 사람이 손대지 않아도 된다.
+전제: Mac이 그 시간에 켜져 있어야 하고(잠자면 깨어났을 때 한 번 실행됨), 뷰트랩이 토큰을 재발급하려면 브라우저가 뷰트랩 페이지를 가끔 열어야 한다.
+
+설치 (터미널, 저장소 폴더에서):
+```bash
+cd ~/Documents/dream-grow-content-automation
+python3 tools/viewtrap_cookie_sync.py --check     # 쿠키를 읽는지 확인. 키체인 창이 뜨면 "항상 허용"
+python3 tools/viewtrap_cookie_sync.py --install   # 매일 08:30·20:30 실행 등록 + 지금 1회 업로드
+```
+- `.env`(저장소 루트, git 제외)에 `VIEWTRAP_COOKIE_KEY`, `GITHUB_TOKEN`이 있어야 한다 (2026-09-19에 만들어 둠).
+  `GITHUB_TOKEN`은 GitHub CLI 기기 인증 토큰(dream0grow, repo 권한)이며 GitHub → Settings → Applications → GitHub CLI에서 취소할 수 있다.
+- `.env`의 `OPEN_BROWSER=Aside`(또는 `Google Chrome`)를 채우면 실행 전에 그 브라우저로 뷰트랩 페이지를 열어 재발급을 유도한다
+  (앱이 꺼져 있으면 켜진다). 비우면 열지 않는다.
+- 로그: `~/Library/Logs/viewtrap-cookie-sync.log`. 해제: `--uninstall`. 강제 업로드: `--run --force`.
+- 키체인 항목 이름이 예상과 다르면(예: Aside가 "Aside Safe Storage"가 아닐 때) `--check` 로그에 "키체인 항목 없음"이 찍힌다 →
+  키체인 접근 앱에서 "Safe Storage"로 검색해 이름을 확인하고 스크립트의 `BROWSERS` 표에 추가.
+
+#### 수동 교체 절차 (자동 갱신이 모두 실패했을 때 — 텔레그램 "갱신 필요" 알림에도 같은 내용이 온다)
+1. 브라우저에서 https://app.viewtrap.com/video-search 열기 (로그아웃됐으면 Google로 다시 로그인)
+2. Cmd+Option+I → Network 탭 → Cmd+R 새로고침 → 목록에서 `notifications` 또는 `users` 클릭
+3. Headers → Request Headers → `cookie:` 값 전체 복사
+4. https://github.com/dream0grow/dream-grow-content-automation/settings/secrets/actions → `VIEWTRAP_COOKIE` → Update → 붙여넣기 → Update secret
+5. 다음 날 09:00에 자동 재개. 바로 돌리려면 Actions → viewtrap-keywords → Run workflow
+
+#### (참고) 뷰트랩 대신 YouTube Data API를 쓰면?
+| | 뷰트랩 (현재) | YouTube Data API v3 |
+| --- | --- | --- |
+| 성격 | 유튜브 데이터를 모아 가공해 주는 유료 SaaS. 공식 API 없음(내부 API 사용 중) | 구글 공식 API, 무료 쿼터 10,000/일 |
+| 지표 | 기여도·성과도·노출확률·활발성 히스토그램이 이미 계산됨 (정의 비공개) | 직접 계산. 기여도≈영상 조회수/채널 평균 조회수, 성과도≈조회수/구독자 등 근사치. 노출확률은 없음 |
+| 검색 결과 | 검색 1회에 약 200~400개(쇼츠 포함), 뷰트랩이 수집해 둔 시점 데이터 | search.list 50개/페이지(100 유닛), 최대 ~250개. 실시간 수치. 쇼츠는 길이로 판별 |
+| 비용/한도 | 다이아 멤버십 월 359,800원, 검색 300회/30일 | 무료. 키워드당 약 300~500 유닛 → 하루 30키워드는 기본 쿼터를 넘김(3페이지×150개로 줄이거나 쿼터 증액 신청) |
+| 자동화 | 약관상 금지, 로그인 쿠키 7일, 내부 API 변경 위험 | 완전 무인 가능, 약관 문제 없음, API 키만 있으면 됨 |
+| 기존 시트와 비교 | 지금 점수와 그대로 연속 | 결과 집합·지표 정의가 달라 점수가 달라진다(별도 탭이나 표시 열 필요) |
+이미 yt-research(dream0grow/yt_research)에 기여도·성과도 계산이 있어 이식 난도는 낮다. 뷰트랩 경로가 막히면 이쪽으로 갈 것.
 
 ### 1-b) `VIEWTRAP_COOKIE_KEY` (등록됨)
 재발급 토큰을 공개 저장소에 암호화해 놓기 위한 임의 문자열. 바꾸면 기존 `data/viewtrap_session.enc`는 무시된다(복호 실패 → 환경변수 쿠키 사용).

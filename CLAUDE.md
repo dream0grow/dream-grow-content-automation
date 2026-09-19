@@ -144,6 +144,23 @@ frontmatter가 라우팅 속성(stage/status/approval_status…), 본문 `## 섹
 
 ## 현재 상태 (세션마다 갱신)
 
+### 뷰트랩 키워드 발굴 자동화 (2026-09-18~19, main 직접 커밋) — ⬅️ 최근 세션 (Aside 브라우저 세션에서 작업, 이어받을 때 여기부터)
+
+스레드 아카이브 CSV에서 뽑은 키워드를 뷰트랩에서 검색·채점해 벤치마킹 시트에 넣고, 5점 이상 키워드의 상위 영상을 풀링 탭에 쌓는 무인 파이프라인.
+상세 설정·수동 절차·뷰트랩 vs YouTube API 비교는 **`docs/viewtrap-keywords-setup.md`** (이 주제의 1차 문서).
+- **코드**: `orchestrator/viewtrap_keywords.py` (뷰트랩 내부 API 검색 → 지표 → 시트 A~AK 수식 포함 기록 → 풀링 → 큐 갱신 → 텔레그램),
+  `.github/workflows/viewtrap-keywords.yml` (매일 00:00 UTC=09:00 KST 30개 처리 + 03/09/15/21 UTC 쿠키 touch), `viewtrap_keyword_queue.json` (큐, Actions가 커밋),
+  `tools/viewtrap_cookie_sync.py` (Mac launchd용 쿠키 동기화), `data/viewtrap_session.enc` (재발급/동기화 쿠키, `VIEWTRAP_COOKIE_KEY`로 암호화).
+- **시크릿**: `VIEWTRAP_COOKIE`(뷰트랩 로그인 쿠키, 7일 토큰 — 이번 것은 2026-09-24 11:13 만료), `VIEWTRAP_COOKIE_KEY`, `GSHEET_SA_JSON`, 텔레그램, `CLAUDE_CODE_OAUTH_TOKEN`(교육·육아 채널 선별 LLM).
+  로컬 `.env`(git 제외)에 `VIEWTRAP_COOKIE_KEY`, `GITHUB_TOKEN`(GitHub CLI 기기인증 토큰) 있음 — 쿠키 동기화 스크립트용.
+- **시트**: `1Vy6_9gn3nNovUUdTqYOmkuc4ZamNbj-5tlvZ1fHmN24` — "잠재고객키워드수요(풀링)" gid 949293824 (3~161행 기록됨, 다음 162행), "풀링 영상 만들기" gid 787785781 (~205행, 다음 206행).
+  사용자 결정: J/K(조회수·구독자 중앙값)는 기존 행(3~61) 원본 그대로 둠(뷰트랩 패널 표기 기준). 스크립트는 API 원본(J=조회수 중앙값)으로 계산 — 두 기준이 섞여 있음을 알고 볼 것.
+  풀링 선별은 "조회수 순 그대로 5개" + "교육·육아 채널 최대 5개"(라벨에 `(교육·육아 채널)`).
+- **상태(2026-09-19)**: 첫 무인 실행 성공(run 35415385371, 30개, 132~161행, 풀링 147~205행, 텔레그램 발송 OK). 큐 pending 30개(공부 정서부터) → 9/20 09:00 자동. 뷰트랩 잔여 검색 270/300.
+  Aside 루틴은 삭제됨(중복 기록 사고 후). 뷰트랩 약관(자동화 금지)은 사용자가 감수하기로 함.
+- **다음 할 일**: ① 사용자가 터미널에서 `python3 tools/viewtrap_cookie_sync.py --check` → `--install` (키체인 "항상 허용") — 아직 안 함.
+  ② 9/24~25에 텔레그램 "쿠키 자동 갱신됨"이 오는지 확인(서버 재발급 가설 검증). "갱신 필요"가 오면 수동 교체(docs 절차). ③ 그래도 안 되면 YouTube Data API 경로 검토.
+
 ### 릴스 원고 자동 추천 → 텔레그램 (2026-08-26, 브랜치 `claude/top-reels-content-selection-zh68y9`) — ⬅️ 이번 세션 작업
 
 `05 리뷰/대기`의 릴스 원고(132편+)를 매일 아침 3편씩 추천해 텔레그램으로 보내는 시스템.

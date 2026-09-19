@@ -479,6 +479,18 @@ def notify(text: str) -> None:
         log(f"텔레그램 실패: {e}")
 
 
+MANUAL_STEPS = (
+    "🔑 쿠키 수동 교체 방법 (3분)\n"
+    "1. 브라우저에서 https://app.viewtrap.com/video-search 열기 (로그아웃됐으면 Google로 다시 로그인)\n"
+    "2. Cmd+Option+I → Network 탭 → Cmd+R 새로고침 → 목록에서 notifications 또는 users 클릭\n"
+    "3. Headers → Request Headers → cookie: 값 전체 복사\n"
+    "4. GitHub → dream-grow-content-automation → Settings → Secrets and variables → Actions → VIEWTRAP_COOKIE → Update → 붙여넣기 → Update secret\n"
+    "   (링크: https://github.com/dream0grow/dream-grow-content-automation/settings/secrets/actions)\n"
+    "5. 다음 날 09:00에 자동 재개. 바로 돌리려면 Actions → viewtrap-keywords → Run workflow\n"
+    "또는 Mac 터미널에서: python3 tools/viewtrap_cookie_sync.py --run (브라우저 쿠키를 자동으로 올림)"
+)
+
+
 # ---------------------------------------------------------------- 메인
 def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: tuple[float, float],
         edu_extra: bool = True) -> int:
@@ -499,8 +511,8 @@ def run(limit: int, dry_run: bool, max_age_days: int, min_credits: int, pause: t
         expiry_note = f"쿠키 만료 {expiry.strftime('%m/%d %H:%M')} (남은 {left.days}일 {left.seconds // 3600}시간)"
         log(expiry_note)
         if left < timedelta(days=2):
-            notify(f"⚠️ 뷰트랩 쿠키가 {expiry.strftime('%m/%d %H:%M')}에 만료됩니다. 만료 전에 app.viewtrap.com에 다시 로그인해 "
-                   f"DevTools → Network → api.viewtrap.com 요청의 cookie 헤더를 GitHub Secret VIEWTRAP_COOKIE에 다시 넣어주세요.")
+            notify(f"⚠️ 뷰트랩 쿠키가 {expiry.strftime('%m/%d %H:%M')}에 만료됩니다. 자동 갱신(6시간마다 시도)이 안 되면 "
+                   "'갱신 필요' 알림이 따로 갑니다. 미리 하려면:\n" + MANUAL_STEPS)
     sheet = Sheet()
     existing = sheet.existing_keywords()
     hist = {}
@@ -664,8 +676,7 @@ def main(argv: list[str] | None = None) -> int:
                    edu_extra=not args.no_edu_extra)
     except AuthError as e:
         log(str(e))
-        notify(f"뷰트랩 키워드 조사 중단: {e}\nDevTools → Network → api.viewtrap.com 요청 → cookie 헤더를 "
-               f"GitHub Secret VIEWTRAP_COOKIE에 다시 넣어주세요.")
+        notify(f"🛑 뷰트랩 키워드 조사 중단: {e}\n자동 갱신이 안 돼서 사람이 한 번 바꿔줘야 합니다.\n\n" + MANUAL_STEPS)
         return 2
 
 
